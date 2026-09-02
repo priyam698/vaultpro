@@ -3,136 +3,270 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VaultPro | Hyper-Fast Private Delivery</title>
+  <title>VaultPro | Private File Transfers</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- Navbar -->
-  <header class="w-full max-w-5xl flex items-center justify-between px-6 py-6 border-b border-slate-900">
-    <div class="flex items-center gap-2">
-      <div class="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">V</div>
-      <span class="font-bold text-xl text-white">Vault<span class="text-indigo-400">Pro</span></span>
-    </div>
-    <div class="flex items-center gap-4 text-sm font-medium">
-      <a href="#pricing" class="text-slate-400 hover:text-white transition">Pricing</a>
-      <button class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 rounded-xl transition">Sign In</button>
+  <!-- Navigation -->
+  <header class="border-b border-slate-900 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-600/30">
+          V
+        </div>
+        <span class="font-bold text-xl tracking-tight text-white">VaultPro</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="#pricing" class="text-sm font-medium text-slate-400 hover:text-slate-200 transition">Pricing</a>
+        <a id="navAuthBtn" href="/auth" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-xl font-semibold border border-slate-800 hover:border-slate-700 shadow-sm transition">
+          Sign In
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Hero & Transfer Card -->
-  <main class="w-full max-w-5xl px-6 py-14 flex flex-col lg:flex-row gap-12 items-center justify-between">
-    <div class="max-w-md">
-      <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Zero-Egress Direct Transmission</span>
-      <h1 class="text-4xl lg:text-5xl font-extrabold text-white mt-4 tracking-tight leading-tight">
+  <!-- Hero & Upload Form -->
+  <main class="max-w-6xl mx-auto px-6 py-12 lg:py-20 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    
+    <!-- Hero Copy -->
+    <div class="lg:col-span-6 space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 text-xs font-semibold">
+        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+        Zero-Egress Direct Transmission
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
         Private file transfers with zero compromise.
       </h1>
-      <p class="text-slate-400 text-sm mt-4 leading-relaxed">
+      <p class="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl">
         Direct upload streaming to edge cloud vaults. Password-protect client deliveries, select expiration windows, and bypass bandwidth throttles completely.
       </p>
     </div>
 
     <!-- Upload Card -->
-    <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-3xl p-6 shadow-2xl">
-      <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-6 text-center transition cursor-pointer" onclick="document.getElementById('fileInput').click()">
-        <input type="file" id="fileInput" class="hidden" onchange="handleFilePicked()" />
-        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-        </div>
-        <p class="font-semibold text-slate-200 text-sm">Drop file or click to browse</p>
-        <p id="fileSubtext" class="text-xs text-slate-500 mt-1">Up to 2 GB per transfer</p>
-      </div>
+    <div class="lg:col-span-6">
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+        
+        <input type="file" id="fileInput" class="hidden">
 
-      <!-- Pro Protection Controls -->
-      <div id="proControls" class="mt-4 space-y-3 hidden">
-        <div>
-          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Passcode Protection (Optional)</label>
-          <input type="password" id="vaultPassword" placeholder="Set secret password..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" />
-        </div>
-
-        <div>
-          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Link Expiration</label>
-          <select id="vaultExpiry" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
-            <option value="1">Expires in 1 Hour</option>
-            <option value="24" selected>Expires in 24 Hours</option>
-            <option value="168">Expires in 7 Days (Pro)</option>
-          </select>
+        <!-- Drop Zone -->
+        <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
+             class="border-2 border-dashed border-slate-800 hover:border-indigo-500/60 bg-slate-950/40 hover:bg-indigo-950/10 rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition group">
+          <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-indigo-500/40 group-hover:bg-indigo-600/10 transition">
+            <svg class="w-6 h-6 text-slate-400 group-hover:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+          </div>
+          <span id="fileNameDisplay" class="font-semibold text-slate-200 text-sm group-hover:text-indigo-300 transition break-all">
+            Drop file or click to browse
+          </span>
+          <span id="fileSizeDisplay" class="text-xs text-slate-500 mt-1">Up to 2 GB per transfer</span>
         </div>
 
-        <button id="uploadBtn" onclick="runUpload()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm text-white rounded-xl shadow-lg shadow-indigo-600/30 transition">
-          Generate Secure Vault Link
-        </button>
-      </div>
+        <!-- Options Panel -->
+        <div class="mt-6 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Vault Passcode (Optional)</label>
+              <input id="passcode" type="password" placeholder="••••••••" 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Auto-Destroy After</label>
+              <select id="expiryHours" 
+                      class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none transition">
+                <option value="1">1 Hour</option>
+                <option value="24" selected>24 Hours</option>
+                <option value="72">3 Days</option>
+                <option value="168">7 Days</option>
+              </select>
+            </div>
+          </div>
 
-      <p id="statusMsg" class="text-xs font-medium text-center mt-3 text-amber-400"></p>
+          <!-- Upload Progress -->
+          <div id="progressBox" class="hidden space-y-1.5">
+            <div class="flex justify-between text-[11px] font-medium text-slate-400">
+              <span id="progressStatus">Uploading...</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden">
+              <div id="progressBar" class="h-full bg-indigo-600 transition-all duration-150" style="width: 0%"></div>
+            </div>
+          </div>
 
-      <!-- Share Box -->
-      <div id="resultBox" class="mt-4 p-4 bg-slate-950 border border-slate-800 rounded-xl hidden">
-        <p class="text-xs text-slate-400 mb-1">Your Branded Share Link:</p>
-        <div class="flex items-center gap-2">
-          <input id="shareUrlInput" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-indigo-300 font-mono" />
-          <button onclick="copyShareUrl()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold text-white">Copy</button>
+          <!-- Submit Button -->
+          <button id="uploadBtn" onclick="initiateUpload()" 
+                  class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            Generate Secure Vault Link
+          </button>
         </div>
+
+        <!-- Result Box -->
+        <div id="resultBox" class="mt-6 pt-6 border-t border-slate-800/80 hidden space-y-2">
+          <label class="block text-xs font-semibold text-slate-400">Your Branded Share Link:</label>
+          <div class="flex items-center gap-2">
+            <input id="shareUrlInput" type="text" readonly 
+                   class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
+            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold transition">
+              Copy
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
 
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
+    © 2026 VaultPro Inc. End-to-end zero knowledge edge storage.
+  </footer>
+
   <script>
-    let pickedFile = null;
-
-    function handleFilePicked() {
-      const input = document.getElementById('fileInput');
-      if (input.files.length > 0) {
-        pickedFile = input.files[0];
-        document.getElementById('fileSubtext').innerText = `${pickedFile.name} (${(pickedFile.size / (1024*1024)).toFixed(2)} MB)`;
-        document.getElementById('proControls').classList.remove('hidden');
-        document.getElementById('resultBox').classList.add('hidden');
+    // --- Auth Check & Nav Link Switch ---
+    function getStoredUserId() {
+      const token = localStorage.getItem("vp_token");
+      if (!token) return null;
+      try {
+        const payloadBase64 = token.split('.')[1];
+        const jsonStr = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+        const data = JSON.parse(jsonStr);
+        if (data.exp && data.exp * 1000 < Date.now()) {
+          localStorage.removeItem("vp_token");
+          return null;
+        }
+        return data.sub || null;
+      } catch (e) {
+        return null;
       }
     }
 
-    async function runUpload() {
-      if (!pickedFile) return;
-      const status = document.getElementById('statusMsg');
-      const password = document.getElementById('vaultPassword').value;
-      const expiry = parseInt(document.getElementById('vaultExpiry').value);
+    const currentUserId = getStoredUserId();
+    const navBtn = document.getElementById("navAuthBtn");
+    if (currentUserId && navBtn) {
+      navBtn.innerText = "Dashboard";
+      navBtn.href = "/dashboard";
+    }
 
-      status.innerText = "Reserving encrypted vault...";
+    // --- File Drag & Select Handling ---
+    let selectedFile = null;
+    const fileInput = document.getElementById("fileInput");
+    const dropZone = document.getElementById("dropZone");
 
-      const res = await fetch('/api/create-share', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          filename: pickedFile.name,
-          filesize_mb: parseFloat((pickedFile.size / (1024*1024)).toFixed(2)),
-          password: password.trim() || null,
-          expiry_hours: expiry
-        })
-      });
-      const data = await res.json();
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
 
-      status.innerText = "Transmitting directly to Cloudflare R2...";
-      const uploadRes = await fetch(data.upload_url, {
-        method: 'PUT',
-        body: pickedFile
-      });
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("border-indigo-500", "bg-indigo-950/20");
+    });
 
-      if (uploadRes.ok) {
-        status.innerText = "";
-        document.getElementById('proControls').classList.add('hidden');
-        document.getElementById('resultBox').classList.remove('hidden');
-        document.getElementById('shareUrlInput').value = `${window.location.origin}/share/${data.share_id}`;
-      } else {
-        status.innerText = "Transmission failed. Verify CORS configurations.";
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("border-indigo-500", "bg-indigo-950/20");
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("border-indigo-500", "bg-indigo-950/20");
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      selectedFile = file;
+      document.getElementById("fileNameDisplay").innerText = file.name;
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+      document.getElementById("fileSizeDisplay").innerText = `${sizeMb} MB • Ready to transfer`;
+    }
+
+    // --- Direct Cloudflare R2 Upload Flow ---
+    async function initiateUpload() {
+      if (!selectedFile) {
+        alert("Please select a file to transfer first.");
+        return;
+      }
+
+      const uploadBtn = document.getElementById("uploadBtn");
+      const progressBox = document.getElementById("progressBox");
+      const progressBar = document.getElementById("progressBar");
+      const progressPercent = document.getElementById("progressPercent");
+      const progressStatus = document.getElementById("progressStatus");
+      const resultBox = document.getElementById("resultBox");
+
+      uploadBtn.disabled = true;
+      progressBox.classList.remove("hidden");
+      resultBox.classList.add("hidden");
+      progressStatus.innerText = "Reserving secure vault...";
+      progressBar.style.width = "10%";
+      progressPercent.innerText = "10%";
+
+      try {
+        const payload = {
+          filename: selectedFile.name,
+          filesize_mb: parseFloat((selectedFile.size / (1024 * 1024)).toFixed(2)),
+          password: document.getElementById("passcode").value.trim() || null,
+          expiry_hours: parseInt(document.getElementById("expiryHours").value),
+          user_id: getStoredUserId()
+        };
+
+        const res = await fetch("/api/create-share", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Failed to initialize vault share.");
+        }
+
+        const data = await res.json();
+
+        // Direct upload to Cloudflare R2 presigned URL
+        progressStatus.innerText = "Streaming to edge storage...";
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", data.upload_url, true);
+        xhr.setRequestHeader("Content-Type", selectedFile.type || "application/octet-stream");
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 90) + 10;
+            progressBar.style.width = `${pct}%`;
+            progressPercent.innerText = `${pct}%`;
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            progressStatus.innerText = "Vault encrypted & ready!";
+            progressBar.style.width = "100%";
+            progressPercent.innerText = "100%";
+
+            const shareUrl = `${window.location.origin}/share/${data.share_id}`;
+            document.getElementById("shareUrlInput").value = shareUrl;
+            resultBox.classList.remove("hidden");
+            uploadBtn.disabled = false;
+          } else {
+            throw new Error("Direct storage upload failed.");
+          }
+        };
+
+        xhr.onerror = () => {
+          throw new Error("Network error during edge transmission.");
+        };
+
+        xhr.send(selectedFile);
+
+      } catch (error) {
+        alert(error.message);
+        progressBox.classList.add("hidden");
+        uploadBtn.disabled = false;
       }
     }
 
-    function copyShareUrl() {
-      const input = document.getElementById('shareUrlInput');
-      input.select();
+    function copyResultLink() {
+      const input = document.getElementById("shareUrlInput");
       navigator.clipboard.writeText(input.value);
-      alert("Share URL copied to clipboard!");
+      alert("Vault link copied to clipboard!");
     }
   </script>
 </body>
