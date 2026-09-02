@@ -6,58 +6,147 @@
   <title>VaultPro | Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    @keyframes drift-1 {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(130px, 80px) scale(1.15); }
+      66% { transform: translate(-70px, 140px) scale(0.9); }
+    }
+    @keyframes drift-2 {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(-100px, -90px) scale(1.2); }
+      66% { transform: translate(80px, -50px) scale(0.9); }
+    }
+    @keyframes pulse-sheen {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.8; }
+    }
+
+    .aurora-1 {
+      animation: drift-1 18s ease-in-out infinite, pulse-sheen 9s ease-in-out infinite alternate;
+    }
+    .aurora-2 {
+      animation: drift-2 22s ease-in-out infinite, pulse-sheen 11s ease-in-out infinite alternate;
+    }
+
+    .glass-card {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.7) 0%, rgba(10, 15, 29, 0.85) 100%);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    .grid-lines {
+      background-size: 50px 50px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 70%, transparent 100%);
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#030712] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white relative overflow-x-hidden flex flex-col">
   
+  <!-- Dynamic Aurora Background -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute inset-0 grid-lines"></div>
+    <div class="absolute -top-20 -left-20 w-[600px] h-[600px] bg-gradient-to-br from-indigo-600/40 via-purple-600/30 to-blue-600/30 rounded-full blur-[80px] aurora-1"></div>
+    <div class="absolute top-1/3 -right-24 w-[550px] h-[550px] bg-gradient-to-bl from-purple-600/35 via-fuchsia-600/25 to-pink-600/25 rounded-full blur-[85px] aurora-2"></div>
+  </div>
+
   <!-- Navigation -->
-  <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-    <div class="flex items-center gap-3">
-      <a href="/" class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-lg shadow-lg shadow-indigo-600/30">V</a>
-      <span class="font-bold tracking-tight">VaultPro 
-        <span id="tierBadge" class="text-xs text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded-full border border-indigo-800/50 ml-1.5 uppercase font-semibold">
-          Free Tier
+  <nav class="border-b border-white/[0.08] bg-[#030712]/50 backdrop-blur-2xl px-6 py-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/" class="relative group">
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+          <div class="relative w-9 h-9 rounded-xl bg-slate-900 border border-white/20 flex items-center justify-center font-black text-lg text-white">
+            V
+          </div>
+        </a>
+        <span class="font-bold tracking-tight text-white flex items-center gap-2">
+          VaultPro
+          <span id="tierBadge" class="text-[11px] font-bold tracking-wide uppercase px-2.5 py-0.5 rounded-full border border-indigo-500/40 bg-indigo-950/60 text-indigo-300">
+            Free Tier
+          </span>
         </span>
-      </span>
-    </div>
-    <div class="flex items-center gap-4">
-      <span id="userEmail" class="text-xs text-slate-400 hidden sm:inline"></span>
-      <a href="/" class="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-md font-medium transition">+ New Transfer</a>
-      <button onclick="handleSignOut()" class="text-xs text-slate-400 hover:text-white transition">Sign Out</button>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <span id="userEmail" class="text-xs text-slate-400 hidden sm:inline font-medium"></span>
+        <a href="/" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl font-semibold shadow-lg shadow-indigo-600/30 transition">
+          + New Transfer
+        </a>
+        <button onclick="handleSignOut()" class="text-xs text-slate-400 hover:text-white px-2 py-1 transition">
+          Sign Out
+        </button>
+      </div>
     </div>
   </nav>
 
-  <!-- Content -->
-  <main class="max-w-5xl mx-auto p-6 space-y-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto p-6 sm:p-8 flex-1 space-y-8 w-full">
+    
+    <!-- Top Row -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
       <div>
-        <h1 class="text-2xl font-bold">Active Encrypted Vaults</h1>
-        <p class="text-xs text-slate-400 mt-1">Manage all live links, monitor download counts, or revoke access anytime.</p>
+        <h1 class="text-3xl font-black text-white tracking-tight">Encrypted Storage Vaults</h1>
+        <p class="text-xs text-slate-400 mt-1">Manage active transfers, inspect download counts, or revoke access on demand.</p>
       </div>
-      <button id="upgradeBtn" onclick="handleUpgrade()" class="border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-xs px-4 py-2 rounded-lg font-semibold transition">
+      <button id="upgradeBtn" onclick="handleUpgrade()" class="border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 hover:border-amber-500/60 text-xs px-4 py-2.5 rounded-xl font-bold transition shadow-lg shadow-amber-500/10">
         ⚡ Upgrade to Pro ($9/mo)
       </button>
     </div>
 
-    <!-- Active Shares Table -->
-    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-x-auto shadow-xl">
-      <table class="w-full text-left text-xs min-w-[600px]">
-        <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
-          <tr>
-            <th class="p-4">File Name</th>
-            <th class="p-4">Size</th>
-            <th class="p-4">Expires In</th>
-            <th class="p-4 text-center">Downloads</th>
-            <th class="p-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="vaultTable" class="divide-y divide-slate-800/60">
-          <tr>
-            <td colspan="5" class="p-6 text-center text-slate-500">Loading your vaults...</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Vaults</div>
+        <div id="statActiveVaults" class="text-2xl sm:text-3xl font-black text-white mt-1">0</div>
+      </div>
+      <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Downloads</div>
+        <div id="statTotalDownloads" class="text-2xl sm:text-3xl font-black text-indigo-400 mt-1">0</div>
+      </div>
+      <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Storage Consumed</div>
+        <div id="statTotalSize" class="text-2xl sm:text-3xl font-black text-purple-400 mt-1">0 MB</div>
+      </div>
     </div>
+
+    <!-- Active Shares Glass Table -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs min-w-[650px]">
+          <thead class="bg-white/[0.04] text-slate-400 border-b border-white/10 uppercase tracking-wider text-[11px] font-semibold">
+            <tr>
+              <th class="p-4 pl-6">File Name</th>
+              <th class="p-4">Size</th>
+              <th class="p-4">Expires In</th>
+              <th class="p-4 text-center">Downloads</th>
+              <th class="p-4 pr-6 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vaultTable" class="divide-y divide-white/[0.06]">
+            <tr>
+              <td colspan="5" class="p-8 text-center text-slate-400">Loading your vaults...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
+
+  <footer class="border-t border-white/[0.08] bg-[#030712]/40 backdrop-blur-md py-6 text-center text-xs text-slate-500">
+    © 2026 VaultPro Systems. Zero-knowledge architecture powered by Cloudflare R2 Edge.
+  </footer>
 
   <script>
     const SUPABASE_URL = "{{ supabase_url }}";
@@ -67,13 +156,27 @@
     let currentUser = null;
 
     async function init() {
+      // 1. Recover User from Supabase
       const { data: { user } } = await sb.auth.getUser();
       if (!user) {
-        window.location.href = "/auth";
-        return;
+        // Fallback check from localStorage token
+        const token = localStorage.getItem("vp_token");
+        if (!token) {
+          window.location.href = "/auth";
+          return;
+        }
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          currentUser = { id: payload.sub, email: payload.email || "" };
+        } catch(e) {
+          window.location.href = "/auth";
+          return;
+        }
+      } else {
+        currentUser = user;
       }
-      currentUser = user;
-      document.getElementById('userEmail').innerText = user.email;
+
+      document.getElementById('userEmail').innerText = currentUser.email || "";
 
       await checkUserTier();
       await loadVaults();
@@ -86,12 +189,12 @@
         if (data.tier === 'pro') {
           const badge = document.getElementById('tierBadge');
           badge.innerText = 'PRO';
-          badge.className = 'text-xs text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-600/50 ml-1.5 font-bold uppercase';
+          badge.className = 'text-[11px] font-black tracking-widest text-amber-300 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)] uppercase';
           
           const upgradeBtn = document.getElementById('upgradeBtn');
           upgradeBtn.innerText = '✓ Pro Member';
           upgradeBtn.disabled = true;
-          upgradeBtn.className = 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs px-4 py-2 rounded-lg font-semibold cursor-default';
+          upgradeBtn.className = 'border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 text-xs px-4 py-2.5 rounded-xl font-bold cursor-default shadow-sm';
         }
       } catch (err) {
         console.error("Profile check error:", err);
@@ -104,25 +207,45 @@
         const vaults = await res.json();
         const tbody = document.getElementById('vaultTable');
 
-        if (!vaults.length) {
-          tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No active uploads found. Create your first transfer!</td></tr>';
+        if (!vaults || !vaults.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 font-medium">No active vaults found. Upload your first transfer!</td></tr>';
+          document.getElementById('statActiveVaults').innerText = '0';
+          document.getElementById('statTotalDownloads').innerText = '0';
+          document.getElementById('statTotalSize').innerText = '0 MB';
           return;
         }
 
+        // Calculate KPIs
+        const totalDownloads = vaults.reduce((acc, v) => acc + (v.downloads || 0), 0);
+        const totalSize = vaults.reduce((acc, v) => acc + (v.filesize_mb || 0), 0).toFixed(1);
+
+        document.getElementById('statActiveVaults').innerText = vaults.length;
+        document.getElementById('statTotalDownloads').innerText = totalDownloads;
+        document.getElementById('statTotalSize').innerText = `${totalSize} MB`;
+
         tbody.innerHTML = vaults.map(v => `
-          <tr class="hover:bg-slate-800/30 transition">
-            <td class="p-4 font-medium text-slate-200">${v.filename}</td>
-            <td class="p-4 text-slate-400">${v.filesize_mb} MB</td>
+          <tr class="hover:bg-white/[0.03] transition duration-150">
+            <td class="p-4 pl-6 font-semibold text-slate-200">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs">📄</span>
+                <span class="truncate max-w-[200px] sm:max-w-[320px]">${v.filename}</span>
+              </div>
+            </td>
+            <td class="p-4 text-slate-300 font-medium">${v.filesize_mb} MB</td>
             <td class="p-4 text-slate-400">${new Date(v.expires_at).toLocaleString()}</td>
-            <td class="p-4 text-center font-semibold text-indigo-400">${v.downloads}</td>
-            <td class="p-4 text-right space-x-2">
-              <button onclick="copyLink('${v.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 text-[11px] transition">Copy Link</button>
-              <button onclick="deleteVault('${v.id}')" class="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded text-[11px] transition">Delete</button>
+            <td class="p-4 text-center font-bold text-indigo-400">${v.downloads}</td>
+            <td class="p-4 pr-6 text-right space-x-2">
+              <button onclick="copyLink('${v.id}')" class="px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 rounded-lg text-slate-200 text-[11px] font-semibold transition">
+                Copy Link
+              </button>
+              <button onclick="deleteVault('${v.id}')" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-[11px] font-semibold transition">
+                Delete
+              </button>
             </td>
           </tr>
         `).join('');
       } catch (err) {
-        document.getElementById('vaultTable').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-rose-400">Failed to load active vaults.</td></tr>';
+        document.getElementById('vaultTable').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-rose-400">Failed to load active vaults.</td></tr>';
       }
     }
 
@@ -132,7 +255,7 @@
     }
 
     async function deleteVault(id) {
-      if (!confirm("Revoke this link and delete the encrypted file permanently?")) return;
+      if (!confirm("Revoke this link and delete the file permanently from edge storage?")) return;
       const res = await fetch(`/api/shares/${id}?user_id=${currentUser.id}`, { method: 'DELETE' });
       if (res.ok) loadVaults();
     }
@@ -142,10 +265,8 @@
         window.location.href = "/auth";
         return;
       }
-      
       const baseUrl = "https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd";
       const checkoutUrl = `${baseUrl}?checkout[email]=${encodeURIComponent(currentUser.email)}&checkout[custom][user_id]=${currentUser.id}`;
-      
       window.location.href = checkoutUrl;
     }
 
