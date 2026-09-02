@@ -1,6 +1,9 @@
 import os
 import uuid
+import hmac
+import hashlib
 from datetime import datetime, timedelta
+
 import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
@@ -8,7 +11,7 @@ from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
+from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime, text
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 load_dotenv()
@@ -53,9 +56,11 @@ s3 = boto3.client(
     config=Config(signature_version="s3v4"),
     region_name="auto",
 )
+
 BUCKET = os.getenv("R2_BUCKET_NAME")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON = os.getenv("SUPABASE_ANON_KEY", "")
+LEMONSQUEEZY_WEBHOOK_SECRET = os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET", "")
 
 app = FastAPI(title="VaultPro Engine")
 templates = Jinja2Templates(directory="templates")
@@ -91,6 +96,26 @@ async def serve_dashboard(request: Request):
         request=request,
         name="dashboard.html",
         context={"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON}
+    )
+
+@app.get("/share/{share_id}", response_class=HTMLResponse)
+async def serve_share_page(request: Request, share_id: str, db: Session = Depends(get_db)):
+    record = db.query(ShareRecord).filter(ShareRecord.id == share_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="File link not found.")
+    if datetime.utcnow() > record.expires_at:
+        raise HTTPException(status_code=410, detail="This secure link has expired.")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="download.html",
+        context={
+            "share_id": record.id,
+            "filename": record.filename,
+            "filesize": record.filesize_mb,
+            "is_locked": bool(record.password),
+            "downloads": record.downloads,
+        }
     )
 
 # --- API Endpoints ---
@@ -136,13 +161,19 @@ def get_user_shares(user_id: str, db: Session = Depends(get_db)):
         "downloads": s.downloads
     } for s in shares]
 
+@app.get("/api/user-profile")
+def get_user_profile(user_id: str, db: Session = Depends(get_db)):
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT tier FROM profiles WHERE id = :uid"), {"uid": user_id}).fetchone()
+        tier = result[0] if result else "free"
+    return {"tier": tier}
+
 @app.delete("/api/shares/{share_id}")
 def delete_share(share_id: str, user_id: str, db: Session = Depends(get_db)):
     record = db.query(ShareRecord).filter(ShareRecord.id == share_id, ShareRecord.user_id == user_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Vault not found or unauthorized.")
 
-    # Delete object from R2 bucket
     try:
         s3.delete_object(Bucket=BUCKET, Key=record.file_key)
     except Exception:
@@ -151,26 +182,6 @@ def delete_share(share_id: str, user_id: str, db: Session = Depends(get_db)):
     db.delete(record)
     db.commit()
     return {"status": "deleted"}
-
-@app.get("/share/{share_id}", response_class=HTMLResponse)
-async def serve_share_page(request: Request, share_id: str, db: Session = Depends(get_db)):
-    record = db.query(ShareRecord).filter(ShareRecord.id == share_id).first()
-    if not record:
-        raise HTTPException(status_code=404, detail="File link not found.")
-    if datetime.utcnow() > record.expires_at:
-        raise HTTPException(status_code=410, detail="This secure link has expired.")
-
-    return templates.TemplateResponse(
-        request=request,
-        name="download.html",
-        context={
-            "share_id": record.id,
-            "filename": record.filename,
-            "filesize": record.filesize_mb,
-            "is_locked": bool(record.password),
-            "downloads": record.downloads,
-        }
-    )
 
 @app.post("/api/unlock-download")
 def unlock_download(req: UnlockRequest, db: Session = Depends(get_db)):
@@ -189,3 +200,29 @@ def unlock_download(req: UnlockRequest, db: Session = Depends(get_db)):
         ExpiresIn=3600
     )
     return {"download_url": download_url}
+
+# --- Lemon Squeezy Webhook Handler ---
+@app.post("/api/lemonsqueezy-webhook")
+async def lemonsqueezy_webhook(request: Request):
+    body = await request.body()
+    signature = request.headers.get("X-Signature")
+
+    if LEMONSQUEEZY_WEBHOOK_SECRET and signature:
+        digest = hmac.new(LEMONSQUEEZY_WEBHOOK_SECRET.encode(), body, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(digest, signature):
+            raise HTTPException(status_code=400, detail="Invalid signature")
+
+    data = await request.json()
+    event_name = data.get("meta", {}).get("event_name")
+    custom_data = data.get("meta", {}).get("custom_data", {})
+    user_id = custom_data.get("user_id")
+
+    if event_name in ["subscription_created", "order_created"] and user_id:
+        with engine.connect() as conn:
+            conn.execute(
+                text("UPDATE profiles SET tier = 'pro' WHERE id = :user_id"),
+                {"user_id": user_id}
+            )
+            conn.commit()
+
+    return {"status": "success"}

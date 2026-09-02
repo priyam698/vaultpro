@@ -2,36 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VaultPro | Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex items-center justify-between">
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white">
+  
+  <!-- Navigation -->
+  <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-3">
-      <a href="/" class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-lg">V</a>
-      <span class="font-bold tracking-tight">VaultPro <span class="text-xs text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded-full border border-indigo-800/50">Free Tier</span></span>
+      <a href="/" class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-lg shadow-lg shadow-indigo-600/30">V</a>
+      <span class="font-bold tracking-tight">VaultPro 
+        <span id="tierBadge" class="text-xs text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded-full border border-indigo-800/50 ml-1.5 uppercase font-semibold">
+          Free Tier
+        </span>
+      </span>
     </div>
     <div class="flex items-center gap-4">
-      <span id="userEmail" class="text-xs text-slate-400"></span>
+      <span id="userEmail" class="text-xs text-slate-400 hidden sm:inline"></span>
       <a href="/" class="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-md font-medium transition">+ New Transfer</a>
       <button onclick="handleSignOut()" class="text-xs text-slate-400 hover:text-white transition">Sign Out</button>
     </div>
   </nav>
 
+  <!-- Content -->
   <main class="max-w-5xl mx-auto p-6 space-y-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
       <div>
         <h1 class="text-2xl font-bold">Active Encrypted Vaults</h1>
         <p class="text-xs text-slate-400 mt-1">Manage all live links, monitor download counts, or revoke access anytime.</p>
       </div>
-      <a href="#" class="border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-xs px-4 py-2 rounded-lg font-semibold transition">
+      <button id="upgradeBtn" onclick="handleUpgrade()" class="border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-xs px-4 py-2 rounded-lg font-semibold transition">
         ⚡ Upgrade to Pro ($9/mo)
-      </a>
+      </button>
     </div>
 
-    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden">
-      <table class="w-full text-left text-xs">
+    <!-- Active Shares Table -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-x-auto shadow-xl">
+      <table class="w-full text-left text-xs min-w-[600px]">
         <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
           <tr>
             <th class="p-4">File Name</th>
@@ -65,31 +74,56 @@
       }
       currentUser = user;
       document.getElementById('userEmail').innerText = user.email;
-      loadVaults();
+
+      await checkUserTier();
+      await loadVaults();
+    }
+
+    async function checkUserTier() {
+      try {
+        const res = await fetch(`/api/user-profile?user_id=${currentUser.id}`);
+        const data = await res.json();
+        if (data.tier === 'pro') {
+          const badge = document.getElementById('tierBadge');
+          badge.innerText = 'PRO';
+          badge.className = 'text-xs text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-600/50 ml-1.5 font-bold uppercase';
+          
+          const upgradeBtn = document.getElementById('upgradeBtn');
+          upgradeBtn.innerText = '✓ Pro Member';
+          upgradeBtn.disabled = true;
+          upgradeBtn.className = 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs px-4 py-2 rounded-lg font-semibold cursor-default';
+        }
+      } catch (err) {
+        console.error("Profile check error:", err);
+      }
     }
 
     async function loadVaults() {
-      const res = await fetch(`/api/user-shares?user_id=${currentUser.id}`);
-      const vaults = await res.json();
-      const tbody = document.getElementById('vaultTable');
+      try {
+        const res = await fetch(`/api/user-shares?user_id=${currentUser.id}`);
+        const vaults = await res.json();
+        const tbody = document.getElementById('vaultTable');
 
-      if (!vaults.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No active uploads found. Create your first transfer!</td></tr>';
-        return;
+        if (!vaults.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No active uploads found. Create your first transfer!</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = vaults.map(v => `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="p-4 font-medium text-slate-200">${v.filename}</td>
+            <td class="p-4 text-slate-400">${v.filesize_mb} MB</td>
+            <td class="p-4 text-slate-400">${new Date(v.expires_at).toLocaleString()}</td>
+            <td class="p-4 text-center font-semibold text-indigo-400">${v.downloads}</td>
+            <td class="p-4 text-right space-x-2">
+              <button onclick="copyLink('${v.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 text-[11px] transition">Copy Link</button>
+              <button onclick="deleteVault('${v.id}')" class="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded text-[11px] transition">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        document.getElementById('vaultTable').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-rose-400">Failed to load active vaults.</td></tr>';
       }
-
-      tbody.innerHTML = vaults.map(v => `
-        <tr class="hover:bg-slate-800/30 transition">
-          <td class="p-4 font-medium text-slate-200">${v.filename}</td>
-          <td class="p-4 text-slate-400">${v.filesize_mb} MB</td>
-          <td class="p-4 text-slate-400">${new Date(v.expires_at).toLocaleString()}</td>
-          <td class="p-4 text-center font-semibold text-indigo-400">${v.downloads}</td>
-          <td class="p-4 text-right space-x-2">
-            <button onclick="copyLink('${v.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 text-[11px] transition">Copy Link</button>
-            <button onclick="deleteVault('${v.id}')" class="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded text-[11px] transition">Delete</button>
-          </td>
-        </tr>
-      `).join('');
     }
 
     function copyLink(id) {
@@ -101,6 +135,18 @@
       if (!confirm("Revoke this link and delete the encrypted file permanently?")) return;
       const res = await fetch(`/api/shares/${id}?user_id=${currentUser.id}`, { method: 'DELETE' });
       if (res.ok) loadVaults();
+    }
+
+    function handleUpgrade() {
+      if (!currentUser) {
+        window.location.href = "/auth";
+        return;
+      }
+      
+      const baseUrl = "https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd";
+      const checkoutUrl = `${baseUrl}?checkout[email]=${encodeURIComponent(currentUser.email)}&checkout[custom][user_id]=${currentUser.id}`;
+      
+      window.location.href = checkoutUrl;
     }
 
     async function handleSignOut() {
