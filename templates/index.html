@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultPro | Hyper-Fast Private Delivery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center selection:bg-indigo-500 selection:text-white">
+
+  <!-- Navbar -->
+  <header class="w-full max-w-5xl flex items-center justify-between px-6 py-6 border-b border-slate-900">
+    <div class="flex items-center gap-2">
+      <div class="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">V</div>
+      <span class="font-bold text-xl text-white">Vault<span class="text-indigo-400">Pro</span></span>
+    </div>
+    <div class="flex items-center gap-4 text-sm font-medium">
+      <a href="#pricing" class="text-slate-400 hover:text-white transition">Pricing</a>
+      <button class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 rounded-xl transition">Sign In</button>
+    </div>
+  </header>
+
+  <!-- Hero & Transfer Card -->
+  <main class="w-full max-w-5xl px-6 py-14 flex flex-col lg:flex-row gap-12 items-center justify-between">
+    <div class="max-w-md">
+      <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Zero-Egress Direct Transmission</span>
+      <h1 class="text-4xl lg:text-5xl font-extrabold text-white mt-4 tracking-tight leading-tight">
+        Private file transfers with zero compromise.
+      </h1>
+      <p class="text-slate-400 text-sm mt-4 leading-relaxed">
+        Direct upload streaming to edge cloud vaults. Password-protect client deliveries, select expiration windows, and bypass bandwidth throttles completely.
+      </p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-3xl p-6 shadow-2xl">
+      <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-6 text-center transition cursor-pointer" onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput" class="hidden" onchange="handleFilePicked()" />
+        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+        <p class="font-semibold text-slate-200 text-sm">Drop file or click to browse</p>
+        <p id="fileSubtext" class="text-xs text-slate-500 mt-1">Up to 2 GB per transfer</p>
+      </div>
+
+      <!-- Pro Protection Controls -->
+      <div id="proControls" class="mt-4 space-y-3 hidden">
+        <div>
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Passcode Protection (Optional)</label>
+          <input type="password" id="vaultPassword" placeholder="Set secret password..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Link Expiration</label>
+          <select id="vaultExpiry" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="1">Expires in 1 Hour</option>
+            <option value="24" selected>Expires in 24 Hours</option>
+            <option value="168">Expires in 7 Days (Pro)</option>
+          </select>
+        </div>
+
+        <button id="uploadBtn" onclick="runUpload()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm text-white rounded-xl shadow-lg shadow-indigo-600/30 transition">
+          Generate Secure Vault Link
+        </button>
+      </div>
+
+      <p id="statusMsg" class="text-xs font-medium text-center mt-3 text-amber-400"></p>
+
+      <!-- Share Box -->
+      <div id="resultBox" class="mt-4 p-4 bg-slate-950 border border-slate-800 rounded-xl hidden">
+        <p class="text-xs text-slate-400 mb-1">Your Branded Share Link:</p>
+        <div class="flex items-center gap-2">
+          <input id="shareUrlInput" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-indigo-300 font-mono" />
+          <button onclick="copyShareUrl()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold text-white">Copy</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let pickedFile = null;
+
+    function handleFilePicked() {
+      const input = document.getElementById('fileInput');
+      if (input.files.length > 0) {
+        pickedFile = input.files[0];
+        document.getElementById('fileSubtext').innerText = `${pickedFile.name} (${(pickedFile.size / (1024*1024)).toFixed(2)} MB)`;
+        document.getElementById('proControls').classList.remove('hidden');
+        document.getElementById('resultBox').classList.add('hidden');
+      }
+    }
+
+    async function runUpload() {
+      if (!pickedFile) return;
+      const status = document.getElementById('statusMsg');
+      const password = document.getElementById('vaultPassword').value;
+      const expiry = parseInt(document.getElementById('vaultExpiry').value);
+
+      status.innerText = "Reserving encrypted vault...";
+
+      const res = await fetch('/api/create-share', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          filename: pickedFile.name,
+          filesize_mb: parseFloat((pickedFile.size / (1024*1024)).toFixed(2)),
+          password: password.trim() || null,
+          expiry_hours: expiry
+        })
+      });
+      const data = await res.json();
+
+      status.innerText = "Transmitting directly to Cloudflare R2...";
+      const uploadRes = await fetch(data.upload_url, {
+        method: 'PUT',
+        body: pickedFile
+      });
+
+      if (uploadRes.ok) {
+        status.innerText = "";
+        document.getElementById('proControls').classList.add('hidden');
+        document.getElementById('resultBox').classList.remove('hidden');
+        document.getElementById('shareUrlInput').value = `${window.location.origin}/share/${data.share_id}`;
+      } else {
+        status.innerText = "Transmission failed. Verify CORS configurations.";
+      }
+    }
+
+    function copyShareUrl() {
+      const input = document.getElementById('shareUrlInput');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert("Share URL copied to clipboard!");
+    }
+  </script>
+</body>
+</html>

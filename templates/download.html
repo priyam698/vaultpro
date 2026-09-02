@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download {{ filename }} | VaultPro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between items-center p-6 selection:bg-indigo-500 selection:text-white">
+  
+  <header class="w-full max-w-xl flex items-center justify-between py-4">
+    <div class="flex items-center gap-2">
+      <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">V</div>
+      <span class="font-bold tracking-tight text-lg text-white">Vault<span class="text-indigo-400">Pro</span></span>
+    </div>
+    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+      Direct Cloudflare Delivery
+    </span>
+  </header>
+
+  <main class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+    <div class="text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+        </svg>
+      </div>
+
+      <h1 class="text-xl font-bold text-white truncate max-w-xs mx-auto mb-1">{{ filename }}</h1>
+      <p class="text-xs text-slate-400 mb-6">{{ filesize }} MB • Total Downloads: {{ downloads }}</p>
+
+      {% if is_locked %}
+      <!-- Password Lock Screen -->
+      <div id="lockScreen" class="space-y-3">
+        <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-xs flex items-center gap-2">
+          <span>🔒 This file is password protected by the sender.</span>
+        </div>
+        <input type="password" id="inputPasscode" placeholder="Enter recipient password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 text-center" />
+        <button onclick="requestDownload(true)" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white rounded-xl shadow-lg transition">
+          Unlock & Download
+        </button>
+        <p id="errorMsg" class="text-xs text-rose-400 font-semibold"></p>
+      </div>
+      {% else %}
+      <!-- Direct Download Button -->
+      <button onclick="requestDownload(false)" class="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-medium text-sm text-white shadow-xl shadow-indigo-600/30 transition">
+        Download File
+      </button>
+      {% endif %}
+
+      <div id="readyBox" class="hidden mt-4">
+        <a id="finalDownloadLink" class="w-full inline-block py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-medium text-sm text-white shadow-xl transition">
+          Direct Download Link Ready
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-4 text-center">
+    <p class="text-xs text-slate-500">
+      Need to send large files? 
+      <a href="/" class="text-indigo-400 hover:text-indigo-300 font-medium ml-1">Send up to 2 GB for free on VaultPro &rarr;</a>
+    </p>
+  </footer>
+
+  <script>
+    async function requestDownload(requiresPass) {
+      const shareId = "{{ share_id }}";
+      const password = requiresPass ? document.getElementById('inputPasscode').value : null;
+
+      const res = await fetch('/api/unlock-download', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ share_id: shareId, password: password })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        window.location.href = data.download_url;
+      } else {
+        const data = await res.json();
+        const err = document.getElementById('errorMsg');
+        if (err) err.innerText = data.detail || "Access denied.";
+      }
+    }
+  </script>
+</body>
+</html>
