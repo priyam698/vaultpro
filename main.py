@@ -1,39 +1,52 @@
 import os
-import sqlite3
 import uuid
 from datetime import datetime, timedelta
 import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 load_dotenv()
 
-app = FastAPI(title="VaultPro Engine")
-templates = Jinja2Templates(directory="templates")
+# Database Connection (Supabase in production, SQLite locally)
+RAW_DB_URL = os.getenv("DATABASE_URL", "sqlite:///./vault.db")
 
-# Initialize Database
-DB_PATH = "vault.db"
+if RAW_DB_URL.startswith("postgres://"):
+    RAW_DB_URL = RAW_DB_URL.replace("postgres://", "postgresql://", 1)
 
-def init_db():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS shares (
-                id TEXT PRIMARY KEY,
-                filename TEXT NOT NULL,
-                file_key TEXT NOT NULL,
-                filesize_mb REAL DEFAULT 0,
-                password TEXT,
-                expires_at TIMESTAMP NOT NULL,
-                downloads INTEGER DEFAULT 0
-            )
-        """)
-init_db()
+connect_args = {"check_same_thread": False} if RAW_DB_URL.startswith("sqlite") else {}
 
-# Configure S3 client for Cloudflare R2
+engine = create_engine(RAW_DB_URL, connect_args=connect_args, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+class ShareRecord(Base):
+    __tablename__ = "shares"
+
+    id = Column(String, primary_key=True, index=True)
+    filename = Column(String, nullable=False)
+    file_key = Column(String, nullable=False)
+    filesize_mb = Column(Float, default=0.0)
+    password = Column(String, nullable=True)
+    expires_at = Column(DateTime, nullable=False)
+    downloads = Column(Integer, default=0)
+
+# Create tables automatically
+Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Cloudflare R2 Client
 s3 = boto3.client(
     service_name="s3",
     endpoint_url=os.getenv("R2_ENDPOINT_URL"),
@@ -44,6 +57,9 @@ s3 = boto3.client(
 )
 
 BUCKET = os.getenv("R2_BUCKET_NAME")
+
+app = FastAPI(title="VaultPro Engine")
+templates = Jinja2Templates(directory="templates")
 
 class CreateShareRequest(BaseModel):
     filename: str
@@ -60,21 +76,25 @@ async def serve_home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/api/create-share")
-def create_share(req: CreateShareRequest):
+def create_share(req: CreateShareRequest, db: Session = Depends(get_db)):
     try:
-        share_id = str(uuid.uuid4())[:8]  # Clean 8-character link ID
+        share_id = str(uuid.uuid4())[:8]
         clean_name = req.filename.replace(" ", "_")
         object_key = f"vault/{share_id}_{clean_name}"
-        
         expires_at = datetime.utcnow() + timedelta(hours=req.expiry_hours)
 
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute(
-                "INSERT INTO shares (id, filename, file_key, filesize_mb, password, expires_at) VALUES (?, ?, ?, ?, ?, ?)",
-                (share_id, clean_name, object_key, req.filesize_mb, req.password if req.password else None, expires_at)
-            )
+        record = ShareRecord(
+            id=share_id,
+            filename=clean_name,
+            file_key=object_key,
+            filesize_mb=req.filesize_mb,
+            password=req.password if req.password else None,
+            expires_at=expires_at,
+            downloads=0
+        )
+        db.add(record)
+        db.commit()
 
-        # Generate 15-minute presigned upload URL for direct browser transmission
         upload_url = s3.generate_presigned_url(
             ClientMethod="put_object",
             Params={"Bucket": BUCKET, "Key": object_key},
@@ -82,56 +102,45 @@ def create_share(req: CreateShareRequest):
         )
         return {"upload_url": upload_url, "share_id": share_id}
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/share/{share_id}", response_class=HTMLResponse)
-async def serve_share_page(request: Request, share_id: str):
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
-        record = cur.fetchone()
-
+async def serve_share_page(request: Request, share_id: str, db: Session = Depends(get_db)):
+    record = db.query(ShareRecord).filter(ShareRecord.id == share_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="File link not found.")
 
-    expires_at = datetime.strptime(record["expires_at"], "%Y-%m-%d %H:%M:%S.%f") if "." in record["expires_at"] else datetime.strptime(record["expires_at"], "%Y-%m-%d %H:%M:%S")
-    if datetime.utcnow() > expires_at:
+    if datetime.utcnow() > record.expires_at:
         raise HTTPException(status_code=410, detail="This secure link has expired.")
 
     return templates.TemplateResponse(
         request=request,
         name="download.html",
         context={
-            "share_id": record["id"],
-            "filename": record["filename"],
-            "filesize": record["filesize_mb"],
-            "is_locked": bool(record["password"]),
-            "downloads": record["downloads"],
+            "share_id": record.id,
+            "filename": record.filename,
+            "filesize": record.filesize_mb,
+            "is_locked": bool(record.password),
+            "downloads": record.downloads,
         }
     )
 
 @app.post("/api/unlock-download")
-def unlock_download(req: UnlockRequest):
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM shares WHERE id = ?", (req.share_id,))
-        record = cur.fetchone()
-
+def unlock_download(req: UnlockRequest, db: Session = Depends(get_db)):
+    record = db.query(ShareRecord).filter(ShareRecord.id == req.share_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="File not found.")
 
-    if record["password"] and record["password"] != req.password:
+    if record.password and record.password != req.password:
         raise HTTPException(status_code=401, detail="Incorrect vault passcode.")
 
-    # Increment counter
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = ?", (req.share_id,))
+    record.downloads += 1
+    db.commit()
 
     download_url = s3.generate_presigned_url(
         ClientMethod="get_object",
-        Params={"Bucket": BUCKET, "Key": record["file_key"]},
-        ExpiresIn=3600  # 1 hour active link
+        Params={"Bucket": BUCKET, "Key": record.file_key},
+        ExpiresIn=3600
     )
     return {"download_url": download_url}

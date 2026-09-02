@@ -3,3 +3,5 @@ uvicorn
 boto3
 python-dotenv
 jinja2
+sqlalchemy
+psycopg2-binary
