@@ -13,14 +13,12 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 load_dotenv()
 
-# Database Connection (Supabase in production, SQLite locally)
+# --- Database Setup ---
 RAW_DB_URL = os.getenv("DATABASE_URL", "sqlite:///./vault.db")
-
 if RAW_DB_URL.startswith("postgres://"):
     RAW_DB_URL = RAW_DB_URL.replace("postgres://", "postgresql://", 1)
 
 connect_args = {"check_same_thread": False} if RAW_DB_URL.startswith("sqlite") else {}
-
 engine = create_engine(RAW_DB_URL, connect_args=connect_args, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -35,8 +33,8 @@ class ShareRecord(Base):
     password = Column(String, nullable=True)
     expires_at = Column(DateTime, nullable=False)
     downloads = Column(Integer, default=0)
+    user_id = Column(String, nullable=True)
 
-# Create tables automatically
 Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -46,7 +44,7 @@ def get_db():
     finally:
         db.close()
 
-# Cloudflare R2 Client
+# --- Cloudflare R2 Client ---
 s3 = boto3.client(
     service_name="s3",
     endpoint_url=os.getenv("R2_ENDPOINT_URL"),
@@ -55,26 +53,47 @@ s3 = boto3.client(
     config=Config(signature_version="s3v4"),
     region_name="auto",
 )
-
 BUCKET = os.getenv("R2_BUCKET_NAME")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON = os.getenv("SUPABASE_ANON_KEY", "")
 
 app = FastAPI(title="VaultPro Engine")
 templates = Jinja2Templates(directory="templates")
 
+# --- Request Schemas ---
 class CreateShareRequest(BaseModel):
     filename: str
     filesize_mb: float
     password: str | None = None
     expiry_hours: int = 24
+    user_id: str | None = None
 
 class UnlockRequest(BaseModel):
     share_id: str
     password: str | None = None
 
+# --- Page Routes ---
 @app.get("/", response_class=HTMLResponse)
 async def serve_home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
+@app.get("/auth", response_class=HTMLResponse)
+async def serve_auth(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="auth.html",
+        context={"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON}
+    )
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def serve_dashboard(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard.html",
+        context={"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON}
+    )
+
+# --- API Endpoints ---
 @app.post("/api/create-share")
 def create_share(req: CreateShareRequest, db: Session = Depends(get_db)):
     try:
@@ -90,7 +109,8 @@ def create_share(req: CreateShareRequest, db: Session = Depends(get_db)):
             filesize_mb=req.filesize_mb,
             password=req.password if req.password else None,
             expires_at=expires_at,
-            downloads=0
+            downloads=0,
+            user_id=req.user_id
         )
         db.add(record)
         db.commit()
@@ -105,12 +125,38 @@ def create_share(req: CreateShareRequest, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/user-shares")
+def get_user_shares(user_id: str, db: Session = Depends(get_db)):
+    shares = db.query(ShareRecord).filter(ShareRecord.user_id == user_id).order_by(ShareRecord.expires_at.desc()).all()
+    return [{
+        "id": s.id,
+        "filename": s.filename,
+        "filesize_mb": s.filesize_mb,
+        "expires_at": s.expires_at.isoformat(),
+        "downloads": s.downloads
+    } for s in shares]
+
+@app.delete("/api/shares/{share_id}")
+def delete_share(share_id: str, user_id: str, db: Session = Depends(get_db)):
+    record = db.query(ShareRecord).filter(ShareRecord.id == share_id, ShareRecord.user_id == user_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Vault not found or unauthorized.")
+
+    # Delete object from R2 bucket
+    try:
+        s3.delete_object(Bucket=BUCKET, Key=record.file_key)
+    except Exception:
+        pass
+
+    db.delete(record)
+    db.commit()
+    return {"status": "deleted"}
+
 @app.get("/share/{share_id}", response_class=HTMLResponse)
 async def serve_share_page(request: Request, share_id: str, db: Session = Depends(get_db)):
     record = db.query(ShareRecord).filter(ShareRecord.id == share_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="File link not found.")
-
     if datetime.utcnow() > record.expires_at:
         raise HTTPException(status_code=410, detail="This secure link has expired.")
 
@@ -131,7 +177,6 @@ def unlock_download(req: UnlockRequest, db: Session = Depends(get_db)):
     record = db.query(ShareRecord).filter(ShareRecord.id == req.share_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="File not found.")
-
     if record.password and record.password != req.password:
         raise HTTPException(status_code=401, detail="Incorrect vault passcode.")
 
