@@ -3,168 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VaultPro | Private Edge Storage</title>
+  <title>VaultPro | Edge-Encrypted File Sharing</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #030408;
     }
 
-    /* Visible, Smooth Drifting Aurora Nodes */
-    @keyframes drift-a {
-      0% { transform: translate(0px, 0px) scale(1); }
-      33% { transform: translate(110px, 80px) scale(1.2); }
-      66% { transform: translate(-80px, 120px) scale(0.9); }
-      100% { transform: translate(0px, 0px) scale(1); }
+    /* Full-screen fluid canvas */
+    #ambientCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    @keyframes drift-b {
-      0% { transform: translate(0px, 0px) scale(1.1); }
-      33% { transform: translate(-100px, -60px) scale(0.9); }
-      66% { transform: translate(60px, -90px) scale(1.25); }
-      100% { transform: translate(0px, 0px) scale(1.1); }
+    /* Precision obsidian glass panel */
+    .obsidian-card {
+      background: linear-gradient(180deg, rgba(16, 20, 32, 0.7) 0%, rgba(9, 11, 20, 0.85) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 
+        0 30px 60px -12px rgba(0, 0, 0, 0.9),
+        0 0 50px -10px rgba(99, 102, 241, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
-    @keyframes drift-c {
-      0% { transform: translate(0px, 0px) scale(0.95); }
-      50% { transform: translate(90px, -70px) scale(1.18); }
-      100% { transform: translate(0px, 0px) scale(0.95); }
-    }
-
-    @keyframes gentle-pulse {
-      0%, 100% { opacity: 0.55; }
-      50% { opacity: 0.75; }
-    }
-
-    .aurora-orb-1 {
-      animation: drift-a 22s ease-in-out infinite, gentle-pulse 9s ease-in-out infinite alternate;
-    }
-
-    .aurora-orb-2 {
-      animation: drift-b 26s ease-in-out infinite, gentle-pulse 11s ease-in-out infinite alternate;
-    }
-
-    .aurora-orb-3 {
-      animation: drift-c 20s ease-in-out infinite, gentle-pulse 8s ease-in-out infinite alternate;
-    }
-
-    /* Glassmorphic Shell */
-    .glass-card {
-      background: rgba(10, 14, 26, 0.75);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 
-                  0 0 40px -5px rgba(99, 102, 241, 0.25),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    /* Subtle grain texture overlay */
+    .film-grain {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+      background-size: 24px 24px;
     }
   </style>
 </head>
-<body class="bg-[#030611] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+<body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
 
-  <!-- Floating Dynamic Aurora Glows -->
-  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-    <!-- Indigo Node (Top-Left) -->
-    <div class="absolute -top-20 -left-10 w-[550px] h-[550px] bg-gradient-to-br from-indigo-500/60 to-blue-600/50 rounded-full blur-[75px] aurora-orb-1 mix-blend-screen"></div>
-    
-    <!-- Violet/Magenta Node (Behind Card, Right) -->
-    <div class="absolute top-1/4 right-0 w-[550px] h-[550px] bg-gradient-to-bl from-purple-600/60 via-fuchsia-600/45 to-pink-600/35 rounded-full blur-[80px] aurora-orb-2 mix-blend-screen"></div>
-    
-    <!-- Cyan/Teal Node (Bottom-Center) -->
-    <div class="absolute -bottom-28 left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-cyan-500/50 to-indigo-600/45 rounded-full blur-[70px] aurora-orb-3 mix-blend-screen"></div>
-  </div>
+  <!-- Interactive Smooth Aurora Fluid Canvas -->
+  <canvas id="ambientCanvas"></canvas>
+  <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
   <!-- Header -->
-  <header class="border-b border-white/[0.08] bg-[#030611]/50 backdrop-blur-xl sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+  <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 p-[1px] shadow-md shadow-indigo-600/20">
-          <div class="w-full h-full bg-[#070b18] rounded-xl flex items-center justify-center font-bold text-white text-sm">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/20">
+          <div class="w-full h-full bg-[#050711] rounded-[11px] flex items-center justify-center font-black text-sm text-white">
             V
           </div>
         </div>
         <span class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
           VaultPro
-          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
         </span>
       </a>
 
       <a id="navAuthBtn" href="/auth" 
-         class="text-xs bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 hover:text-white px-4 py-2 rounded-full font-semibold border border-white/10 transition">
+         class="text-xs bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 hover:text-white px-4 py-2 rounded-xl font-semibold border border-white/10 hover:border-white/20 transition duration-200 shadow-sm">
         Sign In
       </a>
     </div>
   </header>
 
-  <!-- Hero & Upload Section -->
-  <main class="max-w-6xl mx-auto px-6 py-8 lg:py-12 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+  <!-- Hero & Transfer Interface -->
+  <main class="relative z-20 max-w-6xl mx-auto px-6 py-10 lg:py-16 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
-    <!-- Left Hero Copy -->
-    <div class="lg:col-span-6 space-y-5">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
+    <!-- Hero Copy -->
+    <div class="lg:col-span-6 space-y-6">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
         <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Zero-Egress Direct Ingestion
+        Zero-Knowledge Edge Storage
       </div>
 
-      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
-        Private file sharing, <br />
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+        Frictionless, private <br />
         <span class="bg-gradient-to-r from-indigo-300 via-purple-200 to-cyan-300 bg-clip-text text-transparent">
-          strictly secured.
+          file transfers.
         </span>
       </h1>
 
-      <p class="text-slate-300 text-sm sm:text-base max-w-md font-normal leading-relaxed">
-        Direct upload streaming to edge cloud vaults. Password-protect client transfers, set automated expiry windows, and bypass bandwidth limits.
+      <p class="text-slate-400 text-base leading-relaxed max-w-lg font-normal">
+        Send client files directly to cloud edge storage with zero bandwidth throttling, client-side encryption, and strict automated expiration.
       </p>
 
-      <div class="flex items-center gap-6 pt-2 text-xs text-slate-300 font-medium">
+      <div class="flex items-center gap-6 pt-2 text-xs font-medium text-slate-400">
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          Direct R2 Edge Storage
+          Direct S3/R2 Pipeline
         </div>
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          AES-Passcode Gated
+          Password Gated Access
         </div>
       </div>
     </div>
 
-    <!-- Right Upload Card -->
+    <!-- Upload Card -->
     <div class="lg:col-span-6">
-      <div class="glass-card rounded-3xl p-6 sm:p-7 relative">
+      <div class="obsidian-card rounded-3xl p-6 sm:p-8 relative">
         <input type="file" id="fileInput" class="hidden">
 
-        <!-- Drop Area -->
+        <!-- Drop Zone -->
         <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
-             class="border border-dashed border-white/20 hover:border-indigo-400/80 bg-white/[0.02] hover:bg-indigo-950/30 rounded-2xl p-7 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 group">
+             class="border border-dashed border-white/15 hover:border-indigo-400/80 bg-white/[0.02] hover:bg-indigo-950/20 rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 group">
           
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600/30 to-purple-600/30 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-105 transition duration-200 shadow-md">
-            <svg class="w-6 h-6 text-indigo-300 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600/25 to-purple-600/25 border border-white/15 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:border-indigo-400/50 transition duration-300 shadow-lg shadow-indigo-600/20">
+            <svg class="w-7 h-7 text-indigo-300 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
             </svg>
           </div>
 
-          <span id="fileNameDisplay" class="font-bold text-slate-100 text-sm group-hover:text-indigo-200 transition break-all">
-            Drop file or click to browse
+          <span id="fileNameDisplay" class="font-bold text-slate-100 text-sm sm:text-base group-hover:text-indigo-200 transition break-all">
+            Drop your file here or click to browse
           </span>
           <span id="fileSizeDisplay" class="text-xs text-slate-400 mt-1 font-medium">Free Tier • Up to 2 GB per transfer</span>
         </div>
 
-        <!-- Options -->
-        <div class="mt-5 space-y-4">
+        <!-- Controls -->
+        <div class="mt-6 space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Vault Passcode (Optional)</label>
-              <input id="passcode" type="password" placeholder="Protect your link" 
-                     class="w-full bg-[#050816] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Vault Passcode (Optional)</label>
+              <input id="passcode" type="password" placeholder="Protect your file" 
+                     class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Auto-Destroy After</label>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Auto-Destroy After</label>
               <select id="expiryHours" 
-                      class="w-full bg-[#050816] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
+                      class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
                 <option value="1">1 Hour</option>
                 <option value="24" selected>24 Hours</option>
                 <option value="72">3 Days</option>
@@ -175,28 +148,28 @@
           <!-- Progress -->
           <div id="progressBox" class="hidden space-y-1.5 pt-1">
             <div class="flex justify-between text-xs font-medium text-slate-300">
-              <span id="progressStatus">Uploading...</span>
+              <span id="progressStatus">Encrypting & uploading...</span>
               <span id="progressPercent" class="font-mono text-indigo-400">0%</span>
             </div>
             <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/10">
-              <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-150" style="width: 0%"></div>
+              <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
             </div>
           </div>
 
           <!-- Action Button -->
           <button id="uploadBtn" onclick="initiateUpload()" 
-                  class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                  class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
             Generate Secure Vault Link
           </button>
         </div>
 
         <!-- Result Box -->
-        <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-2">
-          <label class="block text-xs font-semibold text-emerald-400">✓ Secure Vault Ready</label>
+        <div id="resultBox" class="mt-6 pt-5 border-t border-white/10 hidden space-y-2">
+          <label class="block text-xs font-semibold text-emerald-400">✓ Secure Vault Link Ready</label>
           <div class="flex items-center gap-2">
             <input id="shareUrlInput" type="text" readonly 
-                   class="flex-1 bg-[#050816] border border-white/15 rounded-xl px-3 py-2 text-xs text-indigo-300 font-mono focus:outline-none">
-            <button onclick="copyResultLink()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition">
+                   class="flex-1 bg-[#050711] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
+            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition">
               Copy
             </button>
           </div>
@@ -207,9 +180,68 @@
 
   </main>
 
-  <footer class="border-t border-white/[0.06] bg-[#030611]/50 py-4 text-center text-xs text-slate-500">
-    © 2026 VaultPro Systems. Zero-knowledge edge transfers.
+  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-5 text-center text-xs text-slate-500">
+    © 2026 VaultPro Systems. Zero-knowledge architecture powered by Cloudflare R2.
   </footer>
+
+  <!-- Ultra-Smooth Liquid Canvas Engine -->
+  <script>
+    const canvas = document.getElementById('ambientCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let step = 0;
+
+    function renderAurora() {
+      step += 0.003; // Smooth slow motion
+
+      ctx.fillStyle = '#030408';
+      ctx.fillRect(0, 0, width, height);
+
+      // Node 1 (Indigo Fluid Beam)
+      const x1 = width * 0.35 + Math.sin(step * 0.7) * (width * 0.15);
+      const y1 = height * 0.25 + Math.cos(step * 0.5) * (height * 0.12);
+      const r1 = Math.max(width, height) * 0.45;
+      const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
+      g1.addColorStop(0, 'rgba(79, 70, 229, 0.45)');
+      g1.addColorStop(0.5, 'rgba(67, 56, 202, 0.18)');
+      g1.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, width, height);
+
+      // Node 2 (Violet / Fuchsia Ambient Light)
+      const x2 = width * 0.75 + Math.cos(step * 0.6) * (width * 0.15);
+      const y2 = height * 0.55 + Math.sin(step * 0.8) * (height * 0.15);
+      const r2 = Math.max(width, height) * 0.4;
+      const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
+      g2.addColorStop(0, 'rgba(147, 51, 234, 0.38)');
+      g2.addColorStop(0.5, 'rgba(126, 34, 206, 0.15)');
+      g2.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      ctx.fillStyle = g2;
+      ctx.fillRect(0, 0, width, height);
+
+      // Node 3 (Cyan Shimmer Accent)
+      const x3 = width * 0.25 + Math.cos(step * 0.9) * (width * 0.1);
+      const y3 = height * 0.75 + Math.sin(step * 0.7) * (height * 0.1);
+      const r3 = Math.max(width, height) * 0.35;
+      const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
+      g3.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
+      g3.addColorStop(0.5, 'rgba(14, 116, 144, 0.1)');
+      g3.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      ctx.fillStyle = g3;
+      ctx.fillRect(0, 0, width, height);
+
+      requestAnimationFrame(renderAurora);
+    }
+    renderAurora();
+  </script>
 
   <!-- App Logic (Preserved) -->
   <script>
