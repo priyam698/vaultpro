@@ -3,111 +3,192 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VaultPro | Private File Transfers</title>
+  <title>VaultPro | Next-Gen Edge Transfers</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    @keyframes float-slow {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    @keyframes float-reverse {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(-40px, 40px) scale(1.05); }
+      66% { transform: translate(30px, -30px) scale(0.9); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.6; }
+    }
+    .animate-blob-1 {
+      animation: float-slow 18s ease-in-out infinite, pulse-glow 10s ease-in-out infinite alternate;
+    }
+    .animate-blob-2 {
+      animation: float-reverse 22s ease-in-out infinite, pulse-glow 12s ease-in-out infinite alternate;
+    }
+    .animate-blob-3 {
+      animation: float-slow 14s ease-in-out infinite reverse, pulse-glow 8s ease-in-out infinite alternate;
+    }
+    .glass-panel {
+      background: rgba(13, 17, 28, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .grid-pattern {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 60%, transparent 100%);
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#05070e] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
 
-  <!-- Navigation -->
-  <header class="border-b border-slate-900 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
+  <!-- Dynamic Moving Background -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute inset-0 grid-pattern"></div>
+    <div class="absolute -top-32 -left-32 w-[550px] h-[550px] bg-indigo-600/25 rounded-full blur-[120px] animate-blob-1"></div>
+    <div class="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[140px] animate-blob-2"></div>
+    <div class="absolute -bottom-32 left-1/4 w-[500px] h-[500px] bg-cyan-500/15 rounded-full blur-[130px] animate-blob-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="border-b border-white/[0.06] bg-[#05070e]/40 backdrop-blur-xl sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-600/30">
-          V
-        </div>
-        <span class="font-bold text-xl tracking-tight text-white">VaultPro</span>
+        <a href="/" class="relative group">
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl blur opacity-60 group-hover:opacity-100 transition duration-300"></div>
+          <div class="relative w-10 h-10 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center font-black text-lg text-white">
+            V
+          </div>
+        </a>
+        <span class="font-bold text-xl tracking-tight text-white flex items-center gap-1.5">
+          VaultPro
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </span>
       </div>
-      <div class="flex items-center gap-6">
-        <a href="#pricing" class="text-sm font-medium text-slate-400 hover:text-slate-200 transition">Pricing</a>
-        <a id="navAuthBtn" href="/auth" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-xl font-semibold border border-slate-800 hover:border-slate-700 shadow-sm transition">
+
+      <div class="flex items-center gap-5">
+        <a id="navAuthBtn" href="/auth" 
+           class="text-xs bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 hover:text-white px-4 py-2 rounded-xl font-semibold border border-white/10 hover:border-white/20 transition duration-200">
           Sign In
         </a>
       </div>
     </div>
   </header>
 
-  <!-- Hero & Upload Form -->
-  <main class="max-w-6xl mx-auto px-6 py-12 lg:py-20 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+  <!-- Hero & Main Upload Area -->
+  <main class="max-w-6xl mx-auto px-6 py-12 lg:py-20 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
-    <!-- Hero Copy -->
-    <div class="lg:col-span-6 space-y-6">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 text-xs font-semibold">
-        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Zero-Egress Direct Transmission
+    <!-- Hero Text -->
+    <div class="lg:col-span-6 space-y-6 text-left">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-medium backdrop-blur-md shadow-inner">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+        </span>
+        Ultra-Fast Edge Architecture
       </div>
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
-        Private file transfers with zero compromise.
+
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+        Private file sharing, <br class="hidden sm:inline" />
+        <span class="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">
+          strictly secured.
+        </span>
       </h1>
-      <p class="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl">
-        Direct upload streaming to edge cloud vaults. Password-protect client deliveries, select expiration windows, and bypass bandwidth throttles completely.
+
+      <p class="text-slate-400 text-base sm:text-lg leading-relaxed max-w-lg font-normal">
+        Direct-to-storage encryption with zero bandwidth throttles. Deliver client files with passcode protection, instant expiry, and zero tracking.
       </p>
+
+      <div class="flex items-center gap-6 pt-2 text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Direct R2 Edge Ingestion
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Password AES-GCM
+        </div>
+      </div>
     </div>
 
     <!-- Upload Card -->
-    <div class="lg:col-span-6">
-      <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-        
+    <div class="lg:col-span-6 relative">
+      <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500/30 via-purple-500/20 to-cyan-500/30 rounded-3xl blur-xl opacity-60"></div>
+      
+      <div class="relative glass-panel rounded-3xl p-6 sm:p-8">
         <input type="file" id="fileInput" class="hidden">
 
         <!-- Drop Zone -->
         <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
-             class="border-2 border-dashed border-slate-800 hover:border-indigo-500/60 bg-slate-950/40 hover:bg-indigo-950/10 rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition group">
-          <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-indigo-500/40 group-hover:bg-indigo-600/10 transition">
-            <svg class="w-6 h-6 text-slate-400 group-hover:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+             class="border-2 border-dashed border-white/10 hover:border-indigo-400/60 bg-white/[0.02] hover:bg-indigo-950/20 rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 group">
+          
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600/20 to-purple-600/20 border border-white/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-indigo-400/40 transition duration-300 shadow-lg">
+            <svg class="w-7 h-7 text-indigo-400 group-hover:text-indigo-300 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
             </svg>
           </div>
-          <span id="fileNameDisplay" class="font-semibold text-slate-200 text-sm group-hover:text-indigo-300 transition break-all">
-            Drop file or click to browse
+          
+          <span id="fileNameDisplay" class="font-semibold text-slate-100 text-sm group-hover:text-indigo-300 transition break-all">
+            Drop your file here or click to browse
           </span>
-          <span id="fileSizeDisplay" class="text-xs text-slate-500 mt-1">Up to 2 GB per transfer</span>
+          <span id="fileSizeDisplay" class="text-xs text-slate-400 mt-1 font-medium">Free Tier • Up to 2 GB per transfer</span>
         </div>
 
-        <!-- Options Panel -->
+        <!-- Options -->
         <div class="mt-6 space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-400 mb-1.5">Vault Passcode (Optional)</label>
               <input id="passcode" type="password" placeholder="••••••••" 
-                     class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition">
+                     class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-400 mb-1.5">Auto-Destroy After</label>
               <select id="expiryHours" 
-                      class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none transition">
+                      class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
                 <option value="1">1 Hour</option>
                 <option value="24" selected>24 Hours</option>
                 <option value="72">3 Days</option>
-                <option value="168">7 Days</option>
               </select>
             </div>
           </div>
 
-          <!-- Upload Progress -->
-          <div id="progressBox" class="hidden space-y-1.5">
-            <div class="flex justify-between text-[11px] font-medium text-slate-400">
+          <!-- Progress -->
+          <div id="progressBox" class="hidden space-y-2 pt-2">
+            <div class="flex justify-between text-xs font-medium text-slate-300">
               <span id="progressStatus">Uploading...</span>
-              <span id="progressPercent">0%</span>
+              <span id="progressPercent" class="font-mono text-indigo-400">0%</span>
             </div>
-            <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden">
-              <div id="progressBar" class="h-full bg-indigo-600 transition-all duration-150" style="width: 0%"></div>
+            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-white/10">
+              <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-150 shadow-[0_0_12px_rgba(99,102,241,0.6)]" style="width: 0%"></div>
             </div>
           </div>
 
-          <!-- Submit Button -->
+          <!-- Action Button -->
           <button id="uploadBtn" onclick="initiateUpload()" 
-                  class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white font-semibold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
             Generate Secure Vault Link
           </button>
         </div>
 
         <!-- Result Box -->
-        <div id="resultBox" class="mt-6 pt-6 border-t border-slate-800/80 hidden space-y-2">
-          <label class="block text-xs font-semibold text-slate-400">Your Branded Share Link:</label>
+        <div id="resultBox" class="mt-6 pt-6 border-t border-white/10 hidden space-y-2">
+          <label class="block text-xs font-semibold text-emerald-400">✓ Secure Vault Ready</label>
           <div class="flex items-center gap-2">
             <input id="shareUrlInput" type="text" readonly 
-                   class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
-            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold transition">
+                   class="flex-1 bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
+            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition">
               Copy
             </button>
           </div>
@@ -117,12 +198,11 @@
     </div>
   </main>
 
-  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
-    © 2026 VaultPro Inc. End-to-end zero knowledge edge storage.
+  <footer class="border-t border-white/[0.06] bg-[#05070e]/30 backdrop-blur-md py-6 text-center text-xs text-slate-500">
+    © 2026 VaultPro Systems. Zero-knowledge architecture powered by Cloudflare R2 Edge.
   </footer>
 
   <script>
-    // --- Auth Check & Nav Link Switch ---
     function getStoredUserId() {
       const token = localStorage.getItem("vp_token");
       if (!token) return null;
@@ -142,12 +222,30 @@
 
     const currentUserId = getStoredUserId();
     const navBtn = document.getElementById("navAuthBtn");
+
     if (currentUserId && navBtn) {
       navBtn.innerText = "Dashboard";
       navBtn.href = "/dashboard";
+
+      fetch(`/api/user-profile?user_id=${currentUserId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.tier === 'pro') {
+            document.getElementById("fileSizeDisplay").innerText = "PRO Member • Up to 50 GB per transfer";
+            const select = document.getElementById("expiryHours");
+            select.innerHTML = `
+              <option value="1">1 Hour</option>
+              <option value="24">24 Hours</option>
+              <option value="72">3 Days</option>
+              <option value="168">7 Days</option>
+              <option value="336">14 Days (Pro)</option>
+              <option value="720" selected>30 Days (Pro)</option>
+            `;
+          }
+        })
+        .catch(() => {});
     }
 
-    // --- File Drag & Select Handling ---
     let selectedFile = null;
     const fileInput = document.getElementById("fileInput");
     const dropZone = document.getElementById("dropZone");
@@ -158,16 +256,16 @@
 
     dropZone.addEventListener("dragover", (e) => {
       e.preventDefault();
-      dropZone.classList.add("border-indigo-500", "bg-indigo-950/20");
+      dropZone.classList.add("border-indigo-400", "bg-indigo-950/40");
     });
 
     dropZone.addEventListener("dragleave", () => {
-      dropZone.classList.remove("border-indigo-500", "bg-indigo-950/20");
+      dropZone.classList.remove("border-indigo-400", "bg-indigo-950/40");
     });
 
     dropZone.addEventListener("drop", (e) => {
       e.preventDefault();
-      dropZone.classList.remove("border-indigo-500", "bg-indigo-950/20");
+      dropZone.classList.remove("border-indigo-400", "bg-indigo-950/40");
       if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
     });
 
@@ -178,7 +276,6 @@
       document.getElementById("fileSizeDisplay").innerText = `${sizeMb} MB • Ready to transfer`;
     }
 
-    // --- Direct Cloudflare R2 Upload Flow ---
     async function initiateUpload() {
       if (!selectedFile) {
         alert("Please select a file to transfer first.");
@@ -221,7 +318,6 @@
 
         const data = await res.json();
 
-        // Direct upload to Cloudflare R2 presigned URL
         progressStatus.innerText = "Streaming to edge storage...";
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", data.upload_url, true);
