@@ -122,6 +122,33 @@ async def serve_share_page(request: Request, share_id: str, db: Session = Depend
 @app.post("/api/create-share")
 def create_share(req: CreateShareRequest, db: Session = Depends(get_db)):
     try:
+        # Check tier from profiles table
+        tier = "free"
+        if req.user_id:
+            with engine.connect() as conn:
+                res = conn.execute(
+                    text("SELECT tier FROM profiles WHERE id = :uid"), 
+                    {"uid": req.user_id}
+                ).fetchone()
+                if res and res[0] == "pro":
+                    tier = "pro"
+
+        # Tier-based limit enforcement
+        max_size_mb = 50000.0 if tier == "pro" else 2048.0  # 50 GB vs 2 GB
+        max_expiry_hours = 720 if tier == "pro" else 72     # 30 days vs 3 days
+
+        if req.filesize_mb > max_size_mb:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"File size exceeds tier limit ({int(max_size_mb / 1024)} GB max)."
+            )
+
+        if req.expiry_hours > max_expiry_hours:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Expiration window exceeds maximum allowed ({max_expiry_hours} hours)."
+            )
+
         share_id = str(uuid.uuid4())[:8]
         clean_name = req.filename.replace(" ", "_")
         object_key = f"vault/{share_id}_{clean_name}"
@@ -146,6 +173,8 @@ def create_share(req: CreateShareRequest, db: Session = Depends(get_db)):
             ExpiresIn=900
         )
         return {"upload_url": upload_url, "share_id": share_id}
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -162,7 +191,7 @@ def get_user_shares(user_id: str, db: Session = Depends(get_db)):
     } for s in shares]
 
 @app.get("/api/user-profile")
-def get_user_profile(user_id: str, db: Session = Depends(get_db)):
+def get_user_profile(user_id: str):
     with engine.connect() as conn:
         result = conn.execute(text("SELECT tier FROM profiles WHERE id = :uid"), {"uid": user_id}).fetchone()
         tier = result[0] if result else "free"
