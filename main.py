@@ -8,12 +8,12 @@ from typing import Optional
 import boto3
 from botocore.config import Config
 from pydantic import BaseModel
-from fastapi import FastAPI, Request, HTTPException, status
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-# Absolute Paths
+# Absolute Directory Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -34,7 +34,7 @@ def render_template(template_name: str, request: Request, context: Optional[dict
     except TypeError:
         return templates.TemplateResponse(template_name, ctx)
 
-# Cloudflare R2 / S3 Configuration
+# Cloudflare R2 Configuration
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "")
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "")
 R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "")
@@ -49,25 +49,6 @@ s3_client = boto3.client(
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
     config=Config(signature_version="s3v4")
 )
-
-# Apply CORS rule to R2 bucket automatically
-try:
-    if R2_ENDPOINT:
-        s3_client.put_bucket_cors(
-            Bucket=R2_BUCKET_NAME,
-            CORSConfiguration={
-                'CORSRules': [
-                    {
-                        'AllowedHeaders': ['*'],
-                        'AllowedMethods': ['GET', 'PUT', 'POST', 'HEAD'],
-                        'AllowedOrigins': ['*'],
-                        'ExposeHeaders': ['ETag']
-                    }
-                ]
-            }
-        )
-except Exception:
-    pass
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
@@ -117,7 +98,7 @@ class CreateShareRequest(BaseModel):
 class DownloadPayload(BaseModel):
     password: Optional[str] = None
 
-# UI Pages
+# UI Routes
 @app.get("/", response_class=HTMLResponse)
 async def index_page(request: Request):
     return render_template("index.html", request, {
@@ -153,12 +134,11 @@ async def share_page(request: Request, share_id: str):
     if not row:
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
-    # Expiry verification (if expiry_hours != 0)
     if row["expiry_hours"] != 0:
         try:
             expires_at = datetime.fromisoformat(row["expires_at"])
             if datetime.utcnow() > expires_at:
-                raise HTTPException(status_code=410, detail="This vault has expired and is no longer available.")
+                raise HTTPException(status_code=410, detail="This vault link has expired.")
         except Exception:
             pass
 
@@ -172,7 +152,7 @@ async def share_page(request: Request, share_id: str):
         "has_password": has_password
     })
 
-# API Endpoints
+# Core API Routes
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
     user_tier = "free"
@@ -187,12 +167,11 @@ async def create_share(payload: CreateShareRequest):
 
     max_mb = 50000 if user_tier == "pro" else 2048
     if payload.filesize_mb > max_mb:
-        raise HTTPException(status_code=400, detail=f"File exceeds size limit for {user_tier.upper()} tier.")
+        raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size for {user_tier.upper()} tier.")
 
-    # Expiration logic: 0 means Never (set 100 years out)
     created_at = datetime.utcnow()
     if payload.expiry_hours == 0:
-        expires_at = created_at + timedelta(days=36500)
+        expires_at = created_at + timedelta(days=36500)  # Permanent ("Never")
     else:
         max_hours = 720 if user_tier == "pro" else 72
         if payload.expiry_hours > max_hours:
@@ -225,28 +204,13 @@ async def create_share(payload: CreateShareRequest):
     conn.commit()
     conn.close()
 
-    # Do not sign ContentType so any file type passes without signature errors
-    try:
-        upload_url = s3_client.generate_presigned_url(
-            "put_object",
-            Params={
-                "Bucket": R2_BUCKET_NAME,
-                "Key": s3_key
-            },
-            ExpiresIn=3600
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate upload URL: {str(e)}")
-
     return {
         "share_id": share_id,
-        "upload_url": upload_url,
         "expires_at": expires_at.isoformat()
     }
 
-# Fallback streaming upload endpoint
-@app.put("/api/upload-direct/{share_id}")
-async def upload_direct(share_id: str, request: Request):
+@app.post("/api/upload-file/{share_id}")
+async def upload_file_direct(share_id: str, file: UploadFile = File(...)):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
@@ -254,15 +218,19 @@ async def upload_direct(share_id: str, request: Request):
     conn.close()
 
     if not row:
-        raise HTTPException(status_code=404, detail="Vault not found")
+        raise HTTPException(status_code=404, detail="Vault record not found.")
 
-    body = await request.body()
-    s3_client.put_object(
-        Bucket=R2_BUCKET_NAME,
-        Key=row["s3_key"],
-        Body=body
-    )
-    return {"status": "success"}
+    try:
+        s3_client.upload_fileobj(
+            file.file,
+            R2_BUCKET_NAME,
+            row["s3_key"],
+            ExtraArgs={"ContentType": file.content_type or "application/octet-stream"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Direct storage relay failed: {str(e)}")
+
+    return {"status": "success", "share_id": share_id}
 
 @app.post("/share/{share_id}/download")
 @app.post("/api/download/{share_id}")
