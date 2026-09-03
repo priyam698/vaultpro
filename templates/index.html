@@ -379,7 +379,12 @@
             resultBox.classList.remove("hidden");
             uploadBtn.disabled = false;
           } else {
-            alert("Upload failed. Server status: " + xhr.status);
+            let detail = "Server status: " + xhr.status;
+            try {
+              const res = JSON.parse(xhr.responseText);
+              if (res.detail) detail = res.detail;
+            } catch(e) {}
+            alert("Upload failed: " + detail);
             progressBox.classList.add("hidden");
             uploadBtn.disabled = false;
           }

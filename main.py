@@ -2,6 +2,7 @@ import os
 import uuid
 import sqlite3
 import hashlib
+import traceback
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -34,11 +35,11 @@ def render_template(template_name: str, request: Request, context: Optional[dict
     except TypeError:
         return templates.TemplateResponse(template_name, ctx)
 
-# Cloudflare R2 Configuration
-R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "")
-R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "")
-R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "")
-R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "vaultpro-storage")
+# Cloudflare R2 Configuration (with sanitization and region_name='auto')
+R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
+R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
+R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "").strip()
+R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "vaultpro-storage").strip()
 
 R2_ENDPOINT = f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com" if R2_ACCOUNT_ID else None
 
@@ -47,11 +48,12 @@ s3_client = boto3.client(
     endpoint_url=R2_ENDPOINT,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+    region_name="auto",
     config=Config(signature_version="s3v4")
 )
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -152,7 +154,7 @@ async def share_page(request: Request, share_id: str):
         "has_password": has_password
     })
 
-# API Endpoints
+# Core API Routes
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
     user_tier = "free"
@@ -209,7 +211,6 @@ async def create_share(payload: CreateShareRequest):
         "expires_at": expires_at.isoformat()
     }
 
-# Direct Raw Streaming Endpoint (No multipart dependency)
 @app.post("/api/upload-file/{share_id}")
 async def upload_file_direct(share_id: str, request: Request):
     conn = get_db()
@@ -224,6 +225,13 @@ async def upload_file_direct(share_id: str, request: Request):
     file_bytes = await request.body()
     content_type = request.headers.get("content-type", "application/octet-stream")
 
+    if not R2_ENDPOINT or not R2_ACCESS_KEY_ID or not R2_SECRET_ACCESS_KEY:
+        print("ERROR: Missing Cloudflare R2 Environment Variables in Render!")
+        raise HTTPException(
+            status_code=500,
+            detail="Server configuration error: Cloudflare R2 credentials (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) are missing in Render Environment."
+        )
+
     try:
         s3_client.put_object(
             Bucket=R2_BUCKET_NAME,
@@ -232,7 +240,8 @@ async def upload_file_direct(share_id: str, request: Request):
             ContentType=content_type
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Storage transmission failed: {str(e)}")
+        print(f"R2 ERROR TRACEBACK:\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Cloudflare R2 storage error: {str(e)}")
 
     return {"status": "success", "share_id": share_id}
 
