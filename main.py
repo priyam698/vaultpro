@@ -8,19 +8,34 @@ from typing import Optional
 import boto3
 from botocore.config import Config
 from pydantic import BaseModel
-from fastapi import FastAPI, Request, HTTPException, Depends, status
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
+# Absolute Paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+DB_PATH = os.path.join(BASE_DIR, "vault.db")
 
 # Initialize FastAPI App
 app = FastAPI(title="VaultPro API", version="1.0.0")
 
 # Mount static folder if present
-if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+# Universal Template Rendering Helper (Fixes Starlette 0.36+ signature bug)
+def render_template(template_name: str, request: Request, context: Optional[dict] = None) -> HTMLResponse:
+    ctx = context.copy() if context else {}
+    ctx["request"] = request
+    try:
+        return templates.TemplateResponse(request=request, name=template_name, context=ctx)
+    except TypeError:
+        return templates.TemplateResponse(template_name, ctx)
 
 # Cloudflare R2 / S3 Configuration
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "")
@@ -38,13 +53,11 @@ s3_client = boto3.client(
     config=Config(signature_version="s3v4")
 )
 
-# Supabase Public Keys for Front-end Template Injection
+# Supabase Keys
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 # SQLite Database Setup
-DB_PATH = "vault.db"
-
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -94,29 +107,27 @@ class DownloadPayload(BaseModel):
 # UI Page Routes
 @app.get("/", response_class=HTMLResponse)
 async def index_page(request: Request):
-    return templates.TemplateResponse("index.html", {
-        "request": request,
+    return render_template("index.html", request, {
         "supabase_url": SUPABASE_URL,
         "supabase_anon": SUPABASE_ANON_KEY
     })
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return render_template("dashboard.html", request, {
         "supabase_url": SUPABASE_URL,
         "supabase_anon": SUPABASE_ANON_KEY
     })
 
 @app.get("/auth", response_class=HTMLResponse)
 async def auth_page(request: Request):
-    if os.path.exists("templates/auth.html"):
-        return templates.TemplateResponse("auth.html", {
-            "request": request,
+    auth_file = os.path.join(TEMPLATES_DIR, "auth.html")
+    if os.path.exists(auth_file):
+        return render_template("auth.html", request, {
             "supabase_url": SUPABASE_URL,
             "supabase_anon": SUPABASE_ANON_KEY
         })
-    return templates.TemplateResponse("index.html", {"request": request})
+    return render_template("index.html", request)
 
 @app.get("/share/{share_id}", response_class=HTMLResponse)
 async def share_page(request: Request, share_id: str):
@@ -129,15 +140,16 @@ async def share_page(request: Request, share_id: str):
     if not row:
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
-    # Check expiration
-    expires_at = datetime.fromisoformat(row["expires_at"])
-    if datetime.utcnow() > expires_at:
-        raise HTTPException(status_code=410, detail="This vault has expired and is no longer available.")
+    try:
+        expires_at = datetime.fromisoformat(row["expires_at"])
+        if datetime.utcnow() > expires_at:
+            raise HTTPException(status_code=410, detail="This vault has expired and is no longer available.")
+    except Exception:
+        pass
 
-    has_password = bool(row["password_hash"])
+    has_password = bool(row["password_hash"]) if "password_hash" in row.keys() else False
 
-    return templates.TemplateResponse("download.html", {
-        "request": request,
+    return render_template("download.html", request, {
         "share_id": share_id,
         "filename": row["filename"],
         "filesize": row["filesize_mb"],
@@ -158,7 +170,6 @@ async def create_share(payload: CreateShareRequest):
         if user_row and user_row["tier"]:
             user_tier = user_row["tier"]
 
-    # Enforce tier limits
     max_mb = 50000 if user_tier == "pro" else 2048
     if payload.filesize_mb > max_mb:
         raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size for {user_tier.upper()} tier ({max_mb/1024:.0f} GB).")
@@ -196,7 +207,6 @@ async def create_share(payload: CreateShareRequest):
     conn.commit()
     conn.close()
 
-    # Generate presigned direct upload URL to R2
     try:
         upload_url = s3_client.generate_presigned_url(
             "put_object",
@@ -228,13 +238,14 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=404, detail="File share link not found or expired.")
 
-    # Validate expiration
-    expires_at = datetime.fromisoformat(row["expires_at"])
-    if datetime.utcnow() > expires_at:
-        conn.close()
-        raise HTTPException(status_code=410, detail="This transfer link has expired.")
+    try:
+        expires_at = datetime.fromisoformat(row["expires_at"])
+        if datetime.utcnow() > expires_at:
+            conn.close()
+            raise HTTPException(status_code=410, detail="This transfer link has expired.")
+    except Exception:
+        pass
 
-    # Validate password if configured
     stored_hash = row["password_hash"]
     if stored_hash:
         user_pass = payload.password if payload else None
@@ -247,7 +258,6 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
             conn.close()
             raise HTTPException(status_code=401, detail="Incorrect passcode entered.")
 
-    # Generate presigned download URL
     try:
         download_url = s3_client.generate_presigned_url(
             "get_object",
@@ -262,7 +272,6 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=500, detail=f"Storage presign failure: {str(e)}")
 
-    # Update downloads
     cursor.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = ?", (share_id,))
     conn.commit()
     conn.close()
@@ -312,7 +321,6 @@ async def delete_user_share(share_id: str, user_id: str):
         conn.close()
         raise HTTPException(status_code=404, detail="Vault not found or unauthorized.")
 
-    # Remove from storage
     try:
         s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
     except Exception:
