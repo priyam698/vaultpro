@@ -19,16 +19,13 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 DB_PATH = os.path.join(BASE_DIR, "vault.db")
 
-# Initialize FastAPI App
 app = FastAPI(title="VaultPro API", version="1.0.0")
 
-# Mount static folder if present
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
-# Universal Template Rendering Helper (Fixes Starlette 0.36+ signature bug)
 def render_template(template_name: str, request: Request, context: Optional[dict] = None) -> HTMLResponse:
     ctx = context.copy() if context else {}
     ctx["request"] = request
@@ -53,11 +50,28 @@ s3_client = boto3.client(
     config=Config(signature_version="s3v4")
 )
 
-# Supabase Keys
+# Apply CORS rule to R2 bucket automatically
+try:
+    if R2_ENDPOINT:
+        s3_client.put_bucket_cors(
+            Bucket=R2_BUCKET_NAME,
+            CORSConfiguration={
+                'CORSRules': [
+                    {
+                        'AllowedHeaders': ['*'],
+                        'AllowedMethods': ['GET', 'PUT', 'POST', 'HEAD'],
+                        'AllowedOrigins': ['*'],
+                        'ExposeHeaders': ['ETag']
+                    }
+                ]
+            }
+        )
+except Exception:
+    pass
+
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
-# SQLite Database Setup
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -93,7 +107,6 @@ def init_db():
 
 init_db()
 
-# Pydantic Schemas
 class CreateShareRequest(BaseModel):
     filename: str
     filesize_mb: float
@@ -104,7 +117,7 @@ class CreateShareRequest(BaseModel):
 class DownloadPayload(BaseModel):
     password: Optional[str] = None
 
-# UI Page Routes
+# UI Pages
 @app.get("/", response_class=HTMLResponse)
 async def index_page(request: Request):
     return render_template("index.html", request, {
@@ -140,12 +153,14 @@ async def share_page(request: Request, share_id: str):
     if not row:
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
-    try:
-        expires_at = datetime.fromisoformat(row["expires_at"])
-        if datetime.utcnow() > expires_at:
-            raise HTTPException(status_code=410, detail="This vault has expired and is no longer available.")
-    except Exception:
-        pass
+    # Expiry verification (if expiry_hours != 0)
+    if row["expiry_hours"] != 0:
+        try:
+            expires_at = datetime.fromisoformat(row["expires_at"])
+            if datetime.utcnow() > expires_at:
+                raise HTTPException(status_code=410, detail="This vault has expired and is no longer available.")
+        except Exception:
+            pass
 
     has_password = bool(row["password_hash"]) if "password_hash" in row.keys() else False
 
@@ -157,7 +172,7 @@ async def share_page(request: Request, share_id: str):
         "has_password": has_password
     })
 
-# API Routes
+# API Endpoints
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
     user_tier = "free"
@@ -172,11 +187,17 @@ async def create_share(payload: CreateShareRequest):
 
     max_mb = 50000 if user_tier == "pro" else 2048
     if payload.filesize_mb > max_mb:
-        raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size for {user_tier.upper()} tier ({max_mb/1024:.0f} GB).")
+        raise HTTPException(status_code=400, detail=f"File exceeds size limit for {user_tier.upper()} tier.")
 
-    max_hours = 720 if user_tier == "pro" else 72
-    if payload.expiry_hours > max_hours:
-        payload.expiry_hours = max_hours
+    # Expiration logic: 0 means Never (set 100 years out)
+    created_at = datetime.utcnow()
+    if payload.expiry_hours == 0:
+        expires_at = created_at + timedelta(days=36500)
+    else:
+        max_hours = 720 if user_tier == "pro" else 72
+        if payload.expiry_hours > max_hours:
+            payload.expiry_hours = max_hours
+        expires_at = created_at + timedelta(hours=payload.expiry_hours)
 
     share_id = uuid.uuid4().hex[:8]
     s3_key = f"transfers/{share_id}/{payload.filename}"
@@ -184,9 +205,6 @@ async def create_share(payload: CreateShareRequest):
     password_hash = None
     if payload.password:
         password_hash = hashlib.sha256(payload.password.encode()).hexdigest()
-
-    created_at = datetime.utcnow()
-    expires_at = created_at + timedelta(hours=payload.expiry_hours)
 
     conn = get_db()
     cursor = conn.cursor()
@@ -207,13 +225,13 @@ async def create_share(payload: CreateShareRequest):
     conn.commit()
     conn.close()
 
+    # Do not sign ContentType so any file type passes without signature errors
     try:
         upload_url = s3_client.generate_presigned_url(
             "put_object",
             Params={
                 "Bucket": R2_BUCKET_NAME,
-                "Key": s3_key,
-                "ContentType": "application/octet-stream"
+                "Key": s3_key
             },
             ExpiresIn=3600
         )
@@ -225,6 +243,26 @@ async def create_share(payload: CreateShareRequest):
         "upload_url": upload_url,
         "expires_at": expires_at.isoformat()
     }
+
+# Fallback streaming upload endpoint
+@app.put("/api/upload-direct/{share_id}")
+async def upload_direct(share_id: str, request: Request):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Vault not found")
+
+    body = await request.body()
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=row["s3_key"],
+        Body=body
+    )
+    return {"status": "success"}
 
 @app.post("/share/{share_id}/download")
 @app.post("/api/download/{share_id}")
@@ -238,13 +276,14 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=404, detail="File share link not found or expired.")
 
-    try:
-        expires_at = datetime.fromisoformat(row["expires_at"])
-        if datetime.utcnow() > expires_at:
-            conn.close()
-            raise HTTPException(status_code=410, detail="This transfer link has expired.")
-    except Exception:
-        pass
+    if row["expiry_hours"] != 0:
+        try:
+            expires_at = datetime.fromisoformat(row["expires_at"])
+            if datetime.utcnow() > expires_at:
+                conn.close()
+                raise HTTPException(status_code=410, detail="This transfer link has expired.")
+        except Exception:
+            pass
 
     stored_hash = row["password_hash"]
     if stored_hash:
@@ -304,7 +343,7 @@ async def get_user_shares(user_id: str):
             "filename": r["filename"],
             "filesize_mb": r["filesize_mb"],
             "downloads": r["downloads"],
-            "expires_at": r["expires_at"],
+            "expires_at": "Never" if r["expiry_hours"] == 0 else r["expires_at"],
             "created_at": r["created_at"]
         }
         for r in rows
@@ -332,7 +371,6 @@ async def delete_user_share(share_id: str, user_id: str):
 
     return {"status": "deleted"}
 
-# Lemon Squeezy Webhook Handler
 @app.post("/api/webhook/lemonsqueezy")
 async def lemon_webhook(request: Request):
     payload = await request.json()
