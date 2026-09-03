@@ -86,12 +86,14 @@
         {{ filename }}
       </h1>
       <p class="text-xs text-slate-400 mt-2 font-medium">
-        {{ filesize_mb }} MB • Total Downloads: <span id="downloadCount" class="text-slate-300 font-semibold">{{ downloads }}</span>
+        {{ filesize or filesize_mb or size or size_mb }} MB • Total Downloads: <span id="downloadCount" class="text-slate-300 font-semibold">{{ downloads or 0 }}</span>
       </p>
+
+      {% set is_locked = is_password_protected or password_protected or requires_password or is_protected or has_password or password %}
 
       <!-- Password Form -->
       <div class="mt-8 space-y-4 text-left">
-        {% if has_password %}
+        {% if is_locked %}
         <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
           <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -101,7 +103,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">Recipient Passcode</label>
-          <input id="passwordInput" type="password" placeholder="Enter file passcode" 
+          <input id="passwordInput" type="password" placeholder="Enter recipient password" 
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-4 py-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
         </div>
         {% endif %}
@@ -112,7 +114,7 @@
         <!-- Download Action -->
         <button id="downloadBtn" onclick="handleDownload()" 
                 class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
-          Unlock & Download
+          {% if is_locked %}Unlock & Download{% else %}Download File{% endif %}
         </button>
       </div>
 
@@ -198,7 +200,6 @@
           throw new Error(data.detail || "Incorrect passcode or vault expired.");
         }
 
-        // Trigger direct browser download
         const a = document.createElement("a");
         a.href = data.download_url;
         a.download = "{{ filename }}";
@@ -206,7 +207,6 @@
         a.click();
         document.body.removeChild(a);
 
-        // Update count visually
         const countSpan = document.getElementById("downloadCount");
         if (countSpan) {
           countSpan.innerText = parseInt(countSpan.innerText || 0) + 1;
@@ -215,14 +215,14 @@
         btn.innerText = "✓ Download Started";
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerText = "Download Again";
+          btn.innerText = pwdInput ? "Unlock & Download" : "Download File";
         }, 3000);
 
       } catch (err) {
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
         btn.disabled = false;
-        btn.innerText = "Unlock & Download";
+        btn.innerText = pwdInput ? "Unlock & Download" : "Download File";
       }
     }
   </script>
