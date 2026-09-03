@@ -81,24 +81,22 @@
         </svg>
       </div>
 
-      <!-- File Meta -->
+      <!-- File Metadata -->
       <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight break-all">
         {{ filename }}
       </h1>
       <p class="text-xs text-slate-400 mt-2 font-medium">
-        {{ filesize or filesize_mb or size or size_mb }} MB • Total Downloads: <span id="downloadCount" class="text-slate-300 font-semibold">{{ downloads or 0 }}</span>
+        {{ filesize }} MB • Total Downloads: <span id="downloadCount" class="text-slate-300 font-semibold">{{ downloads }}</span>
       </p>
 
-      {% set is_locked = password_hash or has_password or is_password or password or password_protected or is_password_protected or password_required or requires_password or is_protected or has_pass or passcode or (share and (share.password_hash or share.password or share.has_password or share.is_protected or share.is_password)) or (file and (file.password_hash or file.password or file.has_password)) %}
-
-      <!-- Password Section -->
+      <!-- Password Form & Action Button -->
       <div class="mt-8 space-y-4 text-left">
-        <div id="passwordSection" class="{% if not is_locked %}hidden{% endif %} space-y-4">
+        <div id="passwordSection" class="{% if not has_password %}hidden{% endif %} space-y-4">
           <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
             <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
             </svg>
-            <span>This file is password protected by the sender.</span>
+            <span>This vault is protected. Enter the passcode to unlock.</span>
           </div>
 
           <div>
@@ -108,13 +106,13 @@
           </div>
         </div>
 
-        <!-- Error Banner -->
+        <!-- Error Message Banner -->
         <div id="errorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-300 font-medium text-center"></div>
 
-        <!-- Download Action -->
+        <!-- Download Button -->
         <button id="downloadBtn" onclick="handleDownload()" 
                 class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
-          {% if is_locked %}Unlock & Download{% else %}Download File{% endif %}
+          {% if has_password %}Unlock & Download{% else %}Download File{% endif %}
         </button>
       </div>
 
@@ -144,7 +142,6 @@
     resize();
 
     let step = 0;
-
     function renderAurora() {
       step += 0.003;
       ctx.fillStyle = '#030408';
@@ -208,8 +205,7 @@
         const data = await res.json();
 
         if (!res.ok) {
-          // If server requires password or password is bad, ensure password input is revealed
-          if (res.status === 401 || res.status === 403 || (data.detail && data.detail.toLowerCase().includes("password"))) {
+          if (res.status === 401 || (data.detail && data.detail.toLowerCase().includes("passcode"))) {
             if (pwdSection) pwdSection.classList.remove("hidden");
             btn.innerText = "Unlock & Download";
             if (pwdInput) pwdInput.focus();
@@ -217,7 +213,7 @@
           throw new Error(data.detail || "Incorrect passcode or vault expired.");
         }
 
-        // Trigger direct browser download
+        // Trigger browser download
         const a = document.createElement("a");
         a.href = data.download_url;
         a.download = "{{ filename }}";
@@ -225,7 +221,7 @@
         a.click();
         document.body.removeChild(a);
 
-        // Update count visually
+        // Increment count visually
         const countSpan = document.getElementById("downloadCount");
         if (countSpan) {
           countSpan.innerText = parseInt(countSpan.innerText || 0) + 1;
