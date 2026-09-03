@@ -1,6 +1,5 @@
 import os
 import uuid
-import sqlite3
 import hashlib
 import traceback
 from datetime import datetime, timedelta
@@ -14,11 +13,13 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 # Absolute Directory Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-DB_PATH = os.path.join(BASE_DIR, "vault.db")
 
 app = FastAPI(title="VaultPro API", version="1.0.0")
 
@@ -35,13 +36,27 @@ def render_template(template_name: str, request: Request, context: Optional[dict
     except TypeError:
         return templates.TemplateResponse(template_name, ctx)
 
-# Cloudflare R2 Configuration (with sanitization and region_name='auto')
+# Database Connection (Supabase PostgreSQL)
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
+def get_db():
+    if not DATABASE_URL:
+        raise HTTPException(status_code=500, detail="DATABASE_URL environment variable is missing.")
+    # Support connection strings formatted with postgres:// or postgresql://
+    conn_str = DATABASE_URL
+    if conn_str.startswith("postgres://"):
+        conn_str = conn_str.replace("postgres://", "postgresql://", 1)
+    conn = psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
+    return conn
+
+# Cloudflare R2 Configuration
+R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
 R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "").strip()
-R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "vaultpro-storage").strip()
+R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "vault-storage-backend").strip()
 
-R2_ENDPOINT = f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com" if R2_ACCOUNT_ID else None
+R2_ENDPOINT = R2_ENDPOINT_URL or (f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com" if R2_ACCOUNT_ID else None)
 
 s3_client = boto3.client(
     "s3",
@@ -54,41 +69,6 @@ s3_client = boto3.client(
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
-
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def init_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS shares (
-            id TEXT PRIMARY KEY,
-            filename TEXT NOT NULL,
-            filesize_mb REAL NOT NULL,
-            s3_key TEXT NOT NULL,
-            password_hash TEXT,
-            expiry_hours INTEGER NOT NULL,
-            created_at TIMESTAMP NOT NULL,
-            expires_at TIMESTAMP NOT NULL,
-            downloads INTEGER DEFAULT 0,
-            user_id TEXT
-        )
-    """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id TEXT PRIMARY KEY,
-            email TEXT,
-            tier TEXT DEFAULT 'free',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
 
 class CreateShareRequest(BaseModel):
     filename: str
@@ -129,7 +109,7 @@ async def auth_page(request: Request):
 async def share_page(request: Request, share_id: str):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
     row = cursor.fetchone()
     conn.close()
 
@@ -137,14 +117,13 @@ async def share_page(request: Request, share_id: str):
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
     if row["expiry_hours"] != 0:
-        try:
-            expires_at = datetime.fromisoformat(row["expires_at"])
-            if datetime.utcnow() > expires_at:
-                raise HTTPException(status_code=410, detail="This vault link has expired.")
-        except Exception:
-            pass
+        expires_at = row["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if datetime.utcnow().astimezone() > expires_at:
+            raise HTTPException(status_code=410, detail="This vault link has expired.")
 
-    has_password = bool(row["password_hash"]) if "password_hash" in row.keys() else False
+    has_password = bool(row["password_hash"])
 
     return render_template("download.html", request, {
         "share_id": share_id,
@@ -154,22 +133,23 @@ async def share_page(request: Request, share_id: str):
         "has_password": has_password
     })
 
-# Core API Routes
+# API Endpoints
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+
     user_tier = "free"
     if payload.user_id:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT tier FROM users WHERE user_id = ?", (payload.user_id,))
+        cursor.execute("SELECT tier FROM users WHERE user_id = %s", (payload.user_id,))
         user_row = cursor.fetchone()
-        conn.close()
-        if user_row and user_row["tier"]:
+        if user_row and user_row.get("tier"):
             user_tier = user_row["tier"]
 
     max_mb = 50000 if user_tier == "pro" else 2048
     if payload.filesize_mb > max_mb:
-        raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size for {user_tier.upper()} tier.")
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"File exceeds limit for {user_tier.upper()} tier.")
 
     created_at = datetime.utcnow()
     if payload.expiry_hours == 0:
@@ -187,11 +167,9 @@ async def create_share(payload: CreateShareRequest):
     if payload.password:
         password_hash = hashlib.sha256(payload.password.encode()).hexdigest()
 
-    conn = get_db()
-    cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO shares (id, filename, filesize_mb, s3_key, password_hash, expiry_hours, created_at, expires_at, downloads, user_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0, %s)
     """, (
         share_id,
         payload.filename,
@@ -199,8 +177,8 @@ async def create_share(payload: CreateShareRequest):
         s3_key,
         password_hash,
         payload.expiry_hours,
-        created_at.isoformat(),
-        expires_at.isoformat(),
+        created_at,
+        expires_at,
         payload.user_id
     ))
     conn.commit()
@@ -215,7 +193,7 @@ async def create_share(payload: CreateShareRequest):
 async def upload_file_direct(share_id: str, request: Request):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
     row = cursor.fetchone()
     conn.close()
 
@@ -226,11 +204,7 @@ async def upload_file_direct(share_id: str, request: Request):
     content_type = request.headers.get("content-type", "application/octet-stream")
 
     if not R2_ENDPOINT or not R2_ACCESS_KEY_ID or not R2_SECRET_ACCESS_KEY:
-        print("ERROR: Missing Cloudflare R2 Environment Variables in Render!")
-        raise HTTPException(
-            status_code=500,
-            detail="Server configuration error: Cloudflare R2 credentials (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) are missing in Render Environment."
-        )
+        raise HTTPException(status_code=500, detail="Cloudflare R2 storage credentials missing.")
 
     try:
         s3_client.put_object(
@@ -240,8 +214,8 @@ async def upload_file_direct(share_id: str, request: Request):
             ContentType=content_type
         )
     except Exception as e:
-        print(f"R2 ERROR TRACEBACK:\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"Cloudflare R2 storage error: {str(e)}")
+        print(f"R2 ERROR:\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"R2 storage error: {str(e)}")
 
     return {"status": "success", "share_id": share_id}
 
@@ -250,7 +224,7 @@ async def upload_file_direct(share_id: str, request: Request):
 async def process_download(share_id: str, payload: Optional[DownloadPayload] = None):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
     row = cursor.fetchone()
 
     if not row:
@@ -258,13 +232,12 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         raise HTTPException(status_code=404, detail="File share link not found or expired.")
 
     if row["expiry_hours"] != 0:
-        try:
-            expires_at = datetime.fromisoformat(row["expires_at"])
-            if datetime.utcnow() > expires_at:
-                conn.close()
-                raise HTTPException(status_code=410, detail="This transfer link has expired.")
-        except Exception:
-            pass
+        expires_at = row["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if datetime.utcnow().astimezone() > expires_at:
+            conn.close()
+            raise HTTPException(status_code=410, detail="This transfer link has expired.")
 
     stored_hash = row["password_hash"]
     if stored_hash:
@@ -290,9 +263,9 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         )
     except Exception as e:
         conn.close()
-        raise HTTPException(status_code=500, detail=f"Storage presign failure: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Presign failed: {str(e)}")
 
-    cursor.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = ?", (share_id,))
+    cursor.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = %s", (share_id,))
     conn.commit()
     conn.close()
 
@@ -302,7 +275,7 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
 async def get_user_profile(user_id: str):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
     row = cursor.fetchone()
     conn.close()
 
@@ -314,7 +287,7 @@ async def get_user_profile(user_id: str):
 async def get_user_shares(user_id: str):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE user_id = ? ORDER BY created_at DESC", (user_id,))
+    cursor.execute("SELECT * FROM shares WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
     rows = cursor.fetchall()
     conn.close()
 
@@ -324,8 +297,8 @@ async def get_user_shares(user_id: str):
             "filename": r["filename"],
             "filesize_mb": r["filesize_mb"],
             "downloads": r["downloads"],
-            "expires_at": "Never" if r["expiry_hours"] == 0 else r["expires_at"],
-            "created_at": r["created_at"]
+            "expires_at": "Never" if r["expiry_hours"] == 0 else str(r["expires_at"]),
+            "created_at": str(r["created_at"])
         }
         for r in rows
     ]
@@ -334,7 +307,7 @@ async def get_user_shares(user_id: str):
 async def delete_user_share(share_id: str, user_id: str):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = ? AND user_id = ?", (share_id, user_id))
+    cursor.execute("SELECT * FROM shares WHERE id = %s AND user_id = %s", (share_id, user_id))
     row = cursor.fetchone()
 
     if not row:
@@ -346,7 +319,7 @@ async def delete_user_share(share_id: str, user_id: str):
     except Exception:
         pass
 
-    cursor.execute("DELETE FROM shares WHERE id = ?", (share_id,))
+    cursor.execute("DELETE FROM shares WHERE id = %s", (share_id,))
     conn.commit()
     conn.close()
 
@@ -367,8 +340,8 @@ async def lemon_webhook(request: Request):
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO users (user_id, email, tier)
-                VALUES (?, ?, 'pro')
-                ON CONFLICT(user_id) DO UPDATE SET tier = 'pro', email = excluded.email
+                VALUES (%s, %s, 'pro')
+                ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', email = EXCLUDED.email
             """, (user_id, user_email))
             conn.commit()
             conn.close()
