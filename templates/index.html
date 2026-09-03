@@ -148,6 +148,7 @@
                 <option value="1">1 Hour</option>
                 <option value="24" selected>24 Hours</option>
                 <option value="72">3 Days</option>
+                <option value="0">Never</option>
               </select>
             </div>
           </div>
@@ -291,12 +292,13 @@
             document.getElementById("fileSizeDisplay").innerText = "PRO Member • Up to 50 GB per transfer";
             const select = document.getElementById("expiryHours");
             select.innerHTML = `
-              <option value="1">1 Hour</option>
-              <option value="24">24 Hours</option>
-              <option value="72">3 Days</option>
-              <option value="168">7 Days</option>
-              <option value="336">14 Days (Pro)</option>
-              <option value="720" selected>30 Days (Pro)</option>
+             <option value="1">1 Hour</option>
+                    <option value="24">24 Hours</option>
+                    <option value="72">3 Days</option>
+                    <option value="168">7 Days</option>
+                    <option value="336">14 Days (Pro)</option>
+                    <option value="720">30 Days (Pro)</option>
+                    <option value="0">Never (Pro)</option>
             `;
           }
         })
