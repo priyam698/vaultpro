@@ -355,12 +355,10 @@
         const data = await res.json();
         progressStatus.innerText = "Streaming to edge storage...";
 
-        // Stream direct to endpoint (zero CORS issues)
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-
+        // Stream direct binary data (Zero CORS issues)
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
+        xhr.setRequestHeader("Content-Type", selectedFile.type || "application/octet-stream");
 
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
@@ -393,7 +391,7 @@
           uploadBtn.disabled = false;
         };
 
-        xhr.send(formData);
+        xhr.send(selectedFile);
 
       } catch (error) {
         alert(error.message);

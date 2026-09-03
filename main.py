@@ -8,7 +8,7 @@ from typing import Optional
 import boto3
 from botocore.config import Config
 from pydantic import BaseModel
-from fastapi import FastAPI, Request, HTTPException, UploadFile, File, status
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -152,7 +152,7 @@ async def share_page(request: Request, share_id: str):
         "has_password": has_password
     })
 
-# Core API Routes
+# API Endpoints
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
     user_tier = "free"
@@ -171,7 +171,7 @@ async def create_share(payload: CreateShareRequest):
 
     created_at = datetime.utcnow()
     if payload.expiry_hours == 0:
-        expires_at = created_at + timedelta(days=36500)  # Permanent ("Never")
+        expires_at = created_at + timedelta(days=36500)
     else:
         max_hours = 720 if user_tier == "pro" else 72
         if payload.expiry_hours > max_hours:
@@ -209,8 +209,9 @@ async def create_share(payload: CreateShareRequest):
         "expires_at": expires_at.isoformat()
     }
 
+# Direct Raw Streaming Endpoint (No multipart dependency)
 @app.post("/api/upload-file/{share_id}")
-async def upload_file_direct(share_id: str, file: UploadFile = File(...)):
+async def upload_file_direct(share_id: str, request: Request):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM shares WHERE id = ?", (share_id,))
@@ -220,15 +221,18 @@ async def upload_file_direct(share_id: str, file: UploadFile = File(...)):
     if not row:
         raise HTTPException(status_code=404, detail="Vault record not found.")
 
+    file_bytes = await request.body()
+    content_type = request.headers.get("content-type", "application/octet-stream")
+
     try:
-        s3_client.upload_fileobj(
-            file.file,
-            R2_BUCKET_NAME,
-            row["s3_key"],
-            ExtraArgs={"ContentType": file.content_type or "application/octet-stream"}
+        s3_client.put_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=row["s3_key"],
+            Body=file_bytes,
+            ContentType=content_type
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Direct storage relay failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Storage transmission failed: {str(e)}")
 
     return {"status": "success", "share_id": share_id}
 
