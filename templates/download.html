@@ -89,24 +89,24 @@
         {{ filesize or filesize_mb or size or size_mb }} MB • Total Downloads: <span id="downloadCount" class="text-slate-300 font-semibold">{{ downloads or 0 }}</span>
       </p>
 
-      {% set is_locked = is_password_protected or password_protected or requires_password or is_protected or has_password or password %}
+      {% set is_locked = password_hash or has_password or is_password or password or password_protected or is_password_protected or password_required or requires_password or is_protected or has_pass or passcode or (share and (share.password_hash or share.password or share.has_password or share.is_protected or share.is_password)) or (file and (file.password_hash or file.password or file.has_password)) %}
 
-      <!-- Password Form -->
+      <!-- Password Section -->
       <div class="mt-8 space-y-4 text-left">
-        {% if is_locked %}
-        <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
-          <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-          </svg>
-          <span>This file is password protected by the sender.</span>
-        </div>
+        <div id="passwordSection" class="{% if not is_locked %}hidden{% endif %} space-y-4">
+          <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <span>This file is password protected by the sender.</span>
+          </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Recipient Passcode</label>
-          <input id="passwordInput" type="password" placeholder="Enter recipient password" 
-                 class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-4 py-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Recipient Passcode</label>
+            <input id="passwordInput" type="password" placeholder="Enter recipient password" 
+                   class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-4 py-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
+          </div>
         </div>
-        {% endif %}
 
         <!-- Error Banner -->
         <div id="errorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-300 font-medium text-center"></div>
@@ -170,6 +170,16 @@
       ctx.fillStyle = g2;
       ctx.fillRect(0, 0, width, height);
 
+      const x3 = width * 0.25 + Math.cos(step * 0.9) * (width * 0.1);
+      const y3 = height * 0.75 + Math.sin(step * 0.7) * (height * 0.1);
+      const r3 = Math.max(width, height) * 0.35;
+      const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
+      g3.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
+      g3.addColorStop(0.5, 'rgba(14, 116, 144, 0.1)');
+      g3.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      ctx.fillStyle = g3;
+      ctx.fillRect(0, 0, width, height);
+
       requestAnimationFrame(renderAurora);
     }
     renderAurora();
@@ -180,6 +190,7 @@
     async function handleDownload() {
       const btn = document.getElementById("downloadBtn");
       const errBox = document.getElementById("errorMsg");
+      const pwdSection = document.getElementById("passwordSection");
       const pwdInput = document.getElementById("passwordInput");
       const password = pwdInput ? pwdInput.value.trim() : null;
 
@@ -197,9 +208,16 @@
         const data = await res.json();
 
         if (!res.ok) {
+          // If server requires password or password is bad, ensure password input is revealed
+          if (res.status === 401 || res.status === 403 || (data.detail && data.detail.toLowerCase().includes("password"))) {
+            if (pwdSection) pwdSection.classList.remove("hidden");
+            btn.innerText = "Unlock & Download";
+            if (pwdInput) pwdInput.focus();
+          }
           throw new Error(data.detail || "Incorrect passcode or vault expired.");
         }
 
+        // Trigger direct browser download
         const a = document.createElement("a");
         a.href = data.download_url;
         a.download = "{{ filename }}";
@@ -207,6 +225,7 @@
         a.click();
         document.body.removeChild(a);
 
+        // Update count visually
         const countSpan = document.getElementById("downloadCount");
         if (countSpan) {
           countSpan.innerText = parseInt(countSpan.innerText || 0) + 1;
@@ -215,14 +234,18 @@
         btn.innerText = "✓ Download Started";
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerText = pwdInput ? "Unlock & Download" : "Download File";
+          btn.innerText = "Download Again";
         }, 3000);
 
       } catch (err) {
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
         btn.disabled = false;
-        btn.innerText = pwdInput ? "Unlock & Download" : "Download File";
+        if (pwdSection && !pwdSection.classList.contains("hidden")) {
+          btn.innerText = "Unlock & Download";
+        } else {
+          btn.innerText = "Download File";
+        }
       }
     }
   </script>
