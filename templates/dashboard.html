@@ -3,125 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privora | Dashboard</title>
+  <title>Privora Drive | Encrypted Cloud Storage</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #030408;
-    }
-
-    #ambientCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030408; }
     .obsidian-card {
       background: linear-gradient(180deg, rgba(16, 20, 32, 0.7) 0%, rgba(9, 11, 20, 0.85) 100%);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-
-    .film-grain {
-      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
-      background-size: 24px 24px;
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9);
     }
   </style>
 </head>
-<body class="text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white relative overflow-x-hidden flex flex-col justify-between">
+<body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- Ambient Fluid Canvas -->
-  <canvas id="ambientCanvas"></canvas>
-  <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
-
-  <!-- Navbar -->
-  <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
-    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+  <header class="border-b border-white/[0.06] bg-[#030408]/60 backdrop-blur-xl sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-3 group">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/20">
-            <div class="w-full h-full bg-[#050711] rounded-[11px] flex items-center justify-center font-black text-sm text-white">
-              V
-            </div>
-          </div>
-          <span class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
-            Privora
-          </span>
-        </a>
-        <span id="tierBadge" class="text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
-          Free Tier
-        </span>
+        <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+            <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
+            <polygon points="17,50 33.5,68 33.5,35" fill="#4338ca" stroke="#090d1a" stroke-width="1" />
+            <polygon points="17,50 33.5,35 33.5,12.5 17,12.5" fill="#6366f1" stroke="#090d1a" stroke-width="1" />
+            <polygon points="33.5,12.5 66.5,12.5 51.5,35" fill="#8b5cf6" stroke="#090d1a" stroke-width="1" />
+            <polygon points="66.5,12.5 83,36.5 51.5,35" fill="#a855f7" stroke="#090d1a" stroke-width="1" />
+            <polygon points="83,36.5 63.5,57.5 51.5,35" fill="#06b6d4" stroke="#090d1a" stroke-width="1" />
+            <polygon points="63.5,57.5 33.5,35 51.5,35" fill="#2563eb" stroke="#090d1a" stroke-width="1" />
+            <polygon points="33.5,35 63.5,57.5 33.5,68" fill="#1d4ed8" stroke="#090d1a" stroke-width="1" />
+          </svg>
+        </div>
+        <div>
+          <a href="/" class="font-bold text-lg text-white flex items-center gap-2">
+            Privora <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">Drive</span>
+          </a>
+        </div>
       </div>
 
       <div class="flex items-center gap-4">
-        <span id="userEmail" class="text-xs text-slate-400 hidden sm:inline font-medium"></span>
-        <a href="/" class="text-xs bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-4 py-2 rounded-xl font-semibold shadow-md transition">
-          + New Transfer
-        </a>
-        <button onclick="handleSignOut()" class="text-xs text-slate-400 hover:text-white transition px-2 py-1">
+        <a href="/" class="text-xs text-slate-400 hover:text-white transition">Transfer Pipeline</a>
+        <button onclick="signOut()" class="text-xs bg-white/[0.05] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 transition">
           Sign Out
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Dashboard Content -->
-  <main class="relative z-20 max-w-6xl mx-auto p-6 sm:p-8 flex-1 space-y-8 w-full">
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full space-y-8">
     
-    <!-- Top Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 class="text-3xl font-extrabold text-white tracking-tight">Active Encrypted Vaults</h1>
-        <p class="text-xs text-slate-400 mt-1">Manage active share links, inspect download counters, or revoke access.</p>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <div class="lg:col-span-4 obsidian-card rounded-3xl p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs uppercase font-bold text-slate-400">Vault Storage</span>
+            <span id="tierBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300">Free Tier</span>
+          </div>
+          <div class="text-2xl font-black text-white mt-1">
+            <span id="usedDisplay">0.00 GB</span> <span class="text-xs font-normal text-slate-400">of <span id="quotaDisplay">5.00 GB</span></span>
+          </div>
+          
+          <div class="w-full h-2 bg-slate-950 rounded-full mt-4 overflow-hidden border border-white/10">
+            <div id="storageBar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-white/10 mt-6 flex items-center justify-between">
+          <p class="text-[11px] text-slate-400">Need 200 GB permanent drive space?</p>
+          <a href="/#pricing" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
+            Upgrade ($4/mo)
+          </a>
+        </div>
       </div>
-      <button id="upgradeBtn" onclick="handleUpgrade()" class="border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs px-4 py-2.5 rounded-xl font-bold transition">
-        ⚡ Upgrade to Pro ($4/mo)
-      </button>
+
+      <div class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-white/15 hover:border-indigo-400/60 bg-white/[0.01] hover:bg-indigo-950/10 transition group"
+           onclick="document.getElementById('driveFileInput').click()">
+        <input type="file" id="driveFileInput" multiple class="hidden">
+        
+        <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        </div>
+        <span class="text-sm font-bold text-slate-200">Click to upload or drag files into your Cloud Drive</span>
+        <span class="text-xs text-slate-500 mt-1">Encrypted, private, and stored permanently until you delete them</span>
+        <div id="uploadStatus" class="text-xs font-semibold text-indigo-400 mt-3 hidden">Uploading files...</div>
+      </div>
     </div>
 
-    <!-- KPI Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      <div class="obsidian-card rounded-2xl p-6">
-        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Vaults</div>
-        <div id="statActiveVaults" class="text-3xl font-extrabold text-white mt-1.5">0</div>
+    <div class="obsidian-card rounded-3xl p-6 sm:p-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h2 class="text-lg font-bold text-white">Your Encrypted Vault Files</h2>
+          <p class="text-xs text-slate-400">All objects stored across zero-egress Cloudflare R2 edge servers</p>
+        </div>
+        <input type="text" id="searchBox" oninput="filterFiles()" placeholder="Search files..." 
+               class="bg-[#050711] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-400 transition w-full sm:w-64">
       </div>
-      <div class="obsidian-card rounded-2xl p-6">
-        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Downloads</div>
-        <div id="statTotalDownloads" class="text-3xl font-extrabold text-indigo-300 mt-1.5">0</div>
-      </div>
-      <div class="obsidian-card rounded-2xl p-6">
-        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Storage Consumed</div>
-        <div id="statTotalSize" class="text-3xl font-extrabold text-purple-300 mt-1.5">0 MB</div>
-      </div>
-    </div>
 
-    <!-- Vaults Table -->
-    <div class="obsidian-card rounded-3xl overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs min-w-[650px]">
-          <thead class="bg-white/[0.03] text-slate-400 border-b border-white/10 uppercase tracking-wider text-[11px] font-semibold">
-            <tr>
-              <th class="p-4 pl-6">File Name</th>
-              <th class="p-4">Size</th>
-              <th class="p-4">Expires In</th>
-              <th class="p-4 text-center">Downloads</th>
-              <th class="p-4 pr-6 text-right">Actions</th>
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead>
+            <tr class="border-b border-white/10 text-slate-500 uppercase tracking-wider">
+              <th class="py-3 px-4">Name</th>
+              <th class="py-3 px-4">Size</th>
+              <th class="py-3 px-4">Uploaded</th>
+              <th class="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody id="vaultTable" class="divide-y divide-white/[0.06]">
+          <tbody id="filesTableBody" class="divide-y divide-white/5">
             <tr>
-              <td colspan="5" class="p-10 text-center text-slate-400">Loading your vaults...</td>
+              <td colspan="4" class="py-8 text-center text-slate-500">Loading drive contents...</td>
             </tr>
           </tbody>
         </table>
@@ -130,180 +124,155 @@
 
   </main>
 
-  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-5 text-center text-xs text-slate-500">
-    © 2026 Privora Systems. Zero-knowledge architecture powered by Cloudflare R2.
+  <footer class="border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
+    © 2026 Privora Systems. Zero-Knowledge Cloud Storage.
   </footer>
 
-  <!-- Fluid Canvas Background Engine -->
   <script>
-    const canvas = document.getElementById('ambientCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    let step = 0;
-    function renderAurora() {
-      step += 0.003;
-      ctx.fillStyle = '#030408';
-      ctx.fillRect(0, 0, width, height);
-
-      const x1 = width * 0.35 + Math.sin(step * 0.7) * (width * 0.15);
-      const y1 = height * 0.25 + Math.cos(step * 0.5) * (height * 0.12);
-      const r1 = Math.max(width, height) * 0.45;
-      const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
-      g1.addColorStop(0, 'rgba(79, 70, 229, 0.45)');
-      g1.addColorStop(0.5, 'rgba(67, 56, 202, 0.18)');
-      g1.addColorStop(1, 'rgba(3, 4, 8, 0)');
-      ctx.fillStyle = g1;
-      ctx.fillRect(0, 0, width, height);
-
-      const x2 = width * 0.75 + Math.cos(step * 0.6) * (width * 0.15);
-      const y2 = height * 0.55 + Math.sin(step * 0.8) * (height * 0.15);
-      const r2 = Math.max(width, height) * 0.4;
-      const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
-      g2.addColorStop(0, 'rgba(147, 51, 234, 0.38)');
-      g2.addColorStop(0.5, 'rgba(126, 34, 206, 0.15)');
-      g2.addColorStop(1, 'rgba(3, 4, 8, 0)');
-      ctx.fillStyle = g2;
-      ctx.fillRect(0, 0, width, height);
-
-      requestAnimationFrame(renderAurora);
-    }
-    renderAurora();
-  </script>
-
-  <!-- Auth & Vault Logic -->
-  <script>
-    const SUPABASE_URL = "{{ supabase_url }}";
-    const SUPABASE_ANON = "{{ supabase_anon }}";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-    let currentUser = null;
-
-    async function init() {
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) {
-        const token = localStorage.getItem("vp_token");
-        if (!token) {
-          window.location.href = "/auth";
-          return;
+    function getStoredUserId() {
+      const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
+      if (direct) return direct;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(k));
+            if (parsed?.user?.id) return parsed.user.id;
+          } catch(e) {}
         }
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          currentUser = { id: payload.sub, email: payload.email || "" };
-        } catch(e) {
-          window.location.href = "/auth";
-          return;
-        }
-      } else {
-        currentUser = user;
       }
-
-      document.getElementById('userEmail').innerText = currentUser.email || "";
-
-      await checkUserTier();
-      await loadVaults();
+      return null;
     }
 
-    async function checkUserTier() {
+    const currentUserId = getStoredUserId();
+    if (!currentUserId) {
+      window.location.href = "/auth";
+    }
+
+    function signOut() {
+      localStorage.clear();
+      window.location.href = "/auth";
+    }
+
+    let allFiles = [];
+
+    async function loadDriveData() {
+      // 1. Quota
       try {
-        const res = await fetch(`/api/user-profile?user_id=${currentUser.id}`);
+        const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
+        const usedGb = (data.used_bytes / (1024**3)).toFixed(2);
+        const quotaGb = (data.quota_bytes / (1024**3)).toFixed(2);
+        const pct = Math.min(100, Math.round((data.used_bytes / data.quota_bytes) * 100));
+
+        document.getElementById("usedDisplay").innerText = `${usedGb} GB`;
+        document.getElementById("quotaDisplay").innerText = `${quotaGb} GB`;
+        document.getElementById("storageBar").style.width = `${pct}%`;
+
         if (data.tier === 'pro') {
-          const badge = document.getElementById('tierBadge');
-          badge.innerText = 'PRO';
-          badge.className = 'text-[10px] font-black tracking-widest text-indigo-200 bg-indigo-500/20 px-2.5 py-0.5 rounded-full border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.3)] uppercase';
-          
-          const upgradeBtn = document.getElementById('upgradeBtn');
-          upgradeBtn.innerText = '✓ Pro Member';
-          upgradeBtn.disabled = true;
-          upgradeBtn.className = 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs px-4 py-2.5 rounded-xl font-bold cursor-default';
+          const badge = document.getElementById("tierBadge");
+          badge.innerText = "PRO 200 GB";
+          badge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
         }
-      } catch (err) {
-        console.error("Profile error:", err);
-      }
-    }
+      } catch(e) {}
 
-    async function loadVaults() {
+      // 2. Files
       try {
-        const res = await fetch(`/api/user-shares?user_id=${currentUser.id}`);
-        const vaults = await res.json();
-        const tbody = document.getElementById('vaultTable');
-
-        if (!vaults || !vaults.length) {
-          tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 font-medium">No active vaults found. Start by creating a transfer!</td></tr>';
-          document.getElementById('statActiveVaults').innerText = '0';
-          document.getElementById('statTotalDownloads').innerText = '0';
-          document.getElementById('statTotalSize').innerText = '0 MB';
-          return;
-        }
-
-        const totalDownloads = vaults.reduce((acc, v) => acc + (v.downloads || 0), 0);
-        const totalSize = vaults.reduce((acc, v) => acc + (v.filesize_mb || 0), 0).toFixed(1);
-
-        document.getElementById('statActiveVaults').innerText = vaults.length;
-        document.getElementById('statTotalDownloads').innerText = totalDownloads;
-        document.getElementById('statTotalSize').innerText = `${totalSize} MB`;
-
-        tbody.innerHTML = vaults.map(v => `
-          <tr class="hover:bg-white/[0.02] transition duration-150">
-            <td class="p-4 pl-6 font-semibold text-slate-200">
-              <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-300 text-xs">📄</span>
-                <span class="truncate max-w-[200px] sm:max-w-[320px]">${v.filename}</span>
-              </div>
-            </td>
-            <td class="p-4 text-slate-300 font-medium">${v.filesize_mb} MB</td>
-            <td class="p-4 text-slate-400">${new Date(v.expires_at).toLocaleString()}</td>
-            <td class="p-4 text-center font-bold text-indigo-300">${v.downloads}</td>
-            <td class="p-4 pr-6 text-right space-x-2">
-              <button onclick="copyLink('${v.id}')" class="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-lg text-slate-200 text-[11px] font-semibold transition">
-                Copy Link
-              </button>
-              <button onclick="deleteVault('${v.id}')" class="px-3 py-1.5 bg-rose-950/30 hover:bg-rose-900/50 text-rose-300 border border-rose-800/30 rounded-lg text-[11px] font-semibold transition">
-                Delete
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        document.getElementById('vaultTable').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-rose-400">Failed to load active vaults.</td></tr>';
+        const res = await fetch(`/api/drive/files?user_id=${currentUserId}`);
+        allFiles = await res.json();
+        renderFiles(allFiles);
+      } catch(e) {
+        document.getElementById("filesTableBody").innerHTML = `<tr><td colspan="4" class="py-8 text-center text-rose-400">Failed to load files.</td></tr>`;
       }
     }
 
-    function copyLink(id) {
-      navigator.clipboard.writeText(`${window.location.origin}/share/${id}`);
-      alert("Share link copied to clipboard!");
-    }
-
-    async function deleteVault(id) {
-      if (!confirm("Revoke link and delete file permanently from storage?")) return;
-      const res = await fetch(`/api/shares/${id}?user_id=${currentUser.id}`, { method: 'DELETE' });
-      if (res.ok) loadVaults();
-    }
-
-    function handleUpgrade() {
-      if (!currentUser) {
-        window.location.href = "/auth";
+    function renderFiles(files) {
+      const tbody = document.getElementById("filesTableBody");
+      if (!files.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-500">Your vault is empty. Upload your first document or video above.</td></tr>`;
         return;
       }
-      const baseUrl = "https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd";
-      window.location.href = `${baseUrl}?checkout[email]=${encodeURIComponent(currentUser.email)}&checkout[custom][user_id]=${currentUser.id}`;
+
+      tbody.innerHTML = files.map(f => `
+        <tr class="hover:bg-white/[0.02] transition">
+          <td class="py-3.5 px-4 font-medium text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            <span class="truncate max-w-xs sm:max-w-sm">${f.filename}</span>
+          </td>
+          <td class="py-3.5 px-4 font-mono text-slate-400">${f.size_mb} MB</td>
+          <td class="py-3.5 px-4 text-slate-500">${f.created_at}</td>
+          <td class="py-3.5 px-4 text-right space-x-2">
+            <button onclick="downloadFile('${f.id}')" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-indigo-300 font-semibold transition">Download</button>
+            <button onclick="deleteFile('${f.id}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg font-semibold transition">Delete</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    async function handleSignOut() {
-      await sb.auth.signOut();
-      localStorage.removeItem("vp_token");
-      window.location.href = "/";
+    function filterFiles() {
+      const q = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = allFiles.filter(f => f.filename.toLowerCase().includes(q));
+      renderFiles(filtered);
     }
 
-    init();
+    async function downloadFile(fileId) {
+      const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);
+      const data = await res.json();
+      if (data.download_url) {
+        window.location.href = data.download_url;
+      } else {
+        alert("Failed to fetch download link.");
+      }
+    }
+
+    async function deleteFile(fileId) {
+      if (!confirm("Are you sure you want to permanently shred this file from your drive?")) return;
+      const res = await fetch(`/api/drive/files/${fileId}?user_id=${currentUserId}`, { method: "DELETE" });
+      if (res.ok) {
+        loadDriveData();
+      } else {
+        alert("Deletion failed.");
+      }
+    }
+
+    // Direct Upload Handler
+    const fileInput = document.getElementById("driveFileInput");
+    fileInput.addEventListener("change", async (e) => {
+      const files = e.target.files;
+      if (!files.length) return;
+
+      const statusEl = document.getElementById("uploadStatus");
+      statusEl.classList.remove("hidden");
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        statusEl.innerText = `Uploading ${i+1}/${files.length}: ${file.name}...`;
+
+        try {
+          const res = await fetch(`/api/drive/upload?filename=${encodeURIComponent(file.name)}&user_id=${currentUserId}`, {
+            method: "POST",
+            headers: { "Content-Type": file.type || "application/octet-stream" },
+            body: file
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            alert(err.detail || `Upload failed for ${file.name}`);
+            break;
+          }
+        } catch(err) {
+          alert(`Network error uploading ${file.name}`);
+          break;
+        }
+      }
+
+      statusEl.innerText = "Uploads complete!";
+      setTimeout(() => statusEl.classList.add("hidden"), 2000);
+      fileInput.value = "";
+      loadDriveData();
+    });
+
+    loadDriveData();
   </script>
 </body>
 </html>

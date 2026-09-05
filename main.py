@@ -16,12 +16,11 @@ from fastapi.staticfiles import StaticFiles
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Absolute Directory Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-app = FastAPI(title="Privora API", version="1.0.0")
+app = FastAPI(title="Privora Drive & Transfer API", version="2.0.0")
 
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -36,7 +35,6 @@ def render_template(template_name: str, request: Request, context: Optional[dict
     except TypeError:
         return templates.TemplateResponse(template_name, ctx)
 
-# Database Connection (Supabase PostgreSQL)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 def get_db():
@@ -45,24 +43,9 @@ def get_db():
     conn_str = DATABASE_URL
     if conn_str.startswith("postgres://"):
         conn_str = conn_str.replace("postgres://", "postgresql://", 1)
-    conn = psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
-    return conn
+    return psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
 
-# Auto-migration check for max_downloads column
-@app.on_event("startup")
-def verify_schema():
-    if not DATABASE_URL:
-        return
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("ALTER TABLE shares ADD COLUMN IF NOT EXISTS max_downloads INT DEFAULT 0;")
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print(f"Database migration notice: {e}")
-
-# Cloudflare R2 Configuration
+# Cloudflare R2 Config
 R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
@@ -83,6 +66,165 @@ s3_client = boto3.client(
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 
+# ----------------- UI Pages -----------------
+@app.get("/", response_class=HTMLResponse)
+async def index_page(request: Request):
+    return render_template("index.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(request: Request):
+    return render_template("dashboard.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
+
+@app.get("/auth", response_class=HTMLResponse)
+async def auth_page(request: Request):
+    return render_template("auth.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
+
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return render_template("terms.html", request)
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return render_template("privacy.html", request)
+
+# ----------------- Privora Drive Core API -----------------
+@app.get("/api/drive/quota")
+async def get_drive_quota(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user:
+        # Default 5 GB free tier quota in bytes (5 * 1024^3)
+        return {"tier": "free", "used_bytes": 0, "quota_bytes": 5368709120}
+
+    quota = user.get("storage_quota_bytes") or (214748364800 if user.get("tier") == "pro" else 5368709120)
+    return {
+        "tier": user.get("tier", "free"),
+        "used_bytes": user.get("storage_used_bytes", 0) or 0,
+        "quota_bytes": quota
+    }
+
+@app.get("/api/drive/files")
+async def get_drive_files(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, filename, file_type, size_bytes, created_at FROM drive_files WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+    files = cursor.fetchall()
+    conn.close()
+
+    return [
+        {
+            "id": str(f["id"]),
+            "filename": f["filename"],
+            "file_type": f["file_type"] or "Unknown",
+            "size_bytes": f["size_bytes"],
+            "size_mb": round(f["size_bytes"] / (1024 * 1024), 2),
+            "created_at": str(f["created_at"])[:19]
+        }
+        for f in files
+    ]
+
+@app.post("/api/drive/upload")
+async def upload_drive_file(request: Request, filename: str, user_id: str):
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Authentication required for Drive storage.")
+
+    file_bytes = await request.body()
+    file_size = len(file_bytes)
+    content_type = request.headers.get("content-type", "application/octet-stream")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Ensure user record exists
+    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user:
+        cursor.execute("INSERT INTO users (user_id, tier, storage_used_bytes, storage_quota_bytes) VALUES (%s, 'free', 0, 5368709120)", (user_id,))
+        conn.commit()
+        used = 0
+        quota = 5368709120
+    else:
+        used = user.get("storage_used_bytes") or 0
+        quota = user.get("storage_quota_bytes") or 5368709120
+
+    if (used + file_size) > quota:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Drive storage quota exceeded. Upgrade to Pro for 200 GB.")
+
+    file_id = uuid.uuid4().hex
+    s3_key = f"drive/{user_id}/{file_id}_{filename}"
+
+    try:
+        s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=s3_key, Body=file_bytes, ContentType=content_type)
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"R2 Cloud storage error: {str(e)}")
+
+    cursor.execute("""
+        INSERT INTO drive_files (id, user_id, filename, file_type, size_bytes, s3_key)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (file_id, user_id, filename, content_type, file_size, s3_key))
+
+    cursor.execute("UPDATE users SET storage_used_bytes = storage_used_bytes + %s WHERE user_id = %s", (file_size, user_id))
+    conn.commit()
+    conn.close()
+
+    return {"status": "success", "file_id": file_id}
+
+@app.get("/api/drive/download/{file_id}")
+async def download_drive_file(file_id: str, user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM drive_files WHERE id = %s AND user_id = %s", (file_id, user_id))
+    file = cursor.fetchone()
+    conn.close()
+
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found or access unauthorized.")
+
+    try:
+        url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": R2_BUCKET_NAME,
+                "Key": file["s3_key"],
+                "ResponseContentDisposition": f'attachment; filename="{file["filename"]}"'
+            },
+            ExpiresIn=3600
+        )
+        return {"download_url": url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Presign error: {str(e)}")
+
+@app.delete("/api/drive/files/{file_id}")
+async def delete_drive_file(file_id: str, user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM drive_files WHERE id = %s AND user_id = %s", (file_id, user_id))
+    file = cursor.fetchone()
+
+    if not file:
+        conn.close()
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    try:
+        s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=file["s3_key"])
+    except Exception:
+        pass
+
+    cursor.execute("DELETE FROM drive_files WHERE id = %s", (file_id,))
+    cursor.execute("UPDATE users SET storage_used_bytes = GREATEST(0, storage_used_bytes - %s) WHERE user_id = %s", (file["size_bytes"], user_id))
+    conn.commit()
+    conn.close()
+
+    return {"status": "deleted"}
+
+# ----------------- Preserved Ephemeral Transfers -----------------
 class CreateShareRequest(BaseModel):
     filename: str
     filesize_mb: float
@@ -93,39 +235,6 @@ class CreateShareRequest(BaseModel):
 
 class DownloadPayload(BaseModel):
     password: Optional[str] = None
-
-# UI Routes
-@app.get("/", response_class=HTMLResponse)
-async def index_page(request: Request):
-    return render_template("index.html", request, {
-        "supabase_url": SUPABASE_URL,
-        "supabase_anon": SUPABASE_ANON_KEY
-    })
-
-@app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard_page(request: Request):
-    return render_template("dashboard.html", request, {
-        "supabase_url": SUPABASE_URL,
-        "supabase_anon": SUPABASE_ANON_KEY
-    })
-
-@app.get("/auth", response_class=HTMLResponse)
-async def auth_page(request: Request):
-    auth_file = os.path.join(TEMPLATES_DIR, "auth.html")
-    if os.path.exists(auth_file):
-        return render_template("auth.html", request, {
-            "supabase_url": SUPABASE_URL,
-            "supabase_anon": SUPABASE_ANON_KEY
-        })
-    return render_template("index.html", request)
-
-@app.get("/terms", response_class=HTMLResponse)
-async def terms_page(request: Request):
-    return render_template("terms.html", request)
-
-@app.get("/privacy", response_class=HTMLResponse)
-async def privacy_page(request: Request):
-    return render_template("privacy.html", request)
 
 @app.get("/share/{share_id}", response_class=HTMLResponse)
 async def share_page(request: Request, share_id: str):
@@ -138,12 +247,10 @@ async def share_page(request: Request, share_id: str):
     if not row:
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
-    # Check Max Downloads / Burn-on-Read limit
     max_downloads = row.get("max_downloads", 0) or 0
     if max_downloads > 0 and row["downloads"] >= max_downloads:
-        raise HTTPException(status_code=410, detail="This vault link has reached its maximum download limit and was shredded.")
+        raise HTTPException(status_code=410, detail="This link reached its maximum download limit and was shredded.")
 
-    # Check Expiration
     if row["expiry_hours"] != 0:
         expires_at = row["expires_at"]
         if isinstance(expires_at, str):
@@ -151,22 +258,18 @@ async def share_page(request: Request, share_id: str):
         if datetime.utcnow().astimezone() > expires_at:
             raise HTTPException(status_code=410, detail="This vault link has expired.")
 
-    has_password = bool(row["password_hash"])
-
     return render_template("download.html", request, {
         "share_id": share_id,
         "filename": row["filename"],
         "filesize": row["filesize_mb"],
         "downloads": row["downloads"],
-        "has_password": has_password
+        "has_password": bool(row["password_hash"])
     })
 
-# API Endpoints
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
     conn = get_db()
     cursor = conn.cursor()
-
     user_tier = "free"
     if payload.user_id:
         cursor.execute("SELECT tier FROM users WHERE user_id = %s", (payload.user_id,))
@@ -180,43 +283,19 @@ async def create_share(payload: CreateShareRequest):
         raise HTTPException(status_code=400, detail=f"File exceeds limit for {user_tier.upper()} tier.")
 
     created_at = datetime.utcnow()
-    if payload.expiry_hours == 0:
-        expires_at = created_at + timedelta(days=36500)
-    else:
-        max_hours = 720 if user_tier == "pro" else 72
-        if payload.expiry_hours > max_hours:
-            payload.expiry_hours = max_hours
-        expires_at = created_at + timedelta(hours=payload.expiry_hours)
-
+    expires_at = created_at + timedelta(days=36500) if payload.expiry_hours == 0 else created_at + timedelta(hours=payload.expiry_hours)
     share_id = uuid.uuid4().hex[:8]
     s3_key = f"transfers/{share_id}/{payload.filename}"
-    
-    password_hash = None
-    if payload.password:
-        password_hash = hashlib.sha256(payload.password.encode()).hexdigest()
+    password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
 
     cursor.execute("""
         INSERT INTO shares (id, filename, filesize_mb, s3_key, password_hash, expiry_hours, max_downloads, created_at, expires_at, downloads, user_id)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s)
-    """, (
-        share_id,
-        payload.filename,
-        payload.filesize_mb,
-        s3_key,
-        password_hash,
-        payload.expiry_hours,
-        payload.max_downloads,
-        created_at,
-        expires_at,
-        payload.user_id
-    ))
+    """, (share_id, payload.filename, payload.filesize_mb, s3_key, password_hash, payload.expiry_hours, payload.max_downloads, created_at, expires_at, payload.user_id))
     conn.commit()
     conn.close()
 
-    return {
-        "share_id": share_id,
-        "expires_at": expires_at.isoformat()
-    }
+    return {"share_id": share_id, "expires_at": expires_at.isoformat()}
 
 @app.post("/api/upload-file/{share_id}")
 async def upload_file_direct(share_id: str, request: Request):
@@ -230,22 +309,7 @@ async def upload_file_direct(share_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Vault record not found.")
 
     file_bytes = await request.body()
-    content_type = request.headers.get("content-type", "application/octet-stream")
-
-    if not R2_ENDPOINT or not R2_ACCESS_KEY_ID or not R2_SECRET_ACCESS_KEY:
-        raise HTTPException(status_code=500, detail="Cloudflare R2 storage credentials missing.")
-
-    try:
-        s3_client.put_object(
-            Bucket=R2_BUCKET_NAME,
-            Key=row["s3_key"],
-            Body=file_bytes,
-            ContentType=content_type
-        )
-    except Exception as e:
-        print(f"R2 ERROR:\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"R2 storage error: {str(e)}")
-
+    s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"], Body=file_bytes, ContentType=request.headers.get("content-type", "application/octet-stream"))
     return {"status": "success", "share_id": share_id}
 
 @app.post("/share/{share_id}/download")
@@ -258,53 +322,24 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
 
     if not row:
         conn.close()
-        raise HTTPException(status_code=404, detail="File share link not found or expired.")
+        raise HTTPException(status_code=404, detail="Share link not found or expired.")
 
-    # Check Max Downloads / Burn-on-Read
     max_downloads = row.get("max_downloads", 0) or 0
     if max_downloads > 0 and row["downloads"] >= max_downloads:
         conn.close()
-        raise HTTPException(status_code=410, detail="This vault link has reached its maximum download limit and was shredded.")
+        raise HTTPException(status_code=410, detail="Link reached its maximum download count.")
 
-    if row["expiry_hours"] != 0:
-        expires_at = row["expires_at"]
-        if isinstance(expires_at, str):
-            expires_at = datetime.fromisoformat(expires_at)
-        if datetime.utcnow().astimezone() > expires_at:
-            conn.close()
-            raise HTTPException(status_code=410, detail="This transfer link has expired.")
-
-    stored_hash = row["password_hash"]
-    if stored_hash:
+    if row["password_hash"]:
         user_pass = payload.password if payload else None
-        if not user_pass:
+        if not user_pass or hashlib.sha256(user_pass.encode()).hexdigest() != row["password_hash"]:
             conn.close()
-            raise HTTPException(status_code=401, detail="Passcode required to download this file.")
-        
-        computed_hash = hashlib.sha256(user_pass.encode()).hexdigest()
-        if computed_hash != stored_hash and user_pass != stored_hash:
-            conn.close()
-            raise HTTPException(status_code=401, detail="Incorrect passcode entered.")
+            raise HTTPException(status_code=401, detail="Incorrect passcode.")
 
-    try:
-        download_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": R2_BUCKET_NAME,
-                "Key": row["s3_key"],
-                "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'
-            },
-            ExpiresIn=3600
-        )
-    except Exception as e:
-        conn.close()
-        raise HTTPException(status_code=500, detail=f"Presign failed: {str(e)}")
-
+    url = s3_client.generate_presigned_url("get_object", Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'}, ExpiresIn=3600)
     new_count = row["downloads"] + 1
     cursor.execute("UPDATE shares SET downloads = %s WHERE id = %s", (new_count, share_id))
     conn.commit()
 
-    # If this download reaches or exceeds max_downloads (Burn-on-Read), shred the object in R2 immediately
     if max_downloads > 0 and new_count >= max_downloads:
         try:
             s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
@@ -312,7 +347,7 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
             pass
 
     conn.close()
-    return {"download_url": download_url}
+    return {"download_url": url}
 
 @app.get("/api/user-profile")
 async def get_user_profile(user_id: str):
@@ -321,52 +356,9 @@ async def get_user_profile(user_id: str):
     cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
     row = cursor.fetchone()
     conn.close()
-
     if not row:
         return {"tier": "free", "user_id": user_id}
     return {"tier": row["tier"], "email": row["email"], "user_id": row["user_id"]}
-
-@app.get("/api/user-shares")
-async def get_user_shares(user_id: str):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [
-        {
-            "id": r["id"],
-            "filename": r["filename"],
-            "filesize_mb": r["filesize_mb"],
-            "downloads": r["downloads"],
-            "expires_at": "Never" if r["expiry_hours"] == 0 else str(r["expires_at"]),
-            "created_at": str(r["created_at"])
-        }
-        for r in rows
-    ]
-
-@app.delete("/api/shares/{share_id}")
-async def delete_user_share(share_id: str, user_id: str):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s AND user_id = %s", (share_id, user_id))
-    row = cursor.fetchone()
-
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Vault not found or unauthorized.")
-
-    try:
-        s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
-    except Exception:
-        pass
-
-    cursor.execute("DELETE FROM shares WHERE id = %s", (share_id,))
-    conn.commit()
-    conn.close()
-
-    return {"status": "deleted"}
 
 @app.post("/api/webhook/lemonsqueezy")
 async def lemon_webhook(request: Request):
@@ -381,10 +373,11 @@ async def lemon_webhook(request: Request):
         if user_id:
             conn = get_db()
             cursor = conn.cursor()
+            # Upgrade user to Pro and expand storage quota to 200 GB
             cursor.execute("""
-                INSERT INTO users (user_id, email, tier)
-                VALUES (%s, %s, 'pro')
-                ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', email = EXCLUDED.email
+                INSERT INTO users (user_id, email, tier, storage_quota_bytes)
+                VALUES (%s, %s, 'pro', 214748364800)
+                ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', storage_quota_bytes = 214748364800, email = EXCLUDED.email
             """, (user_id, user_email))
             conn.commit()
             conn.close()
