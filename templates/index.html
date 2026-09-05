@@ -404,49 +404,86 @@
     </div>
   </section>
 
-  <!-- Security FAQ Accordion -->
+  <!-- Expanded Security & Drive FAQ Accordion -->
   <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
-    <div class="text-center mb-10">
-      <h3 class="text-2xl font-bold text-white">Frequently Asked Questions</h3>
+    <div class="text-center mb-12">
+      <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+        Knowledge Base
+      </span>
+      <h3 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">Frequently Asked Questions</h3>
+      <p class="text-xs text-slate-400 max-w-md mx-auto mt-2">
+        Everything you need to know about encrypted transfers, permanent drive storage, and zero-knowledge privacy.
+      </p>
     </div>
+
     <div class="space-y-4">
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
-        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+          <span>Can I use Privora Drive to free up space on my phone or laptop?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          Yes. You can upload large 4K video reels, photo libraries, PDFs, and disk archives into your encrypted Privora Drive vault (5 GB Free or 200 GB on Pro). Once uploaded, you can safely remove them from your phone or PC storage and download or stream them whenever needed.
+        </p>
+      </details>
+
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
           <span>What is the difference between Privora Transfer and Privora Drive?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          Privora Transfer creates temporary, time-limited download links (or Burn-on-Read links) that self-destruct. Privora Drive is your encrypted personal vault that permanently stores files (5 GB on Free, 200 GB on Pro) until you delete them.
+          <strong>Privora Transfer</strong> is built for quick, disposable handoffs—links automatically expire (1h to 72h) or self-destruct after 1 download. <strong>Privora Drive</strong> is a permanent cloud file manager where your uploaded media stays safely preserved until you intentionally delete it.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
-        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
-          <span>Can Privora or its cloud operators inspect my files?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+          <span>Can Privora, hosting providers, or third parties view my files?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          No. Passcodes and encryption keys are computed client-side. Privora stores encrypted blobs across Cloudflare R2 edge locations without storing your decryption keys in our databases.
+          No. Privora operates on zero-knowledge architecture. When passcodes are used, key derivation occurs on your local browser. Privora stores encrypted blobs across Cloudflare R2 edge locations without storing your plaintext passwords or keys in our databases.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
-        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
-          <span>How does "Burn on Read" work?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+          <span>How does the "Burn on Read" feature work?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          If you set "Max Downloads" to 1, the file is automatically purged from edge storage the exact millisecond the recipient's download stream finishes.
+          When "Max Downloads" is set to <strong>1 (Burn on Read 🔥)</strong>, the file object is permanently purged from Cloudflare R2 edge servers the exact millisecond the recipient's download stream completes. Any subsequent access displays a permanent expiration notice.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
-        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
-          <span>What file extensions are supported?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+          <span>Can I share files stored in my Privora Drive with others?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          All binary formats are supported: video reels (MP4, MOV, ProRes), spreadsheets (XLSX, CSV), documents (PDF, DOCX), archives (ZIP, TAR, 7Z), and audio formats.
+          Yes. In your Drive dashboard, clicking the <strong>Share Link</strong> button next to any stored file copies a direct, secure presigned download link to your clipboard without re-uploading the data.
+        </p>
+      </details>
+
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+          <span>What happens if I reach the 5 GB Free Drive limit?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          Your existing files remain completely secure and downloadable. To upload more files, you can delete old items to free up space or upgrade to <strong>Privora Pro ($4/mo)</strong> for 200 GB of drive storage and 50 GB single uploads.
+        </p>
+      </details>
+
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
+        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+          <span>Are downloads capped or bandwidth-throttled?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          No. Because Privora is powered by Cloudflare R2's zero-egress edge infrastructure, downloads are never throttled, and transfer recipients do not need an account to download files.
         </p>
       </details>
     </div>
