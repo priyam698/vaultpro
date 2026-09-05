@@ -38,7 +38,7 @@
 
     @media print {
       @page { size: auto; margin: 0mm !important; }
-      header, aside, #zoomControls, #floatingAssignBtn, #uploadPromptContainer, #signerModal, #sendLinkModal, #recipientBanner, button, .no-print {
+      header, aside, #zoomControls, #floatingAssignBtn, #uploadPromptContainer, #signerModal, #sendLinkModal, #recipientBanner, #submittedSuccessModal, button, .no-print {
         display: none !important;
       }
       body, html { background: #ffffff !important; color: #000000 !important; margin: 0 !important; padding: 0 !important; }
@@ -54,30 +54,48 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
-  <!-- RECIPIENT VIRTUAL SIGNING BANNER -->
-  <div id="recipientBanner" class="hidden bg-gradient-to-r from-indigo-900 via-indigo-700 to-purple-800 text-white px-6 py-3 border-b border-indigo-400/30 flex items-center justify-between z-40 sticky top-0 shadow-lg no-print">
+  <!-- RECIPIENT TOP BANNER -->
+  <div id="recipientBanner" class="hidden bg-gradient-to-r from-indigo-900 via-indigo-700 to-purple-800 text-white px-6 py-3.5 border-b border-indigo-400/30 flex items-center justify-between z-40 sticky top-0 shadow-lg no-print">
     <div class="flex items-center gap-3">
       <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
       <p class="text-xs sm:text-sm font-semibold">
-        Hello <strong id="bannerSignerName" class="text-indigo-200">Priyam</strong>! You have been invited to sign this document virtually. Click the signature box below to place your signature.
+        Hello <strong id="bannerSignerName" class="text-indigo-200">Priyam</strong>! Click the blue signature box on the document to sign, then submit.
       </p>
     </div>
-    <button onclick="document.getElementById('recipientBanner').classList.add('hidden')" class="text-xs font-bold text-indigo-200 hover:text-white">✕ Dismiss</button>
   </div>
 
-  <!-- SIGNATURE MODAL -->
+  <!-- RECIPIENT SUCCESS MODAL -->
+  <div id="submittedSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-emerald-500/40 shadow-2xl relative text-center">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 text-2xl">
+        ✓
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Document Signed & Saved!</h3>
+      <p class="text-xs text-slate-300 leading-relaxed mb-6">
+        Your signed document has been permanently saved to the vault and the sender has been notified. You can download a signed copy for your records.
+      </p>
+      <div class="space-y-2">
+        <button onclick="exportCompositePNG()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition cursor-pointer">
+          Download Your Signed Copy
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE INPUT MODAL -->
   <div id="signerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative text-slate-100">
       
       <div class="flex justify-between items-start mb-2">
-        <h3 class="text-xl font-extrabold text-white">Who's signing this field?</h3>
-        <button onclick="closeSignerModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        <h3 id="modalTitleText" class="text-xl font-extrabold text-white">Sign Document</h3>
+        <button onclick="closeSignerModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
       </div>
-      <p class="text-xs text-slate-400 leading-relaxed mb-5">
-        Choose who should sign this field. Pick "I'm the signer" to sign now, or "Someone else" to generate a virtual signing link.
+      <p id="modalSubtitleText" class="text-xs text-slate-400 leading-relaxed mb-5">
+        Provide your signature below by typing, drawing, or uploading an image.
       </p>
 
-      <div class="grid grid-cols-2 gap-2 p-1.5 bg-black/50 border border-white/10 rounded-2xl mb-6">
+      <!-- Pill Selector (Hidden in Recipient Mode) -->
+      <div id="signerRoleSelector" class="grid grid-cols-2 gap-2 p-1.5 bg-black/50 border border-white/10 rounded-2xl mb-6">
         <button id="btnSignerMe" onclick="selectSignerType('me')" class="py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition cursor-pointer">
           I'm the signer
         </button>
@@ -86,7 +104,7 @@
         </button>
       </div>
 
-      <!-- VIEW A: I'm the signer -->
+      <!-- VIEW A: Signature Canvas & Typing -->
       <div id="signerMeContainer" class="space-y-4">
         <div class="flex items-center justify-between border-b border-white/10 pb-2.5 text-xs font-semibold">
           <div class="flex items-center gap-4">
@@ -105,7 +123,7 @@
 
         <div id="sigTypePane" class="space-y-3">
           <div class="h-32 rounded-2xl bg-[#050711] border border-white/10 flex items-center justify-center p-4 relative overflow-hidden">
-            <input id="sigNameInput" type="text" placeholder="Type your full legal name" value="Priyam Rana"
+            <input id="sigNameInput" type="text" placeholder="Type your full legal name" value="Priyam"
                    class="w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 cursive-font-0 focus:outline-none">
           </div>
           <div class="flex items-center justify-between text-xs">
@@ -119,7 +137,7 @@
         <div id="sigDrawPane" class="space-y-2 hidden">
           <div class="h-36 rounded-2xl bg-[#050711] border border-white/10 relative overflow-hidden flex items-center justify-center">
             <canvas id="sigCanvas" width="450" height="144" class="w-full h-full cursor-crosshair touch-none"></canvas>
-            <span id="drawPlaceholder" class="absolute pointer-events-none text-slate-600 text-xs font-medium">Draw your signature with mouse or finger</span>
+            <span id="drawPlaceholder" class="absolute pointer-events-none text-slate-600 text-xs font-medium">Draw your signature with mouse or touch</span>
           </div>
         </div>
 
@@ -135,7 +153,7 @@
         </div>
       </div>
 
-      <!-- VIEW B: Someone else -->
+      <!-- VIEW B: Someone else setup (Sender only) -->
       <div id="signerOtherContainer" class="space-y-3.5 hidden">
         <div>
           <label class="block text-[11px] font-semibold text-slate-300 mb-1">Signer's Name</label>
@@ -146,9 +164,6 @@
           <label class="block text-[11px] font-semibold text-slate-300 mb-1">Signer's Email Address</label>
           <input id="otherSignerEmail" type="email" placeholder="priyam@example.com"
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
-        </div>
-        <div class="p-3.5 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl text-xs text-indigo-300 leading-relaxed">
-          When you click "Next", Privora creates a <strong>tokenized web signing URL</strong>. When the recipient opens the link, the document loads automatically and they can sign directly online.
         </div>
       </div>
 
@@ -164,15 +179,15 @@
     </div>
   </div>
 
-  <!-- VIRTUAL SIGNING INVITATION LINK MODAL -->
+  <!-- SENDER LINK SHARING MODAL -->
   <div id="sendLinkModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative text-center">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
       </div>
       <h3 class="text-xl font-bold text-white mb-2">Virtual Signing Link Ready</h3>
-      <p class="text-xs text-slate-300 leading-relaxed mb-5">
-        Send this interactive link to <strong id="inviteRecipientLabel" class="text-indigo-400">Priyam</strong>. When they open it, the document will load with their signature box placed and ready:
+      <p class="text-xs text-slate-300 leading-relaxed mb-4">
+        Send this link to <strong id="inviteRecipientLabel" class="text-indigo-400">Priyam</strong>. As soon as they sign, the status below updates automatically:
       </p>
 
       <div class="flex items-center gap-2 mb-4">
@@ -182,9 +197,19 @@
         </button>
       </div>
 
+      <div id="statusTrackerBox" class="p-4 rounded-2xl bg-black/40 border border-white/10 mb-4 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 text-xs">
+          <span id="trackerDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="trackerText" class="text-slate-300 font-medium">Waiting for recipient to sign...</span>
+        </div>
+        <a id="completedDownloadBtn" href="#" target="_blank" class="hidden px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">
+          Download Completed Copy ↓
+        </a>
+      </div>
+
       <div class="flex gap-2">
         <button onclick="testLinkInNewTab()" class="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-indigo-300 text-xs font-semibold border border-white/10 transition cursor-pointer">
-          Test Sign as Recipient →
+          Test Sign in New Tab →
         </button>
         <button onclick="closeSendLinkModal()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer">
           Done
@@ -198,11 +223,11 @@
     <div class="flex items-center gap-4">
       <a href="/" class="flex items-center gap-2 text-slate-400 hover:text-white transition text-xs font-semibold">
         <span>✕</span>
-        <span>Prepare for signature</span>
+        <span id="topBarTitle">Prepare for signature</span>
       </a>
       <span class="text-white/20">|</span>
       <span id="fieldsStatusIndicator" class="text-xs text-slate-400">No fields placed yet</span>
-      <button onclick="clearAllFields()" class="text-xs text-slate-500 hover:text-rose-400 transition ml-2 cursor-pointer">Clear All</button>
+      <button id="clearAllBtn" onclick="clearAllFields()" class="text-xs text-slate-500 hover:text-rose-400 transition ml-2 cursor-pointer">Clear All</button>
     </div>
 
     <div class="flex items-center gap-3">
@@ -217,8 +242,8 @@
 
   <!-- STUDIO WORKSPACE -->
   <div class="studio-wrapper flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto overflow-hidden">
-    <!-- LEFT SIDEBAR -->
-    <aside class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto no-print">
+    <!-- SENDER SIDEBAR (Auto-hidden in Recipient Mode) -->
+    <aside id="senderSidebar" class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto no-print">
       <div>
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Signers</h4>
         <p id="signersSummary" class="text-xs text-slate-400 leading-relaxed">
@@ -245,10 +270,8 @@
       </div>
     </aside>
 
-    <!-- RIGHT CANVAS WORKSPACE -->
+    <!-- MAIN CANVAS WORKSPACE -->
     <main class="flex-1 flex flex-col items-center justify-start p-6 relative overflow-y-auto min-h-[550px]">
-      
-      <!-- Upload Initial State -->
       <div id="uploadPromptContainer" class="max-w-md w-full my-auto text-center obsidian-card p-8 rounded-3xl border border-dashed border-white/20 hover:border-indigo-400/60 transition cursor-pointer no-print"
            onclick="document.getElementById('docFileInput').click()">
         <input type="file" id="docFileInput" accept="application/pdf, image/png, image/jpeg" class="hidden" onchange="loadUserDocument(event)">
@@ -259,7 +282,6 @@
         <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or invoice</p>
       </div>
 
-      <!-- Live Stage -->
       <div id="documentStage" class="hidden relative max-w-3xl w-full bg-white rounded-xl shadow-2xl border border-slate-700 select-none overflow-hidden">
         <canvas id="pdfCanvas" class="w-full h-auto block"></canvas>
         <img id="imgViewer" src="" class="hidden w-full h-auto block object-contain" />
@@ -268,41 +290,33 @@
           <span>Assign a new signature field</span>
         </button>
 
-        <!-- DRAGGABLE SIGNATURE TARGET BOX -->
+        <!-- SIGNATURE TARGET BOX -->
         <div id="signatureTargetBox" 
              class="absolute hidden border-2 border-dashed border-indigo-600 bg-indigo-50/95 rounded-xl flex items-center justify-between px-3 py-2 cursor-grab z-30 transition-shadow select-none shadow-md"
              style="width: 230px; height: 68px; left: 100px; top: 200px;">
-          
           <div class="flex items-center gap-2 pointer-events-none w-full" id="boxContentWrapper">
             <span class="drag-indicator text-indigo-400 text-xs font-mono select-none">⋮⋮</span>
             <div id="targetBoxContent" class="text-indigo-950 font-bold text-xs font-mono truncate w-full flex items-center">
               ✎ Click to Sign
             </div>
           </div>
-
-          <button type="button" onclick="removeSignatureBox(event)" class="text-slate-400 hover:text-rose-600 font-bold text-xs p-1 ml-1 cursor-pointer no-print">✕</button>
+          <button id="boxCloseBtn" type="button" onclick="removeSignatureBox(event)" class="text-slate-400 hover:text-rose-600 font-bold text-xs p-1 ml-1 cursor-pointer no-print">✕</button>
         </div>
       </div>
 
-      <!-- Zoom Bar -->
       <div id="zoomControls" class="fixed bottom-6 right-8 bg-[#090d1a] border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-3 text-xs text-slate-400 shadow-xl z-20 no-print">
         <button onclick="adjustZoom(-0.1)" class="hover:text-white font-bold cursor-pointer">−</button>
         <span id="zoomLabel" class="font-mono text-[11px]">100%</span>
         <button onclick="adjustZoom(0.1)" class="hover:text-white font-bold cursor-pointer">+</button>
       </div>
-
     </main>
   </div>
 
-  <!-- JAVASCRIPT ENGINE -->
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     let currentDocument = null;
-    let currentPdfPage = 1;
-    let totalPdfPages = 1;
     let currentScale = 1.0;
-
     let signerType = 'me';
     let sigMode = 'type';
     let fontStyleChoice = 0;
@@ -315,6 +329,7 @@
     let isDraggingBox = false;
     let hasMovedDuringDrag = false;
     let currentDocId = null;
+    let statusPollingInterval = null;
 
     const urlParams = new URLSearchParams(window.location.search);
     const inviteRecipient = urlParams.get("invite");
@@ -322,12 +337,38 @@
     const paramX = urlParams.get("x");
     const paramY = urlParams.get("y");
 
-    // Recipient Link Ingestion Engine
+    // RECIPIENT SESSION AUTO-LOAD & UI CLEANUP
     window.addEventListener("DOMContentLoaded", async () => {
       if (inviteRecipient) {
+        // 1. Hide sender-only UI elements
+        const senderSidebar = document.getElementById("senderSidebar");
+        if (senderSidebar) senderSidebar.classList.add("hidden");
+
+        const floatingBtn = document.getElementById("floatingAssignBtn");
+        if (floatingBtn) floatingBtn.classList.add("hidden");
+
+        const clearBtn = document.getElementById("clearAllBtn");
+        if (clearBtn) clearBtn.classList.add("hidden");
+
+        const roleSelector = document.getElementById("signerRoleSelector");
+        if (roleSelector) roleSelector.classList.add("hidden");
+
+        const boxClose = document.getElementById("boxCloseBtn");
+        if (boxClose) boxClose.classList.add("hidden");
+
+        // 2. Configure recipient labels & buttons
+        document.getElementById("topBarTitle").innerText = "Sign Document Online";
         document.getElementById("recipientBanner").classList.remove("hidden");
         document.getElementById("bannerSignerName").innerText = inviteRecipient;
         document.getElementById("sigNameInput").value = inviteRecipient;
+        document.getElementById("modalTitleText").innerText = `Sign as ${inviteRecipient}`;
+        document.getElementById("modalSubtitleText").innerText = "Provide your signature below to seal this document.";
+
+        const pBtn = document.getElementById("primaryActionBtn");
+        pBtn.innerText = "Submit Signed Document";
+        pBtn.className = "px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition cursor-pointer";
+
+        signerType = 'me';
       }
 
       if (paramX && paramY) {
@@ -335,24 +376,20 @@
         signatureY = parseInt(paramY, 10);
       }
 
-      // If document ID is in URL, fetch and render automatically
       if (docIdParam) {
         currentDocId = docIdParam;
         try {
           const res = await fetch(`/api/sign/document/${docIdParam}`);
-          if (!res.ok) throw new Error("Document link expired or not found");
+          if (!res.ok) throw new Error("Document not found or expired");
           const data = await res.json();
 
           document.getElementById("uploadPromptContainer").classList.add("hidden");
           document.getElementById("documentStage").classList.remove("hidden");
 
-          // Load PDF directly into canvas
           const loadingTask = pdfjsLib.getDocument(data.url);
           currentDocument = await loadingTask.promise;
-          totalPdfPages = currentDocument.numPages;
           renderPdfPage(1);
 
-          // Place the interactive recipient box
           setupRecipientBox(signatureX, signatureY, inviteRecipient || "Recipient");
         } catch (err) {
           alert("Error loading document: " + err.message);
@@ -360,7 +397,6 @@
       }
     });
 
-    // Upload & Render Document
     async function loadUserDocument(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -369,7 +405,6 @@
       document.getElementById("uploadPromptContainer").classList.add("hidden");
       document.getElementById("documentStage").classList.remove("hidden");
 
-      // Upload in background to Cloudflare R2
       try {
         const uploadRes = await fetch(`/api/sign/upload?filename=${encodeURIComponent(file.name)}`, {
           method: "POST",
@@ -388,7 +423,6 @@
           const typedarray = new Uint8Array(e.target.result);
           pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
             currentDocument = pdf;
-            totalPdfPages = pdf.numPages;
             renderPdfPage(1);
           });
         };
@@ -411,14 +445,12 @@
         const canvas = document.getElementById('pdfCanvas');
         const ctx = canvas.getContext('2d');
         const viewport = page.getViewport({ scale: 2.0 });
-
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         page.render({ canvasContext: ctx, viewport: viewport });
       });
     }
 
-    // Interactive Recipient Box
     function setupRecipientBox(x, y, name) {
       const targetBox = document.getElementById("signatureTargetBox");
       const targetContent = document.getElementById("targetBoxContent");
@@ -426,10 +458,13 @@
       targetBox.style.top = `${y}px`;
       targetBox.classList.remove("hidden");
       targetBox.classList.add("recipient-glow");
+      targetBox.classList.remove("cursor-grab");
+      targetBox.classList.add("cursor-pointer");
+
       targetContent.innerHTML = `<span class="text-indigo-900 font-bold">✎ Click here to sign, ${name}</span>`;
       document.getElementById("fieldsStatusIndicator").innerText = `Signature Required: ${name}`;
 
-      // Clicking opens signature modal directly for Priyam
+      // Open signature dialog immediately when clicked by recipient
       targetBox.onclick = () => {
         signerType = 'me';
         document.getElementById("sigNameInput").value = name;
@@ -439,6 +474,8 @@
 
     const stage = document.getElementById("documentStage");
     stage.addEventListener("click", function(e) {
+      // Disable canvas clicking for new fields if in recipient view
+      if (inviteRecipient) return;
       if (hasMovedDuringDrag) { hasMovedDuringDrag = false; return; }
       if (e.target.id === 'floatingAssignBtn' || e.target.closest('#signatureTargetBox')) return;
 
@@ -560,9 +597,9 @@
       targetBox.style.top = `${signatureY}px`;
       targetBox.classList.remove("hidden");
 
-      if (signerType === 'me') {
+      if (signerType === 'me' || inviteRecipient) {
         if (sigMode === 'type') {
-          const val = document.getElementById("sigNameInput").value.trim() || "Priyam Rana";
+          const val = document.getElementById("sigNameInput").value.trim() || (inviteRecipient || "Priyam Rana");
           targetContent.innerHTML = `<span class="text-3xl text-slate-900 ${fontFamilies[fontStyleChoice]}">${val}</span>`;
         } else if (sigMode === 'draw') {
           targetContent.innerHTML = `<img src="${drawCanvas.toDataURL()}" class="max-h-12 max-w-[150px] object-contain filter invert" />`;
@@ -570,25 +607,49 @@
           targetContent.innerHTML = `<img src="${activeSignatureDataUrl}" class="max-h-12 max-w-[150px] object-contain" />`;
         }
 
-        document.getElementById("signersSummary").innerText = "Signed. Click 'Download Signed PDF' to save.";
-        actionBtn.innerText = "Download Signed PDF";
+        if (inviteRecipient) {
+          actionBtn.innerText = "Submit Signed Document";
+          actionBtn.className = "px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition cursor-pointer";
+        } else {
+          actionBtn.innerText = "Download Signed PDF";
+        }
         targetBox.classList.remove("recipient-glow");
       } else {
         const oName = document.getElementById("otherSignerName").value.trim() || "Priyam";
         targetContent.innerHTML = `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span><span>Sign here: <strong>${oName}</strong></span></div>`;
-        document.getElementById("signersSummary").innerText = `Assigned to ${oName}. Click 'Next: Generate Link' to share their virtual signing portal.`;
         actionBtn.innerText = "Next: Generate Link";
         targetBox.classList.add("recipient-glow");
       }
 
-      document.getElementById("fieldsStatusIndicator").innerText = "1 Signature Field Configured (Draggable)";
       actionBtn.disabled = false;
       document.getElementById("downloadImageBtn").disabled = false;
       closeSignerModal();
     }
 
-    function handleFinalizeAction() {
-      if (signerType === 'me') {
+    async function handleFinalizeAction() {
+      if (inviteRecipient) {
+        const pBtn = document.getElementById("primaryActionBtn");
+        pBtn.disabled = true;
+        pBtn.innerText = "Saving to cloud...";
+
+        const compositeBlob = await generateCompositeBlob();
+
+        try {
+          const res = await fetch(`/api/sign/complete/${currentDocId}`, {
+            method: "POST",
+            headers: { "Content-Type": "image/png" },
+            body: compositeBlob
+          });
+
+          if (!res.ok) throw new Error("Could not save signed file.");
+          document.getElementById("submittedSuccessModal").classList.remove("hidden");
+        } catch (err) {
+          alert("Error submitting signature: " + err.message);
+        } finally {
+          pBtn.disabled = false;
+          pBtn.innerText = "Submit Signed Document";
+        }
+      } else if (signerType === 'me') {
         exportCleanPrintPDF();
       } else {
         const oName = document.getElementById("otherSignerName").value.trim() || "Priyam";
@@ -596,7 +657,63 @@
         document.getElementById("recipientSigningUrl").value = inviteUrl;
         document.getElementById("inviteRecipientLabel").innerText = oName;
         document.getElementById("sendLinkModal").classList.remove("hidden");
+
+        startStatusPolling(currentDocId);
       }
+    }
+
+    function startStatusPolling(docId) {
+      if (statusPollingInterval) clearInterval(statusPollingInterval);
+      const dot = document.getElementById("trackerDot");
+      const text = document.getElementById("trackerText");
+      const dlBtn = document.getElementById("completedDownloadBtn");
+
+      statusPollingInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/sign/check-status/${docId}`);
+          const data = await res.json();
+          if (data.status === 'completed') {
+            clearInterval(statusPollingInterval);
+            dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+            text.innerHTML = "<strong class='text-emerald-400'>Priyam has signed this document!</strong>";
+            dlBtn.href = data.download_url;
+            dlBtn.classList.remove("hidden");
+          }
+        } catch(e) {}
+      }, 3000);
+    }
+
+    function generateCompositeBlob() {
+      return new Promise((resolve) => {
+        const stage = document.getElementById("documentStage");
+        const canvas = document.createElement("canvas");
+        const baseCanvas = document.getElementById("pdfCanvas");
+        const baseImg = document.getElementById("imgViewer");
+
+        canvas.width = baseCanvas.classList.contains("hidden") ? baseImg.naturalWidth : baseCanvas.width;
+        canvas.height = baseCanvas.classList.contains("hidden") ? baseImg.naturalHeight : baseCanvas.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!baseCanvas.classList.contains("hidden")) {
+          ctx.drawImage(baseCanvas, 0, 0);
+        } else {
+          ctx.drawImage(baseImg, 0, 0);
+        }
+
+        const targetBox = document.getElementById("signatureTargetBox");
+        const stageRect = stage.getBoundingClientRect();
+        const scaleX = canvas.width / stageRect.width;
+        const scaleY = canvas.height / stageRect.height;
+
+        const sigX = parseFloat(targetBox.style.left) * scaleX;
+        const sigY = (parseFloat(targetBox.style.top) + 40) * scaleY;
+
+        ctx.font = `${Math.round(30 * scaleX)}px '${fontNames[fontStyleChoice]}', cursive`;
+        ctx.fillStyle = "#0f172a";
+        ctx.fillText(document.getElementById("sigNameInput").value || (inviteRecipient || "Priyam Rana"), sigX, sigY);
+
+        canvas.toBlob((blob) => resolve(blob), "image/png");
+      });
     }
 
     function copyRecipientLink() {
@@ -628,37 +745,11 @@
       }, 150);
     }
 
-    function exportCompositePNG() {
-      const stage = document.getElementById("documentStage");
-      const canvas = document.createElement("canvas");
-      const baseCanvas = document.getElementById("pdfCanvas");
-      const baseImg = document.getElementById("imgViewer");
-
-      canvas.width = baseCanvas.classList.contains("hidden") ? baseImg.naturalWidth : baseCanvas.width;
-      canvas.height = baseCanvas.classList.contains("hidden") ? baseImg.naturalHeight : baseCanvas.height;
-
-      const ctx = canvas.getContext("2d");
-      if (!baseCanvas.classList.contains("hidden")) {
-        ctx.drawImage(baseCanvas, 0, 0);
-      } else {
-        ctx.drawImage(baseImg, 0, 0);
-      }
-
-      const targetBox = document.getElementById("signatureTargetBox");
-      const stageRect = stage.getBoundingClientRect();
-      const scaleX = canvas.width / stageRect.width;
-      const scaleY = canvas.height / stageRect.height;
-
-      const sigX = parseFloat(targetBox.style.left) * scaleX;
-      const sigY = (parseFloat(targetBox.style.top) + 40) * scaleY;
-
-      ctx.font = `${Math.round(30 * scaleX)}px '${fontNames[fontStyleChoice]}', cursive`;
-      ctx.fillStyle = "#0f172a";
-      ctx.fillText(document.getElementById("sigNameInput").value || "Priyam Rana", sigX, sigY);
-
+    async function exportCompositePNG() {
+      const blob = await generateCompositeBlob();
       const link = document.createElement("a");
       link.download = `${document.getElementById("docTitleInput").value || "signed_document"}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = URL.createObjectURL(blob);
       link.click();
     }
 
@@ -682,7 +773,7 @@
       document.getElementById("documentStage").style.transformOrigin = "top center";
     }
 
-    // Drag-and-drop
+    // Drag-and-Drop (Disabled for recipients)
     const box = document.getElementById("signatureTargetBox");
     let startX = 0, startY = 0, initialBoxLeft = 0, initialBoxTop = 0;
 
@@ -690,6 +781,7 @@
     box.addEventListener("touchstart", dragStart, { passive: false });
 
     function dragStart(e) {
+      if (inviteRecipient) return; // Prevent recipient from dragging out of assigned spot
       if (e.target.tagName === 'BUTTON') return;
       isDraggingBox = true;
       hasMovedDuringDrag = false;
