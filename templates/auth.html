@@ -7,25 +7,31 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative">
     <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 font-black text-2xl mb-2">V</div>
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 font-bold text-white text-xl mb-3 shadow-lg shadow-indigo-500/20">V</div>
       <h2 class="text-2xl font-bold" id="formTitle">Sign In to VaultPro</h2>
       <p class="text-xs text-slate-400 mt-1">Manage private vaults, monitor views, and upgrade storage</p>
     </div>
 
-    <div class="space-y-4">
+    <!-- Login / Sign Up Form -->
+    <div id="authFormSection" class="space-y-4">
       <div>
         <label class="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
-        <input id="email" type="email" placeholder="name@domain.com" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        <input id="email" type="email" placeholder="name@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
       </div>
       <div>
-        <label class="text-xs font-semibold text-slate-400 block mb-1">Password</label>
-        <input id="password" type="password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+        <div class="flex items-center justify-between mb-1">
+          <label class="text-xs font-semibold text-slate-400">Password</label>
+          <button type="button" id="forgotPwdBtn" onclick="toggleForgotView(true)" class="text-xs text-indigo-400 hover:text-indigo-300 transition">Forgot password?</button>
+        </div>
+        <input id="password" type="password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
       </div>
 
-      <button id="authBtn" onclick="handleAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-semibold text-sm transition">Sign In</button>
-      
+      <button id="authBtn" onclick="handleAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
+        Sign In
+      </button>
+
       <p id="authMsg" class="text-xs text-center font-medium hidden"></p>
 
       <div class="text-center text-xs text-slate-400 pt-2">
@@ -33,15 +39,61 @@
         <button onclick="toggleMode()" id="toggleBtn" class="text-indigo-400 font-semibold hover:underline ml-1">Create Account</button>
       </div>
     </div>
+
+    <!-- Forgot Password View -->
+    <div id="forgotSection" class="space-y-4 hidden">
+      <p class="text-xs text-slate-400">Enter your email address and we'll send you a password reset link.</p>
+      <div>
+        <label class="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
+        <input id="forgotEmail" type="email" placeholder="name@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+      </div>
+
+      <button id="sendResetBtn" onclick="handleForgotPassword()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
+        Send Reset Link
+      </button>
+
+      <p id="forgotMsg" class="text-xs text-center font-medium hidden"></p>
+
+      <div class="text-center text-xs text-slate-400 pt-2">
+        <button onclick="toggleForgotView(false)" class="text-slate-400 hover:text-white transition font-semibold">
+          &larr; Back to Sign In
+        </button>
+      </div>
+    </div>
+
+    <!-- Set New Password View (Triggered via email link) -->
+    <div id="newPasswordSection" class="space-y-4 hidden">
+      <p class="text-xs text-slate-400">Create a new secure password for your account.</p>
+      <div>
+        <label class="text-xs font-semibold text-slate-400 block mb-1">New Password</label>
+        <input id="newPasswordInput" type="password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+      </div>
+
+      <button id="updatePasswordBtn" onclick="handleUpdatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
+        Update Password
+      </button>
+
+      <p id="newPassMsg" class="text-xs text-center font-medium hidden"></p>
+    </div>
   </div>
 
   <script>
-    // Replace these with your Supabase Project URL & Anon Key from Settings -> API
     const SUPABASE_URL = "{{ supabase_url }}";
     const SUPABASE_ANON = "{{ supabase_anon }}";
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     let isSignUp = false;
+
+    // Detect recovery flow from reset password email redirect
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash;
+      if (hash.includes('type=recovery')) {
+        document.getElementById('formTitle').innerText = 'Set New Password';
+        document.getElementById('authFormSection').classList.add('hidden');
+        document.getElementById('forgotSection').classList.add('hidden');
+        document.getElementById('newPasswordSection').classList.remove('hidden');
+      }
+    });
 
     function toggleMode() {
       isSignUp = !isSignUp;
@@ -49,33 +101,114 @@
       document.getElementById('authBtn').innerText = isSignUp ? "Create Account" : "Sign In";
       document.getElementById('toggleText').innerText = isSignUp ? "Already have an account?" : "Don't have an account?";
       document.getElementById('toggleBtn').innerText = isSignUp ? "Sign In" : "Create Account";
+      document.getElementById('forgotPwdBtn').classList.toggle('hidden', isSignUp);
+      hideMsg('authMsg');
+    }
+
+    function toggleForgotView(showForgot) {
+      document.getElementById('formTitle').innerText = showForgot ? "Reset Your Password" : (isSignUp ? "Create Your Vault Account" : "Sign In to VaultPro");
+      document.getElementById('authFormSection').classList.toggle('hidden', showForgot);
+      document.getElementById('forgotSection').classList.toggle('hidden', !showForgot);
+      if (showForgot) {
+        document.getElementById('forgotEmail').value = document.getElementById('email').value.trim();
+      }
+      hideMsg('forgotMsg');
+      hideMsg('authMsg');
     }
 
     async function handleAuth() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      const msg = document.getElementById('authMsg');
 
       if (!email || !password) {
-        msg.className = "text-xs text-center font-medium text-rose-400";
-        msg.innerText = "Please enter both email and password.";
-        msg.classList.remove('hidden');
+        showMsg('authMsg', "Please enter both email and password.", "text-rose-400");
         return;
       }
 
-      msg.className = "text-xs text-center font-medium text-amber-400";
-      msg.innerText = "Authenticating...";
-      msg.classList.remove('hidden');
+      showMsg('authMsg', "Authenticating...", "text-amber-400");
 
-      let res = isSignUp ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
+      let res = isSignUp 
+        ? await sb.auth.signUp({ email, password }) 
+        : await sb.auth.signInWithPassword({ email, password });
 
       if (res.error) {
-        msg.className = "text-xs text-center font-medium text-rose-400";
-        msg.innerText = res.error.message;
+        showMsg('authMsg', res.error.message, "text-rose-400");
       } else {
-        localStorage.setItem("vp_token", res.data.session.access_token);
+        if (res.data?.session?.access_token) {
+          localStorage.setItem("vp_token", res.data.session.access_token);
+        }
+        if (res.data?.user?.id) {
+          localStorage.setItem("user_id", res.data.user.id);
+        }
         window.location.href = "/dashboard";
       }
+    }
+
+    async function handleForgotPassword() {
+      const email = document.getElementById('forgotEmail').value.trim();
+      const btn = document.getElementById('sendResetBtn');
+
+      if (!email) {
+        showMsg('forgotMsg', "Please enter your email address.", "text-rose-400");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Sending...";
+      showMsg('forgotMsg', "Sending reset instructions...", "text-amber-400");
+
+      const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth#type=recovery`
+      });
+
+      btn.disabled = false;
+      btn.innerText = "Send Reset Link";
+
+      if (error) {
+        showMsg('forgotMsg', error.message, "text-rose-400");
+      } else {
+        showMsg('forgotMsg', "Reset link sent! Check your inbox.", "text-emerald-400");
+      }
+    }
+
+    async function handleUpdatePassword() {
+      const newPassword = document.getElementById('newPasswordInput').value.trim();
+      const btn = document.getElementById('updatePasswordBtn');
+
+      if (!newPassword || newPassword.length < 6) {
+        showMsg('newPassMsg', "Password must be at least 6 characters.", "text-rose-400");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Updating...";
+
+      const { error } = await sb.auth.updateUser({ password: newPassword });
+
+      btn.disabled = false;
+      btn.innerText = "Update Password";
+
+      if (error) {
+        showMsg('newPassMsg', error.message, "text-rose-400");
+      } else {
+        showMsg('newPassMsg', "Password updated! Redirecting...", "text-emerald-400");
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1200);
+      }
+    }
+
+    function showMsg(id, text, colorClass) {
+      const el = document.getElementById(id);
+      el.className = `text-xs text-center font-medium ${colorClass}`;
+      el.innerText = text;
+      el.classList.remove('hidden');
+    }
+
+    function hideMsg(id) {
+      const el = document.getElementById(id);
+      el.classList.add('hidden');
+      el.innerText = '';
     }
   </script>
 </body>
