@@ -46,7 +46,28 @@
   <canvas id="ambientCanvas"></canvas>
   <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
-  <!-- Exceeded Limit Modal Popup -->
+  <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 text-center shadow-2xl relative">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-extrabold text-white mb-2">Free Guest Quota Reached</h3>
+      <p class="text-xs text-slate-300 leading-relaxed mb-6">
+        You have used your <strong>4 complimentary guest transfers</strong>. Create a free account or sign in to keep uploading files with unlimited access.
+      </p>
+      <div class="space-y-2.5">
+        <a href="/auth" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
+          Sign In or Create Free Account
+        </a>
+        <button onclick="closeAuthModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="limitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-rose-500/30 text-center shadow-2xl relative">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
@@ -69,7 +90,6 @@
     </div>
   </div>
 
-  <!-- Navbar -->
   <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
@@ -98,7 +118,6 @@
     </div>
   </header>
 
-  <!-- Hero & Upload Section -->
   <main class="relative z-20 max-w-6xl mx-auto px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
     <div class="lg:col-span-6 space-y-6">
@@ -138,7 +157,7 @@
       <div class="obsidian-card rounded-3xl p-6 sm:p-8 relative">
         <input type="file" id="fileInput" class="hidden">
 
-        <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
+        <div id="dropZone" onclick="handleDropZoneClick()" 
              class="border border-dashed border-white/15 hover:border-indigo-400/80 bg-white/[0.02] hover:bg-indigo-950/20 rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 group">
           
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600/25 to-purple-600/25 border border-white/15 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:border-indigo-400/50 transition duration-300 shadow-lg shadow-indigo-600/20">
@@ -204,7 +223,6 @@
 
   </main>
 
-  <!-- Features & Specifications Section -->
   <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] mt-8 w-full">
     <div class="text-center mb-14">
       <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
@@ -216,7 +234,6 @@
       </p>
     </div>
 
-    <!-- Feature Showcase Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
         <div class="w-11 h-11 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
@@ -249,7 +266,6 @@
       </div>
     </div>
 
-    <!-- Comparison Matrix -->
     <div class="mt-12 obsidian-card rounded-2xl p-6 sm:p-8">
       <h3 class="text-lg font-bold text-white mb-4 text-center">Feature Matrix: VaultPro vs Legacy Storage</h3>
       <div class="overflow-x-auto">
@@ -288,7 +304,6 @@
     </div>
   </section>
 
-  <!-- Pricing Section -->
   <section id="pricing" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
     <div class="text-center mb-14">
       <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
@@ -301,7 +316,6 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
-      <!-- Free Tier Card -->
       <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border border-white/10 hover:border-white/20 transition">
         <div>
           <div class="flex justify-between items-center mb-4">
@@ -342,7 +356,6 @@
         </a>
       </div>
 
-      <!-- Pro Tier Card -->
       <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border-2 border-indigo-500/50 shadow-2xl shadow-indigo-500/20 relative">
         <div class="absolute -top-3.5 right-6 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
           Most Popular
@@ -389,12 +402,10 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
     © 2026 VaultPro Systems. Zero-knowledge architecture powered by Cloudflare R2.
   </footer>
 
-  <!-- Canvas Background Animation Script -->
   <script>
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
@@ -448,9 +459,8 @@
     renderAurora();
   </script>
 
-  <!-- Application Logic, Upload Guard & Tier Check -->
   <script>
-    let userTier = 'free'; // Default to free tier
+    let userTier = 'free';
 
     function getStoredUserId() {
       const directId = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
@@ -524,6 +534,24 @@
         .catch(() => {});
     }
 
+    // Guest Quota Helpers (Max 4 Free Uploads)
+    function getGuestUploadCount() {
+      return parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10);
+    }
+
+    function incrementGuestUploadCount() {
+      const current = getGuestUploadCount();
+      localStorage.setItem("vp_guest_uploads", (current + 1).toString());
+    }
+
+    function showAuthRequiredModal() {
+      document.getElementById("authRequiredModal").classList.remove("hidden");
+    }
+
+    function closeAuthModal() {
+      document.getElementById("authRequiredModal").classList.add("hidden");
+    }
+
     function showLimitModal(sizeMb) {
       const modal = document.getElementById("limitModal");
       const msg = document.getElementById("limitModalMsg");
@@ -534,6 +562,15 @@
 
     function closeLimitModal() {
       document.getElementById("limitModal").classList.add("hidden");
+    }
+
+    function handleDropZoneClick() {
+      // If user is not logged in and has completed 4 uploads, stop them immediately
+      if (!currentUserId && getGuestUploadCount() >= 4) {
+        showAuthRequiredModal();
+        return;
+      }
+      document.getElementById('fileInput').click();
     }
 
     let selectedFile = null;
@@ -556,13 +593,17 @@
     dropZone.addEventListener("drop", (e) => {
       e.preventDefault();
       dropZone.classList.remove("border-indigo-400", "bg-indigo-950/30");
+      if (!currentUserId && getGuestUploadCount() >= 4) {
+        showAuthRequiredModal();
+        return;
+      }
       if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
     });
 
     function handleFile(file) {
       const sizeMb = parseFloat((file.size / (1024 * 1024)).toFixed(2));
 
-      // Guard: 2048 MB (2 GB) free tier limit
+      // Check 2 GB limit
       if (userTier !== 'pro' && sizeMb > 2048) {
         selectedFile = null;
         fileInput.value = "";
@@ -578,6 +619,12 @@
     }
 
     async function initiateUpload() {
+      // 1. Mandatory Login Gate Check
+      if (!currentUserId && getGuestUploadCount() >= 4) {
+        showAuthRequiredModal();
+        return;
+      }
+
       if (!selectedFile) {
         alert("Please select a file to transfer first.");
         return;
@@ -649,6 +696,11 @@
             progressStatus.innerText = "Vault encrypted & ready!";
             progressBar.style.width = "100%";
             progressPercent.innerText = "100%";
+
+            // If user is a guest, count this successful upload toward their 4-upload quota
+            if (!currentUserId) {
+              incrementGuestUploadCount();
+            }
 
             const shareUrl = `${window.location.origin}/share/${data.share_id}`;
             document.getElementById("shareUrlInput").value = shareUrl;
