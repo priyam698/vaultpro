@@ -46,6 +46,7 @@
   <canvas id="ambientCanvas"></canvas>
   <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
+  <!-- Navbar -->
   <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
@@ -73,7 +74,8 @@
     </div>
   </header>
 
-  <main class="relative z-20 max-w-6xl mx-auto px-6 py-10 lg:py-16 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+  <!-- Hero & Upload Section -->
+  <main class="relative z-20 max-w-6xl mx-auto px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
@@ -174,10 +176,96 @@
 
   </main>
 
-  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-5 text-center text-xs text-slate-500">
+  <!-- Specifications & Why Choose Us Section -->
+  <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] mt-8 w-full">
+    <div class="text-center mb-14">
+      <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+        Engineered for Privacy
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Why Security Teams Trust VaultPro</h2>
+      <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
+        Standard cloud drives treat files like permanent inventory. VaultPro turns transfers into encrypted, ephemeral channels that self-destruct.
+      </p>
+    </div>
+
+    <!-- Feature Showcase Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
+        <div class="w-11 h-11 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <h3 class="text-base font-bold text-white mb-2">Zero-Knowledge Guard</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Files are locked behind optional passcodes using client-side hashing. Decryption keys are never stored on our database servers.
+        </p>
+      </div>
+
+      <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
+        <div class="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3 class="text-base font-bold text-white mb-2">Direct R2 Edge Stream</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Powered by Cloudflare R2 object storage with zero egress fees. Files stream directly between the browser and global edge points without bottlenecks.
+        </p>
+      </div>
+
+      <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
+        <div class="w-11 h-11 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </div>
+        <h3 class="text-base font-bold text-white mb-2">True Automated Ephemeral Purge</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Select an expiration window from 1 hour to 3 days. When a vault expires or you click delete, the file is shredded from the bucket with zero retention.
+        </p>
+      </div>
+    </div>
+
+    <!-- Comparison Matrix -->
+    <div class="mt-12 obsidian-card rounded-2xl p-6 sm:p-8">
+      <h3 class="text-lg font-bold text-white mb-4 text-center">Feature Matrix: VaultPro vs Legacy Storage</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead>
+            <tr class="border-b border-white/10 text-slate-400 uppercase tracking-wider">
+              <th class="py-3 px-4 font-semibold">Capability</th>
+              <th class="py-3 px-4 text-indigo-400 font-bold">VaultPro Systems</th>
+              <th class="py-3 px-4 text-slate-500">Standard Cloud Drives</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            <tr>
+              <td class="py-3.5 px-4 font-medium text-white">Default Retention</td>
+              <td class="py-3.5 px-4 text-indigo-300 font-semibold">Automatic self-destruction (1h - 72h)</td>
+              <td class="py-3.5 px-4 text-slate-500">Indefinite storage until manual deletion</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium text-white">Passcode Gated Links</td>
+              <td class="py-3.5 px-4 text-emerald-400 font-semibold">Included on all tiers (Free & Pro)</td>
+              <td class="py-3.5 px-4 text-slate-500">Gated behind paid enterprise subscriptions</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium text-white">Download Telemetry</td>
+              <td class="py-3.5 px-4 text-indigo-300 font-semibold">Live download count & instant revocation</td>
+              <td class="py-3.5 px-4 text-slate-500">Opaque link metrics</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium text-white">Bandwidth Throttling</td>
+              <td class="py-3.5 px-4 text-emerald-400 font-semibold">Zero edge throttling</td>
+              <td class="py-3.5 px-4 text-slate-500">Throttled transfer limits on free tiers</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
     © 2026 VaultPro Systems. Zero-knowledge architecture powered by Cloudflare R2.
   </footer>
 
+  <!-- Canvas Background Animation Script -->
   <script>
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
@@ -231,8 +319,25 @@
     renderAurora();
   </script>
 
+  <!-- Application Logic & Auth Sync -->
   <script>
     function getStoredUserId() {
+      // 1. Direct key
+      const directId = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
+      if (directId) return directId;
+
+      // 2. Read active Supabase token session directly from storage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith("sb-") || key.includes("supabase")) && key.endsWith("-auth-token")) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key));
+            if (parsed?.user?.id) return parsed.user.id;
+          } catch (e) {}
+        }
+      }
+
+      // 3. Check legacy custom JWT
       const token = localStorage.getItem("vp_token");
       if (!token) return null;
       try {
@@ -243,7 +348,7 @@
           localStorage.removeItem("vp_token");
           return null;
         }
-        return data.sub || null;
+        return data.sub || data.id || null;
       } catch (e) {
         return null;
       }
@@ -256,20 +361,19 @@
       navBtn.innerText = "Sign Out";
       navBtn.className = "text-xs bg-white/[0.04] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 hover:border-rose-800/40 transition cursor-pointer";
       navBtn.href = "#";
-     navBtn.onclick = (e) => {
-    e.preventDefault();
-    localStorage.removeItem("vp_token");
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("vp_user_id");
-    // Clear all Supabase auth keys
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith("sb-") || key.includes("supabase"))) {
+      navBtn.onclick = (e) => {
+        e.preventDefault();
+        localStorage.removeItem("vp_token");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("vp_user_id");
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith("sb-") || key.includes("supabase"))) {
             localStorage.removeItem(key);
+          }
         }
-    }
-    window.location.reload();
-};
+        window.location.reload();
+      };
 
       fetch(`/api/user-profile?user_id=${currentUserId}`)
         .then(r => r.json())
@@ -364,7 +468,6 @@
         const data = await res.json();
         progressStatus.innerText = "Streaming to edge storage...";
 
-        // Stream direct binary data (Zero CORS issues)
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
         xhr.setRequestHeader("Content-Type", selectedFile.type || "application/octet-stream");
@@ -390,8 +493,8 @@
           } else {
             let detail = "Server status: " + xhr.status;
             try {
-              const res = JSON.parse(xhr.responseText);
-              if (res.detail) detail = res.detail;
+              const resObj = JSON.parse(xhr.responseText);
+              if (resObj.detail) detail = resObj.detail;
             } catch(e) {}
             alert("Upload failed: " + detail);
             progressBox.classList.add("hidden");
