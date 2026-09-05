@@ -89,6 +89,34 @@ async def privacy_page(request: Request):
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)
+@app.post("/api/sign/upload")
+async def upload_sign_doc(request: Request, filename: str):
+    doc_id = uuid.uuid4().hex[:10]
+    body = await request.body()
+    content_type = request.headers.get("content-type", "application/pdf")
+    s3_key = f"sign_docs/{doc_id}/{filename}"
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=s3_key,
+        Body=body,
+        ContentType=content_type
+    )
+    return {"doc_id": doc_id, "filename": filename}
+
+@app.get("/api/sign/document/{doc_id}")
+async def get_sign_doc(doc_id: str):
+    prefix = f"sign_docs/{doc_id}/"
+    res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
+    contents = res.get("Contents", [])
+    if not contents:
+        raise HTTPException(status_code=404, detail="Signing document not found or expired")
+    s3_key = contents[0]["Key"]
+    url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
+        ExpiresIn=86400
+    )
+    return {"url": url}
 # ----------------- Privora Drive Core API -----------------
 @app.get("/api/drive/quota")
 async def get_drive_quota(user_id: str):
