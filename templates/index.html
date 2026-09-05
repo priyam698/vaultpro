@@ -256,11 +256,20 @@
       navBtn.innerText = "Sign Out";
       navBtn.className = "text-xs bg-white/[0.04] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 hover:border-rose-800/40 transition cursor-pointer";
       navBtn.href = "#";
-      navBtn.onclick = (e) => {
-        e.preventDefault();
-        localStorage.removeItem("vp_token");
-        window.location.reload();
-      };
+     navBtn.onclick = (e) => {
+    e.preventDefault();
+    localStorage.removeItem("vp_token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("vp_user_id");
+    // Clear all Supabase auth keys
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith("sb-") || key.includes("supabase"))) {
+            localStorage.removeItem(key);
+        }
+    }
+    window.location.reload();
+};
 
       fetch(`/api/user-profile?user_id=${currentUserId}`)
         .then(r => r.json())
