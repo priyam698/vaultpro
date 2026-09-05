@@ -81,7 +81,7 @@
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
         <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Zero-Knowledge Edge Storage
+        Universal Zero-Knowledge Edge Transfers
       </div>
 
       <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
@@ -92,10 +92,14 @@
       </h1>
 
       <p class="text-slate-400 text-base leading-relaxed max-w-lg font-normal">
-        Send client files directly to cloud edge storage with zero bandwidth throttling, client-side encryption, and strict automated expiration.
+        Send videos, documents, PDFs, sheets, or code archives directly to cloud edge storage with zero bandwidth throttling, client-side passcodes, and optional permanent links.
       </p>
 
-      <div class="flex items-center gap-6 pt-2 text-xs font-medium text-slate-400">
+      <div class="flex flex-wrap items-center gap-4 pt-2 text-xs font-medium text-slate-400">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Any File Format Supported
+        </div>
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           Direct S3/R2 Pipeline
@@ -109,6 +113,7 @@
 
     <div class="lg:col-span-6">
       <div class="obsidian-card rounded-3xl p-6 sm:p-8 relative">
+        <!-- Allows any file format -->
         <input type="file" id="fileInput" class="hidden">
 
         <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
@@ -121,7 +126,7 @@
           </div>
 
           <span id="fileNameDisplay" class="font-bold text-slate-100 text-sm sm:text-base group-hover:text-indigo-200 transition break-all">
-            Drop your file here or click to browse
+            Drop any file (PDF, MP4, XLSX, ZIP, PNG...) or click to browse
           </span>
           <span id="fileSizeDisplay" class="text-xs text-slate-400 mt-1 font-medium">Free Tier • Up to 2 GB per transfer</span>
         </div>
@@ -140,7 +145,7 @@
                 <option value="1">1 Hour</option>
                 <option value="24" selected>24 Hours</option>
                 <option value="72">3 Days</option>
-                <option value="0">Never</option>
+                <option value="0">Never (Permanent Vault)</option>
               </select>
             </div>
           </div>
@@ -177,15 +182,15 @@
 
   </main>
 
-  <!-- Specifications & Why Choose Us Section -->
+  <!-- Features & Specifications Section -->
   <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] mt-8 w-full">
     <div class="text-center mb-14">
       <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
-        Engineered for Privacy
+        Engineered for Privacy & Versatility
       </span>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Why Security Teams Trust VaultPro</h2>
       <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
-        Standard cloud drives treat files like permanent inventory. VaultPro turns transfers into encrypted, ephemeral channels that self-destruct.
+        Send confidential videos, spreadsheets, presentations, and binary files with end-to-end edge protection.
       </p>
     </div>
 
@@ -205,9 +210,9 @@
         <div class="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
-        <h3 class="text-base font-bold text-white mb-2">Direct R2 Edge Stream</h3>
+        <h3 class="text-base font-bold text-white mb-2">Any Extension Direct Stream</h3>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Powered by Cloudflare R2 object storage with zero egress fees. Files stream directly between the browser and global edge points without bottlenecks.
+          Full support for PDFs, DOCX, XLSX, MP4, MOV, ZIP, and RAW files streaming at high speed without bandwidth caps.
         </p>
       </div>
 
@@ -215,9 +220,9 @@
         <div class="w-11 h-11 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         </div>
-        <h3 class="text-base font-bold text-white mb-2">True Automated Ephemeral Purge</h3>
+        <h3 class="text-base font-bold text-white mb-2">Flexible Expiration or Never</h3>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Select an expiration window from 1 hour to 3 days. When a vault expires or you click delete, the file is shredded from the bucket with zero retention.
+          Set links to self-destruct from 1 hour to 3 days, or keep them permanently active with the "Never" option.
         </p>
       </div>
     </div>
@@ -236,19 +241,19 @@
           </thead>
           <tbody class="divide-y divide-white/5">
             <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Default Retention</td>
-              <td class="py-3.5 px-4 text-indigo-300 font-semibold">Automatic self-destruction (1h - 72h)</td>
-              <td class="py-3.5 px-4 text-slate-500">Indefinite storage until manual deletion</td>
+              <td class="py-3.5 px-4 font-medium text-white">Accepted Formats</td>
+              <td class="py-3.5 px-4 text-emerald-400 font-semibold">All (Docs, Sheets, Videos, Code, Archives)</td>
+              <td class="py-3.5 px-4 text-slate-500">Subject to MIME type scanning & filters</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium text-white">Retention Freedom</td>
+              <td class="py-3.5 px-4 text-indigo-300 font-semibold">Choose Auto-Purge (1h–72h) OR Permanent (Never)</td>
+              <td class="py-3.5 px-4 text-slate-500">Manual deletion only</td>
             </tr>
             <tr>
               <td class="py-3.5 px-4 font-medium text-white">Passcode Gated Links</td>
               <td class="py-3.5 px-4 text-emerald-400 font-semibold">Included on all tiers (Free & Pro)</td>
               <td class="py-3.5 px-4 text-slate-500">Gated behind paid enterprise subscriptions</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Download Telemetry</td>
-              <td class="py-3.5 px-4 text-indigo-300 font-semibold">Live download count & instant revocation</td>
-              <td class="py-3.5 px-4 text-slate-500">Opaque link metrics</td>
             </tr>
             <tr>
               <td class="py-3.5 px-4 font-medium text-white">Bandwidth Throttling</td>
@@ -269,7 +274,7 @@
       </span>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Choose Your Transfer Power</h2>
       <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
-        Start free forever or unlock massive file limits and extended retention with VaultPro Pro.
+        Start free forever or unlock massive file limits and multi-threaded uploads with VaultPro Pro.
       </p>
     </div>
 
@@ -281,7 +286,7 @@
             <h3 class="text-lg font-bold text-white">Free Starter</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-semibold">Default</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Perfect for occasional file sharing and standard transfers.</p>
+          <p class="text-xs text-slate-400 mb-6">Perfect for documents, spreadsheets, clips, and standard transfers.</p>
           <div class="text-3xl font-extrabold text-white mb-6">
             $0 <span class="text-xs font-normal text-slate-500">/ forever</span>
           </div>
@@ -293,15 +298,19 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Auto-destruction up to <strong>72 hours</strong></span>
+              <span>Any file type (PDF, Excel, Word, Video, Images, Zip)</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Client-side passcode gating</span>
+              <span>Retention options: <strong>1h, 24h, 72h & Never</strong></span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Client-side passcode protection</span>
             </li>
             <li class="flex items-center gap-2 text-slate-500">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              <span>Extended retention (30 Days / Never)</span>
+              <span>Up to 50 GB single uploads (Pro only)</span>
             </li>
           </ul>
         </div>
@@ -330,7 +339,11 @@
           <ul class="space-y-3 text-xs text-slate-200">
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Up to <strong>50 GB</strong> per transfer</span>
+              <span>Massive single transfers up to <strong>50 GB</strong></span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Any file format (4K Video, Project Folders, Huge Datasets)</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -338,11 +351,11 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Uncapped multi-threaded R2 bandwidth</span>
+              <span>Uncapped multi-threaded R2 edge pipeline</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Dedicated transfer telemetry & instant kill switch</span>
+              <span>Dedicated download analytics & instant remote kill switch</span>
             </li>
           </ul>
         </div>
@@ -413,7 +426,7 @@
     renderAurora();
   </script>
 
-  <!-- Application Logic & Auth Sync -->
+  <!-- Application Logic & Upload Script -->
   <script>
     function getStoredUserId() {
       const directId = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
@@ -477,9 +490,9 @@
               <option value="24">24 Hours</option>
               <option value="72">3 Days</option>
               <option value="168">7 Days</option>
-              <option value="336">14 Days (Pro)</option>
-              <option value="720">30 Days (Pro)</option>
-              <option value="0" selected>Never (Pro)</option>
+              <option value="336">14 Days</option>
+              <option value="720">30 Days</option>
+              <option value="0" selected>Never (Permanent Vault)</option>
             `;
           }
         })
@@ -561,6 +574,7 @@
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
+        // Fallback to octet-stream for universal format support
         xhr.setRequestHeader("Content-Type", selectedFile.type || "application/octet-stream");
 
         xhr.upload.onprogress = (e) => {
