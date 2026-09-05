@@ -3,71 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privora Sign | Zero-Knowledge E-Signatures</title>
+  <title>Privora Sign | Zero-Knowledge Document E-Signature Studio</title>
+  
+  <!-- Option 9 Stealth Shard Inline Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PDF.js Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   
+  <!-- Font Assemblies for Authentic Cursive Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@700&family=Great+Vibes&family=Pacifico&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030408; color: #f8fafc; }
-    .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 20, 32, 0.8) 0%, rgba(9, 11, 20, 0.95) 100%);
-      backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #030408;
+      color: #f8fafc;
+      overflow-x: hidden;
     }
-    .cursive-sig { font-family: 'Caveat', cursive; }
-    .cursive-alt { font-family: 'Dancing Script', cursive; }
-    
+
+    .obsidian-card {
+      background: linear-gradient(180deg, rgba(16, 20, 32, 0.85) 0%, rgba(9, 11, 20, 0.95) 100%);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.95);
+    }
+
+    .cursive-font-0 { font-family: 'Caveat', cursive; }
+    .cursive-font-1 { font-family: 'Dancing Script', cursive; }
+    .cursive-font-2 { font-family: 'Great Vibes', cursive; }
+    .cursive-font-3 { font-family: 'Pacifico', cursive; }
+
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
+
     .drag-active {
       cursor: grabbing !important;
       user-select: none !important;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px 2px rgba(99, 102, 241, 0.4);
+      z-index: 50 !important;
     }
 
-    /* ========================================================================= */
-    /* CLEAN 1-PAGE DOCUMENT PRINT ISOLATION                                     */
-    /* ========================================================================= */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+      50% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+    }
+
+    .recipient-glow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    /* Print Formatting */
     @media print {
-      @page {
-        size: auto;
-        margin: 0mm !important;
-      }
-      /* Completely hide UI bars, navigation, sidebars, modals, and buttons */
-      header, 
-      aside, 
-      #zoomControls, 
-      #floatingAssignBtn, 
-      #uploadPromptContainer, 
-      #signerModal, 
-      button, 
-      .no-print {
+      @page { size: auto; margin: 0mm !important; }
+      header, aside, #zoomControls, #floatingAssignBtn, #uploadPromptContainer, #signerModal, #sendLinkModal, #recipientBanner, button, .no-print {
         display: none !important;
       }
-
       body, html {
         background: #ffffff !important;
         color: #000000 !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
       }
-
       .studio-wrapper, main {
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        min-height: 0 !important;
-        overflow: visible !important;
       }
-
       #documentStage {
         display: block !important;
         position: relative !important;
@@ -76,28 +85,18 @@
         margin: 0 auto !important;
         border: none !important;
         box-shadow: none !important;
-        transform: none !important; /* Disable zoom during print */
-        overflow: visible !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        background: white !important;
+        transform: none !important;
       }
-
       #pdfCanvas, #imgViewer {
         display: block !important;
         width: 100% !important;
         height: auto !important;
-        margin: 0 auto !important;
       }
-
-      /* Clean authentic look for the stamped signature on paper */
       #signatureTargetBox {
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
       }
-
-      /* Hide drag-handles (⋮⋮) and close button (✕) */
       #signatureTargetBox .drag-indicator,
       #signatureTargetBox button {
         display: none !important;
@@ -105,79 +104,95 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
   <!-- ========================================================================= -->
-  <!-- SIGNATURE MODAL: "Who's signing this field?"                              -->
+  <!-- RECIPIENT VIRTUAL SIGNING BANNER (Only active when Priyam opens link)     -->
   <!-- ========================================================================= -->
-  <div id="signerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4 no-print">
-    <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative">
+  <div id="recipientBanner" class="hidden bg-gradient-to-r from-indigo-900 via-indigo-700 to-purple-800 text-white px-6 py-3 border-b border-indigo-400/30 flex items-center justify-between z-40 sticky top-0 shadow-lg no-print">
+    <div class="flex items-center gap-3">
+      <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+      <p class="text-xs sm:text-sm font-semibold">
+        Hello <strong id="bannerSignerName" class="text-indigo-200">Priyam</strong>! You have been invited to sign this document virtually. Click the signature box below to place your signature.
+      </p>
+    </div>
+    <button onclick="document.getElementById('recipientBanner').classList.add('hidden')" class="text-xs font-bold text-indigo-200 hover:text-white">✕ Dismiss</button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: "Who's signing this field?"                                      -->
+  <!-- ========================================================================= -->
+  <div id="signerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
+    <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative text-slate-100">
       
       <div class="flex justify-between items-start mb-2">
-        <h3 class="text-xl font-bold text-white">Who's signing this field?</h3>
+        <h3 class="text-xl font-extrabold text-white">Who's signing this field?</h3>
         <button onclick="closeSignerModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
       <p class="text-xs text-slate-400 leading-relaxed mb-5">
-        Choose who should sign this field. You can sign it now, or assign it to someone else.
+        Choose who should sign this field. If you are signing now, choose "I'm the signer". If you need Priyam or a client to sign, pick "Someone else" to generate their virtual signing link.
       </p>
 
-      <!-- Pill Selector -->
+      <!-- Pill Selector: I'm the signer vs Someone else -->
       <div class="grid grid-cols-2 gap-2 p-1.5 bg-black/50 border border-white/10 rounded-2xl mb-6">
         <button id="btnSignerMe" onclick="selectSignerType('me')" 
-                class="py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition">
+                class="py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition cursor-pointer">
           I'm the signer
         </button>
         <button id="btnSignerOther" onclick="selectSignerType('other')" 
-                class="py-2.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition">
+                class="py-2.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition cursor-pointer">
           Someone else
         </button>
       </div>
 
       <!-- VIEW A: "I'm the signer" -->
       <div id="signerMeContainer" class="space-y-4">
+        <!-- Sub-tabs: Type | Draw | Upload -->
         <div class="flex items-center justify-between border-b border-white/10 pb-2.5 text-xs font-semibold">
           <div class="flex items-center gap-4">
-            <button id="tabTypeBtn" onclick="switchSignatureMode('type')" class="text-indigo-400 flex items-center gap-1.5">
+            <button id="tabTypeBtn" onclick="switchSignatureMode('type')" class="text-indigo-400 flex items-center gap-1.5 cursor-pointer">
               <span>⌨ Type</span>
             </button>
-            <button id="tabDrawBtn" onclick="switchSignatureMode('draw')" class="text-slate-400 hover:text-white flex items-center gap-1.5">
+            <button id="tabDrawBtn" onclick="switchSignatureMode('draw')" class="text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer">
               <span>✎ Draw</span>
             </button>
-            <button id="tabUploadBtn" onclick="switchSignatureMode('upload')" class="text-slate-400 hover:text-white flex items-center gap-1.5">
+            <button id="tabUploadBtn" onclick="switchSignatureMode('upload')" class="text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer">
               <span>↑ Upload</span>
             </button>
           </div>
-          <button onclick="clearCurrentSignature()" class="text-slate-500 hover:text-rose-400 text-xs">Clear</button>
+          <button onclick="clearCurrentSignature()" class="text-slate-500 hover:text-rose-400 text-xs font-semibold cursor-pointer">Clear</button>
         </div>
 
-        <!-- Tab 1: Type Signature -->
+        <!-- Mode 1: Type Signature -->
         <div id="sigTypePane" class="space-y-3">
           <div class="h-32 rounded-2xl bg-[#050711] border border-white/10 flex items-center justify-center p-4 relative overflow-hidden">
-            <input id="sigNameInput" type="text" placeholder="Type your name" 
-                   class="w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 cursive-sig focus:outline-none">
+            <input id="sigNameInput" type="text" placeholder="Type your full legal name" 
+                   value="Priyam Rana"
+                   class="w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 cursive-font-0 focus:outline-none">
           </div>
-          <div class="flex justify-end">
-            <button onclick="toggleCursiveFont()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+          <div class="flex items-center justify-between text-xs">
+            <span id="fontFamilyLabel" class="text-[11px] text-slate-500 font-mono">Font: Caveat Cursive</span>
+            <button onclick="toggleCursiveFont()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 cursor-pointer">
               <span>Change font style ▾</span>
             </button>
           </div>
         </div>
 
-        <!-- Tab 2: Draw Signature -->
+        <!-- Mode 2: Draw Signature -->
         <div id="sigDrawPane" class="space-y-2 hidden">
           <div class="h-36 rounded-2xl bg-[#050711] border border-white/10 relative overflow-hidden flex items-center justify-center">
             <canvas id="sigCanvas" width="450" height="144" class="w-full h-full cursor-crosshair touch-none"></canvas>
-            <span id="drawPlaceholder" class="absolute pointer-events-none text-slate-600 text-xs font-medium">Draw your signature with mouse or finger</span>
+            <span id="drawPlaceholder" class="absolute pointer-events-none text-slate-600 text-xs font-medium">Draw your signature with mouse, pen, or touch</span>
           </div>
         </div>
 
-        <!-- Tab 3: Upload Signature -->
+        <!-- Mode 3: Upload Signature -->
         <div id="sigUploadPane" class="space-y-2 hidden">
           <div onclick="document.getElementById('sigFileInput').click()" 
                class="h-32 rounded-2xl bg-[#050711] border border-dashed border-white/15 hover:border-indigo-400/50 flex flex-col items-center justify-center p-4 cursor-pointer transition">
             <input type="file" id="sigFileInput" accept="image/png, image/jpeg" class="hidden" onchange="handleSigImageUpload(event)">
             <svg class="w-6 h-6 text-indigo-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <span class="text-xs text-slate-300 font-medium">Upload signature photo (PNG / JPG)</span>
+            <span class="text-xs text-slate-300 font-medium">Upload photo of your signature (PNG / JPG)</span>
           </div>
           <div id="uploadedSigPreviewBox" class="h-16 hidden rounded-xl bg-white/[0.03] p-2 flex items-center justify-center">
             <img id="uploadedSigImg" src="" class="max-h-full max-w-full object-contain filter invert" />
@@ -188,31 +203,31 @@
       <!-- VIEW B: "Someone else" -->
       <div id="signerOtherContainer" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Recipient Name</label>
-          <input id="otherSignerName" type="text" placeholder="e.g. Alex Morgan" 
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Signer's Name</label>
+          <input id="otherSignerName" type="text" placeholder="e.g. Priyam Rana" value="Priyam"
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Recipient Email Address</label>
-          <input id="otherSignerEmail" type="email" placeholder="alex.morgan@company.com" 
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Signer's Email Address</label>
+          <input id="otherSignerEmail" type="email" placeholder="priyam@example.com" value="priyamrana069@gmail.com"
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
-        <div class="p-3 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 leading-relaxed">
-          The document will be stamped with this assigned recipient box.
+        <div class="p-3.5 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl text-xs text-indigo-300 leading-relaxed">
+          When you click "Next", Privora creates a <strong>tokenized web signing URL</strong> for this recipient. They will open it in their browser and sign virtually.
         </div>
       </div>
 
-      <p class="text-[10px] text-slate-500 leading-relaxed mt-4 pt-3 border-t border-white/10">
-        By signing, I agree that the signature will be the electronic representation of my signature for legally binding contracts.
+      <p class="text-[10px] text-slate-500 leading-relaxed mt-5 pt-3 border-t border-white/10">
+        By signing, I agree that the signature will be the electronic representation of my signature for legally binding contracts and certifications.
       </p>
 
       <div class="flex items-center justify-end gap-3 mt-5">
-        <button onclick="closeSignerModal()" class="px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300 font-semibold text-xs transition">
+        <button onclick="closeSignerModal()" class="px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300 font-semibold text-xs transition cursor-pointer">
           Cancel
         </button>
         <button id="btnApplySignature" onclick="applySignatureToDocument()" 
                 class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer">
-          Sign & Apply
+          Apply & Save Field
         </button>
       </div>
 
@@ -220,7 +235,39 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- TOP STUDIO NAVIGATION (HIDDEN ON PRINT)                                   -->
+  <!-- MODAL 2: VIRTUAL SIGNING INVITATION LINK (For "Someone Else")             -->
+  <!-- ========================================================================= -->
+  <div id="sendLinkModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
+    <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Virtual Signing Link Ready</h3>
+      <p class="text-xs text-slate-300 leading-relaxed mb-5">
+        Send this interactive link to <strong id="inviteRecipientLabel" class="text-indigo-400">Priyam</strong>. When they open it, they can draw or type their signature online directly at your pinned location:
+      </p>
+
+      <div class="flex items-center gap-2 mb-4">
+        <input id="recipientSigningUrl" type="text" readonly 
+               class="flex-1 bg-[#050711] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
+        <button onclick="copyRecipientLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+          Copy Link
+        </button>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="testLinkInNewTab()" class="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-indigo-300 text-xs font-semibold border border-white/10 transition cursor-pointer">
+          Test Sign as Recipient →
+        </button>
+        <button onclick="closeSendLinkModal()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- TOP STUDIO NAVIGATION BAR                                                 -->
   <!-- ========================================================================= -->
   <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print">
     <div class="flex items-center gap-4">
@@ -229,66 +276,91 @@
         <span>Prepare for signature</span>
       </a>
       <span class="text-white/20">|</span>
-      <span id="fieldsStatusIndicator" class="text-xs text-slate-400">No fields yet</span>
-      <button onclick="clearAllFields()" class="text-xs text-slate-500 hover:text-rose-400 transition ml-2">Clear All</button>
+      <span id="fieldsStatusIndicator" class="text-xs text-slate-400">No fields placed yet</span>
+      <button onclick="clearAllFields()" class="text-xs text-slate-500 hover:text-rose-400 transition ml-2 cursor-pointer">Clear All</button>
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- Direct Image Download -->
-      <button id="downloadImageBtn" onclick="downloadDirectImage()" 
+      <!-- Direct Single-Page Image Export -->
+      <button id="downloadImageBtn" onclick="exportCompositePNG()" 
               class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer disabled:opacity-40" disabled>
-        Save as Image
+        Download Clean Image
       </button>
 
-      <!-- Print / Save as PDF Button -->
-      <button id="downloadSignedBtn" onclick="exportSignedDocument()" 
-              class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer disabled:opacity-40" disabled>
-        Download / Print PDF
+      <!-- Primary Action (Download PDF vs Next Send Link) -->
+      <button id="primaryActionBtn" onclick="handleFinalizeAction()" 
+              class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer disabled:opacity-40" disabled>
+        Download Signed PDF
       </button>
     </div>
   </header>
 
   <!-- ========================================================================= -->
-  <!-- MAIN STUDIO WORKSPACE                                                     -->
+  <!-- STUDIO WORKSPACE: SIDEBAR & DOCUMENT VIEWPORT                             -->
   <!-- ========================================================================= -->
   <div class="studio-wrapper flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto overflow-hidden">
     
-    <!-- LEFT SIDEBAR (HIDDEN ON PRINT) -->
-    <aside class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto no-print">
+    <!-- LEFT TOOLBAR / SIDEBAR -->
+    <aside class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto custom-scroll no-print">
       <div>
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Signers</h4>
         <p id="signersSummary" class="text-xs text-slate-400 leading-relaxed">
-          Click on your document or use the button below to drop a signature field. Once placed, you can freely drag it anywhere.
+          Click anywhere on your document to place a signature field. Once placed, drag it to reposition.
         </p>
       </div>
 
+      <!-- Field Palette Tools -->
       <div class="space-y-2">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Fields</h4>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Signature Fields</h4>
+        
         <button onclick="openSignerModalAtCenter()" 
-                class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
-          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-          <span>Signature</span>
+                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            <span>Signature Field</span>
+          </div>
+          <span class="text-[10px] text-indigo-400 font-mono">+ Add</span>
+        </button>
+
+        <button onclick="placeDateField()" 
+                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Date Signed</span>
+          </div>
+          <span class="text-[10px] text-cyan-400 font-mono">+ Date</span>
         </button>
       </div>
 
+      <!-- PDF Page Pagination (Multi-Page Documents) -->
+      <div id="pdfPaginationGroup" class="hidden space-y-2 pt-4 border-t border-white/10">
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Page Navigation</h4>
+        <div class="flex items-center justify-between bg-black/40 border border-white/10 rounded-xl p-2 text-xs">
+          <button onclick="navigatePdfPage(-1)" class="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 font-bold transition">◀ Prev</button>
+          <span id="pageCounterText" class="font-mono text-slate-400 text-[11px]">Page 1 of 1</span>
+          <button onclick="navigatePdfPage(1)" class="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 font-bold transition">Next ▶</button>
+        </div>
+      </div>
+
+      <!-- Metadata Box -->
       <div class="space-y-4 pt-4 border-t border-white/10">
         <div>
           <label class="block text-xs font-bold text-white mb-1.5">Document title</label>
-          <input id="docTitleInput" type="text" value="Privora_Agreement_Final" 
+          <input id="docTitleInput" type="text" value="Tax_Invoice_9229571" 
                  class="w-full bg-[#030408] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-bold text-white mb-1.5">Message</label>
-          <textarea id="docMessageInput" rows="3" placeholder="We'll add it to the email with your document." 
+          <label class="block text-xs font-bold text-white mb-1.5">Message / Note</label>
+          <textarea id="docMessageInput" rows="3" placeholder="Attached is the finalized document for signature and legal filing." 
                     class="w-full bg-[#030408] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none resize-none"></textarea>
         </div>
       </div>
     </aside>
 
-    <!-- RIGHT DOCUMENT WORKSPACE -->
-    <main class="flex-1 flex flex-col items-center justify-start p-6 relative overflow-y-auto min-h-[550px]">
+    <!-- CENTER / MAIN STAGE -->
+    <main class="flex-1 flex flex-col items-center justify-start p-6 relative overflow-y-auto min-h-[550px] custom-scroll">
       
-      <!-- Upload Initial State -->
+      <!-- Initial Upload State -->
       <div id="uploadPromptContainer" class="max-w-md w-full my-auto text-center obsidian-card p-8 rounded-3xl border border-dashed border-white/20 hover:border-indigo-400/60 transition cursor-pointer no-print"
            onclick="document.getElementById('docFileInput').click()">
         <input type="file" id="docFileInput" accept="application/pdf, image/png, image/jpeg" class="hidden" onchange="loadUserDocument(event)">
@@ -296,61 +368,76 @@
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
         </div>
         <h3 class="text-sm font-bold text-white">Upload document to sign</h3>
-        <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or image file</p>
+        <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or invoice</p>
       </div>
 
-      <!-- Live Document Stage (The Only Element Printed) -->
+      <!-- Live Stage with Document -->
       <div id="documentStage" class="hidden relative max-w-3xl w-full bg-white rounded-xl shadow-2xl border border-slate-700 select-none overflow-hidden">
         
+        <!-- Base Render Layers -->
         <canvas id="pdfCanvas" class="w-full h-auto block"></canvas>
         <img id="imgViewer" src="" class="hidden w-full h-auto block object-contain" />
 
-        <!-- Floating Action Button (Hidden on Print) -->
+        <!-- Floating Quick Add Button (WeTransfer Style) -->
         <button id="floatingAssignBtn" onclick="openSignerModalAtCenter()" 
                 class="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-2xl transition cursor-pointer z-10 flex items-center gap-2 no-print">
           <span>Assign a new signature field</span>
         </button>
 
-        <!-- DRAGGABLE SIGNATURE TARGET BOX -->
+        <!-- DRAGGABLE / INTERACTIVE SIGNATURE BOX -->
         <div id="signatureTargetBox" 
-             class="absolute hidden border-2 border-dashed border-indigo-600 bg-indigo-50/90 rounded-xl flex items-center justify-between px-3 py-2 cursor-grab z-30 transition-shadow select-none"
-             style="width: 210px; height: 65px; left: 100px; top: 200px;">
+             class="absolute hidden border-2 border-dashed border-indigo-600 bg-indigo-50/95 rounded-xl flex items-center justify-between px-3 py-2 cursor-grab z-30 transition-shadow select-none shadow-md"
+             style="width: 230px; height: 68px; left: 100px; top: 200px;">
           
-          <div class="flex items-center gap-1.5 pointer-events-none">
-            <span class="drag-indicator text-indigo-400 text-xs font-mono">⋮⋮</span>
-            <div id="targetBoxContent" class="text-indigo-950 font-semibold text-xs font-mono truncate">
-              ✎ Sign here
+          <div class="flex items-center gap-2 pointer-events-none w-full" id="boxContentWrapper">
+            <span class="drag-indicator text-indigo-400 text-xs font-mono select-none">⋮⋮</span>
+            <div id="targetBoxContent" class="text-indigo-950 font-bold text-xs font-mono truncate w-full flex items-center">
+              ✎ Click to Sign
             </div>
           </div>
 
+          <!-- Quick Dismiss Button -->
           <button type="button" onclick="removeSignatureBox(event)" class="text-slate-400 hover:text-rose-600 font-bold text-xs p-1 ml-1 cursor-pointer no-print">
             ✕
           </button>
         </div>
 
+        <!-- OPTIONAL DATE STAMP BOX -->
+        <div id="dateTargetBox" 
+             class="absolute hidden border border-dashed border-cyan-600 bg-cyan-50/90 rounded-lg flex items-center justify-between px-2.5 py-1.5 cursor-grab z-30 select-none text-[11px] font-mono font-bold text-cyan-900"
+             style="width: 140px; height: 38px; left: 100px; top: 280px;">
+          <span id="dateContentText">Date: 2026-09-06</span>
+          <button type="button" onclick="document.getElementById('dateTargetBox').classList.add('hidden')" class="text-slate-400 hover:text-rose-600 ml-1">✕</button>
+        </div>
+
       </div>
 
-      <!-- Zoom Bar (Hidden on Print) -->
+      <!-- Zoom Bar -->
       <div id="zoomControls" class="fixed bottom-6 right-8 bg-[#090d1a] border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-3 text-xs text-slate-400 shadow-xl z-20 no-print">
-        <button onclick="adjustZoom(-0.1)" class="hover:text-white font-bold">−</button>
+        <button onclick="adjustZoom(-0.1)" class="hover:text-white font-bold cursor-pointer">−</button>
         <span id="zoomLabel" class="font-mono text-[11px]">100%</span>
-        <button onclick="adjustZoom(0.1)" class="hover:text-white font-bold">+</button>
+        <button onclick="adjustZoom(0.1)" class="hover:text-white font-bold cursor-pointer">+</button>
       </div>
 
     </main>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT: Document Loading + Drag-and-Drop + Clean Export               -->
+  <!-- COMPREHENSIVE JAVASCRIPT STUDIO ENGINE                                   -->
   <!-- ========================================================================= -->
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     let currentDocument = null;
+    let currentPdfPage = 1;
+    let totalPdfPages = 1;
     let currentScale = 1.0;
+
     let signerType = 'me';
     let sigMode = 'type';
-    let fontStyleChoice = 0;
+    let fontStyleChoice = 0; // 0: Caveat, 1: Dancing Script, 2: Great Vibes, 3: Pacifico
+    const fontFamilies = ['cursive-font-0', 'cursive-font-1', 'cursive-font-2', 'cursive-font-3'];
+    const fontNames = ['Caveat Cursive', 'Dancing Script', 'Great Vibes', 'Pacifico'];
 
     let signatureX = 150;
     let signatureY = 250;
@@ -358,7 +445,26 @@
     let isDraggingBox = false;
     let hasMovedDuringDrag = false;
 
-    // --- 1. Document Loading ---
+    // Check if recipient opened virtual link (?invite=priyam&x=120&y=240)
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteRecipient = urlParams.get("invite");
+    const paramX = urlParams.get("x");
+    const paramY = urlParams.get("y");
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (inviteRecipient) {
+        document.getElementById("recipientBanner").classList.remove("hidden");
+        document.getElementById("bannerSignerName").innerText = inviteRecipient;
+        document.getElementById("sigNameInput").value = inviteRecipient;
+
+        if (paramX && paramY) {
+          signatureX = parseInt(paramX, 10);
+          signatureY = parseInt(paramY, 10);
+        }
+      }
+    });
+
+    // --- 1. Document Loading Engine (PDF + Images) ---
     function loadUserDocument(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -373,6 +479,14 @@
           const typedarray = new Uint8Array(e.target.result);
           pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
             currentDocument = pdf;
+            totalPdfPages = pdf.numPages;
+            currentPdfPage = 1;
+
+            if (totalPdfPages > 1) {
+              document.getElementById("pdfPaginationGroup").classList.remove("hidden");
+              updatePageCounter();
+            }
+
             renderPdfPage(1);
           });
         };
@@ -384,16 +498,18 @@
           img.src = e.target.result;
           img.classList.remove("hidden");
           document.getElementById("pdfCanvas").classList.add("hidden");
+          document.getElementById("pdfPaginationGroup").classList.add("hidden");
         };
         reader.readAsDataURL(file);
       }
     }
 
     function renderPdfPage(num) {
+      if (!currentDocument) return;
       currentDocument.getPage(num).then(function(page) {
         const canvas = document.getElementById('pdfCanvas');
         const ctx = canvas.getContext('2d');
-        const viewport = page.getViewport({ scale: 2.0 }); // High-res rendering
+        const viewport = page.getViewport({ scale: 2.0 }); // 2x crispness
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
@@ -402,26 +518,39 @@
       });
     }
 
-    // --- 2. Stage Click Placement ---
+    function navigatePdfPage(dir) {
+      const next = currentPdfPage + dir;
+      if (next >= 1 && next <= totalPdfPages) {
+        currentPdfPage = next;
+        updatePageCounter();
+        renderPdfPage(currentPdfPage);
+      }
+    }
+
+    function updatePageCounter() {
+      document.getElementById("pageCounterText").innerText = `Page ${currentPdfPage} of ${totalPdfPages}`;
+    }
+
+    // --- 2. Interactive Pinpoint Coordinates ---
     const stage = document.getElementById("documentStage");
     stage.addEventListener("click", function(e) {
       if (hasMovedDuringDrag) {
         hasMovedDuringDrag = false;
         return;
       }
-      if (e.target.id === 'floatingAssignBtn' || e.target.closest('#signatureTargetBox')) return;
+      if (e.target.id === 'floatingAssignBtn' || e.target.closest('#signatureTargetBox') || e.target.closest('#dateTargetBox')) return;
 
       const rect = stage.getBoundingClientRect();
-      signatureX = Math.round(e.clientX - rect.left - 105);
-      signatureY = Math.round(e.clientY - rect.top - 32);
+      signatureX = Math.round(e.clientX - rect.left - 115);
+      signatureY = Math.round(e.clientY - rect.top - 34);
 
       openSignerModal();
     });
 
     function openSignerModalAtCenter() {
       const rect = stage.getBoundingClientRect();
-      signatureX = Math.round((rect.width / 2) - 105);
-      signatureY = Math.round((rect.height / 2) - 32);
+      signatureX = Math.round((rect.width / 2) - 115);
+      signatureY = Math.round((rect.height / 2) - 34);
       openSignerModal();
     }
 
@@ -444,38 +573,37 @@
       const applyBtn = document.getElementById("btnApplySignature");
 
       if (type === 'me') {
-        btnMe.className = "py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition";
-        btnOther.className = "py-2.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition";
+        btnMe.className = "py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition cursor-pointer";
+        btnOther.className = "py-2.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition cursor-pointer";
         meBox.classList.remove("hidden");
         otherBox.classList.add("hidden");
-        applyBtn.innerText = "Sign & Apply";
+        applyBtn.innerText = "Apply & Sign";
       } else {
-        btnOther.className = "py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition";
-        btnMe.className = "py-2.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition";
+        btnOther.className = "py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md transition cursor-pointer";
+        btnMe.className = "py-2.5 rounded-xl font-semibold text-xs text-slate-400 hover:text-white transition cursor-pointer";
         otherBox.classList.remove("hidden");
         meBox.classList.add("hidden");
-        applyBtn.innerText = "Assign Recipient";
+        applyBtn.innerText = "Assign to Recipient";
       }
     }
 
-    // --- 4. Sub-modes: Type, Draw, Upload ---
+    // --- 4. Cursive & Drawing Modes ---
     function switchSignatureMode(mode) {
       sigMode = mode;
       document.getElementById("sigTypePane").classList.toggle("hidden", mode !== 'type');
       document.getElementById("sigDrawPane").classList.toggle("hidden", mode !== 'draw');
       document.getElementById("sigUploadPane").classList.toggle("hidden", mode !== 'upload');
 
-      document.getElementById("tabTypeBtn").className = (mode === 'type' ? 'text-indigo-400' : 'text-slate-400 hover:text-white') + ' flex items-center gap-1.5';
-      document.getElementById("tabDrawBtn").className = (mode === 'draw' ? 'text-indigo-400' : 'text-slate-400 hover:text-white') + ' flex items-center gap-1.5';
-      document.getElementById("tabUploadBtn").className = (mode === 'upload' ? 'text-indigo-400' : 'text-slate-400 hover:text-white') + ' flex items-center gap-1.5';
+      document.getElementById("tabTypeBtn").className = (mode === 'type' ? 'text-indigo-400' : 'text-slate-400 hover:text-white') + ' flex items-center gap-1.5 cursor-pointer';
+      document.getElementById("tabDrawBtn").className = (mode === 'draw' ? 'text-indigo-400' : 'text-slate-400 hover:text-white') + ' flex items-center gap-1.5 cursor-pointer';
+      document.getElementById("tabUploadBtn").className = (mode === 'upload' ? 'text-indigo-400' : 'text-slate-400 hover:text-white') + ' flex items-center gap-1.5 cursor-pointer';
     }
 
     function toggleCursiveFont() {
-      fontStyleChoice = fontStyleChoice === 0 ? 1 : 0;
+      fontStyleChoice = (fontStyleChoice + 1) % fontFamilies.length;
       const input = document.getElementById("sigNameInput");
-      input.className = fontStyleChoice === 1
-        ? "w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 cursive-alt focus:outline-none"
-        : "w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 cursive-sig focus:outline-none";
+      input.className = `w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 ${fontFamilies[fontStyleChoice]} focus:outline-none`;
+      document.getElementById("fontFamilyLabel").innerText = `Font: ${fontNames[fontStyleChoice]}`;
     }
 
     // Drawing Canvas
@@ -487,6 +615,7 @@
       dCtx.strokeStyle = "#ffffff";
       dCtx.lineWidth = 2.5;
       dCtx.lineCap = "round";
+      dCtx.lineJoin = "round";
 
       drawCanvas.onmousedown = (e) => {
         isDrawing = true;
@@ -523,10 +652,11 @@
       reader.readAsDataURL(file);
     }
 
-    // --- 5. Apply Signature to Box ---
+    // --- 5. Apply Signature & Render to Box ---
     function applySignatureToDocument() {
       const targetBox = document.getElementById("signatureTargetBox");
       const targetContent = document.getElementById("targetBoxContent");
+      const actionBtn = document.getElementById("primaryActionBtn");
 
       targetBox.style.left = `${signatureX}px`;
       targetBox.style.top = `${signatureY}px`;
@@ -534,69 +664,85 @@
 
       if (signerType === 'me') {
         if (sigMode === 'type') {
-          const name = document.getElementById("sigNameInput").value.trim() || "Signature";
-          targetContent.innerHTML = `<span class="text-3xl text-slate-900 ${fontStyleChoice === 1 ? 'cursive-alt' : 'cursive-sig'}">${name}</span>`;
+          const val = document.getElementById("sigNameInput").value.trim() || "Priyam Rana";
+          targetContent.innerHTML = `<span class="text-3xl text-slate-900 ${fontFamilies[fontStyleChoice]}">${val}</span>`;
         } else if (sigMode === 'draw') {
-          targetContent.innerHTML = `<img src="${drawCanvas.toDataURL()}" class="max-h-12 max-w-[140px] object-contain filter invert" />`;
+          targetContent.innerHTML = `<img src="${drawCanvas.toDataURL()}" class="max-h-12 max-w-[150px] object-contain filter invert" />`;
         } else if (sigMode === 'upload' && activeSignatureDataUrl) {
-          targetContent.innerHTML = `<img src="${activeSignatureDataUrl}" class="max-h-12 max-w-[140px] object-contain" />`;
+          targetContent.innerHTML = `<img src="${activeSignatureDataUrl}" class="max-h-12 max-w-[150px] object-contain" />`;
         }
-        document.getElementById("signersSummary").innerText = "Signed by You. Drag to reposition anywhere.";
+
+        document.getElementById("signersSummary").innerText = "Signed by You. Your signature is baked on the document. Drag to adjust placement.";
+        actionBtn.innerText = "Download Signed PDF";
+        targetBox.classList.remove("recipient-glow");
       } else {
-        const otherName = document.getElementById("otherSignerName").value.trim() || "Signer";
-        targetContent.innerHTML = `<span>✎ Sign here: <strong>${otherName}</strong></span>`;
-        document.getElementById("signersSummary").innerText = `Assigned to ${otherName}. Drag to reposition.`;
+        const oName = document.getElementById("otherSignerName").value.trim() || "Priyam";
+        targetContent.innerHTML = `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span><span>Sign here: <strong>${oName}</strong></span></div>`;
+        document.getElementById("signersSummary").innerText = `Assigned to ${oName}. Click 'Next: Generate Link' to share their virtual signing portal.`;
+        actionBtn.innerText = "Next: Generate Link";
+        targetBox.classList.add("recipient-glow");
       }
 
-      document.getElementById("fieldsStatusIndicator").innerText = "1 Signature Field Placed";
-      document.getElementById("downloadSignedBtn").disabled = false;
+      document.getElementById("fieldsStatusIndicator").innerText = "1 Signature Field Configured (Draggable)";
+      actionBtn.disabled = false;
       document.getElementById("downloadImageBtn").disabled = false;
       closeSignerModal();
     }
 
-    function removeSignatureBox(e) {
-      e.stopPropagation();
-      clearAllFields();
+    function placeDateField() {
+      const dateBox = document.getElementById("dateTargetBox");
+      dateBox.style.left = `${signatureX}px`;
+      dateBox.style.top = `${signatureY + 80}px`;
+      dateBox.classList.remove("hidden");
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById("dateContentText").innerText = `Date: ${today}`;
     }
 
-    function clearAllFields() {
-      document.getElementById("signatureTargetBox").classList.add("hidden");
-      document.getElementById("fieldsStatusIndicator").innerText = "No fields yet";
-      document.getElementById("signersSummary").innerText = "Click on your document to start adding signature fields.";
-      document.getElementById("downloadSignedBtn").disabled = true;
-      document.getElementById("downloadImageBtn").disabled = true;
+    // --- 6. Next Action: Export vs Generate Recipient Link ---
+    function handleFinalizeAction() {
+      if (signerType === 'me') {
+        exportCleanPrintPDF();
+      } else {
+        const oName = document.getElementById("otherSignerName").value.trim() || "Priyam";
+        const inviteUrl = `${window.location.origin}/sign?invite=${encodeURIComponent(oName)}&x=${signatureX}&y=${signatureY}`;
+        document.getElementById("recipientSigningUrl").value = inviteUrl;
+        document.getElementById("inviteRecipientLabel").innerText = oName;
+        document.getElementById("sendLinkModal").classList.remove("hidden");
+      }
     }
 
-    function adjustZoom(delta) {
-      currentScale = Math.max(0.6, Math.min(1.8, currentScale + delta));
-      document.getElementById("zoomLabel").innerText = `${Math.round(currentScale * 100)}%`;
-      document.getElementById("documentStage").style.transform = `scale(${currentScale})`;
-      document.getElementById("documentStage").style.transformOrigin = "top center";
+    function copyRecipientLink() {
+      const inp = document.getElementById("recipientSigningUrl");
+      navigator.clipboard.writeText(inp.value);
+      alert("Virtual signing link copied! Send this link to Priyam to sign online.");
     }
 
-    // --- 6. Seamless Single-Page PDF Print Handler ---
-    function exportSignedDocument() {
-      // 1. Temporarily reset zoom to 100% so coordinates align perfectly with physical paper
+    function testLinkInNewTab() {
+      window.open(document.getElementById("recipientSigningUrl").value, "_blank");
+    }
+
+    function closeSendLinkModal() {
+      document.getElementById("sendLinkModal").classList.add("hidden");
+    }
+
+    // --- 7. Clean Single-Page PDF Print Export ---
+    function exportCleanPrintPDF() {
       const previousScale = currentScale;
       document.getElementById("documentStage").style.transform = "none";
-
-      // 2. Temporarily strip the editing dashed border and gripper so it prints as a clean stamp
       const box = document.getElementById("signatureTargetBox");
-      box.classList.remove("border-2", "border-dashed", "border-indigo-600", "bg-indigo-50/90");
+      box.classList.remove("border-2", "border-dashed", "border-indigo-600", "bg-indigo-50/95");
       box.classList.add("border-none", "bg-transparent");
 
       setTimeout(() => {
         window.print();
-
-        // 3. Restore interactive UI after print dialog finishes
         document.getElementById("documentStage").style.transform = `scale(${previousScale})`;
-        box.classList.add("border-2", "border-dashed", "border-indigo-600", "bg-indigo-50/90");
+        box.classList.add("border-2", "border-dashed", "border-indigo-600", "bg-indigo-50/95");
         box.classList.remove("border-none", "bg-transparent");
       }, 150);
     }
 
-    // --- 7. Direct Image Download (Bypass Print Dialog) ---
-    function downloadDirectImage() {
+    // --- 8. Clean Composite PNG Direct Download ---
+    function exportCompositePNG() {
       const stage = document.getElementById("documentStage");
       const canvas = document.createElement("canvas");
       const baseCanvas = document.getElementById("pdfCanvas");
@@ -607,34 +753,52 @@
 
       const ctx = canvas.getContext("2d");
 
-      // Draw document base
       if (!baseCanvas.classList.contains("hidden")) {
         ctx.drawImage(baseCanvas, 0, 0);
       } else {
         ctx.drawImage(baseImg, 0, 0);
       }
 
-      // Draw stamped signature at proportional position
       const targetBox = document.getElementById("signatureTargetBox");
       const stageRect = stage.getBoundingClientRect();
       const scaleX = canvas.width / stageRect.width;
       const scaleY = canvas.height / stageRect.height;
 
       const sigX = parseFloat(targetBox.style.left) * scaleX;
-      const sigY = (parseFloat(targetBox.style.top) + 35) * scaleY;
+      const sigY = (parseFloat(targetBox.style.top) + 40) * scaleY;
 
-      ctx.font = `${Math.round(28 * scaleX)}px 'Caveat', cursive`;
+      ctx.font = `${Math.round(30 * scaleX)}px '${fontNames[fontStyleChoice]}', cursive`;
       ctx.fillStyle = "#0f172a";
-      ctx.fillText(document.getElementById("sigNameInput").value || "Signed Document", sigX, sigY);
+      ctx.fillText(document.getElementById("sigNameInput").value || "Priyam Rana", sigX, sigY);
 
-      // Trigger automatic browser download
       const link = document.createElement("a");
       link.download = `${document.getElementById("docTitleInput").value || "signed_document"}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     }
 
-    // --- 8. Drag-and-Drop Handler for Signature Target Box ---
+    function removeSignatureBox(e) {
+      e.stopPropagation();
+      clearAllFields();
+    }
+
+    function clearAllFields() {
+      document.getElementById("signatureTargetBox").classList.add("hidden");
+      document.getElementById("dateTargetBox").classList.add("hidden");
+      document.getElementById("fieldsStatusIndicator").innerText = "No fields placed yet";
+      document.getElementById("signersSummary").innerText = "Click on your document to start adding signature fields.";
+      document.getElementById("primaryActionBtn").disabled = true;
+      document.getElementById("downloadImageBtn").disabled = true;
+    }
+
+    function adjustZoom(delta) {
+      currentScale = Math.max(0.6, Math.min(1.8, currentScale + delta));
+      document.getElementById("zoomLabel").innerText = `${Math.round(currentScale * 100)}%`;
+      document.getElementById("documentStage").style.transform = `scale(${currentScale})`;
+      document.getElementById("documentStage").style.transformOrigin = "top center";
+    }
+
+    // --- 9. Freeform Smooth Drag-and-Drop Handler ---
     const box = document.getElementById("signatureTargetBox");
     let startX = 0, startY = 0, initialBoxLeft = 0, initialBoxTop = 0;
 
