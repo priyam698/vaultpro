@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privora | Zero-Knowledge Edge File Transfers</title>
+  <title>Privora | Zero-Knowledge Edge File Transfers & Cloud Drive</title>
   <!-- Option 9 Stealth Shard Inline Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -58,13 +58,13 @@
       </div>
       <h3 class="text-xl font-extrabold text-white mb-2">Free Guest Quota Reached</h3>
       <p class="text-xs text-slate-300 leading-relaxed mb-6">
-        You have used your <strong>4 complimentary guest transfers</strong>. Create a free account or sign in to continue uploading with unlimited access.
+        You have used your <strong>4 complimentary guest transfers</strong>. Create a free account or sign in to get an encrypted <strong>5 GB Cloud Drive</strong> and unlimited transfers.
       </p>
       <div class="space-y-2.5">
         <a href="/auth" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
           Sign In or Create Free Account
         </a>
-        <button onclick="closeAuthModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition">
+        <button onclick="closeAuthModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition cursor-pointer">
           Dismiss
         </button>
       </div>
@@ -81,13 +81,13 @@
       </div>
       <h3 class="text-xl font-extrabold text-white mb-2">Transfer Limit Exceeded</h3>
       <p id="limitModalMsg" class="text-xs text-slate-300 leading-relaxed mb-6">
-        The file you selected exceeds the Free Tier transfer limit of <strong>2.00 GB</strong>. Upgrade to Pro for single uploads up to 50 GB.
+        The file you selected exceeds the Free Tier transfer limit of <strong>2.00 GB</strong>. Upgrade to Pro for single uploads up to 50 GB and a 200 GB Cloud Drive.
       </p>
       <div class="space-y-2">
         <a href="/dashboard" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
           Upgrade to Pro ($4/mo) • Up to 50 GB
         </a>
-        <button onclick="closeLimitModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition">
+        <button onclick="closeLimitModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition cursor-pointer">
           Dismiss
         </button>
       </div>
@@ -121,11 +121,12 @@
         <a href="#security" class="text-xs text-slate-300 hover:text-white font-medium transition hidden md:inline-block">Security Guarantee</a>
         <a href="#pricing" class="text-xs text-slate-300 hover:text-white font-medium transition hidden sm:inline-block">Pricing</a>
         <a href="/dashboard" 
-           class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.05] px-3.5 py-2 rounded-xl font-semibold border border-transparent hover:border-white/10 transition">
-          Dashboard
+           class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.05] px-3.5 py-2 rounded-xl font-semibold border border-transparent hover:border-white/10 transition flex items-center gap-1.5">
+          <span>Drive Dashboard</span>
+          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">5 GB</span>
         </a>
         <a id="navAuthBtn" href="/auth" 
-           class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-semibold shadow-md shadow-indigo-600/20 transition">
+           class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-semibold shadow-md shadow-indigo-600/20 transition cursor-pointer">
           Sign In
         </a>
       </div>
@@ -138,18 +139,18 @@
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
         <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Zero-Knowledge Cryptographic Edge Pipeline
+        Zero-Knowledge Cryptographic Edge Pipeline & Cloud Drive
       </div>
 
       <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
         Frictionless, private <br />
         <span class="bg-gradient-to-r from-indigo-300 via-purple-200 to-cyan-300 bg-clip-text text-transparent">
-          file transfers.
+          file transfers & drive.
         </span>
       </h1>
 
       <p class="text-slate-400 text-base leading-relaxed max-w-lg font-normal">
-        Transfer videos, spreadsheets, PDFs, or software archives directly via encrypted edge nodes with zero bandwidth throttling, client-side passcodes, and guaranteed cryptographic shredding.
+        Send disposable links or store documents, videos, and archives permanently in your encrypted 5 GB cloud drive. Zero bandwidth throttling, client-side passcodes, and instant cryptographic shredding.
       </p>
 
       <!-- Trust Badges -->
@@ -160,7 +161,7 @@
         </div>
         <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
           <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          <span>Cloudflare R2 Direct Stream</span>
+          <span>Cloudflare R2 Direct Pipeline</span>
         </div>
         <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
           <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -244,7 +245,7 @@
           <div class="flex items-center gap-2">
             <input id="shareUrlInput" type="text" readonly 
                    class="flex-1 bg-[#050711] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
-            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition">
+            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer">
               Copy
             </button>
           </div>
@@ -302,15 +303,15 @@
     </div>
   </section>
 
-  <!-- Pricing Section -->
+  <!-- Pricing Section: Updated for Privora Drive -->
   <section id="pricing" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
     <div class="text-center mb-14">
       <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
         Simple, Transparent Pricing
       </span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Choose Your Transfer Power</h2>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Choose Your Transfer & Storage Power</h2>
       <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
-        Start free forever or unlock massive file limits and custom recipient branding with Privora Pro.
+        Start free forever or unlock a 200 GB permanent encrypted drive and 50 GB single transfers with Privora Pro.
       </p>
     </div>
 
@@ -322,7 +323,7 @@
             <h3 class="text-lg font-bold text-white">Free Starter</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-semibold">Default</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Standard ephemeral transfers for documents, spreadsheets, clips, and code.</p>
+          <p class="text-xs text-slate-400 mb-6">Encrypted cloud drive storage and zero-knowledge ephemeral transfers.</p>
           <div class="text-3xl font-extrabold text-white mb-6">
             $0 <span class="text-xs font-normal text-slate-500">/ forever</span>
           </div>
@@ -330,7 +331,11 @@
           <ul class="space-y-3 text-xs text-slate-300">
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Up to <strong>2 GB</strong> per single transfer</span>
+              <span><strong>5 GB</strong> Permanent Cloud Drive storage</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Up to <strong>2 GB</strong> per single transfer link</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -338,15 +343,11 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Client-side passcode protection</span>
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Retention options: <strong>1h, 24h, 72h & Never</strong></span>
+              <span>Passcode protection & client-side encryption</span>
             </li>
             <li class="flex items-center gap-2 text-slate-500">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              <span>50 GB file support & White-label download screens</span>
+              <span>200 GB permanent drive & 50 GB single uploads (Pro only)</span>
             </li>
           </ul>
         </div>
@@ -367,7 +368,7 @@
             <h3 class="text-lg font-bold text-white">Privora Pro</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">Pro Member</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Designed for filmmakers, agencies, security researchers, and power teams.</p>
+          <p class="text-xs text-slate-400 mb-6">Designed for creators, agencies, teams, and high-capacity storage.</p>
           <div class="text-3xl font-extrabold text-white mb-6">
             $4 <span class="text-xs font-normal text-slate-500">/ month</span>
           </div>
@@ -375,23 +376,23 @@
           <ul class="space-y-3 text-xs text-slate-200">
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Massive single transfers up to <strong>50 GB</strong></span>
+              <span><strong>200 GB</strong> Permanent Cloud Drive storage</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>White-label branded recipient download screens</span>
+              <span>Single transfers up to <strong>50 GB</strong></span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Instant email download notifications & webhooks</span>
+              <span>Instant direct sharing & high-speed streaming</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Extended retention: <strong>7d, 14d, 30d & Never</strong></span>
+              <span>Extended link retention: <strong>7d, 14d, 30d & Never</strong></span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Remote kill switch & real-time telemetry</span>
+              <span>Instant remote shredding & active access controls</span>
             </li>
           </ul>
         </div>
@@ -406,16 +407,26 @@
   <!-- Security FAQ Accordion -->
   <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
     <div class="text-center mb-10">
-      <h3 class="text-2xl font-bold text-white">Frequently Asked Privacy & Security Questions</h3>
+      <h3 class="text-2xl font-bold text-white">Frequently Asked Questions</h3>
     </div>
     <div class="space-y-4">
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
+        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
+          <span>What is the difference between Privora Transfer and Privora Drive?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          Privora Transfer creates temporary, time-limited download links (or Burn-on-Read links) that self-destruct. Privora Drive is your encrypted personal vault that permanently stores files (5 GB on Free, 200 GB on Pro) until you delete them.
+        </p>
+      </details>
+
       <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
         <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
           <span>Can Privora or its cloud operators inspect my files?</span>
           <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          No. When you set a passcode, encryption is derived on your local browser. Privora stores encrypted blobs across Cloudflare R2 without keeping the decryption keys in our databases.
+          No. Passcodes and encryption keys are computed client-side. Privora stores encrypted blobs across Cloudflare R2 edge locations without storing your decryption keys in our databases.
         </p>
       </details>
 
@@ -425,7 +436,7 @@
           <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          If you set "Max Downloads" to 1, the file is immediately expunged from edge storage the exact millisecond the recipient's download stream completes. Any subsequent access displays an expired vault error.
+          If you set "Max Downloads" to 1, the file is automatically purged from edge storage the exact millisecond the recipient's download stream finishes.
         </p>
       </details>
 
@@ -435,7 +446,7 @@
           <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
         </summary>
         <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-          All binary formats are accepted without restriction: video reels (MP4, MOV, ProRes), spreadsheets (XLSX, CSV), documents (PDF, DOCX), archives (ZIP, TAR, 7Z), and raw disk images.
+          All binary formats are supported: video reels (MP4, MOV, ProRes), spreadsheets (XLSX, CSV), documents (PDF, DOCX), archives (ZIP, TAR, 7Z), and audio formats.
         </p>
       </details>
     </div>
@@ -455,7 +466,7 @@
     </div>
   </footer>
 
-  <!-- Canvas Ambient Animation Script -->
+  <!-- Canvas Ambient Background Animation -->
   <script>
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
@@ -509,7 +520,7 @@
     renderAurora();
   </script>
 
-  <!-- Application Logic & Guard Scripts -->
+  <!-- Application Logic & Quota Guard Scripts -->
   <script>
     let userTier = 'free';
 
@@ -552,15 +563,7 @@
       navBtn.href = "#";
       navBtn.onclick = (e) => {
         e.preventDefault();
-        localStorage.removeItem("vp_token");
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("vp_user_id");
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-          const key = localStorage.key(i);
-          if (key && (key.startsWith("sb-") || key.includes("supabase"))) {
-            localStorage.removeItem(key);
-          }
-        }
+        localStorage.clear();
         window.location.reload();
       };
 
@@ -652,7 +655,7 @@
     function handleFile(file) {
       const sizeMb = parseFloat((file.size / (1024 * 1024)).toFixed(2));
 
-      // Guard: 2048 MB free tier limit
+      // Guard against 2048 MB Free limit
       if (userTier !== 'pro' && sizeMb > 2048) {
         selectedFile = null;
         fileInput.value = "";
