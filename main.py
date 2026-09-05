@@ -42,12 +42,25 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 def get_db():
     if not DATABASE_URL:
         raise HTTPException(status_code=500, detail="DATABASE_URL environment variable is missing.")
-    # Support connection strings formatted with postgres:// or postgresql://
     conn_str = DATABASE_URL
     if conn_str.startswith("postgres://"):
         conn_str = conn_str.replace("postgres://", "postgresql://", 1)
     conn = psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
     return conn
+
+# Auto-migration check for max_downloads column
+@app.on_event("startup")
+def verify_schema():
+    if not DATABASE_URL:
+        return
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("ALTER TABLE shares ADD COLUMN IF NOT EXISTS max_downloads INT DEFAULT 0;")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Database migration notice: {e}")
 
 # Cloudflare R2 Configuration
 R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
@@ -75,6 +88,7 @@ class CreateShareRequest(BaseModel):
     filesize_mb: float
     password: Optional[str] = None
     expiry_hours: int = 24
+    max_downloads: int = 0
     user_id: Optional[str] = None
 
 class DownloadPayload(BaseModel):
@@ -105,6 +119,14 @@ async def auth_page(request: Request):
         })
     return render_template("index.html", request)
 
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return render_template("terms.html", request)
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return render_template("privacy.html", request)
+
 @app.get("/share/{share_id}", response_class=HTMLResponse)
 async def share_page(request: Request, share_id: str):
     conn = get_db()
@@ -116,6 +138,12 @@ async def share_page(request: Request, share_id: str):
     if not row:
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
+    # Check Max Downloads / Burn-on-Read limit
+    max_downloads = row.get("max_downloads", 0) or 0
+    if max_downloads > 0 and row["downloads"] >= max_downloads:
+        raise HTTPException(status_code=410, detail="This vault link has reached its maximum download limit and was shredded.")
+
+    # Check Expiration
     if row["expiry_hours"] != 0:
         expires_at = row["expires_at"]
         if isinstance(expires_at, str):
@@ -168,8 +196,8 @@ async def create_share(payload: CreateShareRequest):
         password_hash = hashlib.sha256(payload.password.encode()).hexdigest()
 
     cursor.execute("""
-        INSERT INTO shares (id, filename, filesize_mb, s3_key, password_hash, expiry_hours, created_at, expires_at, downloads, user_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0, %s)
+        INSERT INTO shares (id, filename, filesize_mb, s3_key, password_hash, expiry_hours, max_downloads, created_at, expires_at, downloads, user_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s)
     """, (
         share_id,
         payload.filename,
@@ -177,6 +205,7 @@ async def create_share(payload: CreateShareRequest):
         s3_key,
         password_hash,
         payload.expiry_hours,
+        payload.max_downloads,
         created_at,
         expires_at,
         payload.user_id
@@ -231,6 +260,12 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=404, detail="File share link not found or expired.")
 
+    # Check Max Downloads / Burn-on-Read
+    max_downloads = row.get("max_downloads", 0) or 0
+    if max_downloads > 0 and row["downloads"] >= max_downloads:
+        conn.close()
+        raise HTTPException(status_code=410, detail="This vault link has reached its maximum download limit and was shredded.")
+
     if row["expiry_hours"] != 0:
         expires_at = row["expires_at"]
         if isinstance(expires_at, str):
@@ -265,10 +300,18 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=500, detail=f"Presign failed: {str(e)}")
 
-    cursor.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = %s", (share_id,))
+    new_count = row["downloads"] + 1
+    cursor.execute("UPDATE shares SET downloads = %s WHERE id = %s", (new_count, share_id))
     conn.commit()
-    conn.close()
 
+    # If this download reaches or exceeds max_downloads (Burn-on-Read), shred the object in R2 immediately
+    if max_downloads > 0 and new_count >= max_downloads:
+        try:
+            s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
+        except Exception:
+            pass
+
+    conn.close()
     return {"download_url": download_url}
 
 @app.get("/api/user-profile")
