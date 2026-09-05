@@ -86,9 +86,12 @@ async def terms_page(request: Request):
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_page(request: Request):
     return render_template("privacy.html", request)
+
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)
+
+# ----------------- E-Sign Document & Virtual Signing API -----------------
 @app.post("/api/sign/upload")
 async def upload_sign_doc(request: Request, filename: str):
     doc_id = uuid.uuid4().hex[:10]
@@ -110,13 +113,45 @@ async def get_sign_doc(doc_id: str):
     contents = res.get("Contents", [])
     if not contents:
         raise HTTPException(status_code=404, detail="Signing document not found or expired")
-    s3_key = contents[0]["Key"]
+    
+    # Filter out completed signed files if looking for the original template
+    template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
+    s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
+
     url = s3_client.generate_presigned_url(
         "get_object",
         Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
         ExpiresIn=86400
     )
     return {"url": url}
+
+@app.post("/api/sign/complete/{doc_id}")
+async def complete_signing(doc_id: str, request: Request):
+    body = await request.body()
+    content_type = request.headers.get("content-type", "image/png")
+    s3_key = f"sign_docs/{doc_id}/completed_signed.png"
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=s3_key,
+        Body=body,
+        ContentType=content_type
+    )
+    return {"status": "saved", "doc_id": doc_id}
+
+@app.get("/api/sign/check-status/{doc_id}")
+async def check_signing_status(doc_id: str):
+    s3_key = f"sign_docs/{doc_id}/completed_signed.png"
+    try:
+        s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
+        url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
+            ExpiresIn=86400
+        )
+        return {"status": "completed", "download_url": url}
+    except Exception:
+        return {"status": "pending"}
+
 # ----------------- Privora Drive Core API -----------------
 @app.get("/api/drive/quota")
 async def get_drive_quota(user_id: str):
@@ -169,7 +204,6 @@ async def upload_drive_file(request: Request, filename: str, user_id: str):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Ensure user record exists
     cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
 
@@ -403,7 +437,6 @@ async def lemon_webhook(request: Request):
         if user_id:
             conn = get_db()
             cursor = conn.cursor()
-            # Upgrade user to Pro and expand storage quota to 200 GB
             cursor.execute("""
                 INSERT INTO users (user_id, email, tier, storage_quota_bytes)
                 VALUES (%s, %s, 'pro', 214748364800)
