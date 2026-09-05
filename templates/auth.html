@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>VaultPro | Access Portal</title>
+  <title>Privora | Access Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -10,7 +10,7 @@
   <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative">
     <div class="text-center mb-6">
       <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 font-bold text-white text-xl mb-3 shadow-lg shadow-indigo-500/20">V</div>
-      <h2 class="text-2xl font-bold" id="formTitle">Sign In to VaultPro</h2>
+      <h2 class="text-2xl font-bold" id="formTitle">Sign In to Privora</h2>
       <p class="text-xs text-slate-400 mt-1">Manage private vaults, monitor views, and upgrade storage</p>
     </div>
 
@@ -97,7 +97,7 @@
 
     function toggleMode() {
       isSignUp = !isSignUp;
-      document.getElementById('formTitle').innerText = isSignUp ? "Create Your Vault Account" : "Sign In to VaultPro";
+      document.getElementById('formTitle').innerText = isSignUp ? "Create Your Vault Account" : "Sign In to Privora";
       document.getElementById('authBtn').innerText = isSignUp ? "Create Account" : "Sign In";
       document.getElementById('toggleText').innerText = isSignUp ? "Already have an account?" : "Don't have an account?";
       document.getElementById('toggleBtn').innerText = isSignUp ? "Sign In" : "Create Account";
@@ -106,7 +106,7 @@
     }
 
     function toggleForgotView(showForgot) {
-      document.getElementById('formTitle').innerText = showForgot ? "Reset Your Password" : (isSignUp ? "Create Your Vault Account" : "Sign In to VaultPro");
+      document.getElementById('formTitle').innerText = showForgot ? "Reset Your Password" : (isSignUp ? "Create Your Vault Account" : "Sign In to Privora");
       document.getElementById('authFormSection').classList.toggle('hidden', showForgot);
       document.getElementById('forgotSection').classList.toggle('hidden', !showForgot);
       if (showForgot) {
