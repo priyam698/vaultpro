@@ -23,20 +23,94 @@
     .cursive-sig { font-family: 'Caveat', cursive; }
     .cursive-alt { font-family: 'Dancing Script', cursive; }
     
-    /* Draggable Target Box Styling */
     .drag-active {
       cursor: grabbing !important;
       user-select: none !important;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ========================================================================= */
+    /* CLEAN 1-PAGE DOCUMENT PRINT ISOLATION                                     */
+    /* ========================================================================= */
+    @media print {
+      @page {
+        size: auto;
+        margin: 0mm !important;
+      }
+      /* Completely hide UI bars, navigation, sidebars, modals, and buttons */
+      header, 
+      aside, 
+      #zoomControls, 
+      #floatingAssignBtn, 
+      #uploadPromptContainer, 
+      #signerModal, 
+      button, 
+      .no-print {
+        display: none !important;
+      }
+
+      body, html {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      .studio-wrapper, main {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+      }
+
+      #documentStage {
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important; /* Disable zoom during print */
+        overflow: visible !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        background: white !important;
+      }
+
+      #pdfCanvas, #imgViewer {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 auto !important;
+      }
+
+      /* Clean authentic look for the stamped signature on paper */
+      #signatureTargetBox {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+
+      /* Hide drag-handles (⋮⋮) and close button (✕) */
+      #signatureTargetBox .drag-indicator,
+      #signatureTargetBox button {
+        display: none !important;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
 
   <!-- ========================================================================= -->
-  <!-- SIGNATURE MODAL: "Who's signing this field?" -->
+  <!-- SIGNATURE MODAL: "Who's signing this field?"                              -->
   <!-- ========================================================================= -->
-  <div id="signerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+  <div id="signerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4 no-print">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative">
       
       <div class="flex justify-between items-start mb-2">
@@ -44,7 +118,7 @@
         <button onclick="closeSignerModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
       <p class="text-xs text-slate-400 leading-relaxed mb-5">
-        Choose who should sign this field. You can sign it now, or assign it to someone else. They'll receive a secure link to sign virtually.
+        Choose who should sign this field. You can sign it now, or assign it to someone else.
       </p>
 
       <!-- Pill Selector -->
@@ -103,7 +177,7 @@
                class="h-32 rounded-2xl bg-[#050711] border border-dashed border-white/15 hover:border-indigo-400/50 flex flex-col items-center justify-center p-4 cursor-pointer transition">
             <input type="file" id="sigFileInput" accept="image/png, image/jpeg" class="hidden" onchange="handleSigImageUpload(event)">
             <svg class="w-6 h-6 text-indigo-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <span class="text-xs text-slate-300 font-medium">Upload photo of your signature (PNG / JPG)</span>
+            <span class="text-xs text-slate-300 font-medium">Upload signature photo (PNG / JPG)</span>
           </div>
           <div id="uploadedSigPreviewBox" class="h-16 hidden rounded-xl bg-white/[0.03] p-2 flex items-center justify-center">
             <img id="uploadedSigImg" src="" class="max-h-full max-w-full object-contain filter invert" />
@@ -124,12 +198,12 @@
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
         <div class="p-3 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 leading-relaxed">
-          The document will be sealed and a virtual signing link will be generated for this recipient.
+          The document will be stamped with this assigned recipient box.
         </div>
       </div>
 
       <p class="text-[10px] text-slate-500 leading-relaxed mt-4 pt-3 border-t border-white/10">
-        By signing, I agree that the signature will be the electronic representation of my signature for all legal contract purposes.
+        By signing, I agree that the signature will be the electronic representation of my signature for legally binding contracts.
       </p>
 
       <div class="flex items-center justify-end gap-3 mt-5">
@@ -146,9 +220,9 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- TOP STUDIO NAVIGATION -->
+  <!-- TOP STUDIO NAVIGATION (HIDDEN ON PRINT)                                   -->
   <!-- ========================================================================= -->
-  <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between">
+  <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print">
     <div class="flex items-center gap-4">
       <a href="/" class="flex items-center gap-2 text-slate-400 hover:text-white transition text-xs font-semibold">
         <span>✕</span>
@@ -160,20 +234,27 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <!-- Direct Image Download -->
+      <button id="downloadImageBtn" onclick="downloadDirectImage()" 
+              class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer disabled:opacity-40" disabled>
+        Save as Image
+      </button>
+
+      <!-- Print / Save as PDF Button -->
       <button id="downloadSignedBtn" onclick="exportSignedDocument()" 
-              class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer disabled:opacity-50" disabled>
-        Download Signed Document
+              class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer disabled:opacity-40" disabled>
+        Download / Print PDF
       </button>
     </div>
   </header>
 
   <!-- ========================================================================= -->
-  <!-- MAIN STUDIO WORKSPACE -->
+  <!-- MAIN STUDIO WORKSPACE                                                     -->
   <!-- ========================================================================= -->
-  <div class="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto overflow-hidden">
+  <div class="studio-wrapper flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto overflow-hidden">
     
-    <!-- LEFT SIDEBAR -->
-    <aside class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto">
+    <!-- LEFT SIDEBAR (HIDDEN ON PRINT) -->
+    <aside class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto no-print">
       <div>
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Signers</h4>
         <p id="signersSummary" class="text-xs text-slate-400 leading-relaxed">
@@ -204,11 +285,11 @@
       </div>
     </aside>
 
-    <!-- RIGHT WORKSPACE -->
+    <!-- RIGHT DOCUMENT WORKSPACE -->
     <main class="flex-1 flex flex-col items-center justify-start p-6 relative overflow-y-auto min-h-[550px]">
       
       <!-- Upload Initial State -->
-      <div id="uploadPromptContainer" class="max-w-md w-full my-auto text-center obsidian-card p-8 rounded-3xl border border-dashed border-white/20 hover:border-indigo-400/60 transition cursor-pointer"
+      <div id="uploadPromptContainer" class="max-w-md w-full my-auto text-center obsidian-card p-8 rounded-3xl border border-dashed border-white/20 hover:border-indigo-400/60 transition cursor-pointer no-print"
            onclick="document.getElementById('docFileInput').click()">
         <input type="file" id="docFileInput" accept="application/pdf, image/png, image/jpeg" class="hidden" onchange="loadUserDocument(event)">
         <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center mb-3">
@@ -218,41 +299,39 @@
         <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or image file</p>
       </div>
 
-      <!-- Live Document Stage with Draggable Element -->
+      <!-- Live Document Stage (The Only Element Printed) -->
       <div id="documentStage" class="hidden relative max-w-3xl w-full bg-white rounded-xl shadow-2xl border border-slate-700 select-none overflow-hidden">
         
         <canvas id="pdfCanvas" class="w-full h-auto block"></canvas>
         <img id="imgViewer" src="" class="hidden w-full h-auto block object-contain" />
 
-        <!-- Floating Action Button -->
+        <!-- Floating Action Button (Hidden on Print) -->
         <button id="floatingAssignBtn" onclick="openSignerModalAtCenter()" 
-                class="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-2xl transition cursor-pointer z-10 flex items-center gap-2">
+                class="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-2xl transition cursor-pointer z-10 flex items-center gap-2 no-print">
           <span>Assign a new signature field</span>
         </button>
 
-        <!-- FREELY DRAGGABLE SIGNATURE TARGET BOX -->
+        <!-- DRAGGABLE SIGNATURE TARGET BOX -->
         <div id="signatureTargetBox" 
              class="absolute hidden border-2 border-dashed border-indigo-600 bg-indigo-50/90 rounded-xl flex items-center justify-between px-3 py-2 cursor-grab z-30 transition-shadow select-none"
              style="width: 210px; height: 65px; left: 100px; top: 200px;">
           
-          <!-- Drag Handle Gripper -->
           <div class="flex items-center gap-1.5 pointer-events-none">
-            <span class="text-indigo-400 text-xs font-mono">⋮⋮</span>
-            <div id="targetBoxContent" class="text-indigo-900 font-semibold text-xs font-mono truncate">
+            <span class="drag-indicator text-indigo-400 text-xs font-mono">⋮⋮</span>
+            <div id="targetBoxContent" class="text-indigo-950 font-semibold text-xs font-mono truncate">
               ✎ Sign here
             </div>
           </div>
 
-          <!-- Quick Dismiss Button -->
-          <button type="button" onclick="removeSignatureBox(event)" class="text-slate-400 hover:text-rose-600 font-bold text-xs p-1 ml-1 cursor-pointer">
+          <button type="button" onclick="removeSignatureBox(event)" class="text-slate-400 hover:text-rose-600 font-bold text-xs p-1 ml-1 cursor-pointer no-print">
             ✕
           </button>
         </div>
 
       </div>
 
-      <!-- Zoom Bar -->
-      <div class="fixed bottom-6 right-8 bg-[#090d1a] border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-3 text-xs text-slate-400 shadow-xl z-20">
+      <!-- Zoom Bar (Hidden on Print) -->
+      <div id="zoomControls" class="fixed bottom-6 right-8 bg-[#090d1a] border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-3 text-xs text-slate-400 shadow-xl z-20 no-print">
         <button onclick="adjustZoom(-0.1)" class="hover:text-white font-bold">−</button>
         <span id="zoomLabel" class="font-mono text-[11px]">100%</span>
         <button onclick="adjustZoom(0.1)" class="hover:text-white font-bold">+</button>
@@ -262,7 +341,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT: Document Loading + Drag-and-Drop System -->
+  <!-- JAVASCRIPT: Document Loading + Drag-and-Drop + Clean Export               -->
   <!-- ========================================================================= -->
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -314,10 +393,11 @@
       currentDocument.getPage(num).then(function(page) {
         const canvas = document.getElementById('pdfCanvas');
         const ctx = canvas.getContext('2d');
-        const viewport = page.getViewport({ scale: 1.5 });
+        const viewport = page.getViewport({ scale: 2.0 }); // High-res rendering
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+
         page.render({ canvasContext: ctx, viewport: viewport });
       });
     }
@@ -455,21 +535,22 @@
       if (signerType === 'me') {
         if (sigMode === 'type') {
           const name = document.getElementById("sigNameInput").value.trim() || "Signature";
-          targetContent.innerHTML = `<span class="text-2xl text-indigo-900 ${fontStyleChoice === 1 ? 'cursive-alt' : 'cursive-sig'}">${name}</span>`;
+          targetContent.innerHTML = `<span class="text-3xl text-slate-900 ${fontStyleChoice === 1 ? 'cursive-alt' : 'cursive-sig'}">${name}</span>`;
         } else if (sigMode === 'draw') {
           targetContent.innerHTML = `<img src="${drawCanvas.toDataURL()}" class="max-h-12 max-w-[140px] object-contain filter invert" />`;
         } else if (sigMode === 'upload' && activeSignatureDataUrl) {
           targetContent.innerHTML = `<img src="${activeSignatureDataUrl}" class="max-h-12 max-w-[140px] object-contain" />`;
         }
-        document.getElementById("signersSummary").innerText = "Signed by You. Drag to reposition anywhere on document.";
+        document.getElementById("signersSummary").innerText = "Signed by You. Drag to reposition anywhere.";
       } else {
         const otherName = document.getElementById("otherSignerName").value.trim() || "Signer";
         targetContent.innerHTML = `<span>✎ Sign here: <strong>${otherName}</strong></span>`;
-        document.getElementById("signersSummary").innerText = `Assigned to ${otherName}. Drag to reposition field.`;
+        document.getElementById("signersSummary").innerText = `Assigned to ${otherName}. Drag to reposition.`;
       }
 
-      document.getElementById("fieldsStatusIndicator").innerText = "1 Signature Field Placed (Draggable)";
+      document.getElementById("fieldsStatusIndicator").innerText = "1 Signature Field Placed";
       document.getElementById("downloadSignedBtn").disabled = false;
+      document.getElementById("downloadImageBtn").disabled = false;
       closeSignerModal();
     }
 
@@ -483,6 +564,7 @@
       document.getElementById("fieldsStatusIndicator").innerText = "No fields yet";
       document.getElementById("signersSummary").innerText = "Click on your document to start adding signature fields.";
       document.getElementById("downloadSignedBtn").disabled = true;
+      document.getElementById("downloadImageBtn").disabled = true;
     }
 
     function adjustZoom(delta) {
@@ -492,14 +574,67 @@
       document.getElementById("documentStage").style.transformOrigin = "top center";
     }
 
+    // --- 6. Seamless Single-Page PDF Print Handler ---
     function exportSignedDocument() {
-      alert("Preparing document...\n\nLaunching print/save dialog with your stamped signature.");
-      window.print();
+      // 1. Temporarily reset zoom to 100% so coordinates align perfectly with physical paper
+      const previousScale = currentScale;
+      document.getElementById("documentStage").style.transform = "none";
+
+      // 2. Temporarily strip the editing dashed border and gripper so it prints as a clean stamp
+      const box = document.getElementById("signatureTargetBox");
+      box.classList.remove("border-2", "border-dashed", "border-indigo-600", "bg-indigo-50/90");
+      box.classList.add("border-none", "bg-transparent");
+
+      setTimeout(() => {
+        window.print();
+
+        // 3. Restore interactive UI after print dialog finishes
+        document.getElementById("documentStage").style.transform = `scale(${previousScale})`;
+        box.classList.add("border-2", "border-dashed", "border-indigo-600", "bg-indigo-50/90");
+        box.classList.remove("border-none", "bg-transparent");
+      }, 150);
     }
 
-    // =========================================================================
-    // 6. FREEFORM DRAG-AND-DROP ENGINE FOR SIGNATURE BOX
-    // =========================================================================
+    // --- 7. Direct Image Download (Bypass Print Dialog) ---
+    function downloadDirectImage() {
+      const stage = document.getElementById("documentStage");
+      const canvas = document.createElement("canvas");
+      const baseCanvas = document.getElementById("pdfCanvas");
+      const baseImg = document.getElementById("imgViewer");
+
+      canvas.width = baseCanvas.classList.contains("hidden") ? baseImg.naturalWidth : baseCanvas.width;
+      canvas.height = baseCanvas.classList.contains("hidden") ? baseImg.naturalHeight : baseCanvas.height;
+
+      const ctx = canvas.getContext("2d");
+
+      // Draw document base
+      if (!baseCanvas.classList.contains("hidden")) {
+        ctx.drawImage(baseCanvas, 0, 0);
+      } else {
+        ctx.drawImage(baseImg, 0, 0);
+      }
+
+      // Draw stamped signature at proportional position
+      const targetBox = document.getElementById("signatureTargetBox");
+      const stageRect = stage.getBoundingClientRect();
+      const scaleX = canvas.width / stageRect.width;
+      const scaleY = canvas.height / stageRect.height;
+
+      const sigX = parseFloat(targetBox.style.left) * scaleX;
+      const sigY = (parseFloat(targetBox.style.top) + 35) * scaleY;
+
+      ctx.font = `${Math.round(28 * scaleX)}px 'Caveat', cursive`;
+      ctx.fillStyle = "#0f172a";
+      ctx.fillText(document.getElementById("sigNameInput").value || "Signed Document", sigX, sigY);
+
+      // Trigger automatic browser download
+      const link = document.createElement("a");
+      link.download = `${document.getElementById("docTitleInput").value || "signed_document"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    // --- 8. Drag-and-Drop Handler for Signature Target Box ---
     const box = document.getElementById("signatureTargetBox");
     let startX = 0, startY = 0, initialBoxLeft = 0, initialBoxTop = 0;
 
@@ -507,7 +642,6 @@
     box.addEventListener("touchstart", dragStart, { passive: false });
 
     function dragStart(e) {
-      // Don't drag if clicking the dismiss ✕ button
       if (e.target.tagName === 'BUTTON') return;
 
       isDraggingBox = true;
@@ -546,7 +680,6 @@
       let newLeft = initialBoxLeft + deltaX;
       let newTop = initialBoxTop + deltaY;
 
-      // Bound clamping inside document stage boundaries
       const maxLeft = stage.clientWidth - box.offsetWidth;
       const maxTop = stage.clientHeight - box.offsetHeight;
 
