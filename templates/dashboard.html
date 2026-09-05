@@ -25,7 +25,7 @@
   <header class="border-b border-white/[0.06] bg-[#030408]/60 backdrop-blur-xl sticky top-0 z-20">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
+        <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center shadow-lg shadow-indigo-500/20">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
             <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
             <polygon points="17,50 33.5,68 33.5,35" fill="#4338ca" stroke="#090d1a" stroke-width="1" />
@@ -46,7 +46,7 @@
 
       <div class="flex items-center gap-4">
         <a href="/" class="text-xs text-slate-400 hover:text-white transition">Transfer Pipeline</a>
-        <button onclick="signOut()" class="text-xs bg-white/[0.05] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 transition">
+        <button onclick="signOut()" class="text-xs bg-white/[0.05] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 transition cursor-pointer">
           Sign Out
         </button>
       </div>
@@ -64,7 +64,7 @@
             <span id="tierBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300">Free Tier</span>
           </div>
           <div class="text-2xl font-black text-white mt-1">
-            <span id="usedDisplay">0.00 GB</span> <span class="text-xs font-normal text-slate-400">of <span id="quotaDisplay">5.00 GB</span></span>
+            <span id="usedDisplay">0 B</span> <span class="text-xs font-normal text-slate-400">of <span id="quotaDisplay">5.00 GB</span></span>
           </div>
           
           <div class="w-full h-2 bg-slate-950 rounded-full mt-4 overflow-hidden border border-white/10">
@@ -80,7 +80,8 @@
         </div>
       </div>
 
-      <div class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-white/15 hover:border-indigo-400/60 bg-white/[0.01] hover:bg-indigo-950/10 transition group"
+      <div id="dropZoneContainer" 
+           class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-white/15 hover:border-indigo-400/60 bg-white/[0.01] hover:bg-indigo-950/10 transition group"
            onclick="document.getElementById('driveFileInput').click()">
         <input type="file" id="driveFileInput" multiple class="hidden">
         
@@ -97,7 +98,7 @@
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h2 class="text-lg font-bold text-white">Your Encrypted Vault Files</h2>
-          <p class="text-xs text-slate-400">All objects stored across zero-egress Cloudflare R2 edge servers</p>
+          <p class="text-xs text-slate-400">Stored with zero-knowledge encryption across Cloudflare R2 edge nodes</p>
         </div>
         <input type="text" id="searchBox" oninput="filterFiles()" placeholder="Search files..." 
                class="bg-[#050711] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-400 transition w-full sm:w-64">
@@ -129,6 +130,15 @@
   </footer>
 
   <script>
+    function formatBytes(bytes, decimals = 2) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
+
     function getStoredUserId() {
       const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
       if (direct) return direct;
@@ -161,12 +171,11 @@
       try {
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
-        const usedGb = (data.used_bytes / (1024**3)).toFixed(2);
-        const quotaGb = (data.quota_bytes / (1024**3)).toFixed(2);
+        
+        document.getElementById("usedDisplay").innerText = formatBytes(data.used_bytes);
+        document.getElementById("quotaDisplay").innerText = formatBytes(data.quota_bytes);
+        
         const pct = Math.min(100, Math.round((data.used_bytes / data.quota_bytes) * 100));
-
-        document.getElementById("usedDisplay").innerText = `${usedGb} GB`;
-        document.getElementById("quotaDisplay").innerText = `${quotaGb} GB`;
         document.getElementById("storageBar").style.width = `${pct}%`;
 
         if (data.tier === 'pro') {
@@ -186,24 +195,45 @@
       }
     }
 
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+        return `<svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
+      }
+      if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) {
+        return `<svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`;
+      }
+      if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) {
+        return `<svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
+      }
+      if (['xls', 'xlsx', 'csv'].includes(ext)) {
+        return `<svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
+      }
+      if (['zip', 'rar', 'tar', '7z', 'gz'].includes(ext)) {
+        return `<svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>`;
+      }
+      return `<svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`;
+    }
+
     function renderFiles(files) {
       const tbody = document.getElementById("filesTableBody");
       if (!files.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-500">Your vault is empty. Upload your first document or video above.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-500">Your vault is empty. Upload your first document or media file above.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = files.map(f => `
         <tr class="hover:bg-white/[0.02] transition">
-          <td class="py-3.5 px-4 font-medium text-white flex items-center gap-2">
-            <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            <span class="truncate max-w-xs sm:max-w-sm">${f.filename}</span>
+          <td class="py-3.5 px-4 font-medium text-white flex items-center gap-2.5">
+            ${getFileIcon(f.filename)}
+            <span class="truncate max-w-xs sm:max-w-sm" title="${f.filename}">${f.filename}</span>
           </td>
-          <td class="py-3.5 px-4 font-mono text-slate-400">${f.size_mb} MB</td>
+          <td class="py-3.5 px-4 font-mono text-slate-400">${formatBytes(f.size_bytes)}</td>
           <td class="py-3.5 px-4 text-slate-500">${f.created_at}</td>
           <td class="py-3.5 px-4 text-right space-x-2">
-            <button onclick="downloadFile('${f.id}')" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-indigo-300 font-semibold transition">Download</button>
-            <button onclick="deleteFile('${f.id}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg font-semibold transition">Delete</button>
+            <button onclick="shareFile('${f.id}')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg font-semibold transition cursor-pointer">Share Link</button>
+            <button onclick="downloadFile('${f.id}')" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-slate-200 rounded-lg font-semibold transition cursor-pointer">Download</button>
+            <button onclick="deleteFile('${f.id}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg font-semibold transition cursor-pointer">Delete</button>
           </td>
         </tr>
       `).join('');
@@ -215,13 +245,32 @@
       renderFiles(filtered);
     }
 
+    async function shareFile(fileId) {
+      try {
+        const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);
+        const data = await res.json();
+        if (data.download_url) {
+          navigator.clipboard.writeText(data.download_url);
+          alert("Secure direct download link copied to clipboard!");
+        } else {
+          alert("Failed to generate share link.");
+        }
+      } catch(e) {
+        alert("Network error generating share link.");
+      }
+    }
+
     async function downloadFile(fileId) {
-      const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);
-      const data = await res.json();
-      if (data.download_url) {
-        window.location.href = data.download_url;
-      } else {
-        alert("Failed to fetch download link.");
+      try {
+        const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);
+        const data = await res.json();
+        if (data.download_url) {
+          window.location.href = data.download_url;
+        } else {
+          alert("Failed to fetch download link.");
+        }
+      } catch(e) {
+        alert("Download error.");
       }
     }
 
@@ -236,9 +285,7 @@
     }
 
     // Direct Upload Handler
-    const fileInput = document.getElementById("driveFileInput");
-    fileInput.addEventListener("change", async (e) => {
-      const files = e.target.files;
+    async function uploadFileList(files) {
       if (!files.length) return;
 
       const statusEl = document.getElementById("uploadStatus");
@@ -268,8 +315,26 @@
 
       statusEl.innerText = "Uploads complete!";
       setTimeout(() => statusEl.classList.add("hidden"), 2000);
-      fileInput.value = "";
+      document.getElementById("driveFileInput").value = "";
       loadDriveData();
+    }
+
+    const fileInput = document.getElementById("driveFileInput");
+    fileInput.addEventListener("change", (e) => uploadFileList(e.target.files));
+
+    // Drag and Drop Zone Listeners
+    const dropZone = document.getElementById("dropZoneContainer");
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("border-indigo-400", "bg-indigo-950/20");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("border-indigo-400", "bg-indigo-950/20");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("border-indigo-400", "bg-indigo-950/20");
+      if (e.dataTransfer.files.length) uploadFileList(e.dataTransfer.files);
     });
 
     loadDriveData();
