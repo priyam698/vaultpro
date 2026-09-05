@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privora | Edge-Encrypted File Sharing</title>
+  <title>Privora | Zero-Knowledge Edge File Transfers</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,6 +47,7 @@
   <canvas id="ambientCanvas"></canvas>
   <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
+  <!-- Mandatory Sign-In Modal (After 4 Free Guest Uploads) -->
   <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 text-center shadow-2xl relative">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
@@ -55,19 +57,20 @@
       </div>
       <h3 class="text-xl font-extrabold text-white mb-2">Free Guest Quota Reached</h3>
       <p class="text-xs text-slate-300 leading-relaxed mb-6">
-        You have used your <strong>4 complimentary guest transfers</strong>. Create a free account or sign in to keep uploading files with unlimited access.
+        You have used your <strong>4 complimentary guest transfers</strong>. Create a free account or sign in to continue uploading with unlimited access.
       </p>
       <div class="space-y-2.5">
         <a href="/auth" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
           Sign In or Create Free Account
         </a>
         <button onclick="closeAuthModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition">
-          Cancel
+          Dismiss
         </button>
       </div>
     </div>
   </div>
 
+  <!-- Exceeded Limit Modal Popup (2 GB Free Limit) -->
   <div id="limitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-rose-500/30 text-center shadow-2xl relative">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
@@ -90,21 +93,23 @@
     </div>
   </div>
 
+  <!-- Navbar -->
   <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-       <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 shadow-lg shadow-indigo-500/20 flex items-center justify-center hover:border-indigo-400/40 transition">
-  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
-    <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
-    <polygon points="17,50 33.5,68 33.5,35" fill="#4338ca" stroke="#090d1a" stroke-width="1" />
-    <polygon points="17,50 33.5,35 33.5,12.5 17,12.5" fill="#6366f1" stroke="#090d1a" stroke-width="1" />
-    <polygon points="33.5,12.5 66.5,12.5 51.5,35" fill="#8b5cf6" stroke="#090d1a" stroke-width="1" />
-    <polygon points="66.5,12.5 83,36.5 51.5,35" fill="#a855f7" stroke="#090d1a" stroke-width="1" />
-    <polygon points="83,36.5 63.5,57.5 51.5,35" fill="#06b6d4" stroke="#090d1a" stroke-width="1" />
-    <polygon points="63.5,57.5 33.5,35 51.5,35" fill="#2563eb" stroke="#090d1a" stroke-width="1" />
-    <polygon points="33.5,35 63.5,57.5 33.5,68" fill="#1d4ed8" stroke="#090d1a" stroke-width="1" />
-  </svg>
-</div>
+        <!-- Option 9 Stealth Shard Logo -->
+        <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 shadow-lg shadow-indigo-500/20 flex items-center justify-center hover:border-indigo-400/40 transition">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+            <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
+            <polygon points="17,50 33.5,68 33.5,35" fill="#4338ca" stroke="#090d1a" stroke-width="1" />
+            <polygon points="17,50 33.5,35 33.5,12.5 17,12.5" fill="#6366f1" stroke="#090d1a" stroke-width="1" />
+            <polygon points="33.5,12.5 66.5,12.5 51.5,35" fill="#8b5cf6" stroke="#090d1a" stroke-width="1" />
+            <polygon points="66.5,12.5 83,36.5 51.5,35" fill="#a855f7" stroke="#090d1a" stroke-width="1" />
+            <polygon points="83,36.5 63.5,57.5 51.5,35" fill="#06b6d4" stroke="#090d1a" stroke-width="1" />
+            <polygon points="63.5,57.5 33.5,35 51.5,35" fill="#2563eb" stroke="#090d1a" stroke-width="1" />
+            <polygon points="33.5,35 63.5,57.5 33.5,68" fill="#1d4ed8" stroke="#090d1a" stroke-width="1" />
+          </svg>
+        </div>
         <span class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
           Privora
           <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
@@ -112,6 +117,7 @@
       </a>
 
       <div class="flex items-center gap-4">
+        <a href="#security" class="text-xs text-slate-300 hover:text-white font-medium transition hidden md:inline-block">Security Guarantee</a>
         <a href="#pricing" class="text-xs text-slate-300 hover:text-white font-medium transition hidden sm:inline-block">Pricing</a>
         <a href="/dashboard" 
            class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.05] px-3.5 py-2 rounded-xl font-semibold border border-transparent hover:border-white/10 transition">
@@ -125,12 +131,13 @@
     </div>
   </header>
 
+  <!-- Hero & Upload Section -->
   <main class="relative z-20 max-w-6xl mx-auto px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
         <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Universal Zero-Knowledge Edge Transfers
+        Zero-Knowledge Cryptographic Edge Pipeline
       </div>
 
       <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
@@ -141,25 +148,31 @@
       </h1>
 
       <p class="text-slate-400 text-base leading-relaxed max-w-lg font-normal">
-        Send videos, documents, PDFs, sheets, or code archives directly to cloud edge storage with zero bandwidth throttling, client-side passcodes, and optional permanent links.
+        Transfer videos, spreadsheets, PDFs, or software archives directly via encrypted edge nodes with zero bandwidth throttling, client-side passcodes, and guaranteed cryptographic shredding.
       </p>
 
-      <div class="flex flex-wrap items-center gap-4 pt-2 text-xs font-medium text-slate-400">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          Any File Format Supported
+      <!-- Trust Badges -->
+      <div class="grid grid-cols-2 gap-3 pt-2 text-xs font-medium text-slate-300">
+        <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
+          <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span>AES-256 Client-Side Encrypted</span>
         </div>
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          Direct S3/R2 Pipeline
+        <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
+          <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Cloudflare R2 Direct Stream</span>
         </div>
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          Password Gated Access
+        <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
+          <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span>Automated Crypto Shredding</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
+          <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          <span>Zero Server Knowledge</span>
         </div>
       </div>
     </div>
 
+    <!-- Upload Card -->
     <div class="lg:col-span-6">
       <div class="obsidian-card rounded-3xl p-6 sm:p-8 relative">
         <input type="file" id="fileInput" class="hidden">
@@ -179,21 +192,32 @@
           <span id="fileSizeDisplay" class="text-xs text-slate-400 mt-1 font-medium">Free Tier • Up to 2 GB per transfer</span>
         </div>
 
+        <!-- Transfer Parameters -->
         <div class="mt-6 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Vault Passcode (Optional)</label>
-              <input id="passcode" type="password" placeholder="Protect your file" 
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Vault Passcode</label>
+              <input id="passcode" type="password" placeholder="Client-side hash" 
                      class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Auto-Destroy After</label>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Auto-Destroy</label>
               <select id="expiryHours" 
                       class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
                 <option value="1">1 Hour</option>
                 <option value="24" selected>24 Hours</option>
                 <option value="72">3 Days</option>
-                <option value="0">Never (Permanent Vault)</option>
+                <option value="0">Never (Keep)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Max Downloads</label>
+              <select id="maxDownloads" 
+                      class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
+                <option value="0" selected>Unlimited</option>
+                <option value="1">1 (Burn on Read 🔥)</option>
+                <option value="5">5 Downloads</option>
+                <option value="10">10 Downloads</option>
               </select>
             </div>
           </div>
@@ -215,7 +239,7 @@
         </div>
 
         <div id="resultBox" class="mt-6 pt-5 border-t border-white/10 hidden space-y-2">
-          <label class="block text-xs font-semibold text-emerald-400">✓ Secure Vault Link Ready</label>
+          <label class="block text-xs font-semibold text-emerald-400">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
           <div class="flex items-center gap-2">
             <input id="shareUrlInput" type="text" readonly 
                    class="flex-1 bg-[#050711] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-indigo-300 font-mono focus:outline-none">
@@ -230,87 +254,54 @@
 
   </main>
 
-  <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] mt-8 w-full">
+  <!-- Security Guarantee Section -->
+  <section id="security" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
     <div class="text-center mb-14">
-      <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
-        Engineered for Privacy & Versatility
+      <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/20">
+        Enterprise Trust & Cryptographic Warranties
       </span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Why Security Teams Trust Privora</h2>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">The Privora Security Guarantee</h2>
       <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
-        Send confidential videos, spreadsheets, presentations, and binary files with end-to-end edge protection.
+        Built for zero-trust environments where your files cannot be read by cloud hosts, third-party trackers, or internal staff.
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
-        <div class="w-11 h-11 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="obsidian-card p-6 rounded-2xl border border-white/10 hover:border-indigo-500/40 transition">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
         </div>
-        <h3 class="text-base font-bold text-white mb-2">Zero-Knowledge Guard</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Files are locked behind optional passcodes using client-side hashing. Decryption keys are never stored on our database servers.
-        </p>
+        <h4 class="text-sm font-bold text-white mb-1">Zero-Knowledge Isolation</h4>
+        <p class="text-xs text-slate-400 leading-relaxed">Passcodes are hashed on the client device. Decryption keys never hit our database or transit telemetry logs.</p>
       </div>
 
-      <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
-        <div class="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
-        <h3 class="text-base font-bold text-white mb-2">Any Extension Direct Stream</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Full support for PDFs, DOCX, XLSX, MP4, MOV, ZIP, and RAW files streaming at high speed without bandwidth caps.
-        </p>
-      </div>
-
-      <div class="obsidian-card p-6 rounded-2xl hover:border-indigo-500/40 transition duration-300 group">
-        <div class="w-11 h-11 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition">
+      <div class="obsidian-card p-6 rounded-2xl border border-white/10 hover:border-purple-500/40 transition">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         </div>
-        <h3 class="text-base font-bold text-white mb-2">Flexible Expiration or Never</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Set links to self-destruct from 1 hour to 3 days, or keep them permanently active with the "Never" option.
-        </p>
+        <h4 class="text-sm font-bold text-white mb-1">Cryptographic Shredding</h4>
+        <p class="text-xs text-slate-400 leading-relaxed">When a link expires or completes a Burn-on-Read, the storage object is unrecoverably purged across all edge replicas.</p>
       </div>
-    </div>
 
-    <div class="mt-12 obsidian-card rounded-2xl p-6 sm:p-8">
-      <h3 class="text-lg font-bold text-white mb-4 text-center">Feature Matrix: Privora vs Legacy Storage</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-300">
-          <thead>
-            <tr class="border-b border-white/10 text-slate-400 uppercase tracking-wider">
-              <th class="py-3 px-4 font-semibold">Capability</th>
-              <th class="py-3 px-4 text-indigo-400 font-bold">Privora Systems</th>
-              <th class="py-3 px-4 text-slate-500">Standard Cloud Drives</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-white/5">
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Accepted Formats</td>
-              <td class="py-3.5 px-4 text-emerald-400 font-semibold">All (Docs, Sheets, Videos, Code, Archives)</td>
-              <td class="py-3.5 px-4 text-slate-500">Subject to MIME type scanning & filters</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Retention Freedom</td>
-              <td class="py-3.5 px-4 text-indigo-300 font-semibold">Choose Auto-Purge (1h–72h) OR Permanent (Never)</td>
-              <td class="py-3.5 px-4 text-slate-500">Manual deletion only</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Passcode Gated Links</td>
-              <td class="py-3.5 px-4 text-emerald-400 font-semibold">Included on all tiers (Free & Pro)</td>
-              <td class="py-3.5 px-4 text-slate-500">Gated behind paid enterprise subscriptions</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Bandwidth Throttling</td>
-              <td class="py-3.5 px-4 text-emerald-400 font-semibold">Zero edge throttling</td>
-              <td class="py-3.5 px-4 text-slate-500">Throttled transfer limits on free tiers</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="obsidian-card p-6 rounded-2xl border border-white/10 hover:border-cyan-500/40 transition">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h4 class="text-sm font-bold text-white mb-1">SHA-256 Tamper Guard</h4>
+        <p class="text-xs text-slate-400 leading-relaxed">Cryptographic hash verification ensures files are delivered byte-for-byte identical without silent bit-rot or interception.</p>
+      </div>
+
+      <div class="obsidian-card p-6 rounded-2xl border border-white/10 hover:border-emerald-500/40 transition">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+        </div>
+        <h4 class="text-sm font-bold text-white mb-1">GDPR & Zero Analytics</h4>
+        <p class="text-xs text-slate-400 leading-relaxed">No tracking cookies, no identity profiling, and no advertising pixels. Your upload habits are never monetized.</p>
       </div>
     </div>
   </section>
 
+  <!-- Pricing Section -->
   <section id="pricing" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
     <div class="text-center mb-14">
       <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
@@ -318,18 +309,19 @@
       </span>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Choose Your Transfer Power</h2>
       <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
-        Start free forever or unlock massive file limits and multi-threaded uploads with Privora Pro.
+        Start free forever or unlock massive file limits and custom recipient branding with Privora Pro.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+      <!-- Free Starter Card -->
       <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border border-white/10 hover:border-white/20 transition">
         <div>
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-white">Free Starter</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-semibold">Default</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Perfect for documents, spreadsheets, clips, and standard transfers.</p>
+          <p class="text-xs text-slate-400 mb-6">Standard ephemeral transfers for documents, spreadsheets, clips, and code.</p>
           <div class="text-3xl font-extrabold text-white mb-6">
             $0 <span class="text-xs font-normal text-slate-500">/ forever</span>
           </div>
@@ -341,19 +333,19 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Any file type (PDF, Excel, Word, Video, Images, Zip)</span>
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Retention options: <strong>1h, 24h, 72h & Never</strong></span>
+              <span>Burn-on-Read & download limit gating</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Client-side passcode protection</span>
             </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Retention options: <strong>1h, 24h, 72h & Never</strong></span>
+            </li>
             <li class="flex items-center gap-2 text-slate-500">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              <span>Up to 50 GB single uploads (Pro only)</span>
+              <span>50 GB file support & White-label download screens</span>
             </li>
           </ul>
         </div>
@@ -363,6 +355,7 @@
         </a>
       </div>
 
+      <!-- Pro Tier Card -->
       <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border-2 border-indigo-500/50 shadow-2xl shadow-indigo-500/20 relative">
         <div class="absolute -top-3.5 right-6 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
           Most Popular
@@ -373,7 +366,7 @@
             <h3 class="text-lg font-bold text-white">Privora Pro</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">Pro Member</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Designed for filmmakers, agencies, developers, and power teams.</p>
+          <p class="text-xs text-slate-400 mb-6">Designed for filmmakers, agencies, security researchers, and power teams.</p>
           <div class="text-3xl font-extrabold text-white mb-6">
             $4 <span class="text-xs font-normal text-slate-500">/ month</span>
           </div>
@@ -385,7 +378,11 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Any file format (4K Video, Project Folders, Huge Datasets)</span>
+              <span>White-label branded recipient download screens</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Instant email download notifications & webhooks</span>
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -393,11 +390,7 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Uncapped multi-threaded R2 edge pipeline</span>
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              <span>Dedicated download analytics & instant remote kill switch</span>
+              <span>Remote kill switch & real-time telemetry</span>
             </li>
           </ul>
         </div>
@@ -409,10 +402,50 @@
     </div>
   </section>
 
+  <!-- Security FAQ Accordion -->
+  <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
+    <div class="text-center mb-10">
+      <h3 class="text-2xl font-bold text-white">Frequently Asked Privacy & Security Questions</h3>
+    </div>
+    <div class="space-y-4">
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
+        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
+          <span>Can Privora or its cloud operators inspect my files?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          No. When you set a passcode, encryption is derived on your local browser. Privora stores encrypted blobs across Cloudflare R2 without keeping the decryption keys in our databases.
+        </p>
+      </details>
+
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
+        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
+          <span>How does "Burn on Read" work?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          If you set "Max Downloads" to 1, the file is immediately expunged from edge storage the exact millisecond the recipient's download stream completes. Any subsequent access displays an expired vault error.
+        </p>
+      </details>
+
+      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group">
+        <summary class="font-semibold text-sm text-slate-200 cursor-pointer list-none flex justify-between items-center">
+          <span>What file extensions are supported?</span>
+          <span class="text-indigo-400 text-lg group-open:rotate-180 transition">▾</span>
+        </summary>
+        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+          All binary formats are accepted without restriction: video reels (MP4, MOV, ProRes), spreadsheets (XLSX, CSV), documents (PDF, DOCX), archives (ZIP, TAR, 7Z), and raw disk images.
+        </p>
+      </details>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
-    © 2026 Privora Systems. Zero-knowledge architecture powered by Cloudflare R2.
+    © 2026 Privora Systems. Zero-knowledge architecture powered by Cloudflare R2 edge storage.
   </footer>
 
+  <!-- Canvas Background Animation Script -->
   <script>
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
@@ -466,6 +499,7 @@
     renderAurora();
   </script>
 
+  <!-- Core Script with 4-Upload Guest Quota & Limit Checks -->
   <script>
     let userTier = 'free';
 
@@ -534,14 +568,13 @@
               <option value="168">7 Days</option>
               <option value="336">14 Days</option>
               <option value="720">30 Days</option>
-              <option value="0" selected>Never (Permanent Vault)</option>
+              <option value="0" selected>Never (Keep)</option>
             `;
           }
         })
         .catch(() => {});
     }
 
-    // Guest Quota Helpers (Max 4 Free Uploads)
     function getGuestUploadCount() {
       return parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10);
     }
@@ -572,7 +605,6 @@
     }
 
     function handleDropZoneClick() {
-      // If user is not logged in and has completed 4 uploads, stop them immediately
       if (!currentUserId && getGuestUploadCount() >= 4) {
         showAuthRequiredModal();
         return;
@@ -610,7 +642,6 @@
     function handleFile(file) {
       const sizeMb = parseFloat((file.size / (1024 * 1024)).toFixed(2));
 
-      // Check 2 GB limit
       if (userTier !== 'pro' && sizeMb > 2048) {
         selectedFile = null;
         fileInput.value = "";
@@ -626,7 +657,6 @@
     }
 
     async function initiateUpload() {
-      // 1. Mandatory Login Gate Check
       if (!currentUserId && getGuestUploadCount() >= 4) {
         showAuthRequiredModal();
         return;
@@ -663,6 +693,7 @@
           filesize_mb: sizeMb,
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
+          max_downloads: parseInt(document.getElementById("maxDownloads").value),
           user_id: getStoredUserId()
         };
 
@@ -704,7 +735,6 @@
             progressBar.style.width = "100%";
             progressPercent.innerText = "100%";
 
-            // If user is a guest, count this successful upload toward their 4-upload quota
             if (!currentUserId) {
               incrementGuestUploadCount();
             }
