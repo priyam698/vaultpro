@@ -46,6 +46,29 @@
   <canvas id="ambientCanvas"></canvas>
   <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
+  <!-- Exceeded Limit Modal Popup -->
+  <div id="limitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-rose-500/30 text-center shadow-2xl relative">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-extrabold text-white mb-2">Transfer Limit Exceeded</h3>
+      <p id="limitModalMsg" class="text-xs text-slate-300 leading-relaxed mb-6">
+        The file you selected exceeds the Free Tier limit of <strong>2.00 GB</strong>. Upgrade to Pro for single uploads up to 50 GB.
+      </p>
+      <div class="space-y-2">
+        <a href="/dashboard" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
+          Upgrade to Pro ($4/mo) • Up to 50 GB
+        </a>
+        <button onclick="closeLimitModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Navbar -->
   <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -113,7 +136,6 @@
 
     <div class="lg:col-span-6">
       <div class="obsidian-card rounded-3xl p-6 sm:p-8 relative">
-        <!-- Allows any file format -->
         <input type="file" id="fileInput" class="hidden">
 
         <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
@@ -426,8 +448,10 @@
     renderAurora();
   </script>
 
-  <!-- Application Logic & Upload Script -->
+  <!-- Application Logic, Upload Guard & Tier Check -->
   <script>
+    let userTier = 'free'; // Default to free tier
+
     function getStoredUserId() {
       const directId = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
       if (directId) return directId;
@@ -483,6 +507,7 @@
         .then(r => r.json())
         .then(data => {
           if (data.tier === 'pro') {
+            userTier = 'pro';
             document.getElementById("fileSizeDisplay").innerText = "PRO Member • Up to 50 GB per transfer";
             const select = document.getElementById("expiryHours");
             select.innerHTML = `
@@ -497,6 +522,18 @@
           }
         })
         .catch(() => {});
+    }
+
+    function showLimitModal(sizeMb) {
+      const modal = document.getElementById("limitModal");
+      const msg = document.getElementById("limitModalMsg");
+      const sizeGb = (sizeMb / 1024).toFixed(2);
+      msg.innerHTML = `Your file is <strong>${sizeGb} GB</strong> (${sizeMb} MB), which exceeds the Free Tier transfer limit of <strong>2.00 GB</strong>.<br><br>Upgrade to VaultPro Pro to transfer single files up to <strong>50 GB</strong>.`;
+      modal.classList.remove("hidden");
+    }
+
+    function closeLimitModal() {
+      document.getElementById("limitModal").classList.add("hidden");
     }
 
     let selectedFile = null;
@@ -523,15 +560,32 @@
     });
 
     function handleFile(file) {
+      const sizeMb = parseFloat((file.size / (1024 * 1024)).toFixed(2));
+
+      // Guard: 2048 MB (2 GB) free tier limit
+      if (userTier !== 'pro' && sizeMb > 2048) {
+        selectedFile = null;
+        fileInput.value = "";
+        document.getElementById("fileNameDisplay").innerText = "Drop any file (PDF, MP4, XLSX, ZIP, PNG...) or click to browse";
+        document.getElementById("fileSizeDisplay").innerText = "Free Tier • Up to 2 GB per transfer";
+        showLimitModal(sizeMb);
+        return;
+      }
+
       selectedFile = file;
       document.getElementById("fileNameDisplay").innerText = file.name;
-      const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
       document.getElementById("fileSizeDisplay").innerText = `${sizeMb} MB • Ready to transfer`;
     }
 
     async function initiateUpload() {
       if (!selectedFile) {
         alert("Please select a file to transfer first.");
+        return;
+      }
+
+      const sizeMb = parseFloat((selectedFile.size / (1024 * 1024)).toFixed(2));
+      if (userTier !== 'pro' && sizeMb > 2048) {
+        showLimitModal(sizeMb);
         return;
       }
 
@@ -552,7 +606,7 @@
       try {
         const payload = {
           filename: selectedFile.name,
-          filesize_mb: parseFloat((selectedFile.size / (1024 * 1024)).toFixed(2)),
+          filesize_mb: sizeMb,
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
           user_id: getStoredUserId()
@@ -566,6 +620,12 @@
 
         if (!res.ok) {
           const err = await res.json();
+          if (res.status === 403 || (err.detail && err.detail.toLowerCase().includes("limit"))) {
+            progressBox.classList.add("hidden");
+            uploadBtn.disabled = false;
+            showLimitModal(sizeMb);
+            return;
+          }
           throw new Error(err.detail || "Failed to initialize vault share.");
         }
 
@@ -574,7 +634,6 @@
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
-        // Fallback to octet-stream for universal format support
         xhr.setRequestHeader("Content-Type", selectedFile.type || "application/octet-stream");
 
         xhr.upload.onprogress = (e) => {
