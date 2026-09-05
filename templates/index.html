@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privora | Zero-Knowledge Edge File Transfers</title>
+  <!-- Option 9 Stealth Shard Inline Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,7 +48,7 @@
   <canvas id="ambientCanvas"></canvas>
   <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
-  <!-- Mandatory Sign-In Modal (After 4 Free Guest Uploads) -->
+  <!-- Mandatory Sign-In Required Modal (After 4 Free Guest Uploads) -->
   <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 text-center shadow-2xl relative">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
@@ -70,7 +71,7 @@
     </div>
   </div>
 
-  <!-- Exceeded Limit Modal Popup (2 GB Free Limit) -->
+  <!-- Exceeded Limit Modal Popup (2 GB Free Tier Limit) -->
   <div id="limitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-rose-500/30 text-center shadow-2xl relative">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
@@ -80,7 +81,7 @@
       </div>
       <h3 class="text-xl font-extrabold text-white mb-2">Transfer Limit Exceeded</h3>
       <p id="limitModalMsg" class="text-xs text-slate-300 leading-relaxed mb-6">
-        The file you selected exceeds the Free Tier limit of <strong>2.00 GB</strong>. Upgrade to Pro for single uploads up to 50 GB.
+        The file you selected exceeds the Free Tier transfer limit of <strong>2.00 GB</strong>. Upgrade to Pro for single uploads up to 50 GB.
       </p>
       <div class="space-y-2">
         <a href="/dashboard" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
@@ -97,7 +98,7 @@
   <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <!-- Option 9 Stealth Shard Logo -->
+        <!-- Option 9: Stealth Shard SVG Logo -->
         <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 shadow-lg shadow-indigo-500/20 flex items-center justify-center hover:border-indigo-400/40 transition">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
             <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
@@ -155,7 +156,7 @@
       <div class="grid grid-cols-2 gap-3 pt-2 text-xs font-medium text-slate-300">
         <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
           <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          <span>AES-256 Client-Side Encrypted</span>
+          <span>AES-256 Client Encryption</span>
         </div>
         <div class="flex items-center gap-2 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
           <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -440,12 +441,21 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
-    © 2026 Privora Systems. Zero-knowledge architecture powered by Cloudflare R2 edge storage.
+  <!-- Footer with Legal Links -->
+  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-8 px-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        © 2026 Privora Systems. Zero-knowledge architecture powered by Cloudflare R2 edge storage.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="/privacy" class="text-slate-400 hover:text-white transition">Privacy Policy</a>
+        <span class="text-white/10">•</span>
+        <a href="/terms" class="text-slate-400 hover:text-white transition">Terms & Conditions</a>
+      </div>
+    </div>
   </footer>
 
-  <!-- Canvas Background Animation Script -->
+  <!-- Canvas Ambient Animation Script -->
   <script>
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
@@ -499,7 +509,7 @@
     renderAurora();
   </script>
 
-  <!-- Core Script with 4-Upload Guest Quota & Limit Checks -->
+  <!-- Application Logic & Guard Scripts -->
   <script>
     let userTier = 'free';
 
@@ -642,6 +652,7 @@
     function handleFile(file) {
       const sizeMb = parseFloat((file.size / (1024 * 1024)).toFixed(2));
 
+      // Guard: 2048 MB free tier limit
       if (userTier !== 'pro' && sizeMb > 2048) {
         selectedFile = null;
         fileInput.value = "";
