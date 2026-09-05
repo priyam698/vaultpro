@@ -54,44 +54,52 @@
       </div>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">1. Acceptance of Terms</h2>
+        <h2 class="text-base font-bold text-white">1. Service Scope: Transfer Pipeline vs. Privora Drive</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          By utilizing Privora ("the Service"), whether via anonymous guest transfers or authenticated membership, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, do not access or upload content to the Service.
+          Privora operates two distinct storage models:
         </p>
+        <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
+          <li><strong>Ephemeral Transfer Pipeline:</strong> Disposable, time-limited file handoffs subject to auto-expiration (1h–72h) or instant "Burn-on-Read" shredding.</li>
+          <li><strong>Privora Drive:</strong> Encrypted cloud storage preserved indefinitely in the user's private vault until intentionally deleted.</li>
+        </ul>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">2. Acceptable Use Policy</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">You agree not to use Privora for prohibited actions, including but not limited to:</p>
+        <h2 class="text-base font-bold text-white">2. Storage Allocations & Quotas</h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Each account is bound to designated storage ceilings:
+        </p>
         <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
-          <li>Distribution of unauthorized copyrighted material, pirated cinema, or software cracking archives (DMCA violations).</li>
-          <li>Transmission of malware, viruses, trojans, ransomware, or spyware.</li>
-          <li>Distribution of abusive, non-consensual, illegal, or harmful media.</li>
-          <li>Attempting to execute denial-of-service (DoS) assaults or bypass bandwidth quotas and client-side limit gates.</li>
+          <li><strong>Free Tier:</strong> Includes <strong>5.00 GB</strong> of permanent Privora Drive storage and up to 2.00 GB per single ephemeral transfer.</li>
+          <li><strong>Privora Pro ($4/mo):</strong> Expands capacity to <strong>200.00 GB</strong> of permanent Privora Drive storage and up to 50.00 GB per single transfer.</li>
         </ul>
         <p class="text-xs text-slate-400 leading-relaxed mt-2">
-          Privora reserves the right to immediately terminate accounts or expunge storage blobs found to be in violation without prior notice.
+          Attempts to exceed assigned quotas will be rejected at the API boundary until storage is freed or an upgraded subscription is activated.
         </p>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">3. Nature of Ephemeral Storage & Disclaimers</h2>
+        <h2 class="text-base font-bold text-white">3. Acceptable Use Policy</h2>
+        <p class="text-xs text-slate-400 leading-relaxed">You agree not to store or distribute through Privora or Privora Drive:</p>
+        <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
+          <li>Unauthorized copyrighted media, pirated cinema, or software cracking archives (DMCA violations).</li>
+          <li>Malware, exploits, viruses, ransomware, or malicious bot payloads.</li>
+          <li>Content that violates international laws or privacy regulations.</li>
+          <li>Automated abuse designed to circumvent storage limits or throttle server nodes.</li>
+        </ul>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-base font-bold text-white">4. Deletion & Data Retention Disclaimers</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Privora is an ephemeral transfer pipeline, not a permanent backup repository. Files are designed to expire, burn after download, or shred unrecoverably. Privora assumes no liability for lost data resulting from expiration routines, accidental premature deletion, or forgotten passcodes.
+          When a user initiates the "Delete" action on Privora Drive, the file object is immediately and irreversibly shredded from Cloudflare R2 edge servers. Privora does not retain secondary backup copies of deleted files. Users are solely responsible for maintaining local copies of critical documents.
         </p>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">4. Subscriptions, Pricing & Cancellation</h2>
+        <h2 class="text-base font-bold text-white">5. Subscriptions & Billing</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Privora Pro is billed at <strong>$4.00 USD / month</strong> on a recurring basis. Subscribers may cancel renewal at any time via their dashboard settings. Cancellations take effect at the conclusion of the active billing cycle with no retroactive prorated refunds.
-        </p>
-      </section>
-
-      <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">5. Limitation of Liability</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind. Under no circumstances shall Privora Systems, its directors, or affiliates be held liable for indirect, incidental, or consequential damages resulting from downtime or transfer failures.
+          Privora Pro is billed monthly at <strong>$4.00 USD</strong>. Users may cancel renewals anytime via dashboard settings. If a Pro account downgrades to Free while holding in excess of 5 GB of data, upload privileges are paused until total storage is brought within the 5 GB free threshold.
         </p>
       </section>
     </div>

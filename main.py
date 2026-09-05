@@ -86,7 +86,9 @@ async def terms_page(request: Request):
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_page(request: Request):
     return render_template("privacy.html", request)
-
+@app.get("/sign", response_class=HTMLResponse)
+async def sign_page(request: Request):
+    return render_template("sign.html", request)
 # ----------------- Privora Drive Core API -----------------
 @app.get("/api/drive/quota")
 async def get_drive_quota(user_id: str):
