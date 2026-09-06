@@ -182,44 +182,34 @@
       <!-- Zephyr Wing Z Brand Logo -->
       <a href="/" class="flex items-center gap-3">
   <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_12px_rgba(56,189,248,0.45)]">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_14px_rgba(99,102,241,0.5)]">
   <defs>
-    <linearGradient id="pWing1" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="ribbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="100%" stop-color="#0284c7"/>
+      <stop offset="60%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4338ca"/>
     </linearGradient>
-    <linearGradient id="pWing2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="60%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#1d4ed8"/>
+    <linearGradient id="ribbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
     </linearGradient>
-    <linearGradient id="pWing3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e879f9"/>
-      <stop offset="50%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#4c1d95"/>
-    </linearGradient>
-    <linearGradient id="pWing4" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0284c7"/>
-      <stop offset="100%" stop-color="#0f172a"/>
+    <linearGradient id="glassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
-  <!-- Crown Shard -->
-  <polygon points="46,10 72,28 52,42 30,30" fill="url(#pWing1)" stroke="#38bdf8" stroke-width="0.75"/>
-  <polygon points="72,28 88,52 60,56 52,42" fill="url(#pWing2)" stroke="#22d3ee" stroke-width="0.75"/>
+  <!-- Top Wind Vector -->
+  <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#ribbonCyan)"/>
+  <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#glassSheen)"/>
   
-  <!-- Central Fold & Dynamic Core -->
-  <polygon points="30,30 52,42 42,64 20,50" fill="url(#pWing2)" stroke="#0ea5e9" stroke-width="0.75"/>
-  <polygon points="52,42 60,56 44,68 42,64" fill="url(#pWing3)" stroke="#c084fc" stroke-width="0.75"/>
-  <polygon points="60,56 82,74 56,78 44,68" fill="url(#pWing3)" stroke="#a855f7" stroke-width="0.75"/>
+  <!-- Diagonal Slash -->
+  <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#ribbonViolet)"/>
   
-  <!-- Lower Vault Blades -->
-  <polygon points="20,50 42,64 34,86 14,74" fill="url(#pWing4)" stroke="#1e40af" stroke-width="0.75"/>
-  <polygon points="42,64 44,68 56,78 34,86" fill="url(#pWing1)" stroke="#38bdf8" stroke-width="0.75"/>
-  <polygon points="56,78 86,88 54,92 34,86" fill="url(#pWing3)" stroke="#e879f9" stroke-width="0.75"/>
-  
-  <!-- Specular Reflection Spine -->
-  <polyline points="46,10 52,42 44,68 56,78 86,88" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+  <!-- Bottom Vector -->
+  <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#ribbonCyan)"/>
+  <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#glassSheen)"/>
 </svg>
   </div>
   <span class="font-bold text-lg text-white">Zephyr</span>
