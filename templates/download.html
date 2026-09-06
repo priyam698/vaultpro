@@ -6,58 +6,104 @@
   <title>Download {{ filename }} | Zephyr</title>
   
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #030408;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #04060e;
+      color: #f8fafc;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    #ambientCanvas {
+    .site-mountain-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
+      background-image: 
+        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       pointer-events: none;
       z-index: 0;
+      transition: background-image 0.4s ease;
     }
 
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 20, 32, 0.75) 0%, rgba(9, 11, 20, 0.9) 100%);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 
-        0 30px 60px -12px rgba(0, 0, 0, 0.9),
-        0 0 50px -10px rgba(99, 102, 241, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
     }
 
-    .film-grain {
-      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
-      background-size: 24px 24px;
+    body.light-theme {
+      background-color: #cbd5e1;
+      color: #090d16;
+    }
+
+    body.light-theme .site-mountain-backdrop {
+      background-image: 
+        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
+        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+    }
+
+    body.light-theme header {
+      background: transparent !important;
+      border-color: transparent !important;
+      backdrop-filter: blur(8px);
+    }
+
+    body.light-theme header a,
+    body.light-theme header span {
+      color: #090d16 !important;
+    }
+
+    body.light-theme .obsidian-card {
+      background: rgba(248, 250, 252, 0.84) !important;
+      border-color: rgba(255, 255, 255, 0.7) !important;
+      color: #0f172a !important;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    body.light-theme .obsidian-card h1 {
+      color: #0f172a !important;
+    }
+
+    body.light-theme input {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(148, 163, 184, 0.6) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-theme footer {
+      background-color: rgba(241, 245, 249, 0.85) !important;
+      border-color: rgba(203, 213, 225, 0.7) !important;
+      color: #334155 !important;
     }
   </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
-  <!-- Ambient Fluid Canvas -->
-  <canvas id="ambientCanvas"></canvas>
-  <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
+  <div class="site-mountain-backdrop"></div>
 
-  <!-- Header -->
-  <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        
-        <!-- Supersonic Monogram Logo -->
-        <div class="w-10 h-10 rounded-xl bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:shadow-indigo-500/30 group-hover:border-white/20 transition duration-300">
+        <div class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="dlRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -83,39 +129,40 @@
           </svg>
         </div>
         
-        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent group-hover:to-[#4c1d95] transition duration-300">
+        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
           Zephyr
         </span>
       </a>
 
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
-        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Direct Cloudflare Delivery
+      <div class="flex items-center gap-3">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-semibold backdrop-blur-md">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+          Direct Cloudflare Delivery
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Download Portal Card -->
-  <main class="relative z-20 max-w-xl mx-auto px-6 py-12 flex-1 flex flex-col items-center justify-center text-center w-full">
+  <main class="relative z-20 max-w-xl mx-auto px-6 py-14 flex-1 flex flex-col items-center justify-center text-center w-full">
     
     <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative">
       
-      <!-- File Icon -->
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600/30 via-purple-600/25 to-cyan-500/20 border border-white/15 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20">
-        <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20">
+        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
         </svg>
       </div>
 
-      <!-- File Metadata -->
-      <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight break-all">
+      <h1 class="text-xl sm:text-2xl font-bold tracking-tight break-all">
         {{ filename }}
       </h1>
-      <p class="text-xs text-slate-400 mt-2 font-medium">
-        {{ filesize }} MB • Total Downloads: <span id="downloadCount" class="text-slate-300 font-semibold">{{ downloads }}</span>
+      <p class="text-xs opacity-75 mt-2 font-medium">
+        {{ filesize }} MB • Total Downloads: <span id="downloadCount" class="font-bold">{{ downloads }}</span>
       </p>
 
-      <!-- Password Form & Action Button -->
       <div class="mt-8 space-y-4 text-left">
         <div id="passwordSection" class="{% if not has_password %}hidden{% endif %} space-y-4">
           <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
@@ -126,16 +173,14 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Recipient Passcode</label>
+            <label class="block text-xs font-semibold opacity-80 mb-1.5">Recipient Passcode</label>
             <input id="passwordInput" type="password" placeholder="Enter recipient password" 
-                   class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-4 py-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition">
+                   class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-4 py-3 text-xs focus:outline-none transition">
           </div>
         </div>
 
-        <!-- Error Message Banner -->
-        <div id="errorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-300 font-medium text-center"></div>
+        <div id="errorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
 
-        <!-- Download Button -->
         <button id="downloadBtn" onclick="handleDownload()" 
                 class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
           {% if has_password %}Unlock & Download{% else %}Download File{% endif %}
@@ -144,72 +189,38 @@
 
     </div>
 
-    <p class="mt-8 text-xs text-slate-500">
-      Need to send large files? <a href="/" class="text-indigo-400 hover:text-indigo-300 font-medium transition">Send up to 2 GB for free on Zephyr &rarr;</a>
+    <p class="mt-8 text-xs opacity-75">
+      Need to send large files? <a href="/" class="text-indigo-400 hover:underline font-medium">Send up to 2 GB for free on Zephyr &rarr;</a>
     </p>
 
   </main>
 
-  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-5 text-center text-xs text-slate-500">
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-5 text-center text-xs opacity-75">
     © 2026 Zephyr Systems. Zero-knowledge edge transfers.
   </footer>
 
-  <!-- Ambient Fluid Canvas Engine -->
   <script>
-    const canvas = document.getElementById('ambientCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
     }
-    window.addEventListener('resize', resize);
-    resize();
 
-    let step = 0;
-    function renderAurora() {
-      step += 0.003;
-      ctx.fillStyle = '#030408';
-      ctx.fillRect(0, 0, width, height);
-
-      const x1 = width * 0.35 + Math.sin(step * 0.7) * (width * 0.15);
-      const y1 = height * 0.25 + Math.cos(step * 0.5) * (height * 0.12);
-      const r1 = Math.max(width, height) * 0.45;
-      const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
-      g1.addColorStop(0, 'rgba(79, 70, 229, 0.45)');
-      g1.addColorStop(0.5, 'rgba(67, 56, 202, 0.18)');
-      g1.addColorStop(1, 'rgba(3, 4, 8, 0)');
-      ctx.fillStyle = g1;
-      ctx.fillRect(0, 0, width, height);
-
-      const x2 = width * 0.75 + Math.cos(step * 0.6) * (width * 0.15);
-      const y2 = height * 0.55 + Math.sin(step * 0.8) * (height * 0.15);
-      const r2 = Math.max(width, height) * 0.4;
-      const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
-      g2.addColorStop(0, 'rgba(147, 51, 234, 0.38)');
-      g2.addColorStop(0.5, 'rgba(126, 34, 206, 0.15)');
-      g2.addColorStop(1, 'rgba(3, 4, 8, 0)');
-      ctx.fillStyle = g2;
-      ctx.fillRect(0, 0, width, height);
-
-      const x3 = width * 0.25 + Math.cos(step * 0.9) * (width * 0.1);
-      const y3 = height * 0.75 + Math.sin(step * 0.7) * (height * 0.1);
-      const r3 = Math.max(width, height) * 0.35;
-      const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
-      g3.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
-      g3.addColorStop(0.5, 'rgba(14, 116, 144, 0.1)');
-      g3.addColorStop(1, 'rgba(3, 4, 8, 0)');
-      ctx.fillStyle = g3;
-      ctx.fillRect(0, 0, width, height);
-
-      requestAnimationFrame(renderAurora);
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
-    renderAurora();
-  </script>
 
-  <!-- Download & Passcode Handling -->
-  <script>
+    initTheme();
+
     async function handleDownload() {
       const btn = document.getElementById("downloadBtn");
       const errBox = document.getElementById("errorMsg");
@@ -239,7 +250,6 @@
           throw new Error(data.detail || "Incorrect passcode or vault expired.");
         }
 
-        // Trigger browser download
         const a = document.createElement("a");
         a.href = data.download_url;
         a.download = "{{ filename }}";
@@ -247,7 +257,6 @@
         a.click();
         document.body.removeChild(a);
 
-        // Increment count visually
         const countSpan = document.getElementById("downloadCount");
         if (countSpan) {
           countSpan.innerText = parseInt(countSpan.innerText || 0) + 1;
@@ -263,11 +272,7 @@
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
         btn.disabled = false;
-        if (pwdSection && !pwdSection.classList.contains("hidden")) {
-          btn.innerText = "Unlock & Download";
-        } else {
-          btn.innerText = "Download File";
-        }
+        btn.innerText = (pwdSection && !pwdSection.classList.contains("hidden")) ? "Unlock & Download" : "Download File";
       }
     }
   </script>

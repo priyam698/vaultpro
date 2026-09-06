@@ -6,16 +6,94 @@
   <title>Zephyr | Access Portal</title>
 
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #04060e;
+      color: #f8fafc;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .site-mountain-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: 
+        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 0;
+      transition: background-image 0.4s ease;
+    }
+
+    .obsidian-card {
+      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    body.light-theme {
+      background-color: #cbd5e1;
+      color: #090d16;
+    }
+
+    body.light-theme .site-mountain-backdrop {
+      background-image: 
+        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
+        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+    }
+
+    body.light-theme .obsidian-card {
+      background: rgba(248, 250, 252, 0.84) !important;
+      border-color: rgba(255, 255, 255, 0.7) !important;
+      color: #0f172a !important;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    body.light-theme .obsidian-card h2 {
+      color: #0f172a !important;
+    }
+
+    body.light-theme input {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(148, 163, 184, 0.6) !important;
+      color: #0f172a !important;
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative">
+<body class="min-h-screen flex items-center justify-center p-4 relative">
+
+  <div class="site-mountain-backdrop"></div>
+
+  <!-- Theme Toggle Floating Button -->
+  <div class="fixed top-5 right-5 z-40">
+    <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer backdrop-blur-md">
+      <span id="themeIcon">☀️</span>
+    </button>
+  </div>
+
+  <div class="w-full max-w-md obsidian-card rounded-3xl p-8 relative z-20">
     <div class="text-center mb-6">
       
-      <!-- Supersonic Monogram Logo -->
       <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#080a16] p-2 mb-3 border border-white/10 shadow-inner shadow-indigo-500/10">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.55)]">
           <defs>
@@ -43,21 +121,21 @@
       </div>
       
       <h2 class="text-2xl font-bold" id="formTitle">Sign In to Zephyr</h2>
-      <p class="text-xs text-slate-400 mt-1">Manage private vaults, monitor views, and upgrade storage</p>
+      <p class="text-xs opacity-75 mt-1">Manage private vaults, monitor views, and upgrade storage</p>
     </div>
 
     <!-- Login / Sign Up Form -->
     <div id="authFormSection" class="space-y-4">
       <div>
-        <label class="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
-        <input id="email" type="email" placeholder="name@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+        <label class="text-xs font-semibold opacity-80 block mb-1">Email Address</label>
+        <input id="email" type="email" placeholder="name@domain.com" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition" />
       </div>
       <div>
         <div class="flex items-center justify-between mb-1">
-          <label class="text-xs font-semibold text-slate-400">Password</label>
-          <button type="button" id="forgotPwdBtn" onclick="toggleForgotView(true)" class="text-xs text-indigo-400 hover:text-indigo-300 transition">Forgot password?</button>
+          <label class="text-xs font-semibold opacity-80">Password</label>
+          <button type="button" id="forgotPwdBtn" onclick="toggleForgotView(true)" class="text-xs text-indigo-400 hover:underline transition">Forgot password?</button>
         </div>
-        <input id="password" type="password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+        <input id="password" type="password" placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition" />
       </div>
 
       <button id="authBtn" onclick="handleAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
@@ -66,7 +144,7 @@
 
       <p id="authMsg" class="text-xs text-center font-medium hidden"></p>
 
-      <div class="text-center text-xs text-slate-400 pt-2">
+      <div class="text-center text-xs opacity-75 pt-2">
         <span id="toggleText">Don't have an account?</span>
         <button onclick="toggleMode()" id="toggleBtn" class="text-indigo-400 font-semibold hover:underline ml-1">Create Account</button>
       </div>
@@ -74,10 +152,10 @@
 
     <!-- Forgot Password View -->
     <div id="forgotSection" class="space-y-4 hidden">
-      <p class="text-xs text-slate-400">Enter your email address and we'll send you a password reset link.</p>
+      <p class="text-xs opacity-75">Enter your email address and we'll send you a password reset link.</p>
       <div>
-        <label class="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
-        <input id="forgotEmail" type="email" placeholder="name@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+        <label class="text-xs font-semibold opacity-80 block mb-1">Email Address</label>
+        <input id="forgotEmail" type="email" placeholder="name@domain.com" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition" />
       </div>
 
       <button id="sendResetBtn" onclick="handleForgotPassword()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
@@ -86,8 +164,8 @@
 
       <p id="forgotMsg" class="text-xs text-center font-medium hidden"></p>
 
-      <div class="text-center text-xs text-slate-400 pt-2">
-        <button onclick="toggleForgotView(false)" class="text-slate-400 hover:text-white transition font-semibold">
+      <div class="text-center text-xs opacity-75 pt-2">
+        <button onclick="toggleForgotView(false)" class="hover:underline transition font-semibold">
           &larr; Back to Sign In
         </button>
       </div>
@@ -95,10 +173,10 @@
 
     <!-- Set New Password View -->
     <div id="newPasswordSection" class="space-y-4 hidden">
-      <p class="text-xs text-slate-400">Create a new secure password for your account.</p>
+      <p class="text-xs opacity-75">Create a new secure password for your account.</p>
       <div>
-        <label class="text-xs font-semibold text-slate-400 block mb-1">New Password</label>
-        <input id="newPasswordInput" type="password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+        <label class="text-xs font-semibold opacity-80 block mb-1">New Password</label>
+        <input id="newPasswordInput" type="password" placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition" />
       </div>
 
       <button id="updatePasswordBtn" onclick="handleUpdatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
@@ -110,6 +188,27 @@
   </div>
 
   <script>
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
+    initTheme();
+
     const SUPABASE_URL = "{{ supabase_url }}";
     const SUPABASE_ANON = "{{ supabase_anon }}";
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
