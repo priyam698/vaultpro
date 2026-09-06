@@ -5,30 +5,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <!-- Supersonic Monogram Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030408; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #04060e;
+      color: #f8fafc;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .site-mountain-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: 
+        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 0;
+      transition: background-image 0.4s ease;
+    }
+
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 20, 32, 0.7) 0%, rgba(9, 11, 20, 0.85) 100%);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9);
+      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    body.light-theme {
+      background-color: #cbd5e1;
+      color: #090d16;
+    }
+
+    body.light-theme .site-mountain-backdrop {
+      background-image: 
+        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
+        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+    }
+
+    body.light-theme header {
+      background: transparent !important;
+      border-color: transparent !important;
+      backdrop-filter: blur(8px);
+    }
+
+    body.light-theme header a,
+    body.light-theme header span {
+      color: #090d16 !important;
+    }
+
+    body.light-theme .obsidian-card {
+      background: rgba(248, 250, 252, 0.82) !important;
+      border-color: rgba(255, 255, 255, 0.7) !important;
+      color: #0f172a !important;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    body.light-theme .obsidian-card h2,
+    body.light-theme .obsidian-card .card-heading {
+      color: #0f172a !important;
+    }
+
+    body.light-theme input {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(148, 163, 184, 0.6) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-theme table tr td { color: #0f172a !important; }
+    body.light-theme table tr th { color: #1e293b !important; }
+    body.light-theme table tr { border-color: rgba(203, 213, 225, 0.6) !important; }
+
+    body.light-theme footer {
+      background-color: rgba(241, 245, 249, 0.85) !important;
+      border-color: rgba(203, 213, 225, 0.7) !important;
+      color: #334155 !important;
     }
   </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
-  <header class="border-b border-white/[0.06] bg-[#030408]/60 backdrop-blur-xl sticky top-0 z-20">
+  <!-- Mountain Backdrop -->
+  <div class="site-mountain-backdrop"></div>
+
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        
-        <div class="w-9 h-9 rounded-xl bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
+        <div class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="driveRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -54,46 +135,47 @@
           </svg>
         </div>
         
-        <div>
-          <a href="/" class="group flex items-center gap-2">
-            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent group-hover:to-[#4c1d95] transition duration-300">
-              Zephyr
-            </span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">Drive</span>
-          </a>
-        </div>
+        <a href="/" class="group flex items-center gap-2">
+          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
+            Zephyr
+          </span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-semibold border border-indigo-500/30">Drive</span>
+        </a>
       </div>
 
-      <div class="flex items-center gap-4">
-        <a href="/" class="text-xs text-slate-400 hover:text-white transition">Transfer Pipeline</a>
-        <button onclick="signOut()" class="text-xs bg-white/[0.05] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 transition cursor-pointer">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <a href="/" class="text-xs font-bold hover:opacity-80 transition">Transfer Pipeline</a>
+        <button onclick="signOut()" class="text-xs bg-white/[0.08] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-bold border border-white/15 transition cursor-pointer">
           Sign Out
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full space-y-8">
+  <main class="relative z-20 max-w-7xl mx-auto px-6 py-10 flex-1 w-full space-y-8">
     
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <div class="lg:col-span-4 obsidian-card rounded-3xl p-6 flex flex-col justify-between">
         <div>
           <div class="flex justify-between items-center mb-2">
-            <span class="text-xs uppercase font-bold text-slate-400">Vault Storage</span>
-            <span id="tierBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300">Free Tier</span>
+            <span class="text-xs uppercase font-bold opacity-70">Vault Storage</span>
+            <span id="tierBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Free Tier</span>
           </div>
-          <div class="text-2xl font-black text-white mt-1">
-            <span id="usedDisplay">0 B</span> <span class="text-xs font-normal text-slate-400">of <span id="quotaDisplay">5.00 GB</span></span>
+          <div class="text-2xl font-black card-heading mt-1">
+            <span id="usedDisplay">0 B</span> <span class="text-xs font-normal opacity-70">of <span id="quotaDisplay">5.00 GB</span></span>
           </div>
           
-          <div class="w-full h-2 bg-slate-950 rounded-full mt-4 overflow-hidden border border-white/10">
+          <div class="w-full h-2 bg-black/40 rounded-full mt-4 overflow-hidden border border-white/10">
             <div id="storageBar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
 
-        <div class="pt-6 border-t border-white/10 mt-6 flex items-center justify-between">
-          <p class="text-[11px] text-slate-400">Need 200 GB permanent drive space?</p>
+        <div class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
+          <p class="text-[11px] opacity-75">Need 200 GB permanent space?</p>
           <a href="/#pricing" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
             Upgrade ($4/mo)
           </a>
@@ -101,15 +183,15 @@
       </div>
 
       <div id="dropZoneContainer" 
-            class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-white/15 hover:border-indigo-400/60 bg-white/[0.01] hover:bg-indigo-950/10 transition group"
+            class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-slate-400/30 hover:border-indigo-400/70 transition group"
             onclick="document.getElementById('driveFileInput').click()">
         <input type="file" id="driveFileInput" multiple class="hidden">
         
         <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
         </div>
-        <span class="text-sm font-bold text-slate-200">Click to upload or drag files into your Cloud Drive</span>
-        <span class="text-xs text-slate-500 mt-1">Encrypted, private, and stored permanently until you delete them</span>
+        <span class="text-sm font-bold card-heading">Click to upload or drag files into your Cloud Drive</span>
+        <span class="text-xs opacity-70 mt-1">Encrypted, private, and stored permanently until you delete them</span>
         <div id="uploadStatus" class="text-xs font-semibold text-indigo-400 mt-3 hidden">Uploading files...</div>
       </div>
     </div>
@@ -117,26 +199,26 @@
     <div class="obsidian-card rounded-3xl p-6 sm:p-8">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 class="text-lg font-bold text-white">Your Encrypted Vault Files</h2>
-          <p class="text-xs text-slate-400">Stored with zero-knowledge encryption across Cloudflare R2 edge nodes</p>
+          <h2 class="text-lg font-bold">Your Encrypted Vault Files</h2>
+          <p class="text-xs opacity-70">Stored with zero-knowledge encryption across Cloudflare R2 edge nodes</p>
         </div>
         <input type="text" id="searchBox" oninput="filterFiles()" placeholder="Search files..." 
-                class="bg-[#050711] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-400 transition w-full sm:w-64">
+                class="bg-slate-900/40 border border-slate-400/30 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-400 transition w-full sm:w-64">
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-300">
+        <table class="w-full text-left text-xs">
           <thead>
-            <tr class="border-b border-white/10 text-slate-500 uppercase tracking-wider">
+            <tr class="border-b border-slate-400/20 opacity-70 uppercase tracking-wider">
               <th class="py-3 px-4">Name</th>
               <th class="py-3 px-4">Size</th>
               <th class="py-3 px-4">Uploaded</th>
               <th class="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody id="filesTableBody" class="divide-y divide-white/5">
+          <tbody id="filesTableBody" class="divide-y divide-slate-400/10">
             <tr>
-              <td colspan="4" class="py-8 text-center text-slate-500">Loading drive contents...</td>
+              <td colspan="4" class="py-8 text-center opacity-60">Loading drive contents...</td>
             </tr>
           </tbody>
         </table>
@@ -145,11 +227,32 @@
 
   </main>
 
-  <footer class="border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-6 text-center text-xs opacity-75">
     © 2026 Zephyr Systems. Zero-Knowledge Cloud Storage.
   </footer>
 
   <script>
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
+    initTheme();
+
     function formatBytes(bytes, decimals = 2) {
       if (!bytes || bytes === 0) return '0 B';
       const k = 1024;
@@ -175,9 +278,7 @@
     }
 
     const currentUserId = getStoredUserId();
-    if (!currentUserId) {
-      window.location.href = "/auth";
-    }
+    if (!currentUserId) window.location.href = "/auth";
 
     function signOut() {
       localStorage.clear();
@@ -187,7 +288,6 @@
     let allFiles = [];
 
     async function loadDriveData() {
-      // 1. Quota
       try {
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
@@ -201,11 +301,10 @@
         if (data.tier === 'pro') {
           const badge = document.getElementById("tierBadge");
           badge.innerText = "PRO 200 GB";
-          badge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+          badge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
         }
       } catch(e) {}
 
-      // 2. Files
       try {
         const res = await fetch(`/api/drive/files?user_id=${currentUserId}`);
         allFiles = await res.json();
@@ -226,33 +325,27 @@
       if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) {
         return `<svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
       }
-      if (['xls', 'xlsx', 'csv'].includes(ext)) {
-        return `<svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
-      }
-      if (['zip', 'rar', 'tar', '7z', 'gz'].includes(ext)) {
-        return `<svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>`;
-      }
       return `<svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`;
     }
 
     function renderFiles(files) {
       const tbody = document.getElementById("filesTableBody");
       if (!files.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-500">Your vault is empty. Upload your first document or media file above.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center opacity-60">Your vault is empty. Upload your first document or media file above.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = files.map(f => `
-        <tr class="hover:bg-white/[0.02] transition">
-          <td class="py-3.5 px-4 font-medium text-white flex items-center gap-2.5">
+        <tr class="hover:bg-white/[0.04] transition">
+          <td class="py-3.5 px-4 font-medium flex items-center gap-2.5">
             ${getFileIcon(f.filename)}
             <span class="truncate max-w-xs sm:max-w-sm" title="${f.filename}">${f.filename}</span>
           </td>
-          <td class="py-3.5 px-4 font-mono text-slate-400">${formatBytes(f.size_bytes)}</td>
-          <td class="py-3.5 px-4 text-slate-500">${f.created_at}</td>
+          <td class="py-3.5 px-4 font-mono opacity-80">${formatBytes(f.size_bytes)}</td>
+          <td class="py-3.5 px-4 opacity-60">${f.created_at}</td>
           <td class="py-3.5 px-4 text-right space-x-2">
-            <button onclick="shareFile('${f.id}')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg font-semibold transition cursor-pointer">Share Link</button>
-            <button onclick="downloadFile('${f.id}')" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-slate-200 rounded-lg font-semibold transition cursor-pointer">Download</button>
+            <button onclick="shareFile('${f.id}')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 rounded-lg font-semibold transition cursor-pointer">Share Link</button>
+            <button onclick="downloadFile('${f.id}')" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg font-semibold transition cursor-pointer">Download</button>
             <button onclick="deleteFile('${f.id}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg font-semibold transition cursor-pointer">Delete</button>
           </td>
         </tr>
@@ -261,8 +354,7 @@
 
     function filterFiles() {
       const q = document.getElementById("searchBox").value.toLowerCase();
-      const filtered = allFiles.filter(f => f.filename.toLowerCase().includes(q));
-      renderFiles(filtered);
+      renderFiles(allFiles.filter(f => f.filename.toLowerCase().includes(q)));
     }
 
     async function shareFile(fileId) {
@@ -304,10 +396,8 @@
       }
     }
 
-    // Direct Upload Handler
     async function uploadFileList(files) {
       if (!files.length) return;
-
       const statusEl = document.getElementById("uploadStatus");
       statusEl.classList.remove("hidden");
 
@@ -342,7 +432,6 @@
     const fileInput = document.getElementById("driveFileInput");
     fileInput.addEventListener("change", (e) => uploadFileList(e.target.files));
 
-    // Drag and Drop Zone Listeners
     const dropZone = document.getElementById("dropZoneContainer");
     dropZone.addEventListener("dragover", (e) => {
       e.preventDefault();
