@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr | Zero-Knowledge Edge Transfers, Cloud Drive & Client Portals</title>
   
-  <!-- Favicon (Option 4 Simplified Mark) -->
- <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <!-- Supersonic Monogram Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +16,8 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #030408;
-      color: #f8fafc;
+      background-color: #fafbff;
+      color: #0f172a;
       overflow-x: hidden;
     }
 
@@ -31,83 +31,71 @@
       z-index: 0;
     }
 
+    /* Crisp Clean Surface Cards (WeTransfer & Proton Style) */
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 20, 32, 0.75) 0%, rgba(9, 11, 20, 0.9) 100%);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid rgba(226, 232, 240, 0.85);
       box-shadow: 
-        0 30px 60px -12px rgba(0, 0, 0, 0.95),
-        0 0 50px -10px rgba(99, 102, 241, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        0 4px 6px -1px rgba(15, 23, 42, 0.04),
+        0 24px 48px -12px rgba(15, 23, 42, 0.08);
     }
 
     .obsidian-panel {
-      background: rgba(8, 11, 22, 0.7);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
     }
 
-    .film-grain {
-      background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 0);
-      background-size: 24px 24px;
-    }
-
-    /* Floating Media Badges Keyframes */
+    /* Floating Media Badges */
     @keyframes floatSlow {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-14px) rotate(1.5deg); }
+      50% { transform: translateY(-10px) rotate(1.2deg); }
     }
     @keyframes floatAlt {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(12px) rotate(-1.5deg); }
+      50% { transform: translateY(10px) rotate(-1.2deg); }
     }
 
     .float-card-1 { animation: floatSlow 7s ease-in-out infinite; }
     .float-card-2 { animation: floatAlt 8.5s ease-in-out infinite; }
     .float-card-3 { animation: floatSlow 9s ease-in-out infinite 1s; }
-    .float-card-4 { animation: floatAlt 7.5s ease-in-out infinite 0.5s; }
 
-    /* Custom Scrollbar for Selected Files Box */
     .custom-scroll::-webkit-scrollbar {
-      width: 4px;
+      width: 5px;
     }
     .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
+      background: #f1f5f9;
       border-radius: 8px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.4);
+      background: #cbd5e1;
       border-radius: 8px;
     }
     .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(99, 102, 241, 0.7);
+      background: #94a3b8;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
   <canvas id="ambientCanvas"></canvas>
-  <div class="fixed inset-0 pointer-events-none film-grain z-[1]"></div>
 
   <!-- Free Guest Limit Modal -->
-  <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 text-center shadow-2xl relative">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
+  <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden p-4">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 text-center relative">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
         </svg>
       </div>
-      <h3 class="text-xl font-black text-white mb-2">Free Guest Quota Reached</h3>
-      <p class="text-xs text-slate-300 leading-relaxed mb-6">
-        You have utilized your <strong>4 complimentary guest transfers</strong>. Create a free account or sign in to activate your permanent <strong>5 GB Cloud Drive</strong> and unlock unlimited transfers.
+      <h3 class="text-xl font-extrabold text-slate-900 mb-2">Free Guest Quota Reached</h3>
+      <p class="text-xs text-slate-600 leading-relaxed mb-6">
+        You have utilized your <strong>4 complimentary guest transfers</strong>. Create a free account to activate your permanent <strong>5 GB Cloud Drive</strong> and unlock unlimited transfers.
       </p>
       <div class="space-y-2.5">
-        <a href="/auth" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
+        <a href="/auth" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition">
           Sign In or Create Free Account
         </a>
-        <button onclick="closeAuthModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition cursor-pointer">
+        <button onclick="closeAuthModal()" class="w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold transition cursor-pointer">
           Dismiss
         </button>
       </div>
@@ -115,22 +103,22 @@
   </div>
 
   <!-- Package Size Exceeded Modal -->
-  <div id="limitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-rose-500/30 text-center shadow-2xl relative">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
+  <div id="limitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden p-4">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border-rose-200 text-center relative">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 mb-4">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
       </div>
-      <h3 class="text-xl font-black text-white mb-2">Transfer Package Exceeds 2 GB</h3>
-      <p id="limitModalMsg" class="text-xs text-slate-300 leading-relaxed mb-6">
-        The files you selected exceed the Free Tier package limit of <strong>2.00 GB</strong>. Upgrade to Zephyr Pro for single uploads up to 50 GB and a 200 GB Cloud Drive.
+      <h3 class="text-xl font-extrabold text-slate-900 mb-2">Transfer Package Exceeds 2 GB</h3>
+      <p id="limitModalMsg" class="text-xs text-slate-600 leading-relaxed mb-6">
+        The files you selected exceed the Free Tier package limit of <strong>2.00 GB</strong>. Upgrade to Zephyr Pro for single uploads up to 50 GB and a 200 GB permanent Cloud Drive.
       </p>
       <div class="space-y-2">
-        <a href="/dashboard" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
+        <a href="/dashboard" class="block w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 text-white font-bold text-xs shadow-md transition">
           Upgrade to Pro ($4/mo) • Up to 50 GB
         </a>
-        <button onclick="closeLimitModal()" class="w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition cursor-pointer">
+        <button onclick="closeLimitModal()" class="w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold transition cursor-pointer">
           Dismiss
         </button>
       </div>
@@ -138,37 +126,37 @@
   </div>
 
   <!-- Client Deposit Link Generator Modal -->
-  <div id="requestModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative">
+  <div id="requestModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden p-4">
+    <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 relative">
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           </div>
-          <h3 class="text-lg font-bold text-white">Create Client File Request Link</h3>
+          <h3 class="text-lg font-bold text-slate-900">Create Client File Request Link</h3>
         </div>
-        <button onclick="closeRequestModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+        <button onclick="closeRequestModal()" class="text-slate-400 hover:text-slate-700 text-sm">✕</button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed mb-4">
-        Generate a secure drop-portal link. Clients or collaborators can upload files directly into your Zephyr Vault without needing to create an account.
+      <p class="text-xs text-slate-600 leading-relaxed mb-4">
+        Generate a secure drop portal. Clients or collaborators can upload files directly into your Zephyr Vault without creating an account.
       </p>
       <div class="space-y-3">
         <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Request Title / Project Name</label>
-          <input id="reqProjectTitle" type="text" placeholder="e.g. Q3 Commercial Raw Footage" class="w-full bg-[#050711] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-400">
+          <label class="block text-[11px] font-semibold text-slate-700 mb-1">Request Title / Project Name</label>
+          <input id="reqProjectTitle" type="text" placeholder="e.g. Q3 Commercial Raw Footage" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500">
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Your Destination Vault</label>
-          <input type="text" readonly value="My Zephyr Encrypted Vault" class="w-full bg-[#050711]/60 border border-white/5 rounded-xl px-3.5 py-2 text-xs text-slate-400 font-mono">
+          <label class="block text-[11px] font-semibold text-slate-700 mb-1">Destination Vault</label>
+          <input type="text" readonly value="My Zephyr Encrypted Vault" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-500 font-mono">
         </div>
-        <button onclick="generateClientRequestLink()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer">
+        <button onclick="generateClientRequestLink()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition cursor-pointer">
           Generate Client Drop Link
         </button>
-        <div id="reqResultBox" class="hidden pt-3 border-t border-white/10 space-y-1.5">
-          <label class="block text-[11px] font-semibold text-emerald-400">✓ Share this link with your client:</label>
+        <div id="reqResultBox" class="hidden pt-3 border-t border-slate-200 space-y-1.5">
+          <label class="block text-[11px] font-semibold text-emerald-600">✓ Share this link with your client:</label>
           <div class="flex items-center gap-2">
-            <input id="reqLinkInput" type="text" readonly class="flex-1 bg-[#050711] border border-white/15 rounded-xl px-3 py-2 text-xs text-indigo-300 font-mono">
-            <button onclick="copyReqLink()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition">Copy</button>
+            <input id="reqLinkInput" type="text" readonly class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-indigo-600 font-mono">
+            <button onclick="copyReqLink()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition">Copy</button>
           </div>
         </div>
       </div>
@@ -176,61 +164,55 @@
   </div>
 
   <!-- Header -->
-  <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/50 backdrop-blur-xl sticky top-0">
+  <header class="relative z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
-      <!-- Zephyr Wing Z Brand Logo -->
-      <a href="/" class="flex items-center gap-3">
-  <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_14px_rgba(99,102,241,0.5)]">
-  <defs>
-    <linearGradient id="ribbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="60%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#4338ca"/>
-    </linearGradient>
-    <linearGradient id="ribbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#c084fc"/>
-      <stop offset="50%" stop-color="#818cf8"/>
-      <stop offset="100%" stop-color="#06b6d4"/>
-    </linearGradient>
-    <linearGradient id="glassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Top Wind Vector -->
-  <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#ribbonCyan)"/>
-  <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#glassSheen)"/>
-  
-  <!-- Diagonal Slash -->
-  <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#ribbonViolet)"/>
-  
-  <!-- Bottom Vector -->
-  <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#ribbonCyan)"/>
-  <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#glassSheen)"/>
-</svg>
-  </div>
-  <span class="font-bold text-lg text-white">Zephyr</span>
-</a>
+      <!-- Zephyr Supersonic Monogram Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 p-1 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-indigo-300 transition duration-300">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]">
+            <defs>
+              <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="60%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#4338ca"/>
+              </linearGradient>
+              <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c084fc"/>
+                <stop offset="50%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#navGlassSheen)"/>
+            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
+            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#navRibbonCyan)"/>
+            <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#navGlassSheen)"/>
+          </svg>
+        </div>
+        <span class="font-extrabold text-xl text-slate-900 tracking-tight">Zephyr</span>
+      </a>
 
       <div class="flex items-center gap-3 sm:gap-6">
-        <a href="#services" class="text-xs text-slate-300 hover:text-white font-medium transition hidden lg:inline-block">Services</a>
-        <a href="#security" class="text-xs text-slate-300 hover:text-white font-medium transition hidden md:inline-block">Security Guarantee</a>
-        <a href="#pricing" class="text-xs text-slate-300 hover:text-white font-medium transition hidden sm:inline-block">Pricing</a>
+        <a href="#services" class="text-xs text-slate-600 hover:text-indigo-600 font-semibold transition hidden lg:inline-block">Services</a>
+        <a href="#security" class="text-xs text-slate-600 hover:text-indigo-600 font-semibold transition hidden md:inline-block">Security Guarantee</a>
+        <a href="#pricing" class="text-xs text-slate-600 hover:text-indigo-600 font-semibold transition hidden sm:inline-block">Pricing</a>
         
-        <button onclick="openRequestModal()" class="text-xs text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-1.5 rounded-xl font-semibold transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
+        <button onclick="openRequestModal()" class="text-xs text-indigo-700 hover:bg-indigo-100 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl font-semibold transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           <span>Request Files</span>
         </button>
 
-        <a href="/dashboard" class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.05] px-3.5 py-2 rounded-xl font-semibold border border-transparent hover:border-white/10 transition flex items-center gap-1.5">
+        <a href="/dashboard" class="text-xs text-slate-700 hover:text-indigo-600 hover:bg-slate-100 px-3 py-1.5 rounded-xl font-semibold border border-slate-200 transition flex items-center gap-1.5">
           <span>Drive</span>
-          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">5 GB</span>
+          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">5 GB</span>
         </a>
 
-        <a id="navAuthBtn" href="/auth" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-semibold shadow-md shadow-indigo-600/20 transition cursor-pointer">
+        <a id="navAuthBtn" href="/auth" class="text-xs bg-slate-900 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl font-semibold shadow-sm transition cursor-pointer">
           Sign In
         </a>
       </div>
@@ -238,152 +220,154 @@
   </header>
 
   <!-- Hero & Transfer Center -->
-  <main class="relative z-20 max-w-7xl mx-auto px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+  <main class="relative z-20 max-w-7xl mx-auto px-6 py-12 lg:py-18 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
     <div class="lg:col-span-6 space-y-6">
       
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-semibold backdrop-blur-md">
-        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-        Zero-Knowledge Edge Pipeline & Encrypted Cloud Drive
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-200 bg-indigo-50/80 text-indigo-700 text-xs font-semibold backdrop-blur-md">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        Zero-Knowledge Transfers & Encrypted Cloud Drive
       </div>
 
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
         Send files. <br />
-        <span class="bg-gradient-to-r from-indigo-300 via-purple-200 to-cyan-300 bg-clip-text text-transparent">
+        <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
           Move ideas privately.
         </span>
       </h1>
 
-      <p class="text-slate-400 text-sm sm:text-base leading-relaxed max-w-lg font-normal">
+      <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg font-normal">
         Transfer files, full folders, and client media directly via encrypted edge nodes with zero bandwidth throttling. Backed by client-side passcodes, burn-on-read shredding, and an encrypted 5 GB permanent Cloud Drive.
       </p>
 
-      <div class="grid grid-cols-2 gap-3 pt-2 text-xs font-medium text-slate-300">
-        <div class="flex items-center gap-2.5 bg-white/[0.02] p-3 rounded-2xl border border-white/5">
-          <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          <span>AES-256 Client-Side Encrypted</span>
+      <div class="grid grid-cols-2 gap-3 pt-2 text-xs font-medium text-slate-700">
+        <div class="flex items-center gap-2.5 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm">
+          <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span>AES-256 Client Encryption</span>
         </div>
-        <div class="flex items-center gap-2.5 bg-white/[0.02] p-3 rounded-2xl border border-white/5">
-          <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          <span>Cloudflare R2 Direct Pipeline</span>
+        <div class="flex items-center gap-2.5 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm">
+          <svg class="w-4 h-4 text-cyan-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Cloudflare R2 Direct Pipe</span>
         </div>
-        <div class="flex items-center gap-2.5 bg-white/[0.02] p-3 rounded-2xl border border-white/5">
-          <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        <div class="flex items-center gap-2.5 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm">
+          <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           <span>Cryptographic Shredding</span>
         </div>
-        <div class="flex items-center gap-2.5 bg-white/[0.02] p-2.5 rounded-2xl border border-white/5">
-          <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <div class="flex items-center gap-2.5 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
+          <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           <span>Permanent 5 GB Vault Free</span>
         </div>
       </div>
 
       <div class="pt-2 flex flex-wrap gap-2 text-xs">
-        <span class="text-slate-500 py-1">Quick Actions:</span>
-        <button onclick="openRequestModal()" class="px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 transition cursor-pointer">📥 Receive Client Files</button>
-        <a href="/dashboard" class="px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 transition">📁 Open Cloud Drive</a>
-        <a href="/sign" class="px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 transition">✨ Portals & E-Sign</a>
+        <span class="text-slate-400 py-1 font-medium">Quick Actions:</span>
+        <button onclick="openRequestModal()" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm transition cursor-pointer">📥 Receive Client Files</button>
+        <a href="/dashboard" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm transition">📁 Open Cloud Drive</a>
+        <a href="/sign" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm transition">✨ Portals & E-Sign</a>
       </div>
 
     </div>
 
+    <!-- Right Side: Transfer Card -->
     <div class="lg:col-span-6 relative">
       
       <div class="hidden sm:block absolute -top-8 -right-6 z-10 float-card-1 pointer-events-none">
-        <div class="px-3.5 py-1.5 rounded-2xl bg-[#0f172a]/80 border border-cyan-500/30 text-cyan-300 text-[11px] font-mono shadow-xl backdrop-blur-md flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-cyan-400"></span> .mov (ProRes 4K)
+        <div class="px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-[11px] font-mono shadow-md flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyan-500"></span> .mov (ProRes 4K)
         </div>
       </div>
-      <div class="hidden sm:block absolute top-1/2 -right-10 z-10 float-card-2 pointer-events-none">
-        <div class="px-3.5 py-1.5 rounded-2xl bg-[#0f172a]/80 border border-purple-500/30 text-purple-300 text-[11px] font-mono shadow-xl backdrop-blur-md flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-purple-400"></span> .psd (Design Layer)
+      <div class="hidden sm:block absolute top-1/2 -right-8 z-10 float-card-2 pointer-events-none">
+        <div class="px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-[11px] font-mono shadow-md flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-purple-500"></span> .psd (Design Layer)
         </div>
       </div>
-      <div class="hidden sm:block absolute -bottom-6 -left-6 z-10 float-card-3 pointer-events-none">
-        <div class="px-3.5 py-1.5 rounded-2xl bg-[#0f172a]/80 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono shadow-xl backdrop-blur-md flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-indigo-400"></span> .zip (Folder Tree)
+      <div class="hidden sm:block absolute -bottom-5 -left-5 z-10 float-card-3 pointer-events-none">
+        <div class="px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-[11px] font-mono shadow-md flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span> .zip (Folder Tree)
         </div>
       </div>
 
-      <div class="obsidian-card rounded-3xl p-6 sm:p-7 relative border border-white/15 shadow-2xl z-20">
+      <!-- Main Porcelain Card -->
+      <div class="obsidian-card rounded-3xl p-6 sm:p-8 relative z-20">
         
         <input type="file" id="fileInput" multiple class="hidden">
         <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
 
-        <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
-          <div class="flex items-center bg-black/40 p-1 rounded-xl border border-white/10 text-xs">
-            <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-3.5 py-1.5 rounded-lg font-bold text-white bg-indigo-600 transition cursor-pointer">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs">
+            <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-3.5 py-1.5 rounded-lg font-bold text-slate-900 bg-white shadow-sm transition cursor-pointer">
               Get link
             </button>
-            <button id="modeEmailBtn" onclick="switchTransferMode('email')" class="px-3.5 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition cursor-pointer">
+            <button id="modeEmailBtn" onclick="switchTransferMode('email')" class="px-3.5 py-1.5 rounded-lg font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer">
               Send email
             </button>
           </div>
 
-          <span id="tierCapBadge" class="text-[11px] font-mono text-indigo-300 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
+          <span id="tierCapBadge" class="text-[11px] font-mono font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">
             Free: 2 GB limit
           </span>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-4">
-          <button onclick="handleFileSelectClick()" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/[0.02] hover:bg-indigo-950/20 border border-white/10 hover:border-indigo-400/50 transition duration-200 group cursor-pointer">
-            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+        <div class="grid grid-cols-2 gap-3.5 mb-5">
+          <button onclick="handleFileSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-300 transition duration-200 group cursor-pointer">
+            <div class="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             </div>
-            <span class="text-xs font-bold text-slate-200">Add files</span>
+            <span class="text-xs font-bold text-slate-800">Add files</span>
             <span class="text-[10px] text-slate-500 mt-0.5">Documents, video, audio</span>
           </button>
 
-          <button onclick="handleFolderSelectClick()" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/[0.02] hover:bg-cyan-950/20 border border-white/10 hover:border-cyan-400/50 transition duration-200 group cursor-pointer">
-            <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-1 group-hover:scale-110 transition">
+          <button onclick="handleFolderSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-slate-50 hover:bg-cyan-50/50 border border-slate-200 hover:border-cyan-300 transition duration-200 group cursor-pointer">
+            <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
             </div>
-            <span class="text-xs font-bold text-slate-200">Add folders</span>
-            <span class="text-[10px] text-slate-500 mt-0.5">Retain directory hierarchy</span>
+            <span class="text-xs font-bold text-slate-800">Add folders</span>
+            <span class="text-[10px] text-slate-500 mt-0.5">Retain directory tree</span>
           </button>
         </div>
 
-        <div id="selectedFilesSummary" class="hidden bg-indigo-950/25 border border-indigo-500/30 rounded-2xl p-3.5 mb-4 space-y-2">
+        <div id="selectedFilesSummary" class="hidden bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-3.5 mb-4 space-y-2">
           <div class="flex items-center justify-between text-xs font-semibold">
-            <span id="selectedFilesCountText" class="text-slate-200 flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span id="selectedFilesCountText" class="text-slate-800 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               <span>0 files queued</span>
             </span>
-            <span id="selectedFilesSizeText" class="font-mono text-indigo-300">0 MB</span>
+            <span id="selectedFilesSizeText" class="font-mono text-indigo-700 font-bold">0 MB</span>
           </div>
 
           <div id="selectedFilesList" class="max-h-24 overflow-y-auto space-y-1 custom-scroll pr-1"></div>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-3.5">
           
           <div id="emailFieldsGroup" class="space-y-2.5 hidden">
             <div>
-              <label class="block text-[11px] font-semibold text-slate-300 mb-1">Email To</label>
+              <label class="block text-[11px] font-semibold text-slate-700 mb-1">Email To</label>
               <input id="emailTo" type="email" placeholder="recipient@company.com" 
-                     class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition">
+                     class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition">
             </div>
             <div>
-              <label class="block text-[11px] font-semibold text-slate-300 mb-1">Your Email</label>
+              <label class="block text-[11px] font-semibold text-slate-700 mb-1">Your Email</label>
               <input id="emailFrom" type="email" placeholder="yourname@domain.com" 
-                     class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition">
+                     class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition">
             </div>
           </div>
 
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Title</label>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Title</label>
             <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
-                   class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition">
+                   class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition">
           </div>
 
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Message</label>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Message</label>
             <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                      class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition resize-none"></textarea>
+                      class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition resize-none"></textarea>
           </div>
 
           <div class="flex items-center gap-2 pt-1">
             <div class="flex-1">
-              <select id="expiryHours" class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none transition">
+              <select id="expiryHours" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-medium focus:outline-none transition">
                 <option value="1">Expire in 1 Hour</option>
                 <option value="24" selected>Expire in 24 Hours</option>
                 <option value="72">Expire in 3 Days</option>
@@ -392,21 +376,21 @@
             </div>
 
             <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
-                    class="px-3.5 py-2.5 bg-[#050711] hover:bg-white/5 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
               <span>Security</span>
             </button>
           </div>
 
-          <div id="securityDrawer" class="hidden p-3.5 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+          <div id="securityDrawer" class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
             <div>
-              <label class="block text-[11px] font-semibold text-slate-300 mb-1">Passcode Protection</label>
+              <label class="block text-[11px] font-semibold text-slate-700 mb-1">Passcode Protection</label>
               <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
-                     class="w-full bg-[#050711] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-400 transition">
+                     class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition">
             </div>
             <div>
-              <label class="block text-[11px] font-semibold text-slate-300 mb-1">Max Downloads (Burn-on-Read)</label>
-              <select id="maxDownloads" class="w-full bg-[#050711] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-400 transition">
+              <label class="block text-[11px] font-semibold text-slate-700 mb-1">Max Downloads (Burn-on-Read)</label>
+              <select id="maxDownloads" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 transition">
                 <option value="0" selected>Unlimited Downloads</option>
                 <option value="1">1 (Burn on Read 🔥)</option>
                 <option value="5">5 Downloads</option>
@@ -416,26 +400,26 @@
           </div>
 
           <div id="progressBox" class="hidden space-y-1.5 pt-1">
-            <div class="flex justify-between text-xs font-medium text-slate-300">
+            <div class="flex justify-between text-xs font-medium text-slate-700">
               <span id="progressStatus">Encrypting payload...</span>
-              <span id="progressPercent" class="font-mono text-indigo-400">0%</span>
+              <span id="progressPercent" class="font-mono font-bold text-indigo-600">0%</span>
             </div>
-            <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/10">
-              <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+              <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full transition-all duration-150" style="width: 0%"></div>
             </div>
           </div>
 
           <button id="transferBtn" onclick="initiateTransfer()" 
-                  class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+                  class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-md shadow-indigo-500/25 active:scale-[0.99] transition duration-200 cursor-pointer">
             Transfer
           </button>
         </div>
 
-        <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-2">
-          <label class="block text-xs font-semibold text-emerald-400">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
+        <div id="resultBox" class="mt-5 pt-4 border-t border-slate-200 hidden space-y-2">
+          <label class="block text-xs font-semibold text-emerald-600">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
           <div class="flex items-center gap-2">
-            <input id="shareUrlInput" type="text" readonly class="flex-1 bg-[#050711] border border-white/15 rounded-xl px-3.5 py-2 text-xs text-indigo-300 font-mono focus:outline-none">
-            <button onclick="copyResultLink()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer">
+            <input id="shareUrlInput" type="text" readonly class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-indigo-600 font-mono focus:outline-none">
+            <button onclick="copyResultLink()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-sm transition cursor-pointer">
               Copy
             </button>
           </div>
@@ -447,79 +431,79 @@
   </main>
 
   <!-- Services Suite -->
-  <section id="services" class="relative z-20 max-w-7xl mx-auto px-6 py-20 border-t border-white/[0.06] w-full">
+  <section id="services" class="relative z-20 max-w-7xl mx-auto px-6 py-20 border-t border-slate-200/80 w-full">
     <div class="text-center mb-16">
-      <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+      <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-200">
         Product Suite
       </span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">More Than Just a Transfer Link</h2>
-      <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4">More Than Just a Transfer Link</h2>
+      <p class="text-sm text-slate-600 max-w-xl mx-auto mt-2">
         A comprehensive cryptographic workspace built for creative agencies, video teams, and privacy-conscious users.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 flex flex-col justify-between group hover:border-indigo-500/40 transition duration-300">
+      <div class="obsidian-card p-6 rounded-3xl flex flex-col justify-between group hover:border-indigo-300 transition duration-300">
         <div>
-          <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-110 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
           </div>
-          <h3 class="text-base font-bold text-white mb-2">Send Files & Folders</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900 mb-2">Send Files & Folders</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
             Move up to 50 GB per transfer. Preserve folder tree directories without compressing into ZIP files first. Deliver via direct URL or encrypted email.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/5 text-[11px] text-indigo-300 font-semibold">
+        <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-indigo-600 font-bold">
           Included in Free & Pro →
         </div>
       </div>
 
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 flex flex-col justify-between group hover:border-cyan-500/40 transition duration-300">
+      <div class="obsidian-card p-6 rounded-3xl flex flex-col justify-between group hover:border-cyan-300 transition duration-300">
         <div>
-          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600 mb-4 group-hover:scale-110 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           </div>
-          <h3 class="text-base font-bold text-white mb-2">Request Client Files</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900 mb-2">Request Client Files</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
             Generate custom deposit links for clients, photographers, or contractors. They drag-and-drop assets straight into your encrypted vault without signing up.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/5">
-          <button onclick="openRequestModal()" class="text-[11px] text-cyan-300 font-semibold hover:underline cursor-pointer">
+        <div class="mt-6 pt-4 border-t border-slate-100">
+          <button onclick="openRequestModal()" class="text-[11px] text-cyan-600 font-bold hover:underline cursor-pointer">
             Create Client Drop Link →
           </button>
         </div>
       </div>
 
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 flex flex-col justify-between group hover:border-purple-500/40 transition duration-300">
+      <div class="obsidian-card p-6 rounded-3xl flex flex-col justify-between group hover:border-purple-300 transition duration-300">
         <div>
-          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
+          <div class="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
           </div>
-          <h3 class="text-base font-bold text-white mb-2">Zephyr Drive Vault</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900 mb-2">Zephyr Drive Vault</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
             Permanent cloud storage to free up space on your phone or workstation. Free accounts receive 5 GB; Pro accounts receive 200 GB with zero egress bandwidth charges.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/5">
-          <a href="/dashboard" class="text-[11px] text-purple-300 font-semibold hover:underline">
+        <div class="mt-6 pt-4 border-t border-slate-100">
+          <a href="/dashboard" class="text-[11px] text-purple-600 font-bold hover:underline">
             Open Drive Dashboard →
           </a>
         </div>
       </div>
 
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 flex flex-col justify-between group hover:border-emerald-500/40 transition duration-300">
+      <div class="obsidian-card p-6 rounded-3xl flex flex-col justify-between group hover:border-emerald-300 transition duration-300">
         <div>
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           </div>
-          <h3 class="text-base font-bold text-white mb-2">Showcase & Portals</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900 mb-2">Showcase & Portals</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
             Customize recipient download screens with your agency’s branding, bespoke video backgrounds, and custom domain URLs (Pro Feature).
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/5 text-[11px] text-emerald-300 font-semibold">
+        <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-emerald-600 font-bold">
           Pro Feature Included →
         </div>
       </div>
@@ -528,59 +512,59 @@
   </section>
 
   <!-- Competitor Breakdown -->
-  <section class="relative z-20 max-w-6xl mx-auto px-6 py-12 border-t border-white/[0.06] w-full">
+  <section class="relative z-20 max-w-6xl mx-auto px-6 py-12 border-t border-slate-200/80 w-full">
     <div class="text-center mb-10">
-      <h3 class="text-2xl sm:text-3xl font-extrabold text-white">How Zephyr Compares</h3>
-      <p class="text-xs text-slate-400 mt-2">Engineered to eliminate high subscription costs and corporate tracking.</p>
+      <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900">How Zephyr Compares</h3>
+      <p class="text-xs text-slate-600 mt-2">Engineered to eliminate high subscription costs and corporate tracking.</p>
     </div>
 
-    <div class="obsidian-card rounded-3xl overflow-hidden border border-white/10">
+    <div class="obsidian-card rounded-3xl overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
-            <tr class="border-b border-white/10 bg-white/[0.02] text-slate-400 uppercase tracking-wider">
+            <tr class="border-b border-slate-200 bg-slate-50 text-slate-600 uppercase tracking-wider font-semibold">
               <th class="py-4 px-6">Feature</th>
-              <th class="py-4 px-6 text-indigo-400 font-bold">Zephyr Pro</th>
+              <th class="py-4 px-6 text-indigo-600 font-bold">Zephyr Pro</th>
               <th class="py-4 px-6">WeTransfer Pro</th>
               <th class="py-4 px-6">Proton Drive</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5 text-slate-300">
+          <tbody class="divide-y divide-slate-100 text-slate-700">
             <tr>
-              <td class="py-4 px-6 font-semibold text-white">Monthly Price</td>
-              <td class="py-4 px-6 text-emerald-400 font-bold font-mono">$4.00 / mo</td>
-              <td class="py-4 px-6 font-mono text-slate-400">$12.00 / mo</td>
-              <td class="py-4 px-6 font-mono text-slate-400">$4.99 / mo</td>
+              <td class="py-4 px-6 font-semibold text-slate-900">Monthly Price</td>
+              <td class="py-4 px-6 text-emerald-600 font-bold font-mono text-sm">$4.00 / mo</td>
+              <td class="py-4 px-6 font-mono text-slate-500">$12.00 / mo</td>
+              <td class="py-4 px-6 font-mono text-slate-500">$4.99 / mo</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-semibold text-white">Zero-Knowledge Architecture</td>
-              <td class="py-4 px-6 text-emerald-400">✓ Native Client Hashing</td>
-              <td class="py-4 px-6 text-rose-400">✗ None (Server Access)</td>
-              <td class="py-4 px-6 text-emerald-400">✓ Supported</td>
+              <td class="py-4 px-6 font-semibold text-slate-900">Zero-Knowledge Architecture</td>
+              <td class="py-4 px-6 text-emerald-600 font-medium">✓ Native Client Hashing</td>
+              <td class="py-4 px-6 text-rose-500 font-medium">✗ None (Server Access)</td>
+              <td class="py-4 px-6 text-emerald-600 font-medium">✓ Supported</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-semibold text-white">Single Transfer Limit</td>
-              <td class="py-4 px-6 text-white font-bold">50 GB</td>
+              <td class="py-4 px-6 font-semibold text-slate-900">Single Transfer Limit</td>
+              <td class="py-4 px-6 text-slate-900 font-bold">50 GB</td>
               <td class="py-4 px-6">200 GB</td>
               <td class="py-4 px-6">5 GB</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-semibold text-white">Permanent Cloud Drive Storage</td>
-              <td class="py-4 px-6 text-white font-bold">200 GB Included</td>
-              <td class="py-4 px-6 text-slate-400">Shared pool</td>
+              <td class="py-4 px-6 font-semibold text-slate-900">Permanent Cloud Drive Storage</td>
+              <td class="py-4 px-6 text-slate-900 font-bold">200 GB Included</td>
+              <td class="py-4 px-6 text-slate-500">Shared pool</td>
               <td class="py-4 px-6">200 GB</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-semibold text-white">Burn-on-Read Self-Destruct</td>
-              <td class="py-4 px-6 text-emerald-400">✓ Instant Edge Shred</td>
-              <td class="py-4 px-6 text-rose-400">✗ No (Timer only)</td>
-              <td class="py-4 px-6 text-emerald-400">✓ Supported</td>
+              <td class="py-4 px-6 font-semibold text-slate-900">Burn-on-Read Self-Destruct</td>
+              <td class="py-4 px-6 text-emerald-600 font-medium">✓ Instant Edge Shred</td>
+              <td class="py-4 px-6 text-rose-500 font-medium">✗ No (Timer only)</td>
+              <td class="py-4 px-6 text-emerald-600 font-medium">✓ Supported</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-semibold text-white">Folder Tree Uploads</td>
-              <td class="py-4 px-6 text-emerald-400">✓ Direct Native</td>
-              <td class="py-4 px-6 text-emerald-400">✓ Supported</td>
-              <td class="py-4 px-6 text-slate-400">Requires App</td>
+              <td class="py-4 px-6 font-semibold text-slate-900">Folder Tree Uploads</td>
+              <td class="py-4 px-6 text-emerald-600 font-medium">✓ Direct Native</td>
+              <td class="py-4 px-6 text-emerald-600 font-medium">✓ Supported</td>
+              <td class="py-4 px-6 text-slate-500">Requires App</td>
             </tr>
           </tbody>
         </table>
@@ -589,148 +573,148 @@
   </section>
 
   <!-- Cryptographic Security Guarantees -->
-  <section id="security" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
+  <section id="security" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-slate-200/80 w-full">
     <div class="text-center mb-14">
-      <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/20">
+      <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200">
         Cryptographic Warranties
       </span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">The Zephyr Security Guarantee</h2>
-      <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4">The Zephyr Security Guarantee</h2>
+      <p class="text-sm text-slate-600 max-w-xl mx-auto mt-2">
         Engineered for zero-trust environments where data cannot be viewed by cloud hosts, network sniffers, or internal personnel.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
       
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 hover:border-indigo-500/40 transition">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3">
+      <div class="obsidian-card p-6 rounded-3xl hover:border-indigo-300 transition">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
         </div>
-        <h4 class="text-sm font-bold text-white mb-1">Zero-Knowledge Isolation</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">Passcodes hash locally in your browser. Plaintext keys never touch database records or telemetry streams.</p>
+        <h4 class="text-sm font-bold text-slate-900 mb-1">Zero-Knowledge Isolation</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">Passcodes hash locally in your browser. Plaintext keys never touch database records or telemetry streams.</p>
       </div>
 
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 hover:border-purple-500/40 transition">
-        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3">
+      <div class="obsidian-card p-6 rounded-3xl hover:border-purple-300 transition">
+        <div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 mb-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         </div>
-        <h4 class="text-sm font-bold text-white mb-1">Cryptographic Shredding</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">Upon timer expiration or Burn-on-Read triggers, storage blocks are purged across all Cloudflare R2 replicas.</p>
+        <h4 class="text-sm font-bold text-slate-900 mb-1">Cryptographic Shredding</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">Upon timer expiration or Burn-on-Read triggers, storage blocks are purged across all Cloudflare R2 replicas.</p>
       </div>
 
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 hover:border-cyan-500/40 transition">
-        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
+      <div class="obsidian-card p-6 rounded-3xl hover:border-cyan-300 transition">
+        <div class="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-600 mb-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
         </div>
-        <h4 class="text-sm font-bold text-white mb-1">SHA-256 Tamper Guard</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">Cryptographic hash checks guarantee that your recipient receives byte-for-byte identical assets without transmission bit-rot.</p>
+        <h4 class="text-sm font-bold text-slate-900 mb-1">SHA-256 Tamper Guard</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">Cryptographic hash checks guarantee that your recipient receives byte-for-byte identical assets without bit rot.</p>
       </div>
 
-      <div class="obsidian-card p-6 rounded-3xl border border-white/10 hover:border-emerald-500/40 transition">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+      <div class="obsidian-card p-6 rounded-3xl hover:border-emerald-300 transition">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
         </div>
-        <h4 class="text-sm font-bold text-white mb-1">GDPR & Zero Analytics</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">No tracking cookies, marketing scripts, or advertising networks. Your transfer activity is never monitored or sold.</p>
+        <h4 class="text-sm font-bold text-slate-900 mb-1">GDPR & Zero Tracking</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">No tracking cookies, marketing scripts, or advertising networks. Your transfer activity is never monitored or sold.</p>
       </div>
 
     </div>
   </section>
 
   <!-- Pricing Table -->
-  <section id="pricing" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
+  <section id="pricing" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-slate-200/80 w-full">
     <div class="text-center mb-14">
-      <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+      <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-200">
         Simple, Transparent Pricing
       </span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">Choose Your Transfer & Storage Power</h2>
-      <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4">Choose Your Transfer & Storage Power</h2>
+      <p class="text-sm text-slate-600 max-w-xl mx-auto mt-2">
         Start free forever or unlock a 200 GB permanent encrypted drive and 50 GB single transfers with Zephyr Pro.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
       
-      <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border border-white/10 hover:border-white/20 transition">
+      <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between hover:border-slate-300 transition">
         <div>
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-white">Free Starter</h3>
-            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-semibold">Default</span>
+            <h3 class="text-lg font-bold text-slate-900">Free Starter</h3>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-semibold">Default</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Permanent cloud drive vault and zero-knowledge ephemeral transfers.</p>
-          <div class="text-3xl font-extrabold text-white mb-6">
+          <p class="text-xs text-slate-600 mb-6">Permanent cloud drive vault and zero-knowledge ephemeral transfers.</p>
+          <div class="text-3xl font-black text-slate-900 mb-6">
             $0 <span class="text-xs font-normal text-slate-500">/ forever</span>
           </div>
 
-          <ul class="space-y-3 text-xs text-slate-300">
+          <ul class="space-y-3 text-xs text-slate-700">
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span><strong>5 GB</strong> Permanent Cloud Drive storage</span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Up to <strong>2 GB</strong> per single transfer link</span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Burn-on-Read & download limit gating</span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Folder directory tree uploads supported</span>
             </li>
-            <li class="flex items-center gap-2 text-slate-500">
+            <li class="flex items-center gap-2 text-slate-400">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               <span>200 GB permanent drive & 50 GB single uploads (Pro only)</span>
             </li>
           </ul>
         </div>
 
-        <a href="#transferBtn" class="mt-8 block text-center w-full py-3 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.08] text-white text-xs font-bold transition">
+        <a href="#transferBtn" class="mt-8 block text-center w-full py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition">
           Use Free Now
         </a>
       </div>
 
-      <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border-2 border-indigo-500/50 shadow-2xl shadow-indigo-500/20 relative">
-        <div class="absolute -top-3.5 right-6 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+      <div class="obsidian-card rounded-3xl p-8 flex flex-col justify-between border-2 border-indigo-600 shadow-xl shadow-indigo-500/10 relative">
+        <div class="absolute -top-3.5 right-6 px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
           Most Popular
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-white">Zephyr Pro</h3>
-            <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">Pro Member</span>
+            <h3 class="text-lg font-bold text-slate-900">Zephyr Pro</h3>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold">Pro Member</span>
           </div>
-          <p class="text-xs text-slate-400 mb-6">Designed for filmmakers, agencies, teams, and high-capacity storage.</p>
-          <div class="text-3xl font-extrabold text-white mb-6">
+          <p class="text-xs text-slate-600 mb-6">Designed for filmmakers, agencies, teams, and high-capacity storage.</p>
+          <div class="text-3xl font-black text-slate-900 mb-6">
             $4 <span class="text-xs font-normal text-slate-500">/ month</span>
           </div>
 
-          <ul class="space-y-3 text-xs text-slate-200">
+          <ul class="space-y-3 text-xs text-slate-800">
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span><strong>200 GB</strong> Permanent Cloud Drive storage</span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Single transfers up to <strong>50 GB</strong></span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>White-label branded recipient download screens</span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Extended link retention: <strong>7d, 14d, 30d & Never</strong></span>
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Instant email access alerts & client drop requests</span>
             </li>
           </ul>
         </div>
 
-        <a href="/dashboard" class="mt-8 block text-center w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition duration-200">
+        <a href="/dashboard" class="mt-8 block text-center w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-cyan-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 active:scale-[0.98] transition duration-200">
           Upgrade to Pro ($4/mo)
         </a>
       </div>
@@ -738,85 +722,85 @@
   </section>
 
   <!-- FAQ Accordion -->
-  <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.06] w-full">
+  <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-slate-200/80 w-full">
     <div class="text-center mb-12">
-      <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+      <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-200">
         Knowledge Base
       </span>
-      <h3 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">Frequently Asked Questions</h3>
-      <p class="text-xs text-slate-400 max-w-md mx-auto mt-2">
+      <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">Frequently Asked Questions</h3>
+      <p class="text-xs text-slate-600 max-w-md mx-auto mt-2">
         Everything you need to know about encrypted transfers, permanent drive storage, and zero-knowledge privacy.
       </p>
     </div>
 
     <div class="space-y-4">
       
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>Can I use Zephyr Drive to free up space on my phone or laptop?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           Yes. You can upload 4K video footage, photo galleries, spreadsheets, and archives directly into your encrypted Zephyr Drive vault (5 GB Free or 200 GB on Pro). Once uploaded, you can safely delete the local files from your phone or PC and stream or download them whenever required.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>What is the difference between Zephyr Transfer and Zephyr Drive?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           <strong>Zephyr Transfer</strong> is built for disposable handoffs—links automatically expire (1h to 72h) or self-destruct after 1 download. <strong>Zephyr Drive</strong> is a permanent cloud file manager where your uploaded media stays safely preserved until you intentionally delete it.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>Can Zephyr, hosting providers, or third parties view my files?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           No. Zephyr operates on zero-knowledge architecture. When passcodes are used, key derivation occurs on your local browser. Zephyr stores encrypted blobs across Cloudflare R2 edge locations without storing your plaintext passwords or keys in our databases.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>How does the "Burn on Read" feature work?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           When "Max Downloads" is set to <strong>1 (Burn on Read 🔥)</strong>, the file object is permanently purged from Cloudflare R2 edge servers the exact millisecond the recipient's download stream completes. Any subsequent access displays a permanent expiration notice.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>Can I share files stored in my Zephyr Drive with others?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           Yes. In your Drive dashboard, clicking the <strong>Share Link</strong> button next to any stored file copies a direct, secure presigned download link to your clipboard without re-uploading the data.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>What happens if I reach the 5 GB Free Drive limit?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           Your existing files remain completely secure and downloadable. To upload more files, you can delete old items to free up space or upgrade to <strong>Zephyr Pro ($4/mo)</strong> for 200 GB of drive storage and 50 GB single uploads.
         </p>
       </details>
 
-      <details class="obsidian-card p-5 rounded-2xl border border-white/10 group cursor-pointer">
-        <summary class="font-semibold text-sm text-slate-200 list-none flex justify-between items-center select-none">
+      <details class="obsidian-card p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm text-slate-900 list-none flex justify-between items-center select-none">
           <span>Are downloads capped or bandwidth-throttled?</span>
-          <span class="text-indigo-400 text-lg group-open:rotate-180 transition duration-200">▾</span>
+          <span class="text-indigo-600 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
-        <p class="text-xs text-slate-400 mt-3 leading-relaxed">
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed">
           No. Because Zephyr is powered by Cloudflare R2's zero-egress edge infrastructure, downloads are never throttled, and transfer recipients do not need an account to download files.
         </p>
       </details>
@@ -825,37 +809,40 @@
   </section>
 
   <!-- Footer -->
-  <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/60 py-10 px-6 text-center text-xs text-slate-500">
+  <footer class="relative z-20 border-t border-slate-200/80 bg-white py-10 px-6 text-center text-xs text-slate-500">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-[#080a16] border border-white/5 p-1 flex items-center justify-center shadow-sm">
-          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+        <div class="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 p-1 flex items-center justify-center shadow-sm">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
             <defs>
-              <linearGradient id="zephyr-grad-footer" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8" />
-                <stop offset="35%" stop-color="#06b6d4" />
-                <stop offset="70%" stop-color="#a855f7" />
-                <stop offset="100%" stop-color="#4c1d95" />
+              <linearGradient id="footerRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="60%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#4338ca"/>
+              </linearGradient>
+              <linearGradient id="footerRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c084fc"/>
+                <stop offset="50%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
               </linearGradient>
             </defs>
-            <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-footer)" fill-opacity="0.9"/>
-            <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-footer)" fill-opacity="0.9"/>
-            <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-footer)" fill-opacity="0.9"/>
-            <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#footerRibbonCyan)"/>
+            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#footerRibbonViolet)"/>
+            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#footerRibbonCyan)"/>
           </svg>
         </div>
         <span>© 2026 Zephyr Systems. Zero-knowledge transfers and Cloud Drive.</span>
       </div>
       <div class="flex items-center gap-6">
-        <a href="/privacy" class="text-slate-400 hover:text-white transition">Privacy Policy</a>
-        <span class="text-white/10">•</span>
-        <a href="/terms" class="text-slate-400 hover:text-white transition">Terms & Conditions</a>
+        <a href="/privacy" class="text-slate-600 hover:text-slate-900 transition font-medium">Privacy Policy</a>
+        <span class="text-slate-300">•</span>
+        <a href="/terms" class="text-slate-600 hover:text-slate-900 transition font-medium">Terms & Conditions</a>
       </div>
     </div>
   </footer>
 
   <script>
-    // --- 1. Ambient Background Aurora Engine ---
+    // --- 1. Ambient Pastel Canvas Engine ---
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -869,17 +856,17 @@
 
     let step = 0;
     function renderAurora() {
-      step += 0.003;
-      ctx.fillStyle = '#030408';
+      step += 0.0025;
+      ctx.fillStyle = '#fafbff';
       ctx.fillRect(0, 0, width, height);
 
       const x1 = width * 0.35 + Math.sin(step * 0.7) * (width * 0.15);
       const y1 = height * 0.25 + Math.cos(step * 0.5) * (height * 0.12);
       const r1 = Math.max(width, height) * 0.45;
       const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
-      g1.addColorStop(0, 'rgba(79, 70, 229, 0.45)');
-      g1.addColorStop(0.5, 'rgba(67, 56, 202, 0.18)');
-      g1.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      g1.addColorStop(0, 'rgba(99, 102, 241, 0.06)');
+      g1.addColorStop(0.5, 'rgba(67, 56, 202, 0.02)');
+      g1.addColorStop(1, 'rgba(250, 251, 255, 0)');
       ctx.fillStyle = g1;
       ctx.fillRect(0, 0, width, height);
 
@@ -887,9 +874,9 @@
       const y2 = height * 0.55 + Math.sin(step * 0.8) * (height * 0.15);
       const r2 = Math.max(width, height) * 0.4;
       const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
-      g2.addColorStop(0, 'rgba(147, 51, 234, 0.38)');
-      g2.addColorStop(0.5, 'rgba(126, 34, 206, 0.15)');
-      g2.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      g2.addColorStop(0, 'rgba(168, 85, 247, 0.05)');
+      g2.addColorStop(0.5, 'rgba(126, 34, 206, 0.015)');
+      g2.addColorStop(1, 'rgba(250, 251, 255, 0)');
       ctx.fillStyle = g2;
       ctx.fillRect(0, 0, width, height);
 
@@ -897,9 +884,9 @@
       const y3 = height * 0.75 + Math.sin(step * 0.7) * (height * 0.1);
       const r3 = Math.max(width, height) * 0.35;
       const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
-      g3.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
-      g3.addColorStop(0.5, 'rgba(14, 116, 144, 0.1)');
-      g3.addColorStop(1, 'rgba(3, 4, 8, 0)');
+      g3.addColorStop(0, 'rgba(6, 182, 212, 0.05)');
+      g3.addColorStop(0.5, 'rgba(14, 116, 144, 0.01)');
+      g3.addColorStop(1, 'rgba(250, 251, 255, 0)');
       ctx.fillStyle = g3;
       ctx.fillRect(0, 0, width, height);
 
@@ -908,7 +895,7 @@
     renderAurora();
 
     // --- 2. State & Session Management ---
-    let transferMode = 'link'; // 'link' or 'email'
+    let transferMode = 'link';
     let selectedFiles = [];
     let userTier = 'free';
 
@@ -932,7 +919,7 @@
 
     if (currentUserId && navBtn) {
       navBtn.innerText = "Sign Out";
-      navBtn.className = "text-xs bg-white/[0.04] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-semibold border border-white/10 hover:border-rose-800/40 transition cursor-pointer";
+      navBtn.className = "text-xs bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 px-3.5 py-2 rounded-xl font-semibold border border-slate-200 transition cursor-pointer";
       navBtn.onclick = (e) => {
         e.preventDefault();
         localStorage.clear();
@@ -968,12 +955,12 @@
       const emailGroup = document.getElementById("emailFieldsGroup");
 
       if (mode === 'email') {
-        emailBtn.className = "px-3.5 py-1.5 rounded-lg font-bold text-white bg-indigo-600 transition cursor-pointer";
-        linkBtn.className = "px-3.5 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition cursor-pointer";
+        emailBtn.className = "px-3.5 py-1.5 rounded-lg font-bold text-slate-900 bg-white shadow-sm transition cursor-pointer";
+        linkBtn.className = "px-3.5 py-1.5 rounded-lg font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer";
         emailGroup.classList.remove("hidden");
       } else {
-        linkBtn.className = "px-3.5 py-1.5 rounded-lg font-bold text-white bg-indigo-600 transition cursor-pointer";
-        emailBtn.className = "px-3.5 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition cursor-pointer";
+        linkBtn.className = "px-3.5 py-1.5 rounded-lg font-bold text-slate-900 bg-white shadow-sm transition cursor-pointer";
+        emailBtn.className = "px-3.5 py-1.5 rounded-lg font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer";
         emailGroup.classList.add("hidden");
       }
     }
@@ -1002,10 +989,8 @@
 
     function processSelectedItems(fileList) {
       if (!fileList.length) return;
-      
       const newItems = Array.from(fileList);
       selectedFiles = selectedFiles.concat(newItems);
-
       updateQueueUI();
     }
 
@@ -1032,13 +1017,13 @@
         return;
       }
 
-      countEl.innerHTML = `<svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> <span>${selectedFiles.length} item(s) selected</span>`;
+      countEl.innerHTML = `<svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> <span>${selectedFiles.length} item(s) selected</span>`;
       sizeEl.innerText = `${totalMb} MB`;
 
       listEl.innerHTML = selectedFiles.map((file, idx) => `
-        <div class="flex items-center justify-between text-[11px] bg-white/[0.02] px-2 py-1 rounded-lg border border-white/5">
-          <span class="truncate max-w-xs text-slate-300 font-mono">${file.webkitRelativePath || file.name}</span>
-          <button onclick="removeFileFromQueue(${idx})" class="text-slate-500 hover:text-rose-400 ml-2 cursor-pointer">✕</button>
+        <div class="flex items-center justify-between text-[11px] bg-white px-2.5 py-1.5 rounded-lg border border-slate-200">
+          <span class="truncate max-w-xs text-slate-700 font-mono">${file.webkitRelativePath || file.name}</span>
+          <button onclick="removeFileFromQueue(${idx})" class="text-slate-400 hover:text-rose-500 ml-2 cursor-pointer font-bold">✕</button>
         </div>
       `).join('');
     }
