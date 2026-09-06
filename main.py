@@ -9,7 +9,7 @@ import boto3
 from botocore.config import Config
 from pydantic import BaseModel
 from fastapi import FastAPI, Request, HTTPException, status
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -169,23 +169,38 @@ async def get_signature_requests():
 async def get_sign_doc(doc_id: str, download: Optional[str] = None):
     s3_key = f"sign_docs/{doc_id}/completed_signed.png" if download == "signed" else None
     
-    if not s3_key:
-        prefix = f"sign_docs/{doc_id}/"
-        res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
-        contents = res.get("Contents", [])
-        if not contents:
-            raise HTTPException(status_code=404, detail="Signing document not found or expired")
-        template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
-        s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
+    if download == "signed":
+        try:
+            s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
+        except Exception:
+            raise HTTPException(status_code=404, detail="Signed document not found or pending.")
+
+        # Presigned URL forces the browser to save the file
+        url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": R2_BUCKET_NAME,
+                "Key": s3_key,
+                "ResponseContentDisposition": f'attachment; filename="signed_{doc_id}.png"'
+            },
+            ExpiresIn=3600
+        )
+        return RedirectResponse(url=url)
+
+    prefix = f"sign_docs/{doc_id}/"
+    res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
+    contents = res.get("Contents", [])
+    if not contents:
+        raise HTTPException(status_code=404, detail="Signing document not found or expired")
+    
+    template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
+    s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
 
     url = s3_client.generate_presigned_url(
         "get_object",
         Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
         ExpiresIn=86400
     )
-    
-    if download == "signed":
-        return JSONResponse({"url": url})
 
     conn = get_db()
     cursor = conn.cursor()
