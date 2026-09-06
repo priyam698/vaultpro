@@ -1034,6 +1034,9 @@
               ${r.status === 'completed' 
                 ? `<a href="/api/sign/document/${r.doc_id}?download=signed" target="_blank" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold transition">Download Signed</a>` 
                 : ''}
+              <button onclick="deleteEnvelope('${r.doc_id}')" class="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg text-[11px] font-semibold transition cursor-pointer">
+                Delete
+              </button>
             </td>
           </tr>
         `).join('');
@@ -1047,7 +1050,19 @@
       navigator.clipboard.writeText(url);
       alert(`Virtual signing link for ${name} copied to clipboard!`);
     }
+async function deleteEnvelope(docId) {
+      if (!confirm("Are you sure you want to delete this envelope? This will permanently delete the file and signature records.")) return;
 
+      try {
+        const res = await fetch(`/api/sign/request/${docId}`, {
+          method: "DELETE"
+        });
+        if (!res.ok) throw new Error("Failed to delete envelope");
+        loadManageRequests();
+      } catch (err) {
+        alert("Error deleting envelope: " + err.message);
+      }
+    }
     function copyRecipientLink() {
       navigator.clipboard.writeText(document.getElementById("recipientSigningUrl").value);
       alert("Virtual signing link copied!");

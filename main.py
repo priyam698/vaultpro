@@ -252,7 +252,29 @@ async def check_signing_status(doc_id: str):
         return {"status": "completed", "download_url": url}
     except Exception:
         return {"status": "pending"}
+@app.delete("/api/sign/request/{doc_id}")
+async def delete_signature_request(doc_id: str):
+    # 1. Clean up stored files in Cloudflare R2
+    prefix = f"sign_docs/{doc_id}/"
+    try:
+        res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
+        objects = [{"Key": obj["Key"]} for obj in res.get("Contents", [])]
+        if objects:
+            s3_client.delete_objects(
+                Bucket=R2_BUCKET_NAME,
+                Delete={"Objects": objects}
+            )
+    except Exception as e:
+        print(f"R2 delete cleanup error: {e}")
 
+    # 2. Remove envelope record from PostgreSQL
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM signature_requests WHERE doc_id = %s", (doc_id,))
+    conn.commit()
+    conn.close()
+
+    return {"status": "deleted", "doc_id": doc_id}
 # ----------------- Privora Drive Core API -----------------
 @app.get("/api/drive/quota")
 async def get_drive_quota(user_id: str):
