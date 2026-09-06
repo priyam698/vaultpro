@@ -192,15 +192,11 @@ async def get_sign_doc(doc_id: str, download: Optional[str] = None):
     contents = res.get("Contents", [])
     if not contents:
         raise HTTPException(status_code=404, detail="Signing document not found or expired")
-    
+
     template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
     s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
 
-    url = s3_client.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
-        ExpiresIn=86400
-    )
+    url = f"/api/sign/file/{doc_id}"
 
     conn = get_db()
     cursor = conn.cursor()
@@ -210,6 +206,20 @@ async def get_sign_doc(doc_id: str, download: Optional[str] = None):
 
     return {"url": url, "metadata": meta}
 
+
+@app.get("/api/sign/file/{doc_id}")
+async def get_sign_file_stream(doc_id: str):
+    from fastapi.responses import StreamingResponse
+    prefix = f"sign_docs/{doc_id}/"
+    res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
+    contents = res.get("Contents", [])
+    if not contents:
+        raise HTTPException(status_code=404, detail="Document file not found")
+    template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
+    s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
+
+    obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
+    return StreamingResponse(obj["Body"], media_type="application/pdf")
 @app.post("/api/sign/complete/{doc_id}")
 async def complete_signing(doc_id: str, request: Request):
     body = await request.body()
