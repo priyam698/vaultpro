@@ -91,58 +91,144 @@ async def privacy_page(request: Request):
 async def sign_page(request: Request):
     return render_template("sign.html", request)
 
-# ----------------- E-Sign Document & Virtual Signing API -----------------
+# ----------------- E-Sign Document & Envelope Dashboard API -----------------
 @app.post("/api/sign/upload")
-async def upload_sign_doc(request: Request, filename: str):
+async def upload_sign_doc(request: Request, filename: str, recipient_name: str = "Recipient", recipient_email: str = "", title: str = "Agreement", x: int = 150, y: int = 250):
     doc_id = uuid.uuid4().hex[:10]
     body = await request.body()
     content_type = request.headers.get("content-type", "application/pdf")
     s3_key = f"sign_docs/{doc_id}/{filename}"
+    
     s3_client.put_object(
         Bucket=R2_BUCKET_NAME,
         Key=s3_key,
         Body=body,
         ContentType=content_type
     )
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS signature_requests (
+            doc_id VARCHAR(32) PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            recipient_name VARCHAR(255) NOT NULL,
+            recipient_email VARCHAR(255) NOT NULL,
+            status VARCHAR(32) DEFAULT 'pending',
+            signature_x INT DEFAULT 150,
+            signature_y INT DEFAULT 250,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        INSERT INTO signature_requests (doc_id, title, recipient_name, recipient_email, status, signature_x, signature_y)
+        VALUES (%s, %s, %s, %s, 'pending', %s, %s)
+    """, (doc_id, title, recipient_name, recipient_email, x, y))
+    conn.commit()
+    conn.close()
+
     return {"doc_id": doc_id, "filename": filename}
 
-@app.get("/api/sign/document/{doc_id}")
-async def get_sign_doc(doc_id: str):
-    prefix = f"sign_docs/{doc_id}/"
-    res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
-    contents = res.get("Contents", [])
-    if not contents:
-        raise HTTPException(status_code=404, detail="Signing document not found or expired")
+@app.get("/api/sign/requests")
+async def get_signature_requests():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS signature_requests (
+            doc_id VARCHAR(32) PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            recipient_name VARCHAR(255) NOT NULL,
+            recipient_email VARCHAR(255) NOT NULL,
+            status VARCHAR(32) DEFAULT 'pending',
+            signature_x INT DEFAULT 150,
+            signature_y INT DEFAULT 250,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        )
+    """)
+    cursor.execute("SELECT * FROM signature_requests ORDER BY created_at DESC")
+    rows = cursor.fetchall()
+    conn.close()
     
-    # Filter out completed signed files if looking for the original template
-    template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
-    s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
+    return [
+        {
+            "doc_id": r["doc_id"],
+            "title": r["title"],
+            "recipient_name": r["recipient_name"],
+            "recipient_email": r["recipient_email"],
+            "status": r["status"],
+            "x": r["signature_x"],
+            "y": r["signature_y"],
+            "created_at": str(r["created_at"])[:19]
+        }
+        for r in rows
+    ]
+
+@app.get("/api/sign/document/{doc_id}")
+async def get_sign_doc(doc_id: str, download: Optional[str] = None):
+    s3_key = f"sign_docs/{doc_id}/completed_signed.png" if download == "signed" else None
+    
+    if not s3_key:
+        prefix = f"sign_docs/{doc_id}/"
+        res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
+        contents = res.get("Contents", [])
+        if not contents:
+            raise HTTPException(status_code=404, detail="Signing document not found or expired")
+        template_files = [c for c in contents if not c["Key"].endswith("completed_signed.png")]
+        s3_key = template_files[0]["Key"] if template_files else contents[0]["Key"]
 
     url = s3_client.generate_presigned_url(
         "get_object",
         Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
         ExpiresIn=86400
     )
-    return {"url": url}
+    
+    if download == "signed":
+        return JSONResponse({"url": url})
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM signature_requests WHERE doc_id = %s", (doc_id,))
+    meta = cursor.fetchone()
+    conn.close()
+
+    return {"url": url, "metadata": meta}
 
 @app.post("/api/sign/complete/{doc_id}")
 async def complete_signing(doc_id: str, request: Request):
     body = await request.body()
     content_type = request.headers.get("content-type", "image/png")
     s3_key = f"sign_docs/{doc_id}/completed_signed.png"
+    
     s3_client.put_object(
         Bucket=R2_BUCKET_NAME,
         Key=s3_key,
         Body=body,
         ContentType=content_type
     )
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE signature_requests SET status = 'completed', completed_at = CURRENT_TIMESTAMP WHERE doc_id = %s", (doc_id,))
+    conn.commit()
+    conn.close()
+
     return {"status": "saved", "doc_id": doc_id}
 
 @app.get("/api/sign/check-status/{doc_id}")
 async def check_signing_status(doc_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM signature_requests WHERE doc_id = %s", (doc_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row or row["status"] != "completed":
+        return {"status": "pending"}
+
     s3_key = f"sign_docs/{doc_id}/completed_signed.png"
     try:
-        s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
         url = s3_client.generate_presigned_url(
             "get_object",
             Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
@@ -162,7 +248,6 @@ async def get_drive_quota(user_id: str):
     conn.close()
 
     if not user:
-        # Default 5 GB free tier quota in bytes (5 * 1024^3)
         return {"tier": "free", "used_bytes": 0, "quota_bytes": 5368709120}
 
     quota = user.get("storage_quota_bytes") or (214748364800 if user.get("tier") == "pro" else 5368709120)
