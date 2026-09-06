@@ -125,13 +125,11 @@
       color: #090d16 !important;
     }
 
-    /* High-Contrast Hero Typography for Daylight Snow & Mountain */
     body.light-theme .hero-headline {
       color: #090d16 !important;
       text-shadow: none !important;
     }
 
-    /* Solid High-Contrast Midnight Indigo to Royal Blue: Eliminates white silhouette bleed */
     body.light-theme .hero-gradient-text {
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%) !important;
       -webkit-background-clip: text !important;
@@ -146,7 +144,6 @@
       text-shadow: none !important;
     }
 
-    /* Toned Down Frosted Glass Cards (Non-glare, Translucent Porcelain) */
     body.light-theme .obsidian-panel {
       background: rgba(248, 250, 252, 0.82);
       backdrop-filter: blur(28px);
@@ -173,7 +170,6 @@
       color: #334155 !important;
     }
 
-    /* Soft Translucent Inputs */
     body.light-theme input,
     body.light-theme textarea,
     body.light-theme select {
@@ -218,7 +214,6 @@
       color: #0f172a !important;
     }
 
-    /* Mockup Interior Boxes */
     body.light-theme .mockup-inner {
       background: rgba(241, 245, 249, 0.85) !important;
       border-color: rgba(203, 213, 225, 0.8) !important;
@@ -233,13 +228,11 @@
       color: #0f172a !important;
     }
 
-    /* Table & Pricing Details */
     body.light-theme table tr td { color: #0f172a !important; }
-    body.light-theme table tr th { color: #1e293b !important; background-color: rgba(226, 232, 240, 0.6) !important; }
+    body.light-theme table tr th { color: #1e293b !important; background-color: rgba(226, 232, 240, 0.75) !important; }
     body.light-theme table tr { border-color: rgba(203, 213, 225, 0.6) !important; }
     body.light-theme ul li span { color: #0f172a !important; }
 
-    /* Header Nav Pills */
     body.light-theme #worldLangSelect,
     body.light-theme #themeToggleBtn,
     body.light-theme header .header-pill {
@@ -255,7 +248,6 @@
       color: #334155 !important;
     }
 
-    /* Floating Badges */
     @keyframes floatSlow {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-10px) rotate(1.5deg); }
@@ -401,7 +393,7 @@
         <span class="font-black text-2xl tracking-tight">Zephyr</span>
       </a>
 
-      <!-- Controls: 21 World Languages, Theme Switcher & Auth -->
+      <!-- Controls: Major Languages, Theme Switcher & Auth -->
       <div class="flex items-center gap-2.5 sm:gap-4">
         <a href="#control" class="text-xs font-bold hover:opacity-80 transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs font-bold hover:opacity-80 transition hidden sm:inline-block">Pricing</a>
@@ -479,7 +471,7 @@
         Transfer massive project deliverables, raw mountain footage, and folder trees directly via zero-knowledge edge storage with instant link shredding and client-side passcodes.
       </p>
 
-      <!-- Feature Badges (Balanced Frosted Glass) -->
+      <!-- Feature Badges -->
       <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
         <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
           <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shrink-0">
@@ -506,7 +498,7 @@
     <!-- Right Column: Frosted Glass Transfer Card -->
     <div class="lg:col-span-6 relative">
       
-      <!-- Floating Photo Badge 1 -->
+      <!-- Floating Photo Badge 1: Mountain Panoramic RAW -->
       <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-photo-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=120&h=120&q=80" alt="Mountain RAW" class="w-11 h-11 rounded-xl object-cover border border-slate-400/20">
         <div class="pr-3">
@@ -518,7 +510,7 @@
         </div>
       </div>
 
-      <!-- Floating Photo Badge 2 -->
+      <!-- Floating Photo Badge 2: Drone Video Cut -->
       <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-photo-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-400/20">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=120&h=120&q=80" alt="Ridge Cut" class="w-full h-full object-cover">
@@ -879,7 +871,7 @@
             <a href="/auth" class="px-6 py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
               Create a free account
             </a>
-            <a href="/dashboard" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
+            <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
               Learn more
             </a>
           </div>
@@ -1067,12 +1059,12 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 5: HOW ZEPHYR COMPARES                                            -->
+  <!-- SECTION 5: HOW ZEPHYR COMPARES (Competitor Names Replaced)                -->
   <!-- ========================================================================= -->
   <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-10">
-      <h3 class="text-2xl sm:text-3xl font-black">How Zephyr Compares</h3>
-      <p class="text-xs opacity-70 mt-2 font-medium">Engineered to eliminate high subscription fees and corporate tracking.</p>
+      <h3 class="text-2xl sm:text-3xl font-black">Modern Edge vs. Traditional Cloud</h3>
+      <p class="text-xs opacity-70 mt-2 font-medium">Engineered to eliminate inflated enterprise pricing and corporate surveillance.</p>
     </div>
 
     <div class="obsidian-panel rounded-3xl overflow-hidden">
@@ -1080,42 +1072,48 @@
         <table class="w-full text-left text-xs">
           <thead>
             <tr class="border-b border-slate-400/20 bg-black/20 uppercase tracking-wider font-bold">
-              <th class="py-4 px-6">Feature</th>
+              <th class="py-4 px-6">Capability</th>
               <th class="py-4 px-6 text-indigo-500 font-black">Zephyr Pro</th>
-              <th class="py-4 px-6">WeTransfer Pro</th>
-              <th class="py-4 px-6">Proton Drive</th>
+              <th class="py-4 px-6 font-bold">Zephyr Starter</th>
+              <th class="py-4 px-6 opacity-70 font-semibold">Standard Cloud Drives</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-400/15 font-medium">
             <tr>
               <td class="py-4 px-6 font-bold">Monthly Price</td>
               <td class="py-4 px-6 text-emerald-500 font-black font-mono text-sm">$4.00 / mo</td>
-              <td class="py-4 px-6 font-mono opacity-70">$12.00 / mo</td>
-              <td class="py-4 px-6 font-mono opacity-70">$4.99 / mo</td>
+              <td class="py-4 px-6 font-bold font-mono">$0 / forever</td>
+              <td class="py-4 px-6 font-mono opacity-70">$12+ / mo</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Zero-Knowledge Architecture</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Native Client Hashing</td>
-              <td class="py-4 px-6 text-rose-500 font-bold">✗ None (Server Access)</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Supported</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Client-Side Key Hashing</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Client-Side Key Hashing</td>
+              <td class="py-4 px-6 text-rose-500 font-bold">✗ Server-Side Inspection</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Single Transfer Limit</td>
               <td class="py-4 px-6 font-black">50 GB</td>
-              <td class="py-4 px-6">200 GB</td>
-              <td class="py-4 px-6">5 GB</td>
+              <td class="py-4 px-6">2 GB</td>
+              <td class="py-4 px-6 opacity-70">Strict / Compressed</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Permanent Cloud Drive Storage</td>
-              <td class="py-4 px-6 font-black">200 GB Included</td>
-              <td class="py-4 px-6 opacity-70">Shared pool</td>
-              <td class="py-4 px-6">200 GB</td>
+              <td class="py-4 px-6 font-black">200 GB Vault Included</td>
+              <td class="py-4 px-6">5 GB Vault Included</td>
+              <td class="py-4 px-6 opacity-70">Requires Costly Upgrades</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-bold">Burn-on-Read Self-Destruct</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Instant Edge Shred</td>
-              <td class="py-4 px-6 text-rose-500 font-bold">✗ No (Timer only)</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Supported</td>
+              <td class="py-4 px-6 font-bold">Burn-on-Read Shredding</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Instant Edge Purge</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Instant Edge Purge</td>
+              <td class="py-4 px-6 text-rose-500 font-bold">✗ Residual Archival</td>
+            </tr>
+            <tr>
+              <td class="py-4 px-6 font-bold">Directory Tree Folder Support</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Native Drag & Drop</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Native Drag & Drop</td>
+              <td class="py-4 px-6 opacity-70">Requires ZIP Archive</td>
             </tr>
           </tbody>
         </table>
