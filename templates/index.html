@@ -78,19 +78,23 @@
     /* Hero Typography (Dark Default) */
     .hero-headline {
       color: #ffffff;
+      text-shadow: none !important;
       transition: color 0.3s ease;
     }
 
     .hero-gradient-text {
+      display: inline-block;
       background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      text-shadow: none !important;
       filter: drop-shadow(0 2px 14px rgba(99, 102, 241, 0.35));
       transition: all 0.3s ease;
     }
 
     .hero-desc {
       color: #cbd5e1;
+      text-shadow: none !important;
       transition: color 0.3s ease;
     }
 
@@ -123,22 +127,23 @@
 
     /* High-Contrast Hero Typography for Daylight Snow & Mountain */
     body.light-theme .hero-headline {
-      color: #0f172a !important;
-      text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85);
+      color: #090d16 !important;
+      text-shadow: none !important;
     }
 
-    /* Deep Royal Cobalt to Vivid Indigo Gradient - Pops crisply off the snow */
+    /* Solid High-Contrast Midnight Indigo to Royal Blue: Eliminates white silhouette bleed */
     body.light-theme .hero-gradient-text {
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%) !important;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%) !important;
       -webkit-background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
-      filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.9)) !important;
+      text-shadow: none !important;
+      filter: none !important;
     }
 
     body.light-theme .hero-desc {
       color: #0f172a !important;
       font-weight: 600;
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      text-shadow: none !important;
     }
 
     /* Toned Down Frosted Glass Cards (Non-glare, Translucent Porcelain) */
@@ -401,7 +406,6 @@
         <a href="#control" class="text-xs font-bold hover:opacity-80 transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs font-bold hover:opacity-80 transition hidden sm:inline-block">Pricing</a>
         
-        <!-- Major World Languages Selector -->
         <div class="relative flex items-center">
           <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
           <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-bold focus:outline-none transition cursor-pointer appearance-none">
@@ -502,7 +506,7 @@
     <!-- Right Column: Frosted Glass Transfer Card -->
     <div class="lg:col-span-6 relative">
       
-      <!-- Floating Photo Badge 1: Mountain Panoramic RAW -->
+      <!-- Floating Photo Badge 1 -->
       <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-photo-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=120&h=120&q=80" alt="Mountain RAW" class="w-11 h-11 rounded-xl object-cover border border-slate-400/20">
         <div class="pr-3">
@@ -514,7 +518,7 @@
         </div>
       </div>
 
-      <!-- Floating Photo Badge 2: Drone Video Cut -->
+      <!-- Floating Photo Badge 2 -->
       <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-photo-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-400/20">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=120&h=120&q=80" alt="Ridge Cut" class="w-full h-full object-cover">
