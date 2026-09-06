@@ -14,14 +14,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
+    /* ========================================================================= */
+    /* THEME SYSTEM (DARK DEFAULT + LIGHT ALPINE MODE)                          */
+    /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #04060e;
       color: #f8fafc;
       overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Fixed Seamless Cinematic Mountain Backdrop across the Entire Site */
+    /* Fixed Seamless Cinematic Mountain Backdrop */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
@@ -29,23 +33,25 @@
       width: 100vw;
       height: 100vh;
       background-image: 
-        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(4, 6, 14, 0.78) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.88) 100%),
+        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
         url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       pointer-events: none;
       z-index: 0;
+      transition: background-image 0.4s ease;
     }
 
-    /* Unified Dark Frosted Obsidian Glass Panels */
+    /* Dark Mode Glass Panels */
     .obsidian-panel {
-      background: linear-gradient(180deg, rgba(14, 20, 42, 0.8) 0%, rgba(7, 10, 24, 0.92) 100%);
+      background: linear-gradient(180deg, rgba(14, 20, 42, 0.82) 0%, rgba(7, 10, 24, 0.94) 100%);
       backdrop-filter: blur(35px);
       -webkit-backdrop-filter: blur(35px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
     }
 
     .glass-chip {
@@ -54,6 +60,90 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65);
+      transition: all 0.3s ease;
+    }
+
+    /* LIGHT THEME OVERRIDES */
+    body.light-theme {
+      background-color: #f3f5fb;
+      color: #090d16;
+    }
+
+    body.light-theme .site-mountain-backdrop {
+      background-image: 
+        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.1) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(243, 245, 251, 0.82) 0%, rgba(243, 245, 251, 0.68) 45%, rgba(235, 240, 250, 0.92) 100%),
+        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+    }
+
+    body.light-theme header {
+      background-color: rgba(255, 255, 255, 0.88) !important;
+      border-color: #e2e8f0 !important;
+    }
+
+    body.light-theme header a,
+    body.light-theme header span {
+      color: #0f172a !important;
+    }
+
+    body.light-theme .obsidian-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: #e2e8f0;
+      box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.02);
+      color: #090d16;
+    }
+
+    body.light-theme .obsidian-panel h1,
+    body.light-theme .obsidian-panel h2,
+    body.light-theme .obsidian-panel h3,
+    body.light-theme .obsidian-panel h4,
+    body.light-theme .obsidian-panel label,
+    body.light-theme h1,
+    body.light-theme h2,
+    body.light-theme h3,
+    body.light-theme h4 {
+      color: #090d16 !important;
+    }
+
+    body.light-theme .obsidian-panel p,
+    body.light-theme p {
+      color: #334155 !important;
+    }
+
+    body.light-theme .glass-chip {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: #e2e8f0;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+      color: #090d16;
+    }
+
+    body.light-theme .glass-chip p {
+      color: #090d16 !important;
+    }
+
+    body.light-theme input,
+    body.light-theme textarea,
+    body.light-theme select {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #090d16 !important;
+    }
+
+    body.light-theme .feature-badge {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #090d16 !important;
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    body.light-theme .feature-badge span {
+      color: #090d16 !important;
+    }
+
+    body.light-theme footer {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: #e2e8f0 !important;
+      color: #475569 !important;
     }
 
     /* Floating Badges */
@@ -69,26 +159,21 @@
     .float-photo-1 { animation: floatSlow 7s ease-in-out infinite; }
     .float-photo-2 { animation: floatAlt 8.5s ease-in-out infinite; }
 
-    .custom-scroll::-webkit-scrollbar {
-      width: 5px;
-    }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.4);
-      border-radius: 8px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(99, 102, 241, 0.7);
-    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
+
+    /* Hide Google Translate top banner artifact */
+    .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
+    body { top: 0px !important; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
   <!-- Full-Window Ambient Landscape -->
   <div class="site-mountain-backdrop"></div>
+  <div id="google_translate_element" style="display:none"></div>
 
   <!-- Free Guest Limit Modal -->
   <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
@@ -98,7 +183,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
         </svg>
       </div>
-      <h3 class="text-xl font-black text-white mb-2">Free Guest Quota Reached</h3>
+      <h3 class="text-xl font-black mb-2">Free Guest Quota Reached</h3>
       <p class="text-xs text-slate-300 leading-relaxed mb-6">
         You have utilized your <strong>4 complimentary guest transfers</strong>. Sign in or create an account to activate your permanent <strong>5 GB Cloud Drive</strong> and unlock unlimited transfers.
       </p>
@@ -121,7 +206,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
       </div>
-      <h3 class="text-xl font-black text-white mb-2">Transfer Package Exceeds 2 GB</h3>
+      <h3 class="text-xl font-black mb-2">Transfer Package Exceeds 2 GB</h3>
       <p id="limitModalMsg" class="text-xs text-slate-300 leading-relaxed mb-6">
         The files you selected exceed the Free Tier limit of <strong>2.00 GB</strong>. Upgrade to Zephyr Pro for single uploads up to 50 GB and 200 GB permanent drive storage.
       </p>
@@ -144,7 +229,7 @@
           <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           </div>
-          <h3 class="text-lg font-black text-white">Create Client File Request Link</h3>
+          <h3 class="text-lg font-black">Create Client File Request Link</h3>
         </div>
         <button onclick="closeRequestModal()" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
       </div>
@@ -175,9 +260,10 @@
   </div>
 
   <!-- Header -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-[#04060e]/70 backdrop-blur-xl sticky top-0">
+  <header class="relative z-30 border-b border-white/[0.08] bg-[#04060e]/75 backdrop-blur-xl sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
+      <!-- Logo -->
       <a href="/" class="flex items-center gap-3 group">
         <div class="w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/90 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
@@ -207,21 +293,59 @@
         <span class="font-black text-2xl text-white tracking-tight">Zephyr</span>
       </a>
 
-      <div class="flex items-center gap-3 sm:gap-6">
+      <!-- Navigation, Language Selector, Theme Switcher & Auth -->
+      <div class="flex items-center gap-2.5 sm:gap-4">
         <a href="#control" class="text-xs text-slate-300 hover:text-white font-bold transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs text-slate-300 hover:text-white font-bold transition hidden sm:inline-block">Pricing</a>
         
-        <button onclick="openRequestModal()" class="text-xs text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3.5 py-2 rounded-xl font-bold transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span>Request Files</span>
+        <!-- 25 Major World Languages Selector -->
+        <div class="relative flex items-center">
+          <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
+          <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-slate-200 focus:outline-none transition cursor-pointer appearance-none">
+            <option value="en" class="bg-[#0b1022] text-white">English (US)</option>
+            <option value="es" class="bg-[#0b1022] text-white">Español (Spanish)</option>
+            <option value="fr" class="bg-[#0b1022] text-white">Français (French)</option>
+            <option value="de" class="bg-[#0b1022] text-white">Deutsch (German)</option>
+            <option value="zh-CN" class="bg-[#0b1022] text-white">中文 (Mandarin)</option>
+            <option value="hi" class="bg-[#0b1022] text-white">हिन्दी (Hindi)</option>
+            <option value="ar" class="bg-[#0b1022] text-white">العربية (Arabic)</option>
+            <option value="pt" class="bg-[#0b1022] text-white">Português (Portuguese)</option>
+            <option value="ru" class="bg-[#0b1022] text-white">Русский (Russian)</option>
+            <option value="ja" class="bg-[#0b1022] text-white">日本語 (Japanese)</option>
+            <option value="pa" class="bg-[#0b1022] text-white">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="ko" class="bg-[#0b1022] text-white">한국어 (Korean)</option>
+            <option value="vi" class="bg-[#0b1022] text-white">Tiếng Việt (Vietnamese)</option>
+            <option value="te" class="bg-[#0b1022] text-white">తెలుగు (Telugu)</option>
+            <option value="mr" class="bg-[#0b1022] text-white">मराठी (Marathi)</option>
+            <option value="ta" class="bg-[#0b1022] text-white">தமிழ் (Tamil)</option>
+            <option value="gu" class="bg-[#0b1022] text-white">ગુજરાતી (Gujarati)</option>
+            <option value="tr" class="bg-[#0b1022] text-white">Türkçe (Turkish)</option>
+            <option value="it" class="bg-[#0b1022] text-white">Italiano (Italian)</option>
+            <option value="pl" class="bg-[#0b1022] text-white">Polski (Polish)</option>
+            <option value="uk" class="bg-[#0b1022] text-white">Українська (Ukrainian)</option>
+            <option value="nl" class="bg-[#0b1022] text-white">Nederlands (Dutch)</option>
+            <option value="th" class="bg-[#0b1022] text-white">ภาษาไทย (Thai)</option>
+            <option value="id" class="bg-[#0b1022] text-white">Bahasa Indonesia</option>
+            <option value="bn" class="bg-[#0b1022] text-white">বাংলা (Bengali)</option>
+          </select>
+        </div>
+
+        <!-- Light / Dark Theme Switcher Button -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-sm font-bold text-amber-300 transition cursor-pointer">
+          <span id="themeIcon">☀️</span>
         </button>
 
-        <a href="/dashboard" class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] px-3.5 py-2 rounded-xl font-bold border border-white/10 transition flex items-center gap-1.5">
+        <button onclick="openRequestModal()" class="text-xs text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-2 rounded-xl font-bold transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>Request</span>
+        </button>
+
+        <a href="/dashboard" class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] px-3 py-2 rounded-xl font-bold border border-white/10 transition flex items-center gap-1.5">
           <span>Drive</span>
           <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">5 GB</span>
         </a>
 
-        <a id="navAuthBtn" href="/auth" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
+        <a id="navAuthBtn" href="/auth" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
           Sign In
         </a>
       </div>
@@ -241,7 +365,7 @@
         Zero-Knowledge Transfers & Encrypted Cloud Drive
       </div>
 
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
         Send files. <br />
         <span class="bg-gradient-to-r from-cyan-300 via-indigo-300 to-purple-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(99,102,241,0.3)]">
           Move ideas privately.
@@ -253,14 +377,14 @@
       </p>
 
       <!-- Feature Badges -->
-      <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold text-slate-200">
-        <div class="flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
+      <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
+        <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
           <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
           <span>AES-256 Client Encrypted</span>
         </div>
-        <div class="flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
+        <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
           <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
@@ -283,10 +407,10 @@
       <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-photo-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=120&h=120&q=80" alt="Mountain RAW" class="w-11 h-11 rounded-xl object-cover border border-white/15">
         <div class="pr-3">
-          <p class="text-[11px] font-bold text-white leading-tight">Alpine_Summit_8K.raw</p>
+          <p class="text-[11px] font-bold leading-tight">Alpine_Summit_8K.raw</p>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span class="text-[10px] font-mono font-semibold text-cyan-300">14.2 GB • 8K RAW</span>
+            <span class="text-[10px] font-mono font-semibold text-cyan-400">14.2 GB • 8K RAW</span>
           </div>
         </div>
       </div>
@@ -298,22 +422,22 @@
           <span class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white">▶</span>
         </div>
         <div class="pr-3">
-          <p class="text-[11px] font-bold text-white leading-tight">Glacier_Flight_ProRes.mov</p>
+          <p class="text-[11px] font-bold leading-tight">Glacier_Flight_ProRes.mov</p>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[10px] font-mono font-semibold text-emerald-300">ProRes 422 HQ</span>
+            <span class="text-[10px] font-mono font-semibold text-emerald-400">ProRes 422 HQ</span>
           </div>
         </div>
       </div>
 
       <!-- Main Obsidian Panel -->
-      <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10 text-white">
+      <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10">
         
         <input type="file" id="fileInput" multiple class="hidden">
         <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
 
         <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
-          <div class="flex items-center bg-black/50 p-1 rounded-xl border border-white/10 text-xs">
+          <div class="flex items-center bg-black/40 p-1 rounded-xl border border-white/10 text-xs">
             <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer">
               Get link
             </button>
@@ -332,7 +456,7 @@
             <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             </div>
-            <span class="text-xs font-black text-white">Add files</span>
+            <span class="text-xs font-black">Add files</span>
             <span class="text-[11px] text-slate-400 mt-0.5 font-medium">Documents, video, audio</span>
           </button>
 
@@ -340,7 +464,7 @@
             <div class="w-12 h-12 rounded-2xl bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
             </div>
-            <span class="text-xs font-black text-white">Add folders</span>
+            <span class="text-xs font-black">Add folders</span>
             <span class="text-[11px] text-slate-400 mt-0.5 font-medium">Retain directory hierarchy</span>
           </button>
         </div>
@@ -361,39 +485,39 @@
             <div>
               <label class="block text-xs font-bold text-slate-300 mb-1">Recipient Email</label>
               <input id="emailTo" type="email" placeholder="client@company.com" 
-                     class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                     class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs placeholder-slate-500 focus:outline-none transition">
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-300 mb-1">Your Email</label>
               <input id="emailFrom" type="email" placeholder="you@studio.com" 
-                     class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                     class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs placeholder-slate-500 focus:outline-none transition">
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-300 mb-1">Title</label>
             <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
-                   class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                   class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs placeholder-slate-500 focus:outline-none transition">
           </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-300 mb-1">Message</label>
             <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                      class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition resize-none"></textarea>
+                      class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-4 py-2 text-xs placeholder-slate-500 focus:outline-none transition resize-none"></textarea>
           </div>
 
           <div class="flex items-center gap-2 pt-1">
             <div class="flex-1">
-              <select id="expiryHours" class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-bold focus:outline-none transition">
-                <option value="1" class="bg-[#0c1020] text-white">Expire in 1 Hour</option>
-                <option value="24" selected class="bg-[#0c1020] text-white">Expire in 24 Hours</option>
-                <option value="72" class="bg-[#0c1020] text-white">Expire in 3 Days</option>
-                <option value="0" class="bg-[#0c1020] text-white">Never (Store in Drive Vault)</option>
+              <select id="expiryHours" class="w-full bg-black/40 border border-white/15 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
+                <option value="1" class="bg-[#0c1020]">Expire in 1 Hour</option>
+                <option value="24" selected class="bg-[#0c1020]">Expire in 24 Hours</option>
+                <option value="72" class="bg-[#0c1020]">Expire in 3 Days</option>
+                <option value="0" class="bg-[#0c1020]">Never (Store in Drive Vault)</option>
               </select>
             </div>
 
             <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
-                    class="px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 rounded-xl text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                    class="px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
               <span>Security</span>
             </button>
@@ -403,15 +527,15 @@
             <div>
               <label class="block text-xs font-bold text-slate-300 mb-1">Passcode Protection</label>
               <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
-                     class="w-full bg-[#050814] border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 transition">
+                     class="w-full bg-[#050814] border border-white/15 rounded-xl px-3.5 py-2 text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-400 transition">
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-300 mb-1">Max Downloads (Burn-on-Read)</label>
-              <select id="maxDownloads" class="w-full bg-[#050814] border border-white/15 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-bold focus:outline-none focus:border-indigo-400 transition">
-                <option value="0" selected class="bg-[#0c1020] text-white">Unlimited Downloads</option>
-                <option value="1" class="bg-[#0c1020] text-white">1 (Burn on Read 🔥)</option>
-                <option value="5" class="bg-[#0c1020] text-white">5 Downloads</option>
-                <option value="10" class="bg-[#0c1020] text-white">10 Downloads</option>
+              <select id="maxDownloads" class="w-full bg-[#050814] border border-white/15 rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:border-indigo-400 transition">
+                <option value="0" selected class="bg-[#0c1020]">Unlimited Downloads</option>
+                <option value="1" class="bg-[#0c1020]">1 (Burn on Read 🔥)</option>
+                <option value="5" class="bg-[#0c1020]">5 Downloads</option>
+                <option value="10" class="bg-[#0c1020]">10 Downloads</option>
               </select>
             </div>
           </div>
@@ -456,7 +580,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         <div class="lg:col-span-5 space-y-6">
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
             Stay in control of your files
           </h2>
           
@@ -466,7 +590,7 @@
                 📁
               </div>
               <div>
-                <h4 class="text-sm font-black text-white">File storage</h4>
+                <h4 class="text-sm font-black">File storage</h4>
                 <p class="text-xs text-slate-300 mt-1 leading-relaxed">
                   Protect, back up, and store files of any size, then access them securely from anywhere with end-to-end encrypted cloud storage.
                 </p>
@@ -478,7 +602,7 @@
                 🔗
               </div>
               <div>
-                <h4 class="text-sm font-black text-white">File sharing</h4>
+                <h4 class="text-sm font-black">File sharing</h4>
                 <p class="text-xs text-slate-300 mt-1 leading-relaxed">
                   Share files, photos, documents, and spreadsheets with anyone. Stay in control of who can access your data using password protection and expiry dates.
                 </p>
@@ -502,7 +626,7 @@
           <!-- Card 1: App UI Mockup -->
           <div class="rounded-3xl p-6 obsidian-panel flex flex-col justify-between h-[420px] shadow-2xl relative overflow-hidden">
             <div>
-              <h3 class="text-base font-extrabold text-white leading-snug mb-1">
+              <h3 class="text-base font-extrabold leading-snug mb-1">
                 Safely store files of any size and type
               </h3>
             </div>
@@ -516,23 +640,23 @@
               <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
                 <div class="p-2 rounded-xl bg-white/[0.04] border border-white/10">
                   <span class="text-xl block mb-0.5">📁</span>
-                  <span class="font-bold text-slate-300 truncate block">Archives</span>
+                  <span class="font-bold truncate block">Archives</span>
                 </div>
                 <div class="p-2 rounded-xl bg-white/[0.04] border border-white/10">
                   <span class="text-xl block mb-0.5">📑</span>
-                  <span class="font-bold text-slate-300 truncate block">Contract.pdf</span>
+                  <span class="font-bold truncate block">Contract.pdf</span>
                 </div>
                 <div class="p-2 rounded-xl bg-white/[0.04] border border-white/10">
                   <span class="text-xl block mb-0.5">🎬</span>
-                  <span class="font-bold text-slate-300 truncate block">Reel_4K.mov</span>
+                  <span class="font-bold truncate block">Reel_4K.mov</span>
                 </div>
                 <div class="p-2 rounded-xl bg-white/[0.04] border border-white/10">
                   <span class="text-xl block mb-0.5">📊</span>
-                  <span class="font-bold text-slate-300 truncate block">Budget.xlsx</span>
+                  <span class="font-bold truncate block">Budget.xlsx</span>
                 </div>
                 <div class="p-2 rounded-xl bg-white/[0.04] border border-white/10">
                   <span class="text-xl block mb-0.5">🎨</span>
-                  <span class="font-bold text-slate-300 truncate block">Branding.ai</span>
+                  <span class="font-bold truncate block">Branding.ai</span>
                 </div>
                 <div class="p-2 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex flex-col items-center justify-center">
                   <span class="text-indigo-400 font-black text-sm">+</span>
@@ -603,10 +727,10 @@
 
             <div class="px-2">
               <p class="text-[10px] font-mono font-semibold text-slate-400">07 April 2026 • 220 items</p>
-              <h4 class="text-lg font-black text-white mt-0.5">Family & Friends</h4>
+              <h4 class="text-lg font-black mt-0.5">Family & Friends</h4>
               
               <div class="flex items-center gap-2 mt-2">
-                <button class="px-3 py-1 bg-white/10 text-white rounded-lg text-[11px] font-bold border border-white/10 flex items-center gap-1">
+                <button class="px-3 py-1 bg-white/10 rounded-lg text-[11px] font-bold border border-white/10 flex items-center gap-1">
                   <span>+</span> Add
                 </button>
                 <button class="px-3 py-1 bg-indigo-600/30 text-indigo-300 rounded-lg text-[11px] font-bold border border-indigo-500/30 flex items-center gap-1">
@@ -632,7 +756,7 @@
         </div>
 
         <div class="lg:col-span-6 space-y-6">
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
             Protect your favorite memories
           </h2>
 
@@ -641,7 +765,7 @@
               🌸
             </div>
             <div>
-              <h4 class="text-sm font-black text-white">Photos and albums</h4>
+              <h4 class="text-sm font-black">Photos and albums</h4>
               <p class="text-xs text-slate-300 mt-1 leading-relaxed">
                 Keep your photos and videos safe and easy to access, with automatic mobile backups and collaborative albums for reliving and sharing your favorite moments.
               </p>
@@ -672,7 +796,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         <div class="lg:col-span-5 space-y-6">
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
             Keep everything in sync
           </h2>
 
@@ -682,7 +806,7 @@
                 🔄
               </div>
               <div>
-                <h4 class="text-sm font-black text-white">Desktop file syncing</h4>
+                <h4 class="text-sm font-black">Desktop file syncing</h4>
                 <p class="text-xs text-slate-300 mt-1 leading-relaxed">
                   Automatically sync files between your desktop and cloud storage, so your latest work is always up to date and available everywhere.
                 </p>
@@ -694,7 +818,7 @@
                 📱
               </div>
               <div>
-                <h4 class="text-sm font-black text-white">Everywhere access</h4>
+                <h4 class="text-sm font-black">Everywhere access</h4>
                 <p class="text-xs text-slate-300 mt-1 leading-relaxed">
                   View, edit, and manage your files and photos on all your devices using Windows, macOS, Android, iOS, and web apps.
                 </p>
@@ -725,7 +849,7 @@
 
             <div class="bg-[#070a18]/90 rounded-2xl p-5 shadow-sm border border-white/10 space-y-4">
               <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                <span class="text-xs font-black text-white">Zephyr Drive • Plan & Progress 2026</span>
+                <span class="text-xs font-black">Zephyr Drive • Plan & Progress 2026</span>
                 <span class="text-xs text-indigo-400 font-bold">+ New Item</span>
               </div>
 
@@ -733,28 +857,28 @@
                 <div class="flex items-center justify-between p-2 hover:bg-white/[0.03] rounded-xl transition">
                   <div class="flex items-center gap-2.5">
                     <span>📁</span>
-                    <span class="font-bold text-slate-200">Brand Identity Sprint</span>
+                    <span class="font-bold">Brand Identity Sprint</span>
                   </div>
                   <span class="text-[10px] font-mono text-slate-500">14 items • Synced</span>
                 </div>
                 <div class="flex items-center justify-between p-2 hover:bg-white/[0.03] rounded-xl transition">
                   <div class="flex items-center gap-2.5">
                     <span>📁</span>
-                    <span class="font-bold text-slate-200">Summer Photos Master</span>
+                    <span class="font-bold">Summer Photos Master</span>
                   </div>
                   <span class="text-[10px] font-mono text-slate-500">82 items • Synced</span>
                 </div>
                 <div class="flex items-center justify-between p-2 hover:bg-white/[0.03] rounded-xl transition">
                   <div class="flex items-center gap-2.5">
                     <span>📑</span>
-                    <span class="font-bold text-slate-200">Release_Roadmap.pdf</span>
+                    <span class="font-bold">Release_Roadmap.pdf</span>
                   </div>
                   <span class="text-[10px] font-mono text-slate-500">4.2 MB • Synced</span>
                 </div>
                 <div class="flex items-center justify-between p-2 hover:bg-white/[0.03] rounded-xl transition">
                   <div class="flex items-center gap-2.5">
                     <span>🎬</span>
-                    <span class="font-bold text-slate-200">Commercial_Teaser.mp4</span>
+                    <span class="font-bold">Commercial_Teaser.mp4</span>
                   </div>
                   <span class="text-[10px] font-mono text-slate-500">410 MB • Synced</span>
                 </div>
@@ -784,7 +908,7 @@
               Zephyr Drive For Business
             </div>
             
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
               Secure your team's most sensitive work
             </h2>
 
@@ -844,7 +968,7 @@
   <!-- ========================================================================= -->
   <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-10">
-      <h3 class="text-2xl sm:text-3xl font-black text-white">How Zephyr Compares</h3>
+      <h3 class="text-2xl sm:text-3xl font-black">How Zephyr Compares</h3>
       <p class="text-xs text-slate-400 mt-2 font-medium">Engineered to eliminate high subscription fees and corporate tracking.</p>
     </div>
 
@@ -861,31 +985,31 @@
           </thead>
           <tbody class="divide-y divide-white/5 text-slate-300 font-medium">
             <tr>
-              <td class="py-4 px-6 font-bold text-white">Monthly Price</td>
+              <td class="py-4 px-6 font-bold">Monthly Price</td>
               <td class="py-4 px-6 text-emerald-400 font-black font-mono text-sm">$4.00 / mo</td>
               <td class="py-4 px-6 font-mono text-slate-400">$12.00 / mo</td>
               <td class="py-4 px-6 font-mono text-slate-400">$4.99 / mo</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-bold text-white">Zero-Knowledge Architecture</td>
+              <td class="py-4 px-6 font-bold">Zero-Knowledge Architecture</td>
               <td class="py-4 px-6 text-emerald-400 font-bold">✓ Native Client Hashing</td>
               <td class="py-4 px-6 text-rose-400 font-bold">✗ None (Server Access)</td>
               <td class="py-4 px-6 text-emerald-400 font-bold">✓ Supported</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-bold text-white">Single Transfer Limit</td>
-              <td class="py-4 px-6 text-white font-black">50 GB</td>
+              <td class="py-4 px-6 font-bold">Single Transfer Limit</td>
+              <td class="py-4 px-6 font-black">50 GB</td>
               <td class="py-4 px-6">200 GB</td>
               <td class="py-4 px-6">5 GB</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-bold text-white">Permanent Cloud Drive Storage</td>
-              <td class="py-4 px-6 text-white font-black">200 GB Included</td>
+              <td class="py-4 px-6 font-bold">Permanent Cloud Drive Storage</td>
+              <td class="py-4 px-6 font-black">200 GB Included</td>
               <td class="py-4 px-6 text-slate-400">Shared pool</td>
               <td class="py-4 px-6">200 GB</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-bold text-white">Burn-on-Read Self-Destruct</td>
+              <td class="py-4 px-6 font-bold">Burn-on-Read Self-Destruct</td>
               <td class="py-4 px-6 text-emerald-400 font-bold">✓ Instant Edge Shred</td>
               <td class="py-4 px-6 text-rose-400 font-bold">✗ No (Timer only)</td>
               <td class="py-4 px-6 text-emerald-400 font-bold">✓ Supported</td>
@@ -904,7 +1028,7 @@
       <span class="text-xs font-black uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
         Simple, Transparent Pricing
       </span>
-      <h2 class="text-3xl sm:text-4xl font-black text-white mt-4 tracking-tight">Choose Your Transfer & Storage Plan</h2>
+      <h2 class="text-3xl sm:text-4xl font-black mt-4 tracking-tight">Choose Your Transfer & Storage Plan</h2>
       <p class="text-sm text-slate-400 max-w-xl mx-auto mt-2">
         Start free forever or unlock a 200 GB permanent encrypted drive and 50 GB single transfers with Zephyr Pro.
       </p>
@@ -915,11 +1039,11 @@
       <div class="obsidian-panel rounded-3xl p-8 flex flex-col justify-between hover:border-white/20 transition">
         <div>
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-black text-white">Free Starter</h3>
+            <h3 class="text-lg font-black">Free Starter</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-white/10 text-slate-300 font-bold">Default</span>
           </div>
           <p class="text-xs text-slate-400 mb-6">Permanent cloud drive vault and zero-knowledge ephemeral transfers.</p>
-          <div class="text-4xl font-black text-white mb-6">
+          <div class="text-4xl font-black mb-6">
             $0 <span class="text-xs font-normal text-slate-400">/ forever</span>
           </div>
 
@@ -943,7 +1067,7 @@
           </ul>
         </div>
 
-        <a href="#transferBtn" class="mt-8 block text-center w-full py-3.5 rounded-xl border border-white/10 hover:bg-white/5 text-white text-xs font-bold transition">
+        <a href="#transferBtn" class="mt-8 block text-center w-full py-3.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold transition">
           Use Free Now
         </a>
       </div>
@@ -955,11 +1079,11 @@
 
         <div>
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-black text-white">Zephyr Pro</h3>
+            <h3 class="text-lg font-black">Zephyr Pro</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-black border border-indigo-500/30">Pro Member</span>
           </div>
           <p class="text-xs text-slate-400 mb-6">Designed for creative studios, high-resolution media, and power users.</p>
-          <div class="text-4xl font-black text-white mb-6">
+          <div class="text-4xl font-black mb-6">
             $4 <span class="text-xs font-normal text-slate-400">/ month</span>
           </div>
 
@@ -991,7 +1115,7 @@
   </section>
 
   <!-- Footer -->
-  <footer class="relative z-20 border-t border-white/[0.08] bg-black/40 backdrop-blur-md py-10 px-6 text-center text-xs text-slate-400">
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-10 px-6 text-center text-xs text-slate-400">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-2.5">
         <div class="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/10 p-1 flex items-center justify-center shadow-sm">
@@ -1013,59 +1137,71 @@
             <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#footerRibbonCyan)"/>
           </svg>
         </div>
-        <span class="font-bold text-slate-300">© 2026 Zephyr Systems. Zero-knowledge transfers and Cloud Drive.</span>
+        <span class="font-bold">© 2026 Zephyr Systems. Zero-knowledge transfers and Cloud Drive.</span>
       </div>
       <div class="flex items-center gap-6">
-        <a href="/privacy" class="text-slate-400 hover:text-white transition font-bold">Privacy Policy</a>
+        <a href="/privacy" class="hover:text-white transition font-bold">Privacy Policy</a>
         <span class="text-white/10">•</span>
-        <a href="/terms" class="text-slate-400 hover:text-white transition font-bold">Terms & Conditions</a>
+        <a href="/terms" class="hover:text-white transition font-bold">Terms & Conditions</a>
       </div>
     </div>
   </footer>
 
+  <!-- ========================================================================= -->
+  <!-- SCRIPTS: TRANSLATION ENGINE, THEME SWITCHER & CORE PIPELINE               -->
+  <!-- ========================================================================= -->
+  <script type="text/javascript">
+    // --- 1. Google Translate Core Engine ---
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,es,fr,de,zh-CN,hi,ar,pt,ru,ja,pa,ko,vi,te,mr,ta,gu,tr,it,pl,uk,nl,th,id,bn',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+
+    function changeLanguage(lang) {
+      document.cookie = `googtrans=/en/${lang}; path=/;`;
+      document.cookie = `googtrans=/en/${lang}; domain=.${window.location.hostname}; path=/;`;
+      localStorage.setItem("zephyr_lang", lang);
+      window.location.reload();
+    }
+
+    // Set initial select dropdown value from cookie / storage
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedLang = localStorage.getItem("zephyr_lang");
+      if (savedLang && document.getElementById("worldLangSelect")) {
+        document.getElementById("worldLangSelect").value = savedLang;
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <script>
-    // --- 1. Ambient Background Engine ---
-    const canvas = document.getElementById('ambientCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    // --- 2. Dark / Light Theme Engine ---
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
     }
-    window.addEventListener('resize', resize);
-    resize();
 
-    let step = 0;
-    function renderAurora() {
-      step += 0.002;
-      ctx.clearRect(0, 0, width, height);
-
-      const x1 = width * 0.35 + Math.sin(step * 0.7) * (width * 0.15);
-      const y1 = height * 0.25 + Math.cos(step * 0.5) * (height * 0.12);
-      const r1 = Math.max(width, height) * 0.45;
-      const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
-      g1.addColorStop(0, 'rgba(79, 70, 229, 0.12)');
-      g1.addColorStop(0.5, 'rgba(67, 56, 202, 0.04)');
-      g1.addColorStop(1, 'transparent');
-      ctx.fillStyle = g1;
-      ctx.fillRect(0, 0, width, height);
-
-      const x2 = width * 0.75 + Math.cos(step * 0.6) * (width * 0.15);
-      const y2 = height * 0.55 + Math.sin(step * 0.8) * (height * 0.15);
-      const r2 = Math.max(width, height) * 0.4;
-      const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
-      g2.addColorStop(0, 'rgba(147, 51, 234, 0.1)');
-      g2.addColorStop(0.5, 'rgba(126, 34, 206, 0.03)');
-      g2.addColorStop(1, 'transparent');
-      ctx.fillStyle = g2;
-      ctx.fillRect(0, 0, width, height);
-
-      requestAnimationFrame(renderAurora);
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      const theme = isLight ? "light" : "dark";
+      localStorage.setItem("zephyr_theme", theme);
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
-    renderAurora();
 
-    // --- 2. Session & User State ---
+    initTheme();
+
+    // --- 3. Session & User State ---
     let transferMode = 'link';
     let selectedFiles = [];
     let userTier = 'free';
@@ -1090,7 +1226,7 @@
 
     if (currentUserId && navBtn) {
       navBtn.innerText = "Sign Out";
-      navBtn.className = "text-xs bg-white/10 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-4 py-2.5 rounded-xl font-bold border border-white/15 transition cursor-pointer";
+      navBtn.className = "text-xs bg-white/10 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-4 py-2 rounded-xl font-bold border border-white/15 transition cursor-pointer";
       navBtn.onclick = (e) => {
         e.preventDefault();
         localStorage.clear();
@@ -1105,20 +1241,20 @@
             document.getElementById("tierCapBadge").innerText = "Pro: 50 GB limit";
             const select = document.getElementById("expiryHours");
             select.innerHTML = `
-              <option value="1" class="bg-[#0c1020] text-white">Expire in 1 Hour</option>
-              <option value="24" class="bg-[#0c1020] text-white">Expire in 24 Hours</option>
-              <option value="72" class="bg-[#0c1020] text-white">Expire in 3 Days</option>
-              <option value="168" class="bg-[#0c1020] text-white">Expire in 7 Days</option>
-              <option value="336" class="bg-[#0c1020] text-white">Expire in 14 Days</option>
-              <option value="720" class="bg-[#0c1020] text-white">Expire in 30 Days</option>
-              <option value="0" selected class="bg-[#0c1020] text-white">Never (Store in Drive Vault)</option>
+              <option value="1" class="bg-[#0c1020]">Expire in 1 Hour</option>
+              <option value="24" class="bg-[#0c1020]">Expire in 24 Hours</option>
+              <option value="72" class="bg-[#0c1020]">Expire in 3 Days</option>
+              <option value="168" class="bg-[#0c1020]">Expire in 7 Days</option>
+              <option value="336" class="bg-[#0c1020]">Expire in 14 Days</option>
+              <option value="720" class="bg-[#0c1020]">Expire in 30 Days</option>
+              <option value="0" selected class="bg-[#0c1020]">Never (Store in Drive Vault)</option>
             `;
           }
         })
         .catch(() => {});
     }
 
-    // --- 3. Mode Toggle: Link vs Email ---
+    // --- 4. Mode Toggle: Link vs Email ---
     function switchTransferMode(mode) {
       transferMode = mode;
       const linkBtn = document.getElementById("modeLinkBtn");
@@ -1141,7 +1277,7 @@
       drawer.classList.toggle("hidden");
     }
 
-    // --- 4. File Pickers ---
+    // --- 5. File Pickers ---
     function handleFileSelectClick() {
       if (!currentUserId && parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10) >= 4) {
         document.getElementById("authRequiredModal").classList.remove("hidden");
@@ -1193,7 +1329,7 @@
 
       listEl.innerHTML = selectedFiles.map((file, idx) => `
         <div class="flex items-center justify-between text-xs bg-black/40 px-3 py-2 rounded-xl border border-white/10">
-          <span class="truncate max-w-xs text-slate-200 font-mono">${file.webkitRelativePath || file.name}</span>
+          <span class="truncate max-w-xs font-mono">${file.webkitRelativePath || file.name}</span>
           <button onclick="removeFileFromQueue(${idx})" class="text-slate-400 hover:text-rose-400 ml-2 cursor-pointer font-black">✕</button>
         </div>
       `).join('');
@@ -1207,7 +1343,7 @@
     document.getElementById("fileInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
     document.getElementById("folderInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
 
-    // --- 5. Transfer Execution ---
+    // --- 6. Transfer Execution ---
     async function initiateTransfer() {
       if (!currentUserId && parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10) >= 4) {
         document.getElementById("authRequiredModal").classList.remove("hidden");
@@ -1326,7 +1462,7 @@
       }
     }
 
-    // --- 6. Helper Functions ---
+    // --- 7. Helper Functions ---
     function copyResultLink() {
       const input = document.getElementById("shareUrlInput");
       navigator.clipboard.writeText(input.value);
