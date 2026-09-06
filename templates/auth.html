@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr | Access Portal</title>
+
+  <!-- Supersonic Monogram Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -10,28 +15,30 @@
   <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative">
     <div class="text-center mb-6">
       
-      <!-- *** ZEPHYR LOGO UPDATE (Option 4) *** -->
-      <!-- New integrated container for the dynamic Wing Z mark, replacing the old V icon -->
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#080a16] p-2.5 mb-3 border border-white/5 shadow-inner shadow-indigo-500/10">
-        <!-- Optimized SVG for Option 4 -->
-        <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+      <!-- Supersonic Monogram Logo -->
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#080a16] p-2 mb-3 border border-white/10 shadow-inner shadow-indigo-500/10">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.55)]">
           <defs>
-            <!-- Define the Sapphire to Violet Gradient from Option 4 -->
-            <linearGradient id="zephyr-grad-auth" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38bdf8" /> <!-- Sapphire -->
-              <stop offset="35%" stop-color="#06b6d4" /> <!-- Cyan -->
-              <stop offset="70%" stop-color="#a855f7" /> <!-- Violet -->
-              <stop offset="100%" stop-color="#4c1d95" /> <!-- Deep Violet Core -->
+            <linearGradient id="authRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="60%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#4338ca"/>
+            </linearGradient>
+            <linearGradient id="authRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#c084fc"/>
+              <stop offset="50%" stop-color="#818cf8"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+            <linearGradient id="authGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
             </linearGradient>
           </defs>
-          
-          <!-- Crystalline Geometry for the Aerodynamic Wing Z -->
-          <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-auth)" fill-opacity="0.9"/>
-          <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-auth)" fill-opacity="0.9"/>
-          <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-auth)" fill-opacity="0.9"/>
-          
-          <!-- Subtle White Inlay for the Z Flow -->
-          <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#authRibbonCyan)"/>
+          <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#authGlassSheen)"/>
+          <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#authRibbonViolet)"/>
+          <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#authRibbonCyan)"/>
+          <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#authGlassSheen)"/>
         </svg>
       </div>
       
@@ -39,7 +46,7 @@
       <p class="text-xs text-slate-400 mt-1">Manage private vaults, monitor views, and upgrade storage</p>
     </div>
 
-    <!-- Login / Sign Up Form (Unchanged) -->
+    <!-- Login / Sign Up Form -->
     <div id="authFormSection" class="space-y-4">
       <div>
         <label class="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
@@ -65,7 +72,7 @@
       </div>
     </div>
 
-    <!-- Forgot Password View (Unchanged) -->
+    <!-- Forgot Password View -->
     <div id="forgotSection" class="space-y-4 hidden">
       <p class="text-xs text-slate-400">Enter your email address and we'll send you a password reset link.</p>
       <div>
@@ -86,7 +93,7 @@
       </div>
     </div>
 
-    <!-- Set New Password View (Unchanged) -->
+    <!-- Set New Password View -->
     <div id="newPasswordSection" class="space-y-4 hidden">
       <p class="text-xs text-slate-400">Create a new secure password for your account.</p>
       <div>
@@ -109,7 +116,6 @@
 
     let isSignUp = false;
 
-    // Recovery flow detection (Unchanged)
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash;
       if (hash.includes('type=recovery')) {
@@ -120,7 +126,6 @@
       }
     });
 
-    // JavaScript logic (Unchanged)
     function toggleMode() {
       isSignUp = !isSignUp;
       document.getElementById('formTitle').innerText = isSignUp ? "Create Your Vault Account" : "Sign In to Zephyr";

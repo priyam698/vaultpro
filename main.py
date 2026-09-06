@@ -9,7 +9,7 @@ import boto3
 from botocore.config import Config
 from pydantic import BaseModel
 from fastapi import FastAPI, Request, HTTPException, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -20,8 +20,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
+# Supersonic Monogram SVG Asset
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+
 # Zephyr API Engine
-app = FastAPI(title="Zephyr Drive & Transfer API", version="2.0.0")
+app = FastAPI(
+    title="Zephyr Drive & Transfer API",
+    version="2.0.0",
+    swagger_favicon_url="/favicon.ico"
+)
 
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -66,6 +73,11 @@ s3_client = boto3.client(
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
+
+# ----------------- Brand Assets & Favicon -----------------
+@app.get("/favicon.ico", include_in_schema=False)
+async def site_favicon():
+    return Response(content=SUPERSONIC_FAVICON_SVG, media_type="image/svg+xml")
 
 # ----------------- UI Pages -----------------
 @app.get("/", response_class=HTMLResponse)
@@ -206,9 +218,6 @@ async def get_sign_doc(doc_id: str, download: Optional[str] = None):
 
     return {"url": url, "metadata": meta}
 
-
-from fastapi.responses import Response
-
 @app.get("/api/sign/file/{doc_id}")
 async def get_sign_file_stream(doc_id: str):
     prefix = f"sign_docs/{doc_id}/"
@@ -228,6 +237,7 @@ async def get_sign_file_stream(doc_id: str):
         media_type="application/pdf",
         headers={"Content-Disposition": "inline; filename=document.pdf"}
     )
+
 @app.post("/api/sign/complete/{doc_id}")
 async def complete_signing(doc_id: str, request: Request):
     body = await request.body()
