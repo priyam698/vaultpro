@@ -182,40 +182,23 @@
       <!-- Zephyr Wing Z Brand Logo -->
       <a href="/" class="flex items-center gap-3">
   <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
-    <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full scale-110 drop-shadow-lg">
-      <defs>
-        <linearGradient id="c1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2dd4bf"/><stop offset="100%" stop-color="#0284c7"/></linearGradient>
-        <linearGradient id="c2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#1e40af"/></linearGradient>
-        <linearGradient id="c3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient>
-        <linearGradient id="c4" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#1e3a8a"/></linearGradient>
-      </defs>
-      
-      <!-- Top Fin Section -->
-      <polygon points="180,50 260,160 210,190" fill="url(#c1)" stroke="#38bdf8" stroke-width="1"/>
-      <polygon points="180,50 210,190 150,180" fill="url(#c2)" stroke="#22d3ee" stroke-width="1"/>
-      <polygon points="260,160 360,260 210,190" fill="url(#c2)" stroke="#0ea5e9" stroke-width="1"/>
-      <polygon points="260,160 360,260 310,180" fill="url(#c3)" stroke="#c084fc" stroke-width="1"/>
-      <polygon points="150,180 210,190 170,290" fill="url(#c1)" stroke="#38bdf8" stroke-width="1"/>
-
-      <!-- Mid Section -->
-      <polygon points="150,180 170,290 100,380" fill="url(#c4)" stroke="#1d4ed8" stroke-width="1"/>
-      <polygon points="170,290 250,280 220,340" fill="url(#c2)" stroke="#0ea5e9" stroke-width="1"/>
-      <polygon points="170,290 100,380 220,340" fill="url(#c4)" stroke="#1e40af" stroke-width="1"/>
-      <polygon points="210,190 360,260 250,280" fill="url(#c2)" stroke="#a855f7" stroke-width="1"/>
-      <polygon points="250,280 360,260 330,330" fill="url(#c3)" stroke="#9333ea" stroke-width="1"/>
-
-      <!-- Center Z Cutout Area -->
-      <polygon points="220,340 330,330 280,380" fill="url(#c3)" stroke="#7e22ce" stroke-width="1"/>
-      <polygon points="220,340 280,380 160,410" fill="url(#c4)" stroke="#1e3a8a" stroke-width="1"/>
-      <polygon points="280,380 400,420 330,400" fill="url(#c3)" stroke="#a855f7" stroke-width="1"/>
-      <polygon points="280,380 330,400 250,420" fill="url(#c3)" stroke="#6b21a8" stroke-width="1"/>
-      
-      <!-- Base Anchors -->
-      <polygon points="100,380 160,410 80,440" fill="url(#c4)" stroke="#1e40af" stroke-width="1"/>
-      <polygon points="160,410 280,380 230,450" fill="url(#c4)" stroke="#1d4ed8" stroke-width="1"/>
-      <polygon points="160,410 230,450 80,440" fill="url(#c4)" stroke="#1d4ed8" stroke-width="1"/>
-      <polygon points="280,380 400,420 230,450" fill="url(#c4)" stroke="#1e3a8a" stroke-width="1"/>
-    </svg>
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-md">
+  <defs>
+    <linearGradient id="aeroZ" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+  <!-- Top Streamline -->
+  <path d="M 18,28 C 42,24 72,24 86,28 C 68,36 44,38 24,38 Z" fill="url(#aeroZ)"/>
+  <!-- Diagonal Wind Slash -->
+  <path d="M 78,34 L 34,70 L 48,70 L 84,34 Z" fill="url(#aeroZ)" opacity="0.85"/>
+  <!-- Central Fast Cut -->
+  <path d="M 64,46 L 28,74 L 38,74 L 72,46 Z" fill="#38bdf8"/>
+  <!-- Bottom Streamline -->
+  <path d="M 14,72 C 34,72 62,70 82,76 C 58,80 30,82 14,76 Z" fill="url(#aeroZ)"/>
+</svg>
   </div>
   <span class="font-bold text-lg text-white">Zephyr</span>
 </a>
@@ -1135,4 +1118,70 @@
         };
 
         xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.s
+          if (xhr.status >= 200 && xhr.status < 300) {
+            progressStatus.innerText = "Vault encrypted & active!";
+            progressBar.style.width = "100%";
+            progressPercent.innerText = "100%";
+
+            if (!currentUserId) {
+              const current = parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10);
+              localStorage.setItem("vp_guest_uploads", (current + 1).toString());
+            }
+
+            const shareUrl = `${window.location.origin}/share/${data.share_id}`;
+            document.getElementById("shareUrlInput").value = shareUrl;
+            resultBox.classList.remove("hidden");
+            transferBtn.disabled = false;
+
+            if (transferMode === 'email') {
+              alert(`Transfer link generated and scheduled for delivery to ${document.getElementById("emailTo").value}!`);
+            }
+          } else {
+            alert("Upload failed. Server returned status: " + xhr.status);
+            progressBox.classList.add("hidden");
+            transferBtn.disabled = false;
+          }
+        };
+
+        xhr.onerror = () => {
+          alert("Network failure during transfer upload.");
+          progressBox.classList.add("hidden");
+          transferBtn.disabled = false;
+        };
+
+        xhr.send(primaryFile);
+
+      } catch(err) {
+        alert(err.message);
+        progressBox.classList.add("hidden");
+        transferBtn.disabled = false;
+      }
+    }
+
+    // --- 6. Clipboard & Modal Helpers ---
+    function copyResultLink() {
+      const input = document.getElementById("shareUrlInput");
+      navigator.clipboard.writeText(input.value);
+      alert("Vault transfer link copied to clipboard!");
+    }
+
+    function openRequestModal() { document.getElementById("requestModal").classList.remove("hidden"); }
+    function closeRequestModal() { document.getElementById("requestModal").classList.add("hidden"); }
+    function closeAuthModal() { document.getElementById("authRequiredModal").classList.add("hidden"); }
+    function closeLimitModal() { document.getElementById("limitModal").classList.add("hidden"); }
+
+    function generateClientRequestLink() {
+      const proj = document.getElementById("reqProjectTitle").value.trim() || "Client-Deposit";
+      const randomCode = Math.random().toString(36).substring(2, 9);
+      const reqUrl = `${window.location.origin}/#dropZone?request=${randomCode}&title=${encodeURIComponent(proj)}`;
+      document.getElementById("reqLinkInput").value = reqUrl;
+      document.getElementById("reqResultBox").classList.remove("hidden");
+    }
+
+    function copyReqLink() {
+      navigator.clipboard.writeText(document.getElementById("reqLinkInput").value);
+      alert("Client deposit portal link copied!");
+    }
+  </script>
+</body>
+</html>
