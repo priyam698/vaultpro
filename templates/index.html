@@ -15,7 +15,7 @@
   
   <style>
     /* ========================================================================= */
-    /* THEME SYSTEM (DARK DEFAULT + LIGHT ALPINE MODE)                          */
+    /* THEME SYSTEM & BACKGROUND ENGINE                                          */
     /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -63,33 +63,49 @@
       transition: all 0.3s ease;
     }
 
-    /* LIGHT THEME OVERRIDES */
+    /* ========================================================================= */
+    /* BALANCED DAYLIGHT THEME (Darker, non-washed alpine atmosphere)            */
+    /* ========================================================================= */
     body.light-theme {
-      background-color: #f3f5fb;
+      background-color: #cbd5e1;
       color: #090d16;
     }
 
+    /* Subdued, richer day mountain background without over-whitening */
     body.light-theme .site-mountain-backdrop {
       background-image: 
-        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.1) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(243, 245, 251, 0.82) 0%, rgba(243, 245, 251, 0.68) 45%, rgba(235, 240, 250, 0.92) 100%),
+        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(203, 213, 225, 0.45) 0%, rgba(180, 195, 215, 0.35) 45%, rgba(203, 213, 225, 0.65) 100%),
         url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
     }
 
+    /* Transparent Day Header (Eliminates white upper banner bar) */
     body.light-theme header {
-      background-color: rgba(255, 255, 255, 0.88) !important;
-      border-color: #e2e8f0 !important;
+      background: transparent !important;
+      border-color: transparent !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
 
     body.light-theme header a,
     body.light-theme header span {
+      color: #090d16 !important;
+    }
+
+    /* High-contrast floating pill buttons in day mode */
+    body.light-theme #worldLangSelect,
+    body.light-theme #themeToggleBtn,
+    body.light-theme header .header-pill {
+      background: rgba(255, 255, 255, 0.82) !important;
+      border-color: rgba(148, 163, 184, 0.6) !important;
       color: #0f172a !important;
+      box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
     }
 
     body.light-theme .obsidian-panel {
       background: rgba(255, 255, 255, 0.92);
-      border-color: #e2e8f0;
-      box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.02);
+      border-color: rgba(203, 213, 225, 0.9);
+      box-shadow: 0 24px 60px -15px rgba(15, 23, 42, 0.16), 0 0 1px 1px rgba(0, 0, 0, 0.02);
       color: #090d16;
     }
 
@@ -107,13 +123,13 @@
 
     body.light-theme .obsidian-panel p,
     body.light-theme p {
-      color: #334155 !important;
+      color: #1e293b !important;
     }
 
     body.light-theme .glass-chip {
       background: rgba(255, 255, 255, 0.92);
-      border-color: #e2e8f0;
-      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+      border-color: rgba(203, 213, 225, 0.9);
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12);
       color: #090d16;
     }
 
@@ -125,15 +141,15 @@
     body.light-theme textarea,
     body.light-theme select {
       background-color: #ffffff !important;
-      border-color: #cbd5e1 !important;
+      border-color: #94a3b8 !important;
       color: #090d16 !important;
     }
 
     body.light-theme .feature-badge {
-      background-color: #ffffff !important;
-      border-color: #e2e8f0 !important;
+      background-color: rgba(255, 255, 255, 0.92) !important;
+      border-color: rgba(203, 213, 225, 0.9) !important;
       color: #090d16 !important;
-      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 4px 10px -2px rgba(15, 23, 42, 0.06);
     }
 
     body.light-theme .feature-badge span {
@@ -141,9 +157,9 @@
     }
 
     body.light-theme footer {
-      background-color: rgba(255, 255, 255, 0.9) !important;
-      border-color: #e2e8f0 !important;
-      color: #475569 !important;
+      background-color: rgba(241, 245, 249, 0.85) !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      color: #334155 !important;
     }
 
     /* Floating Badges */
@@ -164,7 +180,6 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
 
-    /* Hide Google Translate top banner artifact */
     .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
     body { top: 0px !important; }
   </style>
@@ -259,13 +274,13 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-[#04060e]/75 backdrop-blur-xl sticky top-0">
+  <!-- Transparent Header (No Solid Upper Panel) -->
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
-      <!-- Logo -->
+      <!-- Brand Logo -->
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/90 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
+        <div class="w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -293,12 +308,12 @@
         <span class="font-black text-2xl text-white tracking-tight">Zephyr</span>
       </a>
 
-      <!-- Navigation, Language Selector, Theme Switcher & Auth -->
+      <!-- Controls: Language Filter, Theme Switcher & Auth -->
       <div class="flex items-center gap-2.5 sm:gap-4">
         <a href="#control" class="text-xs text-slate-300 hover:text-white font-bold transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs text-slate-300 hover:text-white font-bold transition hidden sm:inline-block">Pricing</a>
         
-        <!-- 25 Major World Languages Selector -->
+        <!-- Filtered Major World Languages Selector (Gujarati, Marathi, Bengali, Punjabi Removed) -->
         <div class="relative flex items-center">
           <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
           <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-slate-200 focus:outline-none transition cursor-pointer appearance-none">
@@ -312,13 +327,10 @@
             <option value="pt" class="bg-[#0b1022] text-white">Português (Portuguese)</option>
             <option value="ru" class="bg-[#0b1022] text-white">Русский (Russian)</option>
             <option value="ja" class="bg-[#0b1022] text-white">日本語 (Japanese)</option>
-            <option value="pa" class="bg-[#0b1022] text-white">ਪੰਜਾਬੀ (Punjabi)</option>
             <option value="ko" class="bg-[#0b1022] text-white">한국어 (Korean)</option>
             <option value="vi" class="bg-[#0b1022] text-white">Tiếng Việt (Vietnamese)</option>
             <option value="te" class="bg-[#0b1022] text-white">తెలుగు (Telugu)</option>
-            <option value="mr" class="bg-[#0b1022] text-white">मराठी (Marathi)</option>
             <option value="ta" class="bg-[#0b1022] text-white">தமிழ் (Tamil)</option>
-            <option value="gu" class="bg-[#0b1022] text-white">ગુજરાતી (Gujarati)</option>
             <option value="tr" class="bg-[#0b1022] text-white">Türkçe (Turkish)</option>
             <option value="it" class="bg-[#0b1022] text-white">Italiano (Italian)</option>
             <option value="pl" class="bg-[#0b1022] text-white">Polski (Polish)</option>
@@ -326,21 +338,20 @@
             <option value="nl" class="bg-[#0b1022] text-white">Nederlands (Dutch)</option>
             <option value="th" class="bg-[#0b1022] text-white">ภาษาไทย (Thai)</option>
             <option value="id" class="bg-[#0b1022] text-white">Bahasa Indonesia</option>
-            <option value="bn" class="bg-[#0b1022] text-white">বাংলা (Bengali)</option>
           </select>
         </div>
 
-        <!-- Light / Dark Theme Switcher Button -->
+        <!-- Light / Dark Theme Toggle Button -->
         <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-sm font-bold text-amber-300 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
 
-        <button onclick="openRequestModal()" class="text-xs text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-2 rounded-xl font-bold transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
+        <button onclick="openRequestModal()" class="header-pill text-xs text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-2 rounded-xl font-bold transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           <span>Request</span>
         </button>
 
-        <a href="/dashboard" class="text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] px-3 py-2 rounded-xl font-bold border border-white/10 transition flex items-center gap-1.5">
+        <a href="/dashboard" class="header-pill text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] px-3.5 py-2 rounded-xl font-bold border border-white/10 transition flex items-center gap-1.5">
           <span>Drive</span>
           <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">5 GB</span>
         </a>
@@ -357,7 +368,7 @@
   <!-- ========================================================================= -->
   <main class="relative z-20 max-w-7xl mx-auto px-6 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
-    <!-- Left Column: Copy & Value Proposition -->
+    <!-- Left Column: Headline & Details -->
     <div class="lg:col-span-6 space-y-6">
       
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-300 text-xs font-bold shadow-lg backdrop-blur-md">
@@ -400,10 +411,10 @@
       </div>
     </div>
 
-    <!-- Right Column: Obsidian Transfer Card with Floating Photography Chips -->
+    <!-- Right Column: Glass Card with Floating Photography Badges -->
     <div class="lg:col-span-6 relative">
       
-      <!-- Floating Photo Badge 1: Mountain Panoramic RAW -->
+      <!-- Floating Photo Badge 1 -->
       <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-photo-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=120&h=120&q=80" alt="Mountain RAW" class="w-11 h-11 rounded-xl object-cover border border-white/15">
         <div class="pr-3">
@@ -415,7 +426,7 @@
         </div>
       </div>
 
-      <!-- Floating Photo Badge 2: Drone Video Cut -->
+      <!-- Floating Photo Badge 2 -->
       <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-photo-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-white/15">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=120&h=120&q=80" alt="Ridge Cut" class="w-full h-full object-cover">
@@ -430,7 +441,7 @@
         </div>
       </div>
 
-      <!-- Main Obsidian Panel -->
+      <!-- Main Obsidian Transfer Card -->
       <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10">
         
         <input type="file" id="fileInput" multiple class="hidden">
@@ -1148,14 +1159,14 @@
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- SCRIPTS: TRANSLATION ENGINE, THEME SWITCHER & CORE PIPELINE               -->
+  <!-- SCRIPTS: TRANSLATION ENGINE & THEME TOGGLE                                -->
   <!-- ========================================================================= -->
   <script type="text/javascript">
-    // --- 1. Google Translate Core Engine ---
+    // --- 1. Google Translate Init (Filtered Languages) ---
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
         pageLanguage: 'en',
-        includedLanguages: 'en,es,fr,de,zh-CN,hi,ar,pt,ru,ja,pa,ko,vi,te,mr,ta,gu,tr,it,pl,uk,nl,th,id,bn',
+        includedLanguages: 'en,es,fr,de,zh-CN,hi,ar,pt,ru,ja,ko,vi,te,ta,tr,it,pl,uk,nl,th,id',
         autoDisplay: false
       }, 'google_translate_element');
     }
@@ -1167,7 +1178,6 @@
       window.location.reload();
     }
 
-    // Set initial select dropdown value from cookie / storage
     window.addEventListener("DOMContentLoaded", () => {
       const savedLang = localStorage.getItem("zephyr_lang");
       if (savedLang && document.getElementById("worldLangSelect")) {
