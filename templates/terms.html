@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms & Conditions | Privora</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
+  <title>Terms & Conditions | Zephyr</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 30L75 30L25 70L75 70' stroke='%2338bdf8' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,20 +25,26 @@
   <!-- Navbar -->
   <header class="border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0 z-20">
     <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3">
-        <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
-            <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
-            <polygon points="17,50 33.5,68 33.5,35" fill="#4338ca" stroke="#090d1a" stroke-width="1" />
-            <polygon points="17,50 33.5,35 33.5,12.5 17,12.5" fill="#6366f1" stroke="#090d1a" stroke-width="1" />
-            <polygon points="33.5,12.5 66.5,12.5 51.5,35" fill="#8b5cf6" stroke="#090d1a" stroke-width="1" />
-            <polygon points="66.5,12.5 83,36.5 51.5,35" fill="#a855f7" stroke="#090d1a" stroke-width="1" />
-            <polygon points="83,36.5 63.5,57.5 51.5,35" fill="#06b6d4" stroke="#090d1a" stroke-width="1" />
-            <polygon points="63.5,57.5 33.5,35 51.5,35" fill="#2563eb" stroke="#090d1a" stroke-width="1" />
-            <polygon points="33.5,35 63.5,57.5 33.5,68" fill="#1d4ed8" stroke="#090d1a" stroke-width="1" />
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-[#080a16] border border-white/5 p-2 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:shadow-indigo-500/30 group-hover:border-white/10 transition duration-300">
+          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <defs>
+              <linearGradient id="zephyr-grad-terms" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="35%" stop-color="#06b6d4" />
+                <stop offset="70%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#4c1d95" />
+              </linearGradient>
+            </defs>
+            <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-terms)" fill-opacity="0.9"/>
+            <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-terms)" fill-opacity="0.9"/>
+            <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-terms)" fill-opacity="0.9"/>
+            <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <span class="font-bold text-lg text-white">Privora</span>
+        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent group-hover:to-[#4c1d95] transition duration-300">
+          Zephyr
+        </span>
       </a>
       <a href="/" class="text-xs text-slate-400 hover:text-white transition">← Back to App</a>
     </div>
@@ -54,13 +60,13 @@
       </div>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">1. Service Scope: Transfer Pipeline vs. Privora Drive</h2>
+        <h2 class="text-base font-bold text-white">1. Service Scope: Transfer Pipeline vs. Zephyr Drive</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Privora operates two distinct storage models:
+          Zephyr operates two distinct storage models:
         </p>
         <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
           <li><strong>Ephemeral Transfer Pipeline:</strong> Disposable, time-limited file handoffs subject to auto-expiration (1h–72h) or instant "Burn-on-Read" shredding.</li>
-          <li><strong>Privora Drive:</strong> Encrypted cloud storage preserved indefinitely in the user's private vault until intentionally deleted.</li>
+          <li><strong>Zephyr Drive:</strong> Encrypted cloud storage preserved indefinitely in the user's private vault until intentionally deleted.</li>
         </ul>
       </section>
 
@@ -70,8 +76,8 @@
           Each account is bound to designated storage ceilings:
         </p>
         <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
-          <li><strong>Free Tier:</strong> Includes <strong>5.00 GB</strong> of permanent Privora Drive storage and up to 2.00 GB per single ephemeral transfer.</li>
-          <li><strong>Privora Pro ($4/mo):</strong> Expands capacity to <strong>200.00 GB</strong> of permanent Privora Drive storage and up to 50.00 GB per single transfer.</li>
+          <li><strong>Free Tier:</strong> Includes <strong>5.00 GB</strong> of permanent Zephyr Drive storage and up to 2.00 GB per single ephemeral transfer.</li>
+          <li><strong>Zephyr Pro ($4/mo):</strong> Expands capacity to <strong>200.00 GB</strong> of permanent Zephyr Drive storage and up to 50.00 GB per single transfer.</li>
         </ul>
         <p class="text-xs text-slate-400 leading-relaxed mt-2">
           Attempts to exceed assigned quotas will be rejected at the API boundary until storage is freed or an upgraded subscription is activated.
@@ -80,7 +86,7 @@
 
       <section class="space-y-3">
         <h2 class="text-base font-bold text-white">3. Acceptable Use Policy</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">You agree not to store or distribute through Privora or Privora Drive:</p>
+        <p class="text-xs text-slate-400 leading-relaxed">You agree not to store or distribute through Zephyr or Zephyr Drive:</p>
         <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
           <li>Unauthorized copyrighted media, pirated cinema, or software cracking archives (DMCA violations).</li>
           <li>Malware, exploits, viruses, ransomware, or malicious bot payloads.</li>
@@ -92,14 +98,14 @@
       <section class="space-y-3">
         <h2 class="text-base font-bold text-white">4. Deletion & Data Retention Disclaimers</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          When a user initiates the "Delete" action on Privora Drive, the file object is immediately and irreversibly shredded from Cloudflare R2 edge servers. Privora does not retain secondary backup copies of deleted files. Users are solely responsible for maintaining local copies of critical documents.
+          When a user initiates the "Delete" action on Zephyr Drive, the file object is immediately and irreversibly shredded from Cloudflare R2 edge servers. Zephyr does not retain secondary backup copies of deleted files. Users are solely responsible for maintaining local copies of critical documents.
         </p>
       </section>
 
       <section class="space-y-3">
         <h2 class="text-base font-bold text-white">5. Subscriptions & Billing</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Privora Pro is billed monthly at <strong>$4.00 USD</strong>. Users may cancel renewals anytime via dashboard settings. If a Pro account downgrades to Free while holding in excess of 5 GB of data, upload privileges are paused until total storage is brought within the 5 GB free threshold.
+          Zephyr Pro is billed monthly at <strong>$4.00 USD</strong>. Users may cancel renewals anytime via dashboard settings. If a Pro account downgrades to Free while holding in excess of 5 GB of data, upload privileges are paused until total storage is brought within the 5 GB free threshold.
         </p>
       </section>
     </div>
@@ -107,7 +113,7 @@
 
   <!-- Footer -->
   <footer class="border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
-    © 2026 Privora Systems. All rights reserved.
+    © 2026 Zephyr Systems. All rights reserved.
   </footer>
 
 </body>

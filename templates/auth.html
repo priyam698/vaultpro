@@ -2,19 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Privora | Access Portal</title>
+  <title>Zephyr | Access Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative">
     <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 font-bold text-white text-xl mb-3 shadow-lg shadow-indigo-500/20">V</div>
-      <h2 class="text-2xl font-bold" id="formTitle">Sign In to Privora</h2>
+      
+      <!-- *** ZEPHYR LOGO UPDATE (Option 4) *** -->
+      <!-- New integrated container for the dynamic Wing Z mark, replacing the old V icon -->
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#080a16] p-2.5 mb-3 border border-white/5 shadow-inner shadow-indigo-500/10">
+        <!-- Optimized SVG for Option 4 -->
+        <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <defs>
+            <!-- Define the Sapphire to Violet Gradient from Option 4 -->
+            <linearGradient id="zephyr-grad-auth" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" /> <!-- Sapphire -->
+              <stop offset="35%" stop-color="#06b6d4" /> <!-- Cyan -->
+              <stop offset="70%" stop-color="#a855f7" /> <!-- Violet -->
+              <stop offset="100%" stop-color="#4c1d95" /> <!-- Deep Violet Core -->
+            </linearGradient>
+          </defs>
+          
+          <!-- Crystalline Geometry for the Aerodynamic Wing Z -->
+          <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-auth)" fill-opacity="0.9"/>
+          <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-auth)" fill-opacity="0.9"/>
+          <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-auth)" fill-opacity="0.9"/>
+          
+          <!-- Subtle White Inlay for the Z Flow -->
+          <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      
+      <h2 class="text-2xl font-bold" id="formTitle">Sign In to Zephyr</h2>
       <p class="text-xs text-slate-400 mt-1">Manage private vaults, monitor views, and upgrade storage</p>
     </div>
 
-    <!-- Login / Sign Up Form -->
+    <!-- Login / Sign Up Form (Unchanged) -->
     <div id="authFormSection" class="space-y-4">
       <div>
         <label class="text-xs font-semibold text-slate-400 block mb-1">Email Address</label>
@@ -40,7 +65,7 @@
       </div>
     </div>
 
-    <!-- Forgot Password View -->
+    <!-- Forgot Password View (Unchanged) -->
     <div id="forgotSection" class="space-y-4 hidden">
       <p class="text-xs text-slate-400">Enter your email address and we'll send you a password reset link.</p>
       <div>
@@ -61,7 +86,7 @@
       </div>
     </div>
 
-    <!-- Set New Password View (Triggered via email link) -->
+    <!-- Set New Password View (Unchanged) -->
     <div id="newPasswordSection" class="space-y-4 hidden">
       <p class="text-xs text-slate-400">Create a new secure password for your account.</p>
       <div>
@@ -84,7 +109,7 @@
 
     let isSignUp = false;
 
-    // Detect recovery flow from reset password email redirect
+    // Recovery flow detection (Unchanged)
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash;
       if (hash.includes('type=recovery')) {
@@ -95,9 +120,10 @@
       }
     });
 
+    // JavaScript logic (Unchanged)
     function toggleMode() {
       isSignUp = !isSignUp;
-      document.getElementById('formTitle').innerText = isSignUp ? "Create Your Vault Account" : "Sign In to Privora";
+      document.getElementById('formTitle').innerText = isSignUp ? "Create Your Vault Account" : "Sign In to Zephyr";
       document.getElementById('authBtn').innerText = isSignUp ? "Create Account" : "Sign In";
       document.getElementById('toggleText').innerText = isSignUp ? "Already have an account?" : "Don't have an account?";
       document.getElementById('toggleBtn').innerText = isSignUp ? "Sign In" : "Create Account";
@@ -106,7 +132,7 @@
     }
 
     function toggleForgotView(showForgot) {
-      document.getElementById('formTitle').innerText = showForgot ? "Reset Your Password" : (isSignUp ? "Create Your Vault Account" : "Sign In to Privora");
+      document.getElementById('formTitle').innerText = showForgot ? "Reset Your Password" : (isSignUp ? "Create Your Vault Account" : "Sign In to Zephyr");
       document.getElementById('authFormSection').classList.toggle('hidden', showForgot);
       document.getElementById('forgotSection').classList.toggle('hidden', !showForgot);
       if (showForgot) {

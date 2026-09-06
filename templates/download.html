@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download {{ filename }} | Privora</title>
+  <title>Download {{ filename }} | Zephyr</title>
+  
+  <!-- *** FAVICON UPDATE (Simplified mark) *** -->
+  <!-- Updated with a simplified, non-gradient Sapphire version of the new Aerodynamic Wing Z shape for high clarity -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 30L75 30L25 70L75 70' stroke='%2338bdf8' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,14 +56,34 @@
   <header class="relative z-20 border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/20">
-          <div class="w-full h-full bg-[#050711] rounded-[11px] flex items-center justify-center font-black text-sm text-white">
-            V
-          </div>
+        
+        <!-- *** LOGO UPDATE (Option 4) *** -->
+        <!-- Subtly refined container with a matching inner glow for the dynamic mark -->
+        <div class="w-10 h-10 rounded-xl bg-[#080a16] border border-white/5 p-2 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:shadow-indigo-500/30 group-hover:border-white/10 transition duration-300">
+          <!-- Crystalline Geometry for the Zmark (Option 4) -->
+          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <defs>
+              <!-- Define the Sapphire to Violet Gradient from Option 4 -->
+              <linearGradient id="zephyr-grad-opt4" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" /> <!-- Sapphire Top -->
+                <stop offset="35%" stop-color="#06b6d4" /> <!-- Cyan Mid -->
+                <stop offset="70%" stop-color="#a855f7" /> <!-- Violet Mid -->
+                <stop offset="100%" stop-color="#4c1d95" /> <!-- Deep Violet Core -->
+              </linearGradient>
+            </defs>
+            <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-opt4)" fill-opacity="0.9"/>
+            <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-opt4)" fill-opacity="0.9"/>
+            <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-opt4)" fill-opacity="0.9"/>
+            
+            <!-- Dynamic 'Z' Trace -->
+            <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
-        <span class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
-          Privora
-          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+        
+        <!-- *** BRAND TEXT UPDATE *** -->
+        <!-- Brand name 'Zephyr' now uses the matching sapphire-to-violet gradient and is bolder -->
+        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent group-hover:to-[#4c1d95] transition duration-300">
+          Zephyr
         </span>
       </a>
 
@@ -69,7 +94,7 @@
     </div>
   </header>
 
-  <!-- Download Portal Card -->
+  <!-- Download Portal Card (Unchanged) -->
   <main class="relative z-20 max-w-xl mx-auto px-6 py-12 flex-1 flex flex-col items-center justify-center text-center w-full">
     
     <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative">
@@ -119,16 +144,16 @@
     </div>
 
     <p class="mt-8 text-xs text-slate-500">
-      Need to send large files? <a href="/" class="text-indigo-400 hover:text-indigo-300 font-medium transition">Send up to 2 GB for free on Privora &rarr;</a>
+      Need to send large files? <a href="/" class="text-indigo-400 hover:text-indigo-300 font-medium transition">Send up to 2 GB for free on Zephyr &rarr;</a>
     </p>
 
   </main>
 
   <footer class="relative z-20 border-t border-white/[0.06] bg-[#030408]/50 py-5 text-center text-xs text-slate-500">
-    © 2026 Privora Systems. Zero-knowledge edge transfers.
+    © 2026 Zephyr Systems. Zero-knowledge edge transfers.
   </footer>
 
-  <!-- Ambient Fluid Canvas Engine -->
+  <!-- Ambient Fluid Canvas Engine (Unchanged) -->
   <script>
     const canvas = document.getElementById('ambientCanvas');
     const ctx = canvas.getContext('2d');
@@ -182,7 +207,7 @@
     renderAurora();
   </script>
 
-  <!-- Download & Passcode Handling -->
+  <!-- Download & Passcode Handling (Unchanged) -->
   <script>
     async function handleDownload() {
       const btn = document.getElementById("downloadBtn");

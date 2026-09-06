@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy | Privora</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='17,89 33.5,68 17,50' fill='%23312e81' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,68 33.5,35' fill='%234338ca' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='17,50 33.5,35 33.5,12.5 17,12.5' fill='%236366f1' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,12.5 66.5,12.5 51.5,35' fill='%238b5cf6' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='66.5,12.5 83,36.5 51.5,35' fill='%23a855f7' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='83,36.5 63.5,57.5 51.5,35' fill='%2306b6d4' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='63.5,57.5 33.5,35 51.5,35' fill='%232563eb' stroke='%23090d1a' stroke-width='1'/%3E%3Cpolygon points='33.5,35 63.5,57.5 33.5,68' fill='%231d4ed8' stroke='%23090d1a' stroke-width='1'/%3E%3C/svg%3E">
+  <title>Privacy Policy | Zephyr</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 30L75 30L25 70L75 70' stroke='%2338bdf8' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,20 +25,26 @@
   <!-- Navbar -->
   <header class="border-b border-white/[0.06] bg-[#030408]/40 backdrop-blur-xl sticky top-0 z-20">
     <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3">
-        <div class="w-9 h-9 p-1 rounded-xl bg-[#090d1a] border border-white/10 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
-            <polygon points="17,89 33.5,68 17,50" fill="#312e81" stroke="#090d1a" stroke-width="1" />
-            <polygon points="17,50 33.5,68 33.5,35" fill="#4338ca" stroke="#090d1a" stroke-width="1" />
-            <polygon points="17,50 33.5,35 33.5,12.5 17,12.5" fill="#6366f1" stroke="#090d1a" stroke-width="1" />
-            <polygon points="33.5,12.5 66.5,12.5 51.5,35" fill="#8b5cf6" stroke="#090d1a" stroke-width="1" />
-            <polygon points="66.5,12.5 83,36.5 51.5,35" fill="#a855f7" stroke="#090d1a" stroke-width="1" />
-            <polygon points="83,36.5 63.5,57.5 51.5,35" fill="#06b6d4" stroke="#090d1a" stroke-width="1" />
-            <polygon points="63.5,57.5 33.5,35 51.5,35" fill="#2563eb" stroke="#090d1a" stroke-width="1" />
-            <polygon points="33.5,35 63.5,57.5 33.5,68" fill="#1d4ed8" stroke="#090d1a" stroke-width="1" />
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-[#080a16] border border-white/5 p-2 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:shadow-indigo-500/30 group-hover:border-white/10 transition duration-300">
+          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <defs>
+              <linearGradient id="zephyr-grad-privacy" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="35%" stop-color="#06b6d4" />
+                <stop offset="70%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#4c1d95" />
+              </linearGradient>
+            </defs>
+            <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-privacy)" fill-opacity="0.9"/>
+            <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-privacy)" fill-opacity="0.9"/>
+            <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-privacy)" fill-opacity="0.9"/>
+            <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <span class="font-bold text-lg text-white">Privora</span>
+        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent group-hover:to-[#4c1d95] transition duration-300">
+          Zephyr
+        </span>
       </a>
       <a href="/" class="text-xs text-slate-400 hover:text-white transition">← Back to App</a>
     </div>
@@ -56,14 +62,14 @@
       <section class="space-y-3">
         <h2 class="text-base font-bold text-white">1. Zero-Knowledge Architecture</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Privora operates on zero-knowledge encryption principles. Files stored in Privora Drive or transferred through our ephemeral pipelines are isolated at the edge. Plaintext passcodes and client encryption keys are never stored on our database servers, preventing internal staff or third parties from reading your file contents.
+          Zephyr operates on zero-knowledge encryption principles. Files stored in Zephyr Drive or transferred through our ephemeral pipelines are isolated at the edge. Plaintext passcodes and client encryption keys are never stored on our database servers, preventing internal staff or third parties from reading your file contents.
         </p>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold text-white">2. Privora Drive Storage Handling</h2>
+        <h2 class="text-base font-bold text-white">2. Zephyr Drive Storage Handling</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          When uploading files to Privora Drive:
+          When uploading files to Zephyr Drive:
         </p>
         <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
           <li><strong>Storage Isolation:</strong> Objects are stored within dedicated, user-isolated prefixes in Cloudflare R2 edge object storage.</li>
@@ -82,7 +88,7 @@
 
       <section class="space-y-3">
         <h2 class="text-base font-bold text-white">4. Third-Party Infrastructure Sub-processors</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">Privora uses vetted infrastructure providers:</p>
+        <p class="text-xs text-slate-400 leading-relaxed">Zephyr uses vetted infrastructure providers:</p>
         <ul class="list-disc list-inside text-xs text-slate-400 space-y-1.5 pl-2">
           <li><strong>Cloudflare R2:</strong> Edge object storage with zero egress fees and AES-256 server-side encryption.</li>
           <li><strong>Supabase:</strong> Encrypted PostgreSQL user authentication and database management.</li>
@@ -93,7 +99,7 @@
       <section class="space-y-3">
         <h2 class="text-base font-bold text-white">5. Cookies & Analytics</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Privora does not use tracking cookies, analytics pixels, or ad networks. LocalStorage is used strictly to retain user session tokens and the complimentary 4-upload guest counter.
+          Zephyr does not use tracking cookies, analytics pixels, or ad networks. LocalStorage is used strictly to retain user session tokens and the complimentary 4-upload guest counter.
         </p>
       </section>
     </div>
@@ -101,7 +107,7 @@
 
   <!-- Footer -->
   <footer class="border-t border-white/[0.06] bg-[#030408]/50 py-6 text-center text-xs text-slate-500">
-    © 2026 Privora Systems. All rights reserved.
+    © 2026 Zephyr Systems. All rights reserved.
   </footer>
 
 </body>

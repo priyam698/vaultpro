@@ -20,7 +20,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-app = FastAPI(title="Privora Drive & Transfer API", version="2.0.0")
+# Zephyr API Engine
+app = FastAPI(title="Zephyr Drive & Transfer API", version="2.0.0")
 
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -175,7 +176,6 @@ async def get_sign_doc(doc_id: str, download: Optional[str] = None):
         except Exception:
             raise HTTPException(status_code=404, detail="Signed document not found or pending.")
 
-        # Presigned URL forces the browser to save the file
         url = s3_client.generate_presigned_url(
             "get_object",
             Params={
@@ -252,9 +252,9 @@ async def check_signing_status(doc_id: str):
         return {"status": "completed", "download_url": url}
     except Exception:
         return {"status": "pending"}
+
 @app.delete("/api/sign/request/{doc_id}")
 async def delete_signature_request(doc_id: str):
-    # 1. Clean up stored files in Cloudflare R2
     prefix = f"sign_docs/{doc_id}/"
     try:
         res = s3_client.list_objects_v2(Bucket=R2_BUCKET_NAME, Prefix=prefix)
@@ -267,7 +267,6 @@ async def delete_signature_request(doc_id: str):
     except Exception as e:
         print(f"R2 delete cleanup error: {e}")
 
-    # 2. Remove envelope record from PostgreSQL
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM signature_requests WHERE doc_id = %s", (doc_id,))
@@ -275,7 +274,8 @@ async def delete_signature_request(doc_id: str):
     conn.close()
 
     return {"status": "deleted", "doc_id": doc_id}
-# ----------------- Privora Drive Core API -----------------
+
+# ----------------- Zephyr Drive Core API -----------------
 @app.get("/api/drive/quota")
 async def get_drive_quota(user_id: str):
     conn = get_db()
@@ -410,7 +410,7 @@ async def delete_drive_file(file_id: str, user_id: str):
 
     return {"status": "deleted"}
 
-# ----------------- Preserved Ephemeral Transfers -----------------
+# ----------------- Ephemeral Transfers -----------------
 class CreateShareRequest(BaseModel):
     filename: str
     filesize_mb: float
