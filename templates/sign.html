@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Sign | Multi-Envelope E-Signature Studio & Dashboard</title>
   
-  <!-- Option 4 Aerodynamic Wing Z Simplified Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 30L75 30L25 70L75 70' stroke='%2338bdf8' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <!-- Supersonic Monogram Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
   
   <!-- Tailwind CSS Engine -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -275,7 +275,7 @@
         </div>
         <div>
           <label class="block text-[11px] font-semibold text-slate-300 mb-1">Recipient Email Address</label>
-          <input id="modalSignerEmail" type="email" placeholder="priyam@example.com" value="priyam@example.com"
+          <input id="modalSignerEmail" type="email" placeholder="priyam@example.com" value="priyam@example.com" 
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
         <div class="p-3.5 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl text-xs text-indigo-300 leading-relaxed">
@@ -338,28 +338,37 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- TOP APP BAR WITH STUDIO & DASHBOARD TABS                                 -->
+  <!-- TOP APP BAR WITH SUPERSONIC MONOGRAM BRANDING                             -->
   <!-- ========================================================================= -->
   <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print">
     <div class="flex items-center gap-6">
       
-      <!-- Zephyr Wing Z Brand Logo -->
+      <!-- Zephyr Supersonic Monogram Logo -->
       <a href="/" class="flex items-center gap-2.5 text-slate-400 hover:text-white transition group">
         <span class="text-xs font-semibold text-slate-400 group-hover:text-white">✕</span>
-        <div class="w-7 h-7 rounded-lg bg-[#080a16] border border-white/10 p-1 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-white/20 transition">
-          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+        <div class="w-8 h-8 rounded-lg bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-white/20 transition">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
-              <linearGradient id="zephyr-grad-sign" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8" />
-                <stop offset="35%" stop-color="#06b6d4" />
-                <stop offset="70%" stop-color="#a855f7" />
-                <stop offset="100%" stop-color="#4c1d95" />
+              <linearGradient id="headerRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="60%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#4338ca"/>
+              </linearGradient>
+              <linearGradient id="headerRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c084fc"/>
+                <stop offset="50%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="headerGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
               </linearGradient>
             </defs>
-            <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-sign)" fill-opacity="0.9"/>
-            <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-sign)" fill-opacity="0.9"/>
-            <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-sign)" fill-opacity="0.9"/>
-            <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#headerRibbonCyan)"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#headerGlassSheen)"/>
+            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#headerRibbonViolet)"/>
+            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#headerRibbonCyan)"/>
+            <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#headerGlassSheen)"/>
           </svg>
         </div>
         <span id="topBarTitle" class="text-xs font-bold tracking-tight text-white">Zephyr Sign</span>
@@ -546,7 +555,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT STUDIO & ENVELOPE MANAGEMENT ENGINE                            -->
+  <!-- JAVASCRIPT STUDIO & ROBUST BINARY PDF PARSING ENGINE                     -->
   <!-- ========================================================================= -->
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -576,7 +585,7 @@
     const paramX = urlParams.get("x");
     const paramY = urlParams.get("y");
 
-    // 1. RECIPIENT SESSION INGESTION
+    // 1. RECIPIENT SESSION INGESTION & DOCUMENT STREAM LOADER
     window.addEventListener("DOMContentLoaded", async () => {
       if (inviteRecipient && docIdParam) {
         const senderSidebar = document.getElementById("senderSidebar");
@@ -619,22 +628,48 @@
 
         try {
           const res = await fetch(`/api/sign/document/${docIdParam}`);
-          if (!res.ok) throw new Error("Document not found or expired");
+          if (!res.ok) throw new Error("Document envelope metadata not found or expired");
           const data = await res.json();
 
           document.getElementById("uploadPromptContainer").classList.add("hidden");
           document.getElementById("documentStage").classList.remove("hidden");
 
-          const loadingTask = pdfjsLib.getDocument(data.url);
-          currentDocument = await loadingTask.promise;
-          totalPdfPages = currentDocument.numPages;
+          // Fetch binary bytes directly to eliminate PDF structure and worker CORS errors
+          const fileTarget = data.url || `/api/sign/file/${docIdParam}`;
+          const fileRes = await fetch(fileTarget);
+          if (!fileRes.ok) throw new Error(`Could not stream document: HTTP ${fileRes.status}`);
 
-          if (totalPdfPages > 1) {
-            document.getElementById("pdfPaginationGroup").classList.remove("hidden");
-            updatePageCounter();
+          const arrayBuffer = await fileRes.arrayBuffer();
+          const bytes = new Uint8Array(arrayBuffer);
+
+          // Verify if the payload is a valid PDF (%PDF- is 0x25 0x50 0x44 0x46)
+          const isPdf = bytes.length >= 4 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46;
+
+          if (isPdf) {
+            document.getElementById("pdfCanvas").classList.remove("hidden");
+            document.getElementById("imgViewer").classList.add("hidden");
+
+            const loadingTask = pdfjsLib.getDocument({ data: bytes });
+            currentDocument = await loadingTask.promise;
+            totalPdfPages = currentDocument.numPages;
+
+            if (totalPdfPages > 1) {
+              document.getElementById("pdfPaginationGroup").classList.remove("hidden");
+              updatePageCounter();
+            }
+
+            renderPdfPage(1);
+          } else {
+            // Render non-PDF uploads (PNG, JPEG) safely in the image viewer
+            const blob = new Blob([arrayBuffer]);
+            const objectUrl = URL.createObjectURL(blob);
+            const img = document.getElementById("imgViewer");
+            img.src = objectUrl;
+            img.classList.remove("hidden");
+            document.getElementById("pdfCanvas").classList.add("hidden");
+            document.getElementById("pdfPaginationGroup").classList.add("hidden");
           }
 
-          renderPdfPage(1);
           setupRecipientBox(signatureX, signatureY, inviteRecipient);
         } catch (err) {
           alert("Error loading document: " + err.message);
@@ -690,7 +725,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           const typedarray = new Uint8Array(e.target.result);
-          pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+          pdfjsLib.getDocument({ data: typedarray }).promise.then(function(pdf) {
             currentDocument = pdf;
             totalPdfPages = pdf.numPages;
             currentPdfPage = 1;
