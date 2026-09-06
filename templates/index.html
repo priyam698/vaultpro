@@ -182,20 +182,59 @@
       <!-- Zephyr Wing Z Brand Logo -->
       <a href="/" class="flex items-center gap-3 group">
         <div class="w-10 h-10 rounded-xl bg-[#080a16] border border-white/5 p-2 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:shadow-indigo-500/30 group-hover:border-white/10 transition duration-300">
-          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-            <defs>
-              <linearGradient id="zephyr-grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8" />
-                <stop offset="35%" stop-color="#06b6d4" />
-                <stop offset="70%" stop-color="#a855f7" />
-                <stop offset="100%" stop-color="#4c1d95" />
-              </linearGradient>
-            </defs>
-            <path d="M 256,110 L 390,180 L 256,250 L 120,180 L 256,110 Z" fill="url(#zephyr-grad-nav)" fill-opacity="0.9"/>
-            <path d="M 256,250 L 390,180 L 390,330 L 256,400 L 256,250 Z" fill="url(#zephyr-grad-nav)" fill-opacity="0.9"/>
-            <path d="M 120,180 L 256,250 L 256,400 L 120,330 L 120,180 Z" fill="url(#zephyr-grad-nav)" fill-opacity="0.9"/>
-            <path d="M 180,200 L 330,200 L 180,310 L 330,310" stroke="#ffffff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+        <defs>
+          <linearGradient id="crystalTop" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="50%" stop-color="#0284c7"/>
+            <stop offset="100%" stop-color="#0369a1"/>
+          </linearGradient>
+          <linearGradient id="crystalMid" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06b6d4"/>
+            <stop offset="60%" stop-color="#0891b2"/>
+            <stop offset="100%" stop-color="#1e1b4b"/>
+          </linearGradient>
+          <linearGradient id="crystalRight" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a855f7"/>
+            <stop offset="50%" stop-color="#7c3aed"/>
+            <stop offset="100%" stop-color="#3b0764"/>
+          </linearGradient>
+          <linearGradient id="crystalBase" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0284c7"/>
+            <stop offset="100%" stop-color="#1e3a8a"/>
+          </linearGradient>
+        </defs>
+        
+        <!-- Top Aerodynamic Fin & Upper Facets -->
+        <polygon points="190,80 260,130 220,160" fill="url(#crystalTop)" stroke="#0ea5e9" stroke-width="0.8"/>
+        <polygon points="190,80 220,160 170,160" fill="url(#crystalMid)" stroke="#22d3ee" stroke-width="0.8"/>
+        <polygon points="260,130 310,180 220,160" fill="url(#crystalMid)" stroke="#0891b2" stroke-width="0.8"/>
+        <polygon points="260,130 330,220 310,180" fill="url(#crystalRight)" stroke="#c084fc" stroke-width="0.8"/>
+        <polygon points="220,160 310,180 260,240" fill="url(#crystalMid)" stroke="#0e7490" stroke-width="0.8"/>
+        <polygon points="170,160 220,160 210,230" fill="url(#crystalTop)" stroke="#38bdf8" stroke-width="0.8"/>
+        
+        <!-- Mid Wing Body & Crystal Meshes -->
+        <polygon points="170,160 210,230 150,260" fill="url(#crystalBase)" stroke="#1d4ed8" stroke-width="0.8"/>
+        <polygon points="210,230 260,240 230,300" fill="url(#crystalMid)" stroke="#0891b2" stroke-width="0.8"/>
+        <polygon points="210,230 150,260 230,300" fill="url(#crystalBase)" stroke="#1e40af" stroke-width="0.8"/>
+        <polygon points="260,240 310,180 330,260" fill="url(#crystalRight)" stroke="#a855f7" stroke-width="0.8"/>
+        <polygon points="260,240 330,260 290,320" fill="url(#crystalRight)" stroke="#9333ea" stroke-width="0.8"/>
+        
+        <!-- Central 'Z' Crystal Core Structure -->
+        <polygon points="230,300 290,320 270,360" fill="url(#crystalRight)" stroke="#6b21a8" stroke-width="0.8"/>
+        <polygon points="230,300 270,360 200,340" fill="url(#crystalBase)" stroke="#1e3a8a" stroke-width="0.8"/>
+        <polygon points="290,320 350,380 310,400" fill="url(#crystalRight)" stroke="#a855f7" stroke-width="0.8"/>
+        <polygon points="290,320 310,400 270,360" fill="url(#crystalRight)" stroke="#7e22ce" stroke-width="0.8"/>
+        
+        <!-- Lower Base Anchor Facets -->
+        <polygon points="150,260 200,340 180,410" fill="url(#crystalBase)" stroke="#1e40af" stroke-width="0.8"/>
+        <polygon points="200,340 270,360 240,430 180,410" fill="url(#crystalBase)" stroke="#1d4ed8" stroke-width="0.8"/>
+        <polygon points="270,360 310,400 290,440 240,430" fill="url(#crystalBase)" stroke="#1e3a8a" stroke-width="0.8"/>
+        
+        <!-- Highlight Edges for Crystal Sparkle -->
+        <polyline points="190,80 220,160 210,230 230,300 200,340 180,410" stroke="#7dd3fc" stroke-width="1.2" fill="none"/>
+        <polyline points="260,130 310,180 330,260 350,380 310,400" stroke="#e879f9" stroke-width="1.2" fill="none"/>
+      </svg>
         </div>
         <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent group-hover:to-[#4c1d95] transition duration-300">
           Zephyr
