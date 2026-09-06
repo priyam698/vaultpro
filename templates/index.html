@@ -44,7 +44,7 @@
       transition: background-image 0.4s ease;
     }
 
-    /* Dark Mode Glass Panels */
+    /* Dark Mode Glass Panels & Inputs */
     .obsidian-panel {
       background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
       backdrop-filter: blur(35px);
@@ -52,6 +52,19 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       transition: all 0.3s ease;
+    }
+
+    input, textarea, select {
+      background-color: rgba(5, 8, 20, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      color: #ffffff !important;
+    }
+    input::placeholder, textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+    select option {
+      background-color: #0c1020 !important;
+      color: #ffffff !important;
     }
 
     .glass-chip {
@@ -75,10 +88,9 @@
       color: #f8fafc;
     }
 
-    /* Hero Typography (Dark Default) */
+    /* Hero Typography */
     .hero-headline {
       color: #ffffff;
-      text-shadow: none !important;
       transition: color 0.3s ease;
     }
 
@@ -87,19 +99,17 @@
       background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: none !important;
       filter: drop-shadow(0 2px 14px rgba(99, 102, 241, 0.35));
       transition: all 0.3s ease;
     }
 
     .hero-desc {
       color: #cbd5e1;
-      text-shadow: none !important;
       transition: color 0.3s ease;
     }
 
     /* ========================================================================= */
-    /* BALANCED DAYLIGHT THEME (High Contrast Alpine Mountain Mode)              */
+    /* BALANCED DAYLIGHT THEME (High Contrast & Visible Inputs)                  */
     /* ========================================================================= */
     body.light-theme {
       background-color: #cbd5e1;
@@ -127,28 +137,25 @@
 
     body.light-theme .hero-headline {
       color: #090d16 !important;
-      text-shadow: none !important;
     }
 
     body.light-theme .hero-gradient-text {
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%) !important;
       -webkit-background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
-      text-shadow: none !important;
       filter: none !important;
     }
 
     body.light-theme .hero-desc {
       color: #0f172a !important;
       font-weight: 600;
-      text-shadow: none !important;
     }
 
     body.light-theme .obsidian-panel {
-      background: rgba(248, 250, 252, 0.82);
+      background: rgba(248, 250, 252, 0.85);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.75);
       box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
       color: #0f172a;
     }
@@ -170,20 +177,28 @@
       color: #334155 !important;
     }
 
+    /* Day Mode Inputs with Dark Readable Text */
     body.light-theme input,
     body.light-theme textarea,
     body.light-theme select {
-      background-color: rgba(255, 255, 255, 0.9) !important;
-      border-color: rgba(148, 163, 184, 0.6) !important;
+      background-color: #ffffff !important;
+      border: 1px solid #94a3b8 !important;
       color: #0f172a !important;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    body.light-theme input::placeholder,
+    body.light-theme textarea::placeholder {
+      color: #64748b !important;
+    }
+    body.light-theme select option {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
     }
 
     body.light-theme .feature-badge {
-      background: rgba(248, 250, 252, 0.82) !important;
+      background: rgba(248, 250, 252, 0.85) !important;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.8) !important;
       color: #0f172a !important;
       box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.06);
     }
@@ -192,9 +207,9 @@
     }
 
     body.light-theme .quick-btn {
-      background: rgba(248, 250, 252, 0.85) !important;
+      background: rgba(248, 250, 252, 0.88) !important;
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.7) !important;
+      border: 1px solid rgba(255, 255, 255, 0.75) !important;
       color: #0f172a !important;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
@@ -204,9 +219,9 @@
     }
 
     body.light-theme .glass-chip {
-      background: rgba(248, 250, 252, 0.85) !important;
+      background: rgba(248, 250, 252, 0.88) !important;
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.7) !important;
+      border: 1px solid rgba(255, 255, 255, 0.75) !important;
       box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12);
       color: #0f172a !important;
     }
@@ -215,13 +230,13 @@
     }
 
     body.light-theme .mockup-inner {
-      background: rgba(241, 245, 249, 0.85) !important;
-      border-color: rgba(203, 213, 225, 0.8) !important;
+      background: rgba(241, 245, 249, 0.9) !important;
+      border-color: rgba(203, 213, 225, 0.85) !important;
       color: #0f172a !important;
     }
     body.light-theme .mockup-item {
-      background: rgba(255, 255, 255, 0.9) !important;
-      border-color: rgba(203, 213, 225, 0.8) !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-color: rgba(203, 213, 225, 0.85) !important;
       color: #0f172a !important;
     }
     body.light-theme .mockup-item span {
@@ -229,22 +244,22 @@
     }
 
     body.light-theme table tr td { color: #0f172a !important; }
-    body.light-theme table tr th { color: #1e293b !important; background-color: rgba(226, 232, 240, 0.75) !important; }
-    body.light-theme table tr { border-color: rgba(203, 213, 225, 0.6) !important; }
+    body.light-theme table tr th { color: #1e293b !important; background-color: rgba(226, 232, 240, 0.8) !important; }
+    body.light-theme table tr { border-color: rgba(203, 213, 225, 0.7) !important; }
     body.light-theme ul li span { color: #0f172a !important; }
 
     body.light-theme #worldLangSelect,
     body.light-theme #themeToggleBtn,
     body.light-theme header .header-pill {
-      background: rgba(248, 250, 252, 0.85) !important;
+      background: rgba(248, 250, 252, 0.9) !important;
       border-color: rgba(148, 163, 184, 0.5) !important;
       color: #0f172a !important;
       box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
     }
 
     body.light-theme footer {
-      background-color: rgba(241, 245, 249, 0.85) !important;
-      border-color: rgba(203, 213, 225, 0.7) !important;
+      background-color: rgba(241, 245, 249, 0.9) !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
       color: #334155 !important;
     }
 
@@ -339,11 +354,11 @@
       <div class="space-y-3">
         <div>
           <label class="block text-[11px] font-bold mb-1">Request Title / Project Name</label>
-          <input id="reqProjectTitle" type="text" placeholder="e.g. Q3 Commercial Raw Footage" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-indigo-400">
+          <input id="reqProjectTitle" type="text" placeholder="e.g. Q3 Commercial Raw Footage" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-[11px] font-bold mb-1">Destination Vault</label>
-          <input type="text" readonly value="My Zephyr Encrypted Vault" class="w-full bg-black/40 border border-slate-400/20 rounded-xl px-3.5 py-2 text-xs font-mono">
+          <input type="text" readonly value="My Zephyr Encrypted Vault" class="w-full rounded-xl px-3.5 py-2 text-xs font-mono">
         </div>
         <button onclick="generateClientRequestLink()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition cursor-pointer">
           Generate Client Drop Link
@@ -351,8 +366,8 @@
         <div id="reqResultBox" class="hidden pt-3 border-t border-slate-400/30 space-y-1.5">
           <label class="block text-[11px] font-bold text-emerald-600">✓ Share this link with your client:</label>
           <div class="flex items-center gap-2">
-            <input id="reqLinkInput" type="text" readonly class="flex-1 bg-slate-900/40 border border-slate-400/30 rounded-xl px-3 py-2 text-xs text-indigo-500 font-mono font-semibold">
-            <button onclick="copyReqLink()" class="px-3.5 py-2 bg-slate-500/20 hover:bg-slate-500/30 rounded-xl text-xs font-bold transition">Copy</button>
+            <input id="reqLinkInput" type="text" readonly class="flex-1 rounded-xl px-3 py-2 text-xs font-mono font-semibold">
+            <button onclick="copyReqLink()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition">Copy</button>
           </div>
         </div>
       </div>
@@ -400,7 +415,7 @@
         
         <div class="relative flex items-center">
           <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
-          <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-bold focus:outline-none transition cursor-pointer appearance-none">
+          <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl border text-xs font-bold focus:outline-none transition cursor-pointer appearance-none">
             <option value="en" class="bg-[#0b1022] text-white">English (US)</option>
             <option value="es" class="bg-[#0b1022] text-white">Español (Spanish)</option>
             <option value="fr" class="bg-[#0b1022] text-white">Français (French)</option>
@@ -426,16 +441,16 @@
         </div>
 
         <!-- Light / Dark Theme Toggle Button -->
-        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
 
-        <button onclick="openRequestModal()" class="header-pill text-xs font-bold bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-2 rounded-xl transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
+        <button onclick="openRequestModal()" class="header-pill text-xs font-bold border px-3 py-2 rounded-xl transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer">
           <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           <span>Request</span>
         </button>
 
-        <a href="/dashboard" class="header-pill text-xs font-bold hover:bg-white/[0.06] px-3.5 py-2 rounded-xl border border-white/10 transition flex items-center gap-1.5">
+        <a href="/dashboard" class="header-pill text-xs font-bold px-3.5 py-2 rounded-xl border transition flex items-center gap-1.5">
           <span>Drive</span>
           <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-500 border border-indigo-500/30">5 GB</span>
         </a>
@@ -452,7 +467,7 @@
   <!-- ========================================================================= -->
   <main class="relative z-20 max-w-7xl mx-auto px-6 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
-    <!-- Left Column: Headline & Contrast-Balanced Copy -->
+    <!-- Left Column -->
     <div class="lg:col-span-6 space-y-6">
       
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 text-xs font-bold shadow-lg backdrop-blur-md">
@@ -471,15 +486,14 @@
         Transfer massive project deliverables, raw mountain footage, and folder trees directly via zero-knowledge edge storage with instant link shredding and client-side passcodes.
       </p>
 
-      <!-- Feature Badges -->
       <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
-        <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
+        <div class="feature-badge flex items-center gap-3 backdrop-blur-md p-3.5 rounded-2xl border shadow-lg">
           <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
           <span>AES-256 Client Encrypted</span>
         </div>
-        <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
+        <div class="feature-badge flex items-center gap-3 backdrop-blur-md p-3.5 rounded-2xl border shadow-lg">
           <div class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-500 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
@@ -489,16 +503,15 @@
 
       <div class="pt-2 flex flex-wrap items-center gap-2.5 text-xs font-bold">
         <span class="opacity-70">Quick Actions:</span>
-        <button onclick="openRequestModal()" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 shadow-sm transition">📥 Receive Client Files</button>
-        <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 shadow-sm transition">📁 Cloud Drive Vault</a>
-        <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 shadow-sm transition">✨ E-Sign Studio</a>
+        <button onclick="openRequestModal()" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📥 Receive Client Files</button>
+        <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📁 Cloud Drive Vault</a>
+        <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">✨ E-Sign Studio</a>
       </div>
     </div>
 
     <!-- Right Column: Frosted Glass Transfer Card -->
     <div class="lg:col-span-6 relative">
       
-      <!-- Floating Photo Badge 1: Mountain Panoramic RAW -->
       <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-photo-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=120&h=120&q=80" alt="Mountain RAW" class="w-11 h-11 rounded-xl object-cover border border-slate-400/20">
         <div class="pr-3">
@@ -510,7 +523,6 @@
         </div>
       </div>
 
-      <!-- Floating Photo Badge 2: Drone Video Cut -->
       <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-photo-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-400/20">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=120&h=120&q=80" alt="Ridge Cut" class="w-full h-full object-cover">
@@ -580,30 +592,30 @@
             <div>
               <label class="block text-xs font-bold mb-1">Recipient Email</label>
               <input id="emailTo" type="email" placeholder="client@company.com" 
-                     class="w-full border rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                     class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
             </div>
             <div>
               <label class="block text-xs font-bold mb-1">Your Email</label>
               <input id="emailFrom" type="email" placeholder="you@studio.com" 
-                     class="w-full border rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                     class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-bold mb-1">Title</label>
             <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
-                   class="w-full border rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                   class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
           </div>
 
           <div>
             <label class="block text-xs font-bold mb-1">Message</label>
             <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                      class="w-full border rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
+                      class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
           </div>
 
           <div class="flex items-center gap-2 pt-1">
             <div class="flex-1">
-              <select id="expiryHours" class="w-full border rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
+              <select id="expiryHours" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
                 <option value="1">Expire in 1 Hour</option>
                 <option value="24" selected>Expire in 24 Hours</option>
                 <option value="72">Expire in 3 Days</option>
@@ -622,11 +634,11 @@
             <div>
               <label class="block text-xs font-bold mb-1">Passcode Protection</label>
               <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
-                     class="w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
+                     class="w-full rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
             </div>
             <div>
               <label class="block text-xs font-bold mb-1">Max Downloads (Burn-on-Read)</label>
-              <select id="maxDownloads" class="w-full border rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
+              <select id="maxDownloads" class="w-full rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
                 <option value="0" selected>Unlimited Downloads</option>
                 <option value="1">1 (Burn on Read 🔥)</option>
                 <option value="5">5 Downloads</option>
@@ -654,7 +666,7 @@
         <div id="resultBox" class="mt-5 pt-4 border-t border-slate-400/20 hidden space-y-2">
           <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
           <div class="flex items-center gap-2">
-            <input id="shareUrlInput" type="text" readonly class="flex-1 border rounded-xl px-3.5 py-2.5 text-xs text-indigo-500 font-mono font-bold focus:outline-none">
+            <input id="shareUrlInput" type="text" readonly class="flex-1 rounded-xl px-3.5 py-2.5 text-xs text-indigo-500 font-mono font-bold focus:outline-none">
             <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
               Copy
             </button>
@@ -782,7 +794,7 @@
               <p class="text-[10px] opacity-85">Shareable link for <strong>Wedding_Plan.pdf</strong></p>
               
               <div class="flex items-center gap-1.5 bg-black/40 rounded-xl p-1 border border-white/15">
-                <input type="text" readonly value="https://zephyr.me/urls/TG0D..." class="flex-1 bg-transparent px-2 text-[10px] font-mono focus:outline-none">
+                <input type="text" readonly value="https://zephyr.me/urls/TG0D..." class="flex-1 bg-transparent px-2 text-[10px] text-indigo-300 font-mono focus:outline-none">
                 <span class="px-2.5 py-1 bg-indigo-600 rounded-lg text-[10px] font-bold text-white shadow-sm">Copy link</span>
               </div>
             </div>
@@ -871,7 +883,7 @@
             <a href="/auth" class="px-6 py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
               Create a free account
             </a>
-            <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
+            <a href="/dashboard" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
               Learn more
             </a>
           </div>
@@ -1059,12 +1071,12 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 5: HOW ZEPHYR COMPARES (Competitor Names Replaced)                -->
+  <!-- SECTION 5: HOW ZEPHYR COMPARES                                            -->
   <!-- ========================================================================= -->
   <section class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-10">
-      <h3 class="text-2xl sm:text-3xl font-black">Modern Edge vs. Traditional Cloud</h3>
-      <p class="text-xs opacity-70 mt-2 font-medium">Engineered to eliminate inflated enterprise pricing and corporate surveillance.</p>
+      <h3 class="text-2xl sm:text-3xl font-black">How Zephyr Compares</h3>
+      <p class="text-xs opacity-70 mt-2 font-medium">Engineered to eliminate high subscription fees and corporate tracking.</p>
     </div>
 
     <div class="obsidian-panel rounded-3xl overflow-hidden">
@@ -1072,48 +1084,42 @@
         <table class="w-full text-left text-xs">
           <thead>
             <tr class="border-b border-slate-400/20 bg-black/20 uppercase tracking-wider font-bold">
-              <th class="py-4 px-6">Capability</th>
+              <th class="py-4 px-6">Feature</th>
               <th class="py-4 px-6 text-indigo-500 font-black">Zephyr Pro</th>
-              <th class="py-4 px-6 font-bold">Zephyr Starter</th>
-              <th class="py-4 px-6 opacity-70 font-semibold">Standard Cloud Drives</th>
+              <th class="py-4 px-6">WeTransfer Pro</th>
+              <th class="py-4 px-6">Proton Drive</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-400/15 font-medium">
             <tr>
               <td class="py-4 px-6 font-bold">Monthly Price</td>
               <td class="py-4 px-6 text-emerald-500 font-black font-mono text-sm">$4.00 / mo</td>
-              <td class="py-4 px-6 font-bold font-mono">$0 / forever</td>
-              <td class="py-4 px-6 font-mono opacity-70">$12+ / mo</td>
+              <td class="py-4 px-6 font-mono opacity-70">$12.00 / mo</td>
+              <td class="py-4 px-6 font-mono opacity-70">$4.99 / mo</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Zero-Knowledge Architecture</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Client-Side Key Hashing</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Client-Side Key Hashing</td>
-              <td class="py-4 px-6 text-rose-500 font-bold">✗ Server-Side Inspection</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Native Client Hashing</td>
+              <td class="py-4 px-6 text-rose-500 font-bold">✗ None (Server Access)</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Supported</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Single Transfer Limit</td>
               <td class="py-4 px-6 font-black">50 GB</td>
-              <td class="py-4 px-6">2 GB</td>
-              <td class="py-4 px-6 opacity-70">Strict / Compressed</td>
+              <td class="py-4 px-6">200 GB</td>
+              <td class="py-4 px-6">5 GB</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Permanent Cloud Drive Storage</td>
-              <td class="py-4 px-6 font-black">200 GB Vault Included</td>
-              <td class="py-4 px-6">5 GB Vault Included</td>
-              <td class="py-4 px-6 opacity-70">Requires Costly Upgrades</td>
+              <td class="py-4 px-6 font-black">200 GB Included</td>
+              <td class="py-4 px-6 opacity-70">Shared pool</td>
+              <td class="py-4 px-6">200 GB</td>
             </tr>
             <tr>
-              <td class="py-4 px-6 font-bold">Burn-on-Read Shredding</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Instant Edge Purge</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Instant Edge Purge</td>
-              <td class="py-4 px-6 text-rose-500 font-bold">✗ Residual Archival</td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 font-bold">Directory Tree Folder Support</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Native Drag & Drop</td>
-              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Native Drag & Drop</td>
-              <td class="py-4 px-6 opacity-70">Requires ZIP Archive</td>
+              <td class="py-4 px-6 font-bold">Burn-on-Read Self-Destruct</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Instant Edge Shred</td>
+              <td class="py-4 px-6 text-rose-500 font-bold">✗ No (Timer only)</td>
+              <td class="py-4 px-6 text-emerald-500 font-bold">✓ Supported</td>
             </tr>
           </tbody>
         </table>
@@ -1291,8 +1297,7 @@
 
     function toggleTheme() {
       const isLight = document.body.classList.toggle("light-theme");
-      const theme = isLight ? "light" : "dark";
-      localStorage.setItem("zephyr_theme", theme);
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
       const icon = document.getElementById("themeIcon");
       if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
@@ -1423,7 +1428,7 @@
       sizeEl.innerText = `${totalMb} MB`;
 
       listEl.innerHTML = selectedFiles.map((file, idx) => `
-        <div class="flex items-center justify-between text-xs bg-slate-900/40 px-3 py-2 rounded-xl border border-slate-400/20">
+        <div class="flex items-center justify-between text-xs px-3 py-2 rounded-xl border border-slate-400/20">
           <span class="truncate max-w-xs font-mono">${file.webkitRelativePath || file.name}</span>
           <button onclick="removeFileFromQueue(${idx})" class="hover:text-rose-500 ml-2 cursor-pointer font-black">✕</button>
         </div>
