@@ -15,7 +15,7 @@
   
   <style>
     /* ========================================================================= */
-    /* THEME SYSTEM & HIGH-CONTRAST TOKENS                                      */
+    /* THEME SYSTEM & BACKGROUND ENGINE                                          */
     /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -46,11 +46,20 @@
 
     /* Dark Mode Glass Panels */
     .obsidian-panel {
-      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
+      background: linear-gradient(180deg, rgba(14, 20, 42, 0.82) 0%, rgba(7, 10, 24, 0.94) 100%);
       backdrop-filter: blur(35px);
       -webkit-backdrop-filter: blur(35px);
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .glass-chip {
+      background: rgba(10, 16, 35, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65);
       transition: all 0.3s ease;
     }
 
@@ -66,15 +75,6 @@
       color: #f8fafc;
     }
 
-    .glass-chip {
-      background: rgba(10, 16, 35, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.65);
-      transition: all 0.3s ease;
-    }
-
     /* Headline Gradient */
     .hero-gradient-text {
       background: linear-gradient(to right, #67e8f9, #a5b4fc, #d8b4fe);
@@ -84,7 +84,7 @@
     }
 
     /* ========================================================================= */
-    /* LIGHT THEME (BALANCED DAYLIGHT ALPINE AESTHETIC)                          */
+    /* BALANCED DAYLIGHT THEME (Refined Frosted Glass - Eliminates Blinding White)*/
     /* ========================================================================= */
     body.light-theme {
       background-color: #cbd5e1;
@@ -93,8 +93,8 @@
 
     body.light-theme .site-mountain-backdrop {
       background-image: 
-        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(203, 213, 225, 0.45) 0%, rgba(180, 195, 215, 0.35) 45%, rgba(203, 213, 225, 0.65) 100%),
+        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
         url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
     }
 
@@ -110,28 +110,33 @@
       color: #090d16 !important;
     }
 
-    body.light-theme #worldLangSelect,
-    body.light-theme #themeToggleBtn,
-    body.light-theme header .header-pill {
-      background: rgba(255, 255, 255, 0.9) !important;
-      border-color: rgba(148, 163, 184, 0.6) !important;
+    /* Mountain & Sky Harmony for Hero Headline */
+    body.light-theme .hero-headline {
       color: #0f172a !important;
-      box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
     }
 
     body.light-theme .hero-gradient-text {
-      background: linear-gradient(to right, #4338ca, #6d28d9, #0284c7);
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0284c7 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: none;
+      filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.7));
     }
 
-    /* Day Mode Cards & Text */
+    body.light-theme .hero-desc {
+      color: #1e293b !important;
+      font-weight: 600;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Toned Down Frosted Glass Cards (Non-glare, Translucent Porcelain) */
     body.light-theme .obsidian-panel {
-      background: rgba(255, 255, 255, 0.95);
-      border-color: #cbd5e1;
-      box-shadow: 0 24px 60px -15px rgba(15, 23, 42, 0.16), 0 0 1px 1px rgba(0, 0, 0, 0.02);
-      color: #090d16;
+      background: rgba(248, 250, 252, 0.78);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
+      color: #0f172a;
     }
 
     body.light-theme .obsidian-panel h1,
@@ -143,7 +148,7 @@
     body.light-theme h2,
     body.light-theme h3,
     body.light-theme h4 {
-      color: #090d16 !important;
+      color: #0f172a !important;
     }
 
     body.light-theme .obsidian-panel p,
@@ -151,88 +156,85 @@
       color: #334155 !important;
     }
 
-    /* Day Mode Table Rows & Text */
-    body.light-theme table tr td {
+    /* Soft Translucent Inputs */
+    body.light-theme input,
+    body.light-theme textarea,
+    body.light-theme select {
+      background-color: rgba(255, 255, 255, 0.85) !important;
+      border-color: rgba(148, 163, 184, 0.6) !important;
       color: #0f172a !important;
-    }
-    body.light-theme table tr th {
-      color: #334155 !important;
-      background-color: #f1f5f9 !important;
-    }
-    body.light-theme table tr {
-      border-color: #e2e8f0 !important;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
-    /* Day Mode Pricing Checklist */
-    body.light-theme ul li span {
+    body.light-theme .feature-badge {
+      background: rgba(248, 250, 252, 0.72) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.7) !important;
       color: #0f172a !important;
+      box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.06);
     }
-
-    /* Day Mode Mockups (Fixes black inner box bug) */
-    body.light-theme .mockup-inner {
-      background: #f8fafc !important;
-      border-color: #e2e8f0 !important;
+    body.light-theme .feature-badge span {
       color: #0f172a !important;
     }
 
-    body.light-theme .mockup-item {
+    body.light-theme .quick-btn {
+      background: rgba(248, 250, 252, 0.75) !important;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6) !important;
+      color: #0f172a !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    body.light-theme .quick-btn:hover {
       background: #ffffff !important;
-      border-color: #cbd5e1 !important;
+      color: #4338ca !important;
+    }
+
+    body.light-theme .glass-chip {
+      background: rgba(248, 250, 252, 0.8) !important;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.7) !important;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12);
       color: #0f172a !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+    body.light-theme .glass-chip p {
+      color: #0f172a !important;
+    }
+
+    /* Internal Mockup Contrast */
+    body.light-theme .mockup-inner {
+      background: rgba(241, 245, 249, 0.85) !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .mockup-item {
+      background: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      color: #0f172a !important;
     }
     body.light-theme .mockup-item span {
       color: #0f172a !important;
     }
 
-    body.light-theme .glass-chip {
-      background: rgba(255, 255, 255, 0.94);
-      border-color: #cbd5e1;
-      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12);
-      color: #090d16;
-    }
-    body.light-theme .glass-chip p {
-      color: #090d16 !important;
-    }
+    /* Table & Pricing Details */
+    body.light-theme table tr td { color: #0f172a !important; }
+    body.light-theme table tr th { color: #1e293b !important; background-color: rgba(226, 232, 240, 0.6) !important; }
+    body.light-theme table tr { border-color: rgba(203, 213, 225, 0.6) !important; }
+    body.light-theme ul li span { color: #0f172a !important; }
 
-    body.light-theme input,
-    body.light-theme textarea,
-    body.light-theme select {
-      background-color: #ffffff !important;
-      border-color: #94a3b8 !important;
-      color: #090d16 !important;
-    }
-
-    /* Transfer Tab Switching Colors */
-    body.light-theme #modeEmailBtn.inactive-tab {
-      color: #475569 !important;
-      background: transparent !important;
-    }
-
-    body.light-theme .feature-badge {
-      background-color: rgba(255, 255, 255, 0.94) !important;
-      border-color: #cbd5e1 !important;
-      color: #090d16 !important;
-      box-shadow: 0 4px 10px -2px rgba(15, 23, 42, 0.06);
-    }
-    body.light-theme .feature-badge span {
-      color: #090d16 !important;
-    }
-
-    body.light-theme .quick-btn {
-      background-color: rgba(255, 255, 255, 0.9) !important;
-      border-color: #cbd5e1 !important;
+    /* Header Nav Pills */
+    body.light-theme #worldLangSelect,
+    body.light-theme #themeToggleBtn,
+    body.light-theme header .header-pill {
+      background: rgba(248, 250, 252, 0.85) !important;
+      border-color: rgba(148, 163, 184, 0.5) !important;
       color: #0f172a !important;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    }
-    body.light-theme .quick-btn:hover {
-      background-color: #ffffff !important;
-      color: #4f46e5 !important;
+      box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
     }
 
     body.light-theme footer {
-      background-color: rgba(241, 245, 249, 0.9) !important;
-      border-color: #cbd5e1 !important;
+      background-color: rgba(241, 245, 249, 0.85) !important;
+      border-color: rgba(203, 213, 225, 0.7) !important;
       color: #334155 !important;
     }
 
@@ -267,7 +269,7 @@
   <!-- Free Guest Limit Modal -->
   <div id="authRequiredModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
     <div class="obsidian-panel max-w-md w-full rounded-3xl p-6 sm:p-8 text-center relative border border-indigo-500/40 shadow-2xl">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 mb-4">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
         </svg>
@@ -328,11 +330,11 @@
       <div class="space-y-3">
         <div>
           <label class="block text-[11px] font-bold mb-1">Request Title / Project Name</label>
-          <input id="reqProjectTitle" type="text" placeholder="e.g. Q3 Commercial Raw Footage" class="w-full bg-slate-900/50 border border-slate-400/30 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-indigo-400">
+          <input id="reqProjectTitle" type="text" placeholder="e.g. Q3 Commercial Raw Footage" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-[11px] font-bold mb-1">Destination Vault</label>
-          <input type="text" readonly value="My Zephyr Encrypted Vault" class="w-full bg-slate-800/40 border border-slate-400/20 rounded-xl px-3.5 py-2 text-xs font-mono">
+          <input type="text" readonly value="My Zephyr Encrypted Vault" class="w-full bg-black/40 border border-slate-400/20 rounded-xl px-3.5 py-2 text-xs font-mono">
         </div>
         <button onclick="generateClientRequestLink()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition cursor-pointer">
           Generate Client Drop Link
@@ -340,7 +342,7 @@
         <div id="reqResultBox" class="hidden pt-3 border-t border-slate-400/30 space-y-1.5">
           <label class="block text-[11px] font-bold text-emerald-600">✓ Share this link with your client:</label>
           <div class="flex items-center gap-2">
-            <input id="reqLinkInput" type="text" readonly class="flex-1 bg-slate-900/50 border border-slate-400/30 rounded-xl px-3 py-2 text-xs text-indigo-500 font-mono font-semibold">
+            <input id="reqLinkInput" type="text" readonly class="flex-1 bg-slate-900/40 border border-slate-400/30 rounded-xl px-3 py-2 text-xs text-indigo-500 font-mono font-semibold">
             <button onclick="copyReqLink()" class="px-3.5 py-2 bg-slate-500/20 hover:bg-slate-500/30 rounded-xl text-xs font-bold transition">Copy</button>
           </div>
         </div>
@@ -348,7 +350,7 @@
     </div>
   </div>
 
-  <!-- Transparent Header -->
+  <!-- Transparent Header (No Opaque Banner Bar) -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
@@ -382,12 +384,12 @@
         <span class="font-black text-2xl tracking-tight">Zephyr</span>
       </a>
 
-      <!-- Controls: Language Filter, Theme Switcher & Auth -->
+      <!-- Controls: 21 World Languages, Theme Switcher & Auth -->
       <div class="flex items-center gap-2.5 sm:gap-4">
         <a href="#control" class="text-xs font-bold hover:opacity-80 transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs font-bold hover:opacity-80 transition hidden sm:inline-block">Pricing</a>
         
-        <!-- Major World Languages Selector -->
+        <!-- Major World Languages Selector (Gujarati, Marathi, Bengali, Punjabi Filtered Out) -->
         <div class="relative flex items-center">
           <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
           <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-bold focus:outline-none transition cursor-pointer appearance-none">
@@ -442,7 +444,7 @@
   <!-- ========================================================================= -->
   <main class="relative z-20 max-w-7xl mx-auto px-6 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
     
-    <!-- Left Column: Headline & Value Proposition -->
+    <!-- Left Column: Headline & Contrast-Balanced Copy -->
     <div class="lg:col-span-6 space-y-6">
       
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 text-xs font-bold shadow-lg backdrop-blur-md">
@@ -450,27 +452,27 @@
         Zero-Knowledge Transfers & Encrypted Cloud Drive
       </div>
 
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
+      <h1 class="hero-headline text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
         Send files. <br />
         <span class="hero-gradient-text">
           Move ideas privately.
         </span>
       </h1>
 
-      <p class="text-base sm:text-lg leading-relaxed max-w-lg font-medium opacity-90">
+      <p class="hero-desc text-base sm:text-lg leading-relaxed max-w-lg font-medium opacity-90">
         Transfer massive project deliverables, raw mountain footage, and folder trees directly via zero-knowledge edge storage with instant link shredding and client-side passcodes.
       </p>
 
-      <!-- Feature Badges -->
+      <!-- Feature Badges (Balanced Frosted Glass) -->
       <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
         <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
-          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shrink-0">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
           <span>AES-256 Client Encrypted</span>
         </div>
         <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
-          <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-500 flex items-center justify-center shrink-0">
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-500 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
           <span>Cloudflare R2 Direct Pipe</span>
@@ -478,14 +480,14 @@
       </div>
 
       <div class="pt-2 flex flex-wrap items-center gap-2.5 text-xs font-bold">
-        <span class="opacity-60">Quick Actions:</span>
-        <button onclick="openRequestModal()" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 shadow-sm transition">📥 Receive Client Files</button>
-        <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 shadow-sm transition">📁 Cloud Drive Vault</a>
-        <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 shadow-sm transition">✨ E-Sign Studio</a>
+        <span class="opacity-70">Quick Actions:</span>
+        <button onclick="openRequestModal()" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 shadow-sm transition">📥 Receive Client Files</button>
+        <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 shadow-sm transition">📁 Cloud Drive Vault</a>
+        <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 shadow-sm transition">✨ E-Sign Studio</a>
       </div>
     </div>
 
-    <!-- Right Column: Obsidian Transfer Card with Floating Photography Chips -->
+    <!-- Right Column: Frosted Glass Transfer Card -->
     <div class="lg:col-span-6 relative">
       
       <!-- Floating Photo Badge 1: Mountain Panoramic RAW -->
@@ -494,8 +496,8 @@
         <div class="pr-3">
           <p class="text-[11px] font-bold leading-tight">Alpine_Summit_8K.raw</p>
           <div class="flex items-center gap-1.5 mt-0.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span class="text-[10px] font-mono font-semibold text-cyan-500">14.2 GB • 8K RAW</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+            <span class="text-[10px] font-mono font-semibold text-cyan-600">14.2 GB • 8K RAW</span>
           </div>
         </div>
       </div>
@@ -509,13 +511,13 @@
         <div class="pr-3">
           <p class="text-[11px] font-bold leading-tight">Glacier_Flight_ProRes.mov</p>
           <div class="flex items-center gap-1.5 mt-0.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[10px] font-mono font-semibold text-emerald-500">ProRes 422 HQ</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span class="text-[10px] font-mono font-semibold text-emerald-600">ProRes 422 HQ</span>
           </div>
         </div>
       </div>
 
-      <!-- Main Obsidian Panel -->
+      <!-- Main Translucent Frosted Panel -->
       <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10">
         
         <input type="file" id="fileInput" multiple class="hidden">
@@ -542,7 +544,7 @@
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             </div>
             <span class="text-xs font-black">Add files</span>
-            <span class="text-[11px] opacity-60 mt-0.5 font-medium">Documents, video, audio</span>
+            <span class="text-[11px] opacity-65 mt-0.5 font-medium">Documents, video, audio</span>
           </button>
 
           <button onclick="handleFolderSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-slate-400/30 hover:border-cyan-400 transition duration-200 group cursor-pointer">
@@ -550,7 +552,7 @@
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
             </div>
             <span class="text-xs font-black">Add folders</span>
-            <span class="text-[11px] opacity-60 mt-0.5 font-medium">Retain directory hierarchy</span>
+            <span class="text-[11px] opacity-65 mt-0.5 font-medium">Retain directory hierarchy</span>
           </button>
         </div>
 
@@ -570,30 +572,30 @@
             <div>
               <label class="block text-xs font-bold mb-1">Recipient Email</label>
               <input id="emailTo" type="email" placeholder="client@company.com" 
-                     class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                     class="w-full border rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
             </div>
             <div>
               <label class="block text-xs font-bold mb-1">Your Email</label>
               <input id="emailFrom" type="email" placeholder="you@studio.com" 
-                     class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                     class="w-full border rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-bold mb-1">Title</label>
             <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
-                   class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                   class="w-full border rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
           </div>
 
           <div>
             <label class="block text-xs font-bold mb-1">Message</label>
             <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                      class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
+                      class="w-full border rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
           </div>
 
           <div class="flex items-center gap-2 pt-1">
             <div class="flex-1">
-              <select id="expiryHours" class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
+              <select id="expiryHours" class="w-full border rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
                 <option value="1">Expire in 1 Hour</option>
                 <option value="24" selected>Expire in 24 Hours</option>
                 <option value="72">Expire in 3 Days</option>
@@ -602,7 +604,7 @@
             </div>
 
             <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
-                    class="px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.12] border border-slate-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                    class="quick-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
               <span>Security</span>
             </button>
@@ -612,11 +614,11 @@
             <div>
               <label class="block text-xs font-bold mb-1">Passcode Protection</label>
               <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
-                     class="w-full bg-slate-900/50 border border-slate-400/30 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-400 transition">
+                     class="w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
             </div>
             <div>
               <label class="block text-xs font-bold mb-1">Max Downloads (Burn-on-Read)</label>
-              <select id="maxDownloads" class="w-full bg-slate-900/50 border border-slate-400/30 rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:border-indigo-400 transition">
+              <select id="maxDownloads" class="w-full border rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
                 <option value="0" selected>Unlimited Downloads</option>
                 <option value="1">1 (Burn on Read 🔥)</option>
                 <option value="5">5 Downloads</option>
@@ -644,7 +646,7 @@
         <div id="resultBox" class="mt-5 pt-4 border-t border-slate-400/20 hidden space-y-2">
           <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
           <div class="flex items-center gap-2">
-            <input id="shareUrlInput" type="text" readonly class="flex-1 bg-slate-900/40 border border-slate-400/30 rounded-xl px-3.5 py-2.5 text-xs text-indigo-400 font-mono font-bold focus:outline-none">
+            <input id="shareUrlInput" type="text" readonly class="flex-1 border rounded-xl px-3.5 py-2.5 text-xs text-indigo-500 font-mono font-bold focus:outline-none">
             <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
               Copy
             </button>
@@ -671,24 +673,24 @@
           
           <div class="space-y-6 pt-2">
             <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl shrink-0 border border-amber-500/20">
+              <div class="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-xl shrink-0 border border-amber-500/30">
                 📁
               </div>
               <div>
                 <h4 class="text-sm font-black">File storage</h4>
-                <p class="text-xs leading-relaxed opacity-80 mt-1">
+                <p class="text-xs leading-relaxed opacity-85 mt-1">
                   Protect, back up, and store files of any size, then access them securely from anywhere with end-to-end encrypted cloud storage.
                 </p>
               </div>
             </div>
 
             <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl shrink-0 border border-indigo-500/20">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center text-xl shrink-0 border border-indigo-500/30">
                 🔗
               </div>
               <div>
                 <h4 class="text-sm font-black">File sharing</h4>
-                <p class="text-xs leading-relaxed opacity-80 mt-1">
+                <p class="text-xs leading-relaxed opacity-85 mt-1">
                   Share files, photos, documents, and spreadsheets with anyone. Stay in control of who can access your data using password protection and expiry dates.
                 </p>
               </div>
@@ -699,7 +701,7 @@
             <a href="/auth" class="px-6 py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
               Create a free account
             </a>
-            <a href="#pricing" class="px-6 py-3.5 rounded-full border border-slate-400/30 hover:bg-white/5 font-bold text-xs transition">
+            <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
               Learn more
             </a>
           </div>
@@ -718,7 +720,7 @@
             
             <div class="mt-4 rounded-2xl mockup-inner p-4 shadow-xl space-y-3">
               <div class="flex items-center justify-between border-b border-slate-400/20 pb-2">
-                <span class="text-[11px] font-mono font-bold opacity-60">Zephyr Cloud Drive</span>
+                <span class="text-[11px] font-mono font-bold opacity-70">Zephyr Cloud Drive</span>
                 <span class="text-[9px] font-mono font-bold text-cyan-500 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded">AES-256</span>
               </div>
               
@@ -750,7 +752,7 @@
               </div>
             </div>
             
-            <div class="text-[11px] opacity-70 font-mono text-center">Cloudflare R2 Object Replication</div>
+            <div class="text-[11px] opacity-75 font-mono text-center">Cloudflare R2 Object Replication</div>
           </div>
 
           <!-- Card 2: Lifestyle Image + Floating Glass "Share via link" -->
@@ -769,7 +771,7 @@
                 <span class="font-bold">Share via link</span>
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
               </div>
-              <p class="text-[10px] opacity-80">Shareable link for <strong>Wedding_Plan.pdf</strong></p>
+              <p class="text-[10px] opacity-85">Shareable link for <strong>Wedding_Plan.pdf</strong></p>
               
               <div class="flex items-center gap-1.5 bg-black/40 rounded-xl p-1 border border-white/15">
                 <input type="text" readonly value="https://zephyr.me/urls/TG0D..." class="flex-1 bg-transparent px-2 text-[10px] font-mono focus:outline-none">
@@ -798,7 +800,7 @@
           <div class="w-full max-w-sm rounded-[36px] obsidian-panel p-4 shadow-2xl space-y-3">
             
             <div class="flex items-center justify-between px-2 pt-1">
-              <span class="opacity-60 font-bold text-sm">←</span>
+              <span class="opacity-70 font-bold text-sm">←</span>
               <div class="flex -space-x-1.5">
                 <span class="w-6 h-6 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center border border-slate-700">F</span>
                 <span class="w-6 h-6 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center border border-slate-700">K</span>
@@ -811,7 +813,7 @@
             </div>
 
             <div class="px-2">
-              <p class="text-[10px] font-mono font-semibold opacity-60">07 April 2026 • 220 items</p>
+              <p class="text-[10px] font-mono font-semibold opacity-70">07 April 2026 • 220 items</p>
               <h4 class="text-lg font-black mt-0.5">Family & Friends</h4>
               
               <div class="flex items-center gap-2 mt-2">
@@ -846,12 +848,12 @@
           </h2>
 
           <div class="flex items-start gap-4 pt-2">
-            <div class="w-10 h-10 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center text-xl shrink-0 border border-pink-500/20">
+            <div class="w-10 h-10 rounded-2xl bg-pink-500/15 text-pink-500 flex items-center justify-center text-xl shrink-0 border border-pink-500/30">
               🌸
             </div>
             <div>
               <h4 class="text-sm font-black">Photos and albums</h4>
-              <p class="text-xs opacity-80 mt-1 leading-relaxed">
+              <p class="text-xs opacity-85 mt-1 leading-relaxed">
                 Keep your photos and videos safe and easy to access, with automatic mobile backups and collaborative albums for reliving and sharing your favorite moments.
               </p>
             </div>
@@ -861,7 +863,7 @@
             <a href="/auth" class="px-6 py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
               Create a free account
             </a>
-            <a href="/dashboard" class="px-6 py-3.5 rounded-full border border-slate-400/30 hover:bg-white/5 font-bold text-xs transition">
+            <a href="/dashboard" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
               Learn more
             </a>
           </div>
@@ -887,24 +889,24 @@
 
           <div class="space-y-6 pt-2">
             <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-xl shrink-0 border border-indigo-500/20">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center text-xl shrink-0 border border-indigo-500/30">
                 🔄
               </div>
               <div>
                 <h4 class="text-sm font-black">Desktop file syncing</h4>
-                <p class="text-xs opacity-80 mt-1 leading-relaxed">
+                <p class="text-xs opacity-85 mt-1 leading-relaxed">
                   Automatically sync files between your desktop and cloud storage, so your latest work is always up to date and available everywhere.
                 </p>
               </div>
             </div>
 
             <div class="flex items-start gap-4">
-              <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center text-xl shrink-0 border border-cyan-500/20">
+              <div class="w-10 h-10 rounded-2xl bg-cyan-500/15 text-cyan-500 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30">
                 📱
               </div>
               <div>
                 <h4 class="text-sm font-black">Everywhere access</h4>
-                <p class="text-xs opacity-80 mt-1 leading-relaxed">
+                <p class="text-xs opacity-85 mt-1 leading-relaxed">
                   View, edit, and manage your files and photos on all your devices using Windows, macOS, Android, iOS, and web apps.
                 </p>
               </div>
@@ -915,7 +917,7 @@
             <a href="/dashboard" class="px-6 py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
               Download now
             </a>
-            <a href="#pricing" class="px-6 py-3.5 rounded-full border border-slate-400/30 hover:bg-white/5 font-bold text-xs transition">
+            <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
               Learn more
             </a>
           </div>
@@ -944,28 +946,28 @@
                     <span>📁</span>
                     <span class="font-bold">Brand Identity Sprint</span>
                   </div>
-                  <span class="text-[10px] font-mono opacity-60">14 items • Synced</span>
+                  <span class="text-[10px] font-mono opacity-70">14 items • Synced</span>
                 </div>
                 <div class="flex items-center justify-between p-2 rounded-xl mockup-item transition">
                   <div class="flex items-center gap-2.5">
                     <span>📁</span>
                     <span class="font-bold">Summer Photos Master</span>
                   </div>
-                  <span class="text-[10px] font-mono opacity-60">82 items • Synced</span>
+                  <span class="text-[10px] font-mono opacity-70">82 items • Synced</span>
                 </div>
                 <div class="flex items-center justify-between p-2 rounded-xl mockup-item transition">
                   <div class="flex items-center gap-2.5">
                     <span>📑</span>
                     <span class="font-bold">Release_Roadmap.pdf</span>
                   </div>
-                  <span class="text-[10px] font-mono opacity-60">4.2 MB • Synced</span>
+                  <span class="text-[10px] font-mono opacity-70">4.2 MB • Synced</span>
                 </div>
                 <div class="flex items-center justify-between p-2 rounded-xl mockup-item transition">
                   <div class="flex items-center gap-2.5">
                     <span>🎬</span>
                     <span class="font-bold">Commercial_Teaser.mp4</span>
                   </div>
-                  <span class="text-[10px] font-mono opacity-60">410 MB • Synced</span>
+                  <span class="text-[10px] font-mono opacity-70">410 MB • Synced</span>
                 </div>
               </div>
             </div>
@@ -997,7 +999,7 @@
               Secure your team's most sensitive work
             </h2>
 
-            <p class="text-sm sm:text-base leading-relaxed max-w-lg opacity-80">
+            <p class="text-sm sm:text-base leading-relaxed max-w-lg opacity-85">
               Help your team collaborate securely, stay compliant, and keep full control over your company's data with zero-knowledge cloud storage.
             </p>
 
@@ -1005,7 +1007,7 @@
               <a href="/auth" class="px-6 py-3.5 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs shadow-md transition">
                 Get Drive for Business
               </a>
-              <a href="#pricing" class="px-6 py-3.5 rounded-full border border-slate-400/30 hover:bg-white/10 font-bold text-xs transition">
+              <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
                 Learn more
               </a>
             </div>
@@ -1072,8 +1074,8 @@
             <tr>
               <td class="py-4 px-6 font-bold">Monthly Price</td>
               <td class="py-4 px-6 text-emerald-500 font-black font-mono text-sm">$4.00 / mo</td>
-              <td class="py-4 px-6 font-mono opacity-60">$12.00 / mo</td>
-              <td class="py-4 px-6 font-mono opacity-60">$4.99 / mo</td>
+              <td class="py-4 px-6 font-mono opacity-70">$12.00 / mo</td>
+              <td class="py-4 px-6 font-mono opacity-70">$4.99 / mo</td>
             </tr>
             <tr>
               <td class="py-4 px-6 font-bold">Zero-Knowledge Architecture</td>
@@ -1090,7 +1092,7 @@
             <tr>
               <td class="py-4 px-6 font-bold">Permanent Cloud Drive Storage</td>
               <td class="py-4 px-6 font-black">200 GB Included</td>
-              <td class="py-4 px-6 opacity-60">Shared pool</td>
+              <td class="py-4 px-6 opacity-70">Shared pool</td>
               <td class="py-4 px-6">200 GB</td>
             </tr>
             <tr>
@@ -1114,7 +1116,7 @@
         Simple, Transparent Pricing
       </span>
       <h2 class="text-3xl sm:text-4xl font-black mt-4 tracking-tight">Choose Your Transfer & Storage Plan</h2>
-      <p class="text-sm opacity-70 max-w-xl mx-auto mt-2">
+      <p class="text-sm opacity-75 max-w-xl mx-auto mt-2">
         Start free forever or unlock a 200 GB permanent encrypted drive and 50 GB single transfers with Zephyr Pro.
       </p>
     </div>
@@ -1127,7 +1129,7 @@
             <h3 class="text-lg font-black">Free Starter</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-white/10 font-bold">Default</span>
           </div>
-          <p class="text-xs opacity-70 mb-6">Permanent cloud drive vault and zero-knowledge ephemeral transfers.</p>
+          <p class="text-xs opacity-75 mb-6">Permanent cloud drive vault and zero-knowledge ephemeral transfers.</p>
           <div class="text-4xl font-black mb-6">
             $0 <span class="text-xs font-normal opacity-60">/ forever</span>
           </div>
@@ -1152,7 +1154,7 @@
           </ul>
         </div>
 
-        <a href="#transferBtn" class="mt-8 block text-center w-full py-3.5 rounded-xl border border-slate-400/30 hover:bg-white/5 text-xs font-bold transition">
+        <a href="#transferBtn" class="quick-btn mt-8 block text-center w-full py-3.5 rounded-xl text-xs font-bold transition">
           Use Free Now
         </a>
       </div>
@@ -1167,7 +1169,7 @@
             <h3 class="text-lg font-black">Zephyr Pro</h3>
             <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-500 font-black border border-indigo-500/30">Pro Member</span>
           </div>
-          <p class="text-xs opacity-70 mb-6">Designed for creative studios, high-resolution media, and power users.</p>
+          <p class="text-xs opacity-75 mb-6">Designed for creative studios, high-resolution media, and power users.</p>
           <div class="text-4xl font-black mb-6">
             $4 <span class="text-xs font-normal opacity-60">/ month</span>
           </div>
