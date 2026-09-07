@@ -12,7 +12,7 @@ from typing import Optional
 
 import boto3
 from botocore.config import Config
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
@@ -83,10 +83,10 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 otp_storage = {}
 
 class SendOtpRequest(BaseModel):
-    email: EmailStr
+    email: str
 
 class VerifyOtpRequest(BaseModel):
-    email: EmailStr
+    email: str
     code: str
 
 @app.post("/api/send-otp")
