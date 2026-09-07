@@ -1,13 +1,18 @@
 import os
 import uuid
+import time
+import random
 import hashlib
+import smtplib
 import traceback
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from typing import Optional
 
 import boto3
 from botocore.config import Config
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
@@ -73,6 +78,80 @@ s3_client = boto3.client(
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
+
+# ----------------- OTP Verification Engine -----------------
+otp_storage = {}
+
+class SendOtpRequest(BaseModel):
+    email: EmailStr
+
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+@app.post("/api/send-otp")
+async def send_verification_otp(req: SendOtpRequest):
+    email = req.email.lower().strip()
+    code = f"{random.randint(100000, 999999)}"
+    otp_storage[email] = {
+        "code": code,
+        "expires": time.time() + 600  # 10 minutes validity
+    }
+
+    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_user = os.getenv("SMTP_USER", "").strip()
+    smtp_pass = os.getenv("SMTP_PASS", "").strip()
+
+    if smtp_user and smtp_pass:
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = f"Your Zephyr Verification Code: {code}"
+            msg["From"] = f"Zephyr Transfers <{smtp_user}>"
+            msg["To"] = email
+
+            html_content = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
+                <h2 style="color: #4f46e5; margin-bottom: 8px;">Zephyr Verification</h2>
+                <p style="font-size: 14px; color: #475569; line-height: 1.5;">To verify your email address and authorize your secure file transfer, enter the following code:</p>
+                <div style="text-align: center; margin: 24px 0;">
+                    <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0f172a; background: #e0e7ff; padding: 10px 24px; border-radius: 12px; border: 1px solid #c7d2fe; display: inline-block;">{code}</span>
+                </div>
+                <p style="font-size: 12px; color: #94a3b8;">This code expires in 10 minutes. If you did not initiate this transfer, please disregard this email.</p>
+            </div>
+            """
+            msg.attach(MIMEText(html_content, "html"))
+
+            with smtplib.SMTP(smtp_host, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(smtp_user, email, msg.as_string())
+        except Exception as e:
+            print(f"[OTP EMAIL DISPATCH ERROR]: {e}")
+    else:
+        print("\n==========================================")
+        print(f"[ZEPHYR VERIFICATION OTP FOR {email}]: {code}")
+        print("==========================================\n")
+
+    return {"message": "Verification code dispatched successfully."}
+
+@app.post("/api/verify-otp")
+async def verify_otp(req: VerifyOtpRequest):
+    email = req.email.lower().strip()
+    entry = otp_storage.get(email)
+
+    if not entry:
+        raise HTTPException(status_code=400, detail="No verification code requested for this email.")
+
+    if time.time() > entry["expires"]:
+        otp_storage.pop(email, None)
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new one.")
+
+    if entry["code"] != req.code.strip():
+        raise HTTPException(status_code=400, detail="Invalid verification code. Please check your inbox.")
+
+    otp_storage.pop(email, None)
+    return {"status": "verified", "email": email}
 
 # ----------------- Brand Assets & Favicon -----------------
 @app.get("/favicon.ico", include_in_schema=False)
@@ -549,7 +628,11 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
             conn.close()
             raise HTTPException(status_code=401, detail="Incorrect passcode.")
 
-    url = s3_client.generate_presigned_url("get_object", Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'}, ExpiresIn=3600)
+    url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'},
+        ExpiresIn=3600
+    )
     new_count = row["downloads"] + 1
     cursor.execute("UPDATE shares SET downloads = %s WHERE id = %s", (new_count, share_id))
     conn.commit()
@@ -572,7 +655,7 @@ async def get_user_profile(user_id: str):
     conn.close()
     if not row:
         return {"tier": "free", "user_id": user_id}
-    return {"tier": row["tier"], "email": row["email"], "user_id": row["user_id"]}
+    return {"tier": row.get("tier", "free"), "email": row.get("email"), "user_id": row.get("user_id")}
 
 @app.post("/api/webhook/lemonsqueezy")
 async def lemon_webhook(request: Request):
