@@ -25,7 +25,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Fixed Mountain Backdrop */
+    /* Fixed Seamless Mountain Backdrop */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
@@ -65,8 +65,8 @@
 
     /* DEFAULT (DARK MODE) FORM INPUTS */
     input, textarea, select {
-      background-color: rgba(15, 23, 42, 0.72) !important;
-      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      background-color: rgba(15, 23, 42, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.22) !important;
       color: #ffffff !important;
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
     }
@@ -160,7 +160,7 @@
     }
 
     body.light-theme .obsidian-panel {
-      background: rgba(248, 250, 252, 0.84);
+      background: rgba(248, 250, 252, 0.85);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border: 1px solid rgba(255, 255, 255, 0.75);
@@ -504,7 +504,7 @@
       </div>
 
       <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-photo-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
-        <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-white/15">
+        <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-400/20">
           <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=120&h=120&q=80" alt="Ridge Cut" class="w-full h-full object-cover">
           <span class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white">▶</span>
         </div>
@@ -522,133 +522,179 @@
         <input type="file" id="fileInput" multiple class="hidden">
         <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
 
-        <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
-          <div class="flex items-center bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
-            <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer">
-              Get link
-            </button>
-            <button id="modeEmailBtn" onclick="switchTransferMode('email')" class="inactive-tab px-4 py-2 rounded-lg font-bold opacity-70 hover:opacity-100 transition cursor-pointer">
-              Send email
-            </button>
-          </div>
-
-          <span id="tierCapBadge" class="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20">
-            Free: 2 GB limit
-          </span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3.5 mb-5">
-          <button onclick="handleFileSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/10 border-2 border-dashed border-white/15 hover:border-indigo-400 transition duration-200 group cursor-pointer">
-            <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        <!-- VIEW A: STANDARD TRANSFER VIEW -->
+        <div id="transferStandardView">
+          <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+            <div class="flex items-center bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
+              <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer">
+                Get link
+              </button>
+              <button id="modeEmailBtn" onclick="switchTransferMode('email')" class="inactive-tab px-4 py-2 rounded-lg font-bold opacity-70 hover:opacity-100 transition cursor-pointer">
+                Send email
+              </button>
             </div>
-            <span class="text-xs font-black">Add files</span>
-            <span class="text-[11px] opacity-65 mt-0.5 font-medium">Documents, video, audio</span>
-          </button>
 
-          <button onclick="handleFolderSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition duration-200 group cursor-pointer">
-            <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-            </div>
-            <span class="text-xs font-black">Add folders</span>
-            <span class="text-[11px] opacity-65 mt-0.5 font-medium">Retain directory hierarchy</span>
-          </button>
-        </div>
-
-        <div id="selectedFilesSummary" class="hidden bg-indigo-500/15 border border-indigo-500/30 rounded-2xl p-4 mb-4 space-y-2">
-          <div class="flex items-center justify-between text-xs font-bold">
-            <span id="selectedFilesCountText" class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-              <span>0 files queued</span>
+            <span id="tierCapBadge" class="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20">
+              Free: 2 GB limit
             </span>
-            <span id="selectedFilesSizeText" class="font-mono text-indigo-400 font-extrabold text-sm">0 MB</span>
-          </div>
-          <div id="selectedFilesList" class="max-h-24 overflow-y-auto space-y-1.5 custom-scroll pr-1"></div>
-        </div>
-
-        <div class="space-y-3.5">
-          <div id="emailFieldsGroup" class="space-y-2.5 hidden">
-            <div>
-              <label class="block text-xs font-bold mb-1">Recipient Email</label>
-              <input id="emailTo" type="email" placeholder="client@company.com" 
-                     class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1">Your Email</label>
-              <input id="emailFrom" type="email" placeholder="you@studio.com" 
-                     class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-            </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold mb-1">Title</label>
-            <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
+          <div class="grid grid-cols-2 gap-3.5 mb-5">
+            <button onclick="handleFileSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/10 border-2 border-dashed border-white/15 hover:border-indigo-400 transition duration-200 group cursor-pointer">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              </div>
+              <span class="text-xs font-black">Add files</span>
+              <span class="text-[11px] opacity-65 mt-0.5 font-medium">Documents, video, audio</span>
+            </button>
+
+            <button onclick="handleFolderSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition duration-200 group cursor-pointer">
+              <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              </div>
+              <span class="text-xs font-black">Add folders</span>
+              <span class="text-[11px] opacity-65 mt-0.5 font-medium">Retain directory hierarchy</span>
+            </button>
+          </div>
+
+          <div id="selectedFilesSummary" class="hidden bg-indigo-500/15 border border-indigo-500/30 rounded-2xl p-4 mb-4 space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span id="selectedFilesCountText" class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>0 files queued</span>
+              </span>
+              <span id="selectedFilesSizeText" class="font-mono text-indigo-400 font-extrabold text-sm">0 MB</span>
+            </div>
+            <div id="selectedFilesList" class="max-h-24 overflow-y-auto space-y-1.5 custom-scroll pr-1"></div>
+          </div>
+
+          <div class="space-y-3.5">
+            <div id="emailFieldsGroup" class="space-y-2.5 hidden">
+              <div>
+                <label class="block text-xs font-bold mb-1">Recipient Email</label>
+                <input id="emailTo" type="email" placeholder="client@company.com" 
+                       class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block text-xs font-bold mb-1">Your Email</label>
+                <input id="emailFrom" type="email" placeholder="you@studio.com" 
+                       class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold mb-1">Title</label>
+              <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
                    class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold mb-1">Message</label>
-            <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                      class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
-          </div>
-
-          <div class="flex items-center gap-2 pt-1">
-            <div class="flex-1">
-              <select id="expiryHours" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
-                <option value="1">Expire in 1 Hour</option>
-                <option value="24" selected>Expire in 24 Hours</option>
-                <option value="72">Expire in 3 Days</option>
-                <option value="0">Never (Store in Drive Vault)</option>
-              </select>
             </div>
 
-            <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
-                    class="quick-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-              <span>Security</span>
+            <div>
+              <label class="block text-xs font-bold mb-1">Message</label>
+              <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
+                        class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <div class="flex-1">
+                <select id="expiryHours" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
+                  <option value="1">Expire in 1 Hour</option>
+                  <option value="24" selected>Expire in 24 Hours</option>
+                  <option value="72">Expire in 3 Days</option>
+                  <option value="0">Never (Store in Drive Vault)</option>
+                </select>
+              </div>
+
+              <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
+                      class="quick-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                <span>Security</span>
+              </button>
+            </div>
+
+            <div id="securityDrawer" class="hidden p-4 rounded-2xl bg-black/40 border border-slate-400/20 space-y-3">
+              <div>
+                <label class="block text-xs font-bold mb-1">Passcode Protection</label>
+                <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
+                       class="w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block text-xs font-bold mb-1">Max Downloads (Burn-on-Read)</label>
+                <select id="maxDownloads" class="w-full border rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
+                  <option value="0" selected>Unlimited Downloads</option>
+                  <option value="1">1 (Burn on Read 🔥)</option>
+                  <option value="5">5 Downloads</option>
+                  <option value="10">10 Downloads</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="progressBox" class="hidden space-y-1.5 pt-1">
+              <div class="flex justify-between text-xs font-bold">
+                <span id="progressStatus">Encrypting payload...</span>
+                <span id="progressPercent" class="font-mono text-indigo-400 font-black">0%</span>
+              </div>
+              <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <button id="transferBtn" onclick="initiateTransfer()" 
+                    class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+              Transfer Files
             </button>
           </div>
 
-          <div id="securityDrawer" class="hidden p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
-            <div>
-              <label class="block text-xs font-bold mb-1">Passcode Protection</label>
-              <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
-                     class="w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1">Max Downloads (Burn-on-Read)</label>
-              <select id="maxDownloads" class="w-full border rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
-                <option value="0" selected>Unlimited Downloads</option>
-                <option value="1">1 (Burn on Read 🔥)</option>
-                <option value="5">5 Downloads</option>
-                <option value="10">10 Downloads</option>
-              </select>
+          <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-2">
+            <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
+            <div class="flex items-center gap-2">
+              <input id="shareUrlInput" type="text" readonly class="flex-1 border rounded-xl px-3.5 py-2.5 text-xs text-indigo-400 font-mono font-bold focus:outline-none">
+              <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
+                Copy
+              </button>
             </div>
           </div>
-
-          <div id="progressBox" class="hidden space-y-1.5 pt-1">
-            <div class="flex justify-between text-xs font-bold">
-              <span id="progressStatus">Encrypting payload...</span>
-              <span id="progressPercent" class="font-mono text-indigo-400 font-black">0%</span>
-            </div>
-            <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-white/10">
-              <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <button id="transferBtn" onclick="initiateTransfer()" 
-                  class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
-            Transfer Files
-          </button>
         </div>
 
-        <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-2">
-          <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
-          <div class="flex items-center gap-2">
-            <input id="shareUrlInput" type="text" readonly class="flex-1 rounded-xl px-3.5 py-2.5 text-xs text-indigo-400 font-mono font-bold focus:outline-none">
-            <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
-              Copy
-            </button>
+        <!-- VIEW B: WETRANSFER-STYLE EMAIL VERIFICATION VIEW -->
+        <div id="transferVerificationView" class="hidden space-y-5">
+          <div class="text-left space-y-2">
+            <h2 class="text-2xl font-black tracking-tight">Enter verification code</h2>
+            <p class="text-xs opacity-75 leading-relaxed">
+              To ensure safety for all our users, we need to verify your email. Insert the code we sent to:
+              <br/>
+              <strong id="verificationEmailDisplay" class="text-indigo-400 font-mono font-bold text-sm block mt-1"></strong>
+            </p>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <div>
+              <label class="block text-xs font-bold opacity-80 mb-1.5">Verification Code</label>
+              <input id="emailOtpInput" type="text" maxlength="6" placeholder="Enter verification code" 
+                     class="w-full rounded-2xl px-4 py-3.5 text-center text-lg tracking-[0.3em] font-mono font-bold focus:outline-none transition">
+            </div>
+
+            <div class="flex items-center justify-between text-xs pt-1">
+              <button type="button" id="resendOtpBtn" onclick="resendOtpCode()" class="text-indigo-400 hover:underline font-bold cursor-pointer">
+                Resend code
+              </button>
+              <a href="https://mail.google.com" target="_blank" class="opacity-70 hover:opacity-100 flex items-center gap-1 font-medium">
+                <span>Open Gmail</span> ↗
+              </a>
+            </div>
+
+            <div id="otpErrorBox" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-center font-bold"></div>
+
+            <div class="flex items-center gap-3 pt-3">
+              <button type="button" onclick="cancelVerificationView()" title="Back to transfer details"
+                      class="w-14 py-3.5 rounded-2xl border border-white/20 bg-white/5 hover:bg-white/10 flex items-center justify-center font-bold text-base transition cursor-pointer">
+                &larr;
+              </button>
+
+              <button type="button" id="verifyOtpSubmitBtn" onclick="submitEmailVerificationOtp()"
+                      class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+                Verify & Transfer
+              </button>
+            </div>
           </div>
         </div>
 
@@ -773,7 +819,7 @@
               <p class="text-[10px] opacity-85">Shareable link for <strong>Wedding_Plan.pdf</strong></p>
               
               <div class="flex items-center gap-1.5 bg-black/40 rounded-xl p-1 border border-white/15">
-                <input type="text" readonly value="https://zephyr.me/urls/TG0D..." class="flex-1 bg-transparent px-2 text-[10px] font-mono focus:outline-none">
+                <input type="text" readonly value="https://zephyr.me/urls/TG0D..." class="flex-1 bg-transparent px-2 text-[10px] text-indigo-300 font-mono focus:outline-none">
                 <span class="px-2.5 py-1 bg-indigo-600 rounded-lg text-[10px] font-bold text-white shadow-sm">Copy link</span>
               </div>
             </div>
@@ -816,7 +862,7 @@
               <h4 class="text-lg font-black mt-0.5">Family & Friends</h4>
               
               <div class="flex items-center gap-2 mt-2">
-                <button class="px-3 py-1 bg-white/10 rounded-lg text-[11px] font-bold border border-white/10 flex items-center gap-1">
+                <button class="px-3 py-1 bg-white/10 rounded-lg text-[11px] font-bold border border-slate-400/20 flex items-center gap-1">
                   <span>+</span> Add
                 </button>
                 <button class="px-3 py-1 bg-indigo-600/30 text-indigo-500 rounded-lg text-[11px] font-bold border border-indigo-500/30 flex items-center gap-1">
@@ -1127,7 +1173,6 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
-      
       <div class="obsidian-panel rounded-3xl p-8 flex flex-col justify-between hover:border-slate-400/40 transition">
         <div>
           <div class="flex justify-between items-center mb-4">
@@ -1151,10 +1196,6 @@
             <li class="flex items-center gap-2.5">
               <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
               <span>Burn-on-Read & download limit gating</span>
-            </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-              <span>Folder directory tree uploads supported</span>
             </li>
           </ul>
         </div>
@@ -1206,18 +1247,13 @@
     </div>
   </section>
 
-  <!-- ========================================================================= -->
-  <!-- SECTION 7: FULL FAQ ACCORDION                                             -->
-  <!-- ========================================================================= -->
+  <!-- Full FAQ Accordion -->
   <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-12">
       <span class="text-xs font-black uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
         Knowledge Base
       </span>
       <h3 class="text-2xl sm:text-3xl font-black mt-3">Frequently Asked Questions</h3>
-      <p class="text-xs opacity-70 max-w-md mx-auto mt-2">
-        Everything you need to know about encrypted transfers, permanent drive storage, and zero-knowledge privacy.
-      </p>
     </div>
 
     <div class="space-y-4">
@@ -1227,67 +1263,17 @@
           <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          Yes. You can upload 4K video footage, photo galleries, spreadsheets, and archives directly into your encrypted Zephyr Drive vault (5 GB Free or 200 GB on Pro). Once uploaded, you can safely delete the local files from your phone or PC and stream or download them whenever required.
+          Yes. You can upload 4K video footage, photo galleries, spreadsheets, and archives directly into your encrypted Zephyr Drive vault (5 GB Free or 200 GB on Pro).
         </p>
       </details>
 
       <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
         <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>What is the difference between Zephyr Transfer and Zephyr Drive?</span>
+          <span>Can Zephyr or third parties view my transferred files?</span>
           <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          <strong>Zephyr Transfer</strong> is built for disposable handoffs—links automatically expire (1h to 72h) or self-destruct after 1 download. <strong>Zephyr Drive</strong> is a permanent cloud file manager where your uploaded media stays safely preserved until you intentionally delete it.
-        </p>
-      </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>Can Zephyr, hosting providers, or third parties view my files?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          No. Zephyr operates on zero-knowledge architecture. When passcodes are used, key derivation occurs on your local browser. Zephyr stores encrypted blobs across Cloudflare R2 edge locations without storing your plaintext passwords or keys in our databases.
-        </p>
-      </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>How does the "Burn on Read" feature work?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          When "Max Downloads" is set to <strong>1 (Burn on Read 🔥)</strong>, the file object is permanently purged from Cloudflare R2 edge servers the exact millisecond the recipient's download stream completes. Any subsequent access displays a permanent expiration notice.
-        </p>
-      </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>Can I share files stored in my Zephyr Drive with others?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          Yes. In your Drive dashboard, clicking the <strong>Share Link</strong> button next to any stored file copies a direct, secure presigned download link to your clipboard without re-uploading the data.
-        </p>
-      </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>What happens if I reach the 5 GB Free Drive limit?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          Your existing files remain completely secure and downloadable. To upload more files, you can delete old items to free up space or upgrade to <strong>Zephyr Pro ($4/mo)</strong> for 200 GB of drive storage and 50 GB single uploads.
-        </p>
-      </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>Are downloads capped or bandwidth-throttled?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          No. Because Zephyr is powered by Cloudflare R2's zero-egress edge infrastructure, downloads are never throttled, and transfer recipients do not need an account to download files.
+          No. Zephyr operates on zero-knowledge architecture. When passcodes are used, key derivation occurs on your local browser.
         </p>
       </details>
     </div>
@@ -1296,28 +1282,7 @@
   <!-- Footer -->
   <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-10 px-6 text-center text-xs opacity-80">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/10 p-1 flex items-center justify-center shadow-sm">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-            <defs>
-              <linearGradient id="footerRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="60%" stop-color="#6366f1"/>
-                <stop offset="100%" stop-color="#4338ca"/>
-              </linearGradient>
-              <linearGradient id="footerRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#c084fc"/>
-                <stop offset="50%" stop-color="#818cf8"/>
-                <stop offset="100%" stop-color="#06b6d4"/>
-              </linearGradient>
-            </defs>
-            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#footerRibbonCyan)"/>
-            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#footerRibbonViolet)"/>
-            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#footerRibbonCyan)"/>
-          </svg>
-        </div>
-        <span class="font-bold">© 2026 Zephyr Systems. Zero-knowledge transfers and Cloud Drive.</span>
-      </div>
+      <span>© 2026 Zephyr Systems. Zero-knowledge transfers and Cloud Drive.</span>
       <div class="flex items-center gap-6">
         <a href="/privacy" class="hover:underline transition font-bold">Privacy Policy</a>
         <span class="opacity-40">•</span>
@@ -1326,9 +1291,7 @@
     </div>
   </footer>
 
-  <!-- ========================================================================= -->
-  <!-- SCRIPTS: TRANSLATION ENGINE & THEME TOGGLE                                -->
-  <!-- ========================================================================= -->
+  <!-- Translation Engine -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
@@ -1345,6 +1308,7 @@
   </script>
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
+  <!-- Core Pipeline & Email OTP Scripts -->
   <script>
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -1370,8 +1334,11 @@
     let transferMode = 'link';
     let selectedFiles = [];
     let userTier = 'free';
+    let pendingOtpEmail = null;
 
     function getStoredUserEmail() {
+      const direct = localStorage.getItem("user_email") || localStorage.getItem("vp_user_email");
+      if (direct) return direct;
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
@@ -1430,16 +1397,6 @@
           if (data.tier === 'pro') {
             userTier = 'pro';
             document.getElementById("tierCapBadge").innerText = "Pro: 50 GB limit";
-            const select = document.getElementById("expiryHours");
-            select.innerHTML = `
-              <option value="1">Expire in 1 Hour</option>
-              <option value="24">Expire in 24 Hours</option>
-              <option value="72">Expire in 3 Days</option>
-              <option value="168">Expire in 7 Days</option>
-              <option value="336">Expire in 14 Days</option>
-              <option value="720">Expire in 30 Days</option>
-              <option value="0" selected>Never (Store in Drive Vault)</option>
-            `;
           }
         })
         .catch(() => {});
@@ -1455,6 +1412,11 @@
         emailBtn.className = "px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer";
         linkBtn.className = "inactive-tab px-4 py-2 rounded-lg font-bold opacity-70 hover:opacity-100 transition cursor-pointer";
         emailGroup.classList.remove("hidden");
+        
+        const yourEmailInput = document.getElementById("emailFrom");
+        if (currentUserEmail && !yourEmailInput.value) {
+          yourEmailInput.value = currentUserEmail;
+        }
       } else {
         linkBtn.className = "px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer";
         emailBtn.className = "inactive-tab px-4 py-2 rounded-lg font-bold opacity-70 hover:opacity-100 transition cursor-pointer";
@@ -1463,30 +1425,23 @@
     }
 
     function toggleSecurityOptions() {
-      const drawer = document.getElementById("securityDrawer");
-      drawer.classList.toggle("hidden");
+      document.getElementById("securityDrawer").classList.toggle("hidden");
     }
 
     function handleFileSelectClick() {
-      if (!currentUserId && parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10) >= 4) {
-        document.getElementById("authRequiredModal").classList.remove("hidden");
-        return;
-      }
       document.getElementById("fileInput").click();
     }
 
     function handleFolderSelectClick() {
-      if (!currentUserId && parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10) >= 4) {
-        document.getElementById("authRequiredModal").classList.remove("hidden");
-        return;
-      }
       document.getElementById("folderInput").click();
     }
 
+    document.getElementById("fileInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
+    document.getElementById("folderInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
+
     function processSelectedItems(fileList) {
       if (!fileList.length) return;
-      const newItems = Array.from(fileList);
-      selectedFiles = selectedFiles.concat(newItems);
+      selectedFiles = selectedFiles.concat(Array.from(fileList));
       updateQueueUI();
     }
 
@@ -1500,44 +1455,87 @@
         summary.classList.add("hidden");
         return;
       }
-
       summary.classList.remove("hidden");
-
       let totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-      let totalMb = (totalBytes / (1024 * 1024)).toFixed(2);
-
-      if (userTier !== 'pro' && totalMb > 2048) {
-        document.getElementById("limitModal").classList.remove("hidden");
-        selectedFiles = [];
-        summary.classList.add("hidden");
-        return;
-      }
-
-      countEl.innerHTML = `<svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> <span>${selectedFiles.length} item(s) selected</span>`;
-      sizeEl.innerText = `${totalMb} MB`;
+      countEl.innerHTML = `<span>${selectedFiles.length} item(s) selected</span>`;
+      sizeEl.innerText = `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
 
       listEl.innerHTML = selectedFiles.map((file, idx) => `
-        <div class="flex items-center justify-between text-xs bg-slate-900/40 px-3 py-2 rounded-xl border border-slate-400/25">
-          <span class="truncate max-w-xs font-mono">${file.webkitRelativePath || file.name}</span>
-          <button onclick="removeFileFromQueue(${idx})" class="hover:text-rose-500 ml-2 cursor-pointer font-black">✕</button>
+        <div class="flex items-center justify-between text-xs px-3 py-2 rounded-xl border border-white/10 bg-black/40">
+          <span class="truncate max-w-xs font-mono">${file.name}</span>
+          <button onclick="selectedFiles.splice(${idx}, 1); updateQueueUI();" class="cursor-pointer font-black hover:text-rose-400">✕</button>
         </div>
       `).join('');
     }
 
-    function removeFileFromQueue(idx) {
-      selectedFiles.splice(idx, 1);
-      updateQueueUI();
+    // --- WeTransfer-Style Email Verification View Logic ---
+    function cancelVerificationView() {
+      document.getElementById("transferVerificationView").classList.add("hidden");
+      document.getElementById("transferStandardView").classList.remove("hidden");
     }
 
-    document.getElementById("fileInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
-    document.getElementById("folderInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
+    async function resendOtpCode() {
+      if (!pendingOtpEmail) return;
+      const resendBtn = document.getElementById("resendOtpBtn");
+      resendBtn.disabled = true;
+      resendBtn.innerText = "Sending code...";
+      try {
+        await fetch("/api/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: pendingOtpEmail })
+        });
+        alert(`A new verification code was sent to ${pendingOtpEmail}!`);
+      } catch (e) {
+        alert("Failed to resend code.");
+      }
+      resendBtn.disabled = false;
+      resendBtn.innerText = "Resend code";
+    }
 
-    async function initiateTransfer() {
-      if (!currentUserId && parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10) >= 4) {
-        document.getElementById("authRequiredModal").classList.remove("hidden");
+    async function submitEmailVerificationOtp() {
+      const otpInput = document.getElementById("emailOtpInput");
+      const errBox = document.getElementById("otpErrorBox");
+      const submitBtn = document.getElementById("verifyOtpSubmitBtn");
+      const code = otpInput.value.trim();
+
+      errBox.classList.add("hidden");
+
+      if (!code || code.length < 4) {
+        errBox.innerText = "Please enter the verification code.";
+        errBox.classList.remove("hidden");
         return;
       }
 
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Verifying...";
+
+      try {
+        const res = await fetch("/api/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: pendingOtpEmail, code: code })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Invalid or expired verification code.");
+        }
+
+        // Return to standard view and start upload
+        cancelVerificationView();
+        executeTransferPayload();
+
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.classList.remove("hidden");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Verify & Transfer";
+      }
+    }
+
+    async function initiateTransfer() {
       if (!selectedFiles.length) {
         alert("Please add files or a folder to transfer first.");
         return;
@@ -1545,12 +1543,54 @@
 
       if (transferMode === 'email') {
         const toEmail = document.getElementById("emailTo").value.trim();
+        const fromEmail = document.getElementById("emailFrom").value.trim();
+
         if (!toEmail) {
           alert("Please enter the recipient's email address.");
+          document.getElementById("emailTo").focus();
           return;
         }
+        if (!fromEmail) {
+          alert("Please enter your email address in the 'Your Email' field.");
+          document.getElementById("emailFrom").focus();
+          return;
+        }
+
+        // Set email and show verification screen
+        pendingOtpEmail = fromEmail;
+        document.getElementById("verificationEmailDisplay").innerText = fromEmail;
+        document.getElementById("emailOtpInput").value = "";
+        document.getElementById("otpErrorBox").classList.add("hidden");
+
+        // Send OTP to the "Your Email" inbox
+        try {
+          const otpRes = await fetch("/api/send-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: fromEmail })
+          });
+          if (!otpRes.ok) {
+            const errData = await otpRes.json();
+            alert(errData.detail || "Failed to send verification code. Please check your email address.");
+            return;
+          }
+        } catch (e) {
+          alert("Could not reach server to send verification code.");
+          return;
+        }
+
+        // Switch to OTP Verification View
+        document.getElementById("transferStandardView").classList.add("hidden");
+        document.getElementById("transferVerificationView").classList.remove("hidden");
+        document.getElementById("emailOtpInput").focus();
+        return;
       }
 
+      // Link mode directly transfers
+      executeTransferPayload();
+    }
+
+    async function executeTransferPayload() {
       const transferBtn = document.getElementById("transferBtn");
       const progressBox = document.getElementById("progressBox");
       const progressBar = document.getElementById("progressBar");
@@ -1565,18 +1605,10 @@
       progressBar.style.width = "10%";
       progressPercent.innerText = "10%";
 
-      const primaryFile = selectedFiles[0];
-      const packageName = selectedFiles.length > 1 
-        ? (document.getElementById("transferTitle").value.trim() || `${primaryFile.name} and ${selectedFiles.length - 1} other files`) 
-        : primaryFile.name;
-
-      const totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-      const totalMb = parseFloat((totalBytes / (1024 * 1024)).toFixed(2));
-
       try {
         const payload = {
-          filename: packageName,
-          filesize_mb: totalMb,
+          filename: selectedFiles[0].name,
+          filesize_mb: parseFloat((selectedFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(2)),
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
           max_downloads: parseInt(document.getElementById("maxDownloads").value),
@@ -1589,18 +1621,12 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || "Failed to initialize vault share.");
-        }
-
+        if (!res.ok) throw new Error("Failed to initialize share.");
         const data = await res.json();
-        progressStatus.innerText = "Streaming to Cloudflare R2 edge...";
 
+        progressStatus.innerText = "Streaming to Cloudflare R2 edge...";
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
-        xhr.setRequestHeader("Content-Type", primaryFile.type || "application/octet-stream");
-
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             const pct = Math.round((e.loaded / e.total) * 88) + 10;
@@ -1608,41 +1634,22 @@
             progressPercent.innerText = `${pct}%`;
           }
         };
-
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             progressStatus.innerText = "Vault encrypted & active!";
             progressBar.style.width = "100%";
             progressPercent.innerText = "100%";
-
-            if (!currentUserId) {
-              const current = parseInt(localStorage.getItem("vp_guest_uploads") || "0", 10);
-              localStorage.setItem("vp_guest_uploads", (current + 1).toString());
-            }
-
-            const shareUrl = `${window.location.origin}/share/${data.share_id}`;
-            document.getElementById("shareUrlInput").value = shareUrl;
+            document.getElementById("shareUrlInput").value = `${window.location.origin}/share/${data.share_id}`;
             resultBox.classList.remove("hidden");
             transferBtn.disabled = false;
-
-            if (transferMode === 'email') {
-              alert(`Transfer link generated and scheduled for delivery to ${document.getElementById("emailTo").value}!`);
-            }
+            if (transferMode === 'email') alert(`Transfer link generated and scheduled for delivery to ${document.getElementById("emailTo").value}!`);
           } else {
-            alert("Upload failed. Server returned status: " + xhr.status);
+            alert("Upload failed.");
             progressBox.classList.add("hidden");
             transferBtn.disabled = false;
           }
         };
-
-        xhr.onerror = () => {
-          alert("Network failure during transfer upload.");
-          progressBox.classList.add("hidden");
-          transferBtn.disabled = false;
-        };
-
-        xhr.send(primaryFile);
-
+        xhr.send(selectedFiles[0]);
       } catch(err) {
         alert(err.message);
         progressBox.classList.add("hidden");
@@ -1651,8 +1658,7 @@
     }
 
     function copyResultLink() {
-      const input = document.getElementById("shareUrlInput");
-      navigator.clipboard.writeText(input.value);
+      navigator.clipboard.writeText(document.getElementById("shareUrlInput").value);
       alert("Vault transfer link copied to clipboard!");
     }
 
@@ -1663,9 +1669,7 @@
 
     function generateClientRequestLink() {
       const proj = document.getElementById("reqProjectTitle").value.trim() || "Client-Deposit";
-      const randomCode = Math.random().toString(36).substring(2, 9);
-      const reqUrl = `${window.location.origin}/#dropZone?request=${randomCode}&title=${encodeURIComponent(proj)}`;
-      document.getElementById("reqLinkInput").value = reqUrl;
+      document.getElementById("reqLinkInput").value = `${window.location.origin}/#dropZone?request=req_${Math.random().toString(36).substring(2, 9)}&title=${encodeURIComponent(proj)}`;
       document.getElementById("reqResultBox").classList.remove("hidden");
     }
 
