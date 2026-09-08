@@ -78,7 +78,7 @@ s3_client = boto3.client(
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 
-# ----------------- OTP Verification Engine (Resend HTTP API) -----------------
+# ----------------- OTP Verification Engine (Brevo HTTP API) -----------------
 otp_storage = {}
 
 class SendOtpRequest(BaseModel):
@@ -97,13 +97,14 @@ async def send_verification_otp(req: SendOtpRequest):
         "expires": time.time() + 600  # 10 minutes validity
     }
 
-    resend_api_key = os.getenv("RESEND_API_KEY", "").strip()
+    brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
+    sender_email = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
-    if not resend_api_key:
+    if not brevo_api_key:
         print(f"\n[ZEPHYR BACKUP LOG - OTP FOR {target_email}]: {code}\n")
         raise HTTPException(
             status_code=500, 
-            detail="RESEND_API_KEY missing on server. Add RESEND_API_KEY in Render Environment."
+            detail="BREVO_API_KEY missing on server. Add BREVO_API_KEY in Render Environment."
         )
 
     html_content = f"""
@@ -118,30 +119,31 @@ async def send_verification_otp(req: SendOtpRequest):
     """
 
     payload = {
-        "from": "Zephyr Transfers <onboarding@resend.dev>",
-        "to": [target_email],
+        "sender": {"name": "Zephyr Transfers", "email": sender_email},
+        "to": [{"email": target_email}],
         "subject": f"Your Zephyr Verification Code: {code}",
-        "html": html_content
+        "htmlContent": html_content
     }
 
     req_data = json.dumps(payload).encode("utf-8")
     http_req = urllib.request.Request(
-        "https://api.resend.com/emails",
+        "https://api.brevo.com/v3/smtp/email",
         data=req_data,
         headers={
-            "Authorization": f"Bearer {resend_api_key}",
-            "Content-Type": "application/json"
+            "api-key": brevo_api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
         },
         method="POST"
     )
 
     try:
         with urllib.request.urlopen(http_req, timeout=15) as response:
-            if response.status != 200 and response.status != 201:
-                raise Exception(f"Resend API returned status {response.status}")
+            if response.status not in (200, 201, 202):
+                raise Exception(f"Brevo API returned status {response.status}")
     except Exception as e:
-        print(f"[RESEND API ERROR]: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to send email via Resend API: {str(e)}")
+        print(f"[BREVO API ERROR]: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email via Brevo API: {str(e)}")
 
     return {"message": "Verification code dispatched successfully."}
 
