@@ -1261,6 +1261,7 @@
         Knowledge Base
       </span>
       <h3 class="text-2xl sm:text-3xl font-black mt-3">Frequently Asked Questions</h3>
+      <p class="text-xs opacity-70 mt-2 font-medium">Everything you need to know about encrypted transfers, storage quotas, and security protocols.</p>
     </div>
 
     <div class="space-y-4">
@@ -1270,7 +1271,7 @@
           <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          Yes. You can upload 4K video footage, photo galleries, spreadsheets, and archives directly into your encrypted Zephyr Drive vault (5 GB Free or 200 GB on Pro).
+          Yes. You can upload 4K video footage, raw photo galleries, archives, and documents directly to your encrypted Zephyr Drive vault (5 GB Free or 200 GB on Pro). Once uploaded, you can safely delete the local copies from your device.
         </p>
       </details>
 
@@ -1280,7 +1281,77 @@
           <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
         </summary>
         <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          No. Zephyr operates on zero-knowledge architecture. When passcodes are used, key derivation occurs on your local browser.
+          No. Zephyr operates on a zero-knowledge architecture. When client-side passcodes are enabled, key derivation and payload hashing occur entirely inside your browser. No unencrypted keys or passcodes are ever written to our server logs or databases.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>What is the maximum file transfer size allowed?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          The Free Starter tier supports single file packages up to <strong>2.00 GB</strong> per transfer. Upgrading to <strong>Zephyr Pro ($4/mo)</strong> expands your transfer pipeline to <strong>50 GB</strong> per single transfer and provides a permanent 200 GB cloud vault.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>How does the Burn-on-Read (self-shredding) feature work?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          When you set the download limit to <strong>1 (Burn on Read 🔥)</strong> under Security options, the underlying object stored in our Cloudflare R2 edge pipe is immediately purged the millisecond the recipient finishes their download. The link is permanently destroyed and cannot be accessed again.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>How does sender email verification and OTP security work?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          To prevent spoofing and spam abuse, email transfers require a 6-digit verification code sent directly to the address provided in "Your Email". Each OTP is valid for <strong>3 minutes</strong>. If an incorrect code is entered <strong>4 consecutive times</strong>, that address is placed into a strict <strong>30-minute security lockout</strong>.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>Do recipients need a Zephyr account to download files?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          No. Anyone receiving a Zephyr transfer link or email notification can click and download the files immediately in their web browser without registering an account, installing software, or paying any fees.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>Can I upload complete folders with their directory structure intact?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          Yes. Click the <strong>Add folders</strong> button on the transfer dashboard to select an entire directory tree. Zephyr maps your relative file paths to keep nested subfolders organized exactly as they appear on your local hard drive.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>How long do transfer links stay active before expiring?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          You can select link lifetimes of <strong>1 Hour</strong>, <strong>24 Hours</strong>, or <strong>3 Days</strong>. Pro members can also choose extended retention windows or set transfers to <strong>Never Expire</strong> to archive them permanently in their Cloud Drive Vault.
+        </p>
+      </details>
+
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>What is the Client File Request link?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          The <strong>Request</strong> feature generates a branded drop portal link you can send to clients or collaborators. Anyone with the link can deposit massive video footage or assets directly into your personal Zephyr Vault without needing to create an account.
         </p>
       </details>
     </div>
