@@ -278,7 +278,7 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
     try:
         with urllib.request.urlopen(http_req, timeout=15) as response:
             if response.status not in (200, 201, 202):
-                raise Exception(f"Brevo returned status {response.status}")
+                raise Exception(f"Brevo API returned status {response.status}")
     except Exception as e:
         print(f"[RECIPIENT NOTIFICATION ERROR]: {e}")
         raise HTTPException(status_code=500, detail=f"Files uploaded, but failed to email recipient: {str(e)}")
@@ -600,6 +600,102 @@ async def upload_drive_file(request: Request, filename: str, user_id: str):
     conn.close()
 
     return {"status": "success", "file_id": file_id}
+
+@app.post("/api/drive/upload-client")
+async def upload_client_deposit(
+    request: Request,
+    owner_id: str,
+    filename: str,
+    project_title: str = "Client Deposit",
+    client_name: str = "Client",
+    client_email: str = ""
+):
+    if not owner_id:
+        raise HTTPException(status_code=400, detail="Owner ID is required.")
+
+    file_bytes = await request.body()
+    file_size = len(file_bytes)
+    content_type = request.headers.get("content-type", "application/octet-stream")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes, email FROM users WHERE user_id = %s", (owner_id,))
+    owner = cursor.fetchone()
+
+    if not owner:
+        cursor.execute("INSERT INTO users (user_id, tier, storage_used_bytes, storage_quota_bytes) VALUES (%s, 'free', 0, 5368709120)", (owner_id,))
+        conn.commit()
+        used = 0
+        quota = 5368709120
+        owner_email = None
+    else:
+        used = owner.get("storage_used_bytes") or 0
+        quota = owner.get("storage_quota_bytes") or 5368709120
+        owner_email = owner.get("email")
+
+    if (used + file_size) > quota:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Recipient vault storage quota is full.")
+
+    file_id = uuid.uuid4().hex
+    stored_filename = f"[{project_title}] {filename}" if project_title else filename
+    s3_key = f"drive/{owner_id}/{file_id}_{filename}"
+
+    try:
+        s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=s3_key, Body=file_bytes, ContentType=content_type)
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"R2 Cloud storage error: {str(e)}")
+
+    cursor.execute("""
+        INSERT INTO drive_files (id, user_id, filename, file_type, size_bytes, s3_key)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (file_id, owner_id, stored_filename, content_type, file_size, s3_key))
+
+    cursor.execute("UPDATE users SET storage_used_bytes = storage_used_bytes + %s WHERE user_id = %s", (file_size, owner_id))
+    conn.commit()
+    conn.close()
+
+    # Brevo email alert to vault owner
+    brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
+    system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
+    if brevo_api_key and owner_email:
+        filesize_mb = round(file_size / (1024 * 1024), 2)
+        html_notify = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
+            <h2 style="color: #4f46e5; margin-top: 0;">New Client Deposit Received</h2>
+            <p style="font-size: 14px; color: #1e293b; line-height: 1.5;">
+                <strong>{client_name or 'A collaborator'}</strong> ({client_email or 'No email specified'}) deposited a file into your Zephyr Vault.
+            </p>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 13px; color: #475569;">
+                <p style="margin: 0 0 6px 0;"><strong>Project:</strong> {project_title}</p>
+                <p style="margin: 0;"><strong>File:</strong> {filename} ({filesize_mb} MB)</p>
+            </div>
+            <p style="font-size: 12px; color: #64748b;">
+                This file is stored in your <a href="https://vaultpro-02ti.onrender.com/dashboard" style="color: #4f46e5; font-weight: bold;">Cloud Drive Vault</a>.
+            </p>
+        </div>
+        """
+        payload = {
+            "sender": {"name": "Zephyr Vault Deposit", "email": system_sender},
+            "to": [{"email": owner_email}],
+            "subject": f"📥 Client file received for '{project_title}': {filename}",
+            "htmlContent": html_notify
+        }
+        try:
+            http_req = urllib.request.Request(
+                "https://api.brevo.com/v3/smtp/email",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"api-key": brevo_api_key, "Content-Type": "application/json", "Accept": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=10) as resp:
+                pass
+        except Exception as e:
+            print(f"[CLIENT DEPOSIT NOTIFY ERROR]: {e}")
+
+    return {"status": "success", "file_id": file_id, "filename": stored_filename}
 
 @app.get("/api/drive/download/{file_id}")
 async def download_drive_file(file_id: str, user_id: str):

@@ -705,6 +705,71 @@
           </div>
         </div>
 
+        <!-- VIEW C: CLIENT DROP-ZONE PORTAL VIEW -->
+        <div id="clientDropView" class="hidden space-y-5">
+          <div class="text-left space-y-1.5 border-b border-white/10 pb-4">
+            <div class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              Client Deposit Portal
+            </div>
+            <h2 id="clientDropProjectTitle" class="text-xl sm:text-2xl font-black tracking-tight text-white">Upload Project Files</h2>
+            <p class="text-xs opacity-75 leading-relaxed">
+              Files uploaded here will be encrypted and deposited directly into the recipient's secure Zephyr Drive Vault.
+            </p>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold mb-1 opacity-80">Your Name / Company</label>
+                <input id="clientSenderName" type="text" placeholder="e.g. Acme Media" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold mb-1 opacity-80">Your Email (Optional)</label>
+                <input id="clientSenderEmail" type="email" placeholder="client@acme.com" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="pt-1">
+              <button type="button" onclick="handleFileSelectClick()" class="w-full py-8 flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition cursor-pointer group">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <span class="text-xs font-bold">Select file(s) to deposit</span>
+                <span class="text-[10px] opacity-60 mt-0.5">Encrypted direct transmission</span>
+              </button>
+            </div>
+
+            <div id="clientDropFilesSummary" class="hidden bg-cyan-500/15 border border-cyan-500/30 rounded-2xl p-3 space-y-1.5">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span id="clientDropFileCountText">0 file(s) selected</span>
+                <span id="clientDropFileSizeText" class="font-mono text-cyan-400">0 MB</span>
+              </div>
+            </div>
+
+            <div id="clientDropProgressBox" class="hidden space-y-1.5 pt-1">
+              <div class="flex justify-between text-xs font-bold">
+                <span id="clientDropProgressStatus">Uploading to recipient vault...</span>
+                <span id="clientDropProgressPercent" class="font-mono text-cyan-400 font-black">0%</span>
+              </div>
+              <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
+                <div id="clientDropProgressBar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-150" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div id="clientDropSuccessBox" class="hidden p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-center space-y-2">
+              <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-sm font-bold">✓</div>
+              <h4 class="text-xs font-black text-emerald-400">Deposit Complete!</h4>
+              <p class="text-[11px] opacity-80">Your files have been safely uploaded to the project vault.</p>
+            </div>
+
+            <button id="clientDropSubmitBtn" type="button" onclick="submitClientDepositPayload()"
+                    class="w-full bg-gradient-to-r from-cyan-600 hover:from-cyan-500 via-indigo-600 hover:via-indigo-500 to-purple-600 text-white font-black text-xs py-3.5 rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
+              Deposit Files into Vault
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1417,6 +1482,8 @@
     let resendInterval = null;
     let otpExpirySeconds = 180;
     let otpExpiryInterval = null;
+    let clientDropOwnerId = null;
+    let clientDropTitle = "Client Deposit";
 
     function getStoredUserEmail() {
       const direct = localStorage.getItem("user_email") || localStorage.getItem("vp_user_email");
@@ -1528,21 +1595,100 @@
       const sizeEl = document.getElementById("selectedFilesSizeText");
       const listEl = document.getElementById("selectedFilesList");
 
+      const clientSummary = document.getElementById("clientDropFilesSummary");
+      const clientCount = document.getElementById("clientDropFileCountText");
+      const clientSize = document.getElementById("clientDropFileSizeText");
+
       if (!selectedFiles.length) {
-        summary.classList.add("hidden");
+        if (summary) summary.classList.add("hidden");
+        if (clientSummary) clientSummary.classList.add("hidden");
         return;
       }
-      summary.classList.remove("hidden");
-      let totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-      countEl.innerHTML = `<span>${selectedFiles.length} item(s) selected</span>`;
-      sizeEl.innerText = `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+      
+      if (summary) summary.classList.remove("hidden");
+      if (clientSummary) clientSummary.classList.remove("hidden");
 
-      listEl.innerHTML = selectedFiles.map((file, idx) => `
-        <div class="flex items-center justify-between text-xs px-3 py-2 rounded-xl border border-white/10 bg-black/40">
-          <span class="truncate max-w-xs font-mono">${file.name}</span>
-          <button onclick="selectedFiles.splice(${idx}, 1); updateQueueUI();" class="cursor-pointer font-black hover:text-rose-400">✕</button>
-        </div>
-      `).join('');
+      let totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+      const sizeStr = `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+
+      if (countEl) countEl.innerHTML = `<span>${selectedFiles.length} item(s) selected</span>`;
+      if (sizeEl) sizeEl.innerText = sizeStr;
+      if (clientCount) clientCount.innerText = `${selectedFiles.length} file(s) selected`;
+      if (clientSize) clientSize.innerText = sizeStr;
+
+      if (listEl) {
+        listEl.innerHTML = selectedFiles.map((file, idx) => `
+          <div class="flex items-center justify-between text-xs px-3 py-2 rounded-xl border border-white/10 bg-black/40">
+            <span class="truncate max-w-xs font-mono">${file.name}</span>
+            <button onclick="selectedFiles.splice(${idx}, 1); updateQueueUI();" class="cursor-pointer font-black hover:text-rose-400">✕</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function checkDropZoneRoute() {
+      if (window.location.hash.startsWith("#dropZone")) {
+        const hashQuery = window.location.hash.split("?")[1];
+        if (!hashQuery) return;
+        const params = new URLSearchParams(hashQuery);
+        clientDropOwnerId = params.get("owner");
+        clientDropTitle = decodeURIComponent(params.get("title") || "Project Deliverables");
+
+        if (clientDropOwnerId) {
+          document.getElementById("transferStandardView").classList.add("hidden");
+          document.getElementById("transferVerificationView").classList.add("hidden");
+          document.getElementById("clientDropView").classList.remove("hidden");
+          document.getElementById("clientDropProjectTitle").innerText = `Deposit Files for: ${clientDropTitle}`;
+        }
+      }
+    }
+
+    window.addEventListener("load", checkDropZoneRoute);
+    window.addEventListener("hashchange", checkDropZoneRoute);
+
+    async function submitClientDepositPayload() {
+      if (!selectedFiles.length) {
+        alert("Please select at least one file to deposit.");
+        return;
+      }
+      const clientName = document.getElementById("clientSenderName").value.trim() || "Collaborator";
+      const clientEmail = document.getElementById("clientSenderEmail").value.trim();
+      const progressBox = document.getElementById("clientDropProgressBox");
+      const progressBar = document.getElementById("clientDropProgressBar");
+      const progressPercent = document.getElementById("clientDropProgressPercent");
+      const submitBtn = document.getElementById("clientDropSubmitBtn");
+
+      submitBtn.disabled = true;
+      progressBox.classList.remove("hidden");
+
+      try {
+        const file = selectedFiles[0];
+        const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}&filename=${encodeURIComponent(file.name)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = `${pct}%`;
+            progressPercent.innerText = `${pct}%`;
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            progressBox.classList.add("hidden");
+            submitBtn.classList.add("hidden");
+            document.getElementById("clientDropSuccessBox").classList.remove("hidden");
+          } else {
+            alert("Deposit failed. Recipient storage quota may be full.");
+            submitBtn.disabled = false;
+          }
+        };
+        xhr.send(file);
+      } catch (err) {
+        alert("Upload error: " + err.message);
+        submitBtn.disabled = false;
+      }
     }
 
     function startOtpCountdown(seconds = 180) {
@@ -1901,8 +2047,15 @@
     function closeLimitModal() { document.getElementById("limitModal").classList.add("hidden"); }
 
     function generateClientRequestLink() {
-      const proj = document.getElementById("reqProjectTitle").value.trim() || "Client-Deposit";
-      document.getElementById("reqLinkInput").value = `${window.location.origin}/#dropZone?request=req_${Math.random().toString(36).substring(2, 9)}&title=${encodeURIComponent(proj)}`;
+      if (!currentUserId) {
+        alert("Please sign in first so uploaded client files can be saved to your Vault.");
+        window.location.href = "/auth";
+        return;
+      }
+      const proj = document.getElementById("reqProjectTitle").value.trim() || "Project Deliverables";
+      const reqId = "req_" + Math.random().toString(36).substring(2, 9);
+      const link = `${window.location.origin}/#dropZone?request=${reqId}&owner=${currentUserId}&title=${encodeURIComponent(proj)}`;
+      document.getElementById("reqLinkInput").value = link;
       document.getElementById("reqResultBox").classList.remove("hidden");
     }
 
