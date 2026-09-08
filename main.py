@@ -1,6 +1,7 @@
 import os
 import uuid
 import time
+import math
 import random
 import hashlib
 import json
@@ -78,10 +79,7 @@ s3_client = boto3.client(
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 
-# ----------------- OTP Verification Engine (Brevo HTTP API) -----------------
 # ----------------- OTP Verification Engine (Brevo HTTP API + Rate Limiter) -----------------
-import math
-
 otp_storage = {}
 
 class SendOtpRequest(BaseModel):
@@ -90,6 +88,15 @@ class SendOtpRequest(BaseModel):
 class VerifyOtpRequest(BaseModel):
     email: str
     code: str
+
+class SendTransferEmailRequest(BaseModel):
+    recipient_email: str
+    sender_email: str
+    share_id: str
+    filename: str
+    filesize_mb: float
+    title: Optional[str] = "Files shared via Zephyr"
+    message: Optional[str] = ""
 
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
@@ -110,9 +117,10 @@ async def send_verification_otp(req: SendOtpRequest):
     code = f"{random.randint(100000, 999999)}"
     current_attempts = entry.get("attempts", 0) if now < entry.get("expires", 0) else 0
 
+    # 3-minute validity (180 seconds)
     otp_storage[target_email] = {
         "code": code,
-        "expires": now + 600,  # 10 minutes validity
+        "expires": now + 180,
         "attempts": current_attempts,
         "locked_until": 0
     }
@@ -120,7 +128,7 @@ async def send_verification_otp(req: SendOtpRequest):
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
-    print(f"\n[ZEPHYR LIVE OTP FOR {target_email}]: {code}\n", flush=True)
+    print(f"\n[ZEPHYR LIVE OTP FOR {target_email}]: {code} (Valid for 3 mins)\n", flush=True)
 
     if not brevo_api_key:
         raise HTTPException(
@@ -135,7 +143,8 @@ async def send_verification_otp(req: SendOtpRequest):
         <div style="text-align: center; margin: 24px 0;">
             <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0f172a; background: #e0e7ff; padding: 10px 24px; border-radius: 12px; border: 1px solid #c7d2fe; display: inline-block;">{code}</span>
         </div>
-        <p style="font-size: 12px; color: #94a3b8;">This code expires in 10 minutes. You have <strong>4 attempts</strong> to enter the correct code before a 30-minute lockout is triggered.</p>
+        <p style="font-size: 12px; color: #dc2626; font-weight: bold;">⚠️ This code expires in 3 minutes.</p>
+        <p style="font-size: 11px; color: #94a3b8;">You have 4 attempts to enter the correct code before a 30-minute lockout is triggered.</p>
     </div>
     """
 
@@ -185,9 +194,10 @@ async def verify_otp(req: VerifyOtpRequest):
             detail=f"Too many failed attempts. Locked out for {remaining_mins} more minute(s)."
         )
 
+    # 3-minute expiration check
     if now > entry.get("expires", 0):
         otp_storage.pop(email, None)
-        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new one.")
+        raise HTTPException(status_code=400, detail="Verification code has expired (3-minute validity). Please request a new one.")
 
     if entry["code"] != req.code.strip():
         entry["attempts"] = entry.get("attempts", 0) + 1
@@ -209,6 +219,72 @@ async def verify_otp(req: VerifyOtpRequest):
     # Verification successful: clear session state
     otp_storage.pop(email, None)
     return {"status": "verified", "email": email}
+
+@app.post("/api/send-transfer-email")
+async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
+    brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
+    system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
+
+    if not brevo_api_key:
+        raise HTTPException(status_code=500, detail="BREVO_API_KEY missing on server.")
+
+    base_url = str(request.base_url).rstrip("/")
+    download_url = f"{base_url}/share/{req.share_id}"
+
+    html_email = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 540px; margin: auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 18px; background-color: #f8fafc;">
+        <h2 style="color: #4f46e5; margin-top: 0;">Zephyr Secure Transfer</h2>
+        <p style="font-size: 15px; color: #1e293b; line-height: 1.6;">
+            <strong>{req.sender_email}</strong> has sent you files via Zephyr's zero-knowledge transfer network.
+        </p>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin: 22px 0;">
+            <p style="margin: 0 0 10px 0; font-size: 13px; color: #475569;"><strong>Subject:</strong> {req.title or 'Shared Files'}</p>
+            {f'<p style="margin: 0 0 10px 0; font-size: 13px; color: #475569;"><strong>Message:</strong> {req.message}</p>' if req.message else ''}
+            <p style="margin: 0; font-size: 13px; color: #475569;"><strong>File:</strong> {req.filename} ({req.filesize_mb} MB)</p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{download_url}" style="background-color: #4f46e5; color: #ffffff; padding: 14px 30px; text-decoration: none; font-size: 14px; font-weight: bold; border-radius: 12px; display: inline-block;">Download Files</a>
+        </div>
+
+        <p style="font-size: 12px; color: #94a3b8; text-align: center; word-break: break-all;">
+            Direct download link:<br>
+            <a href="{download_url}" style="color: #4f46e5;">{download_url}</a>
+        </p>
+    </div>
+    """
+
+    payload = {
+        "sender": {"name": f"{req.sender_email} via Zephyr", "email": system_sender},
+        "replyTo": {"email": req.sender_email},
+        "to": [{"email": req.recipient_email}],
+        "subject": f"{req.sender_email} sent you files: {req.title or req.filename}",
+        "htmlContent": html_email
+    }
+
+    req_data = json.dumps(payload).encode("utf-8")
+    http_req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=req_data,
+        headers={
+            "api-key": brevo_api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(http_req, timeout=15) as response:
+            if response.status not in (200, 201, 202):
+                raise Exception(f"Brevo returned status {response.status}")
+    except Exception as e:
+        print(f"[RECIPIENT NOTIFICATION ERROR]: {e}")
+        raise HTTPException(status_code=500, detail=f"Files uploaded, but failed to email recipient: {str(e)}")
+
+    return {"status": "dispatched", "recipient": req.recipient_email}
+
 # ----------------- Brand Assets & Favicon -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():

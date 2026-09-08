@@ -6,7 +6,7 @@
   <title>Zephyr | Zero-Knowledge Edge Transfers, Cloud Drive & Client Portals</title>
   
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cdefs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -660,7 +660,7 @@
           <div class="text-left space-y-2">
             <h2 class="text-2xl font-black tracking-tight">Enter verification code</h2>
             <p class="text-xs opacity-75 leading-relaxed">
-              To ensure safety for all our users, we need to verify your email. Insert the code we sent to:
+              To verify sender authorization, enter the code sent to:
               <br/>
               <strong id="verificationEmailDisplay" class="text-indigo-400 font-mono font-bold text-sm block mt-1"></strong>
             </p>
@@ -668,8 +668,15 @@
 
           <div class="space-y-3 pt-2">
             <div>
-              <label class="block text-xs font-bold opacity-80 mb-1.5">Verification Code</label>
-              <input id="emailOtpInput" type="text" maxlength="6" placeholder="Enter verification code" 
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="block text-xs font-bold opacity-80">Verification Code</label>
+                <div class="flex items-center gap-2">
+                  <span id="attemptTracker" class="text-[11px] font-mono font-bold text-indigo-400">4 attempts remaining</span>
+                  <span class="opacity-40 text-xs">•</span>
+                  <span id="otpCountdownBadge" class="text-[11px] font-mono font-bold text-amber-400">03:00</span>
+                </div>
+              </div>
+              <input id="emailOtpInput" type="text" maxlength="6" placeholder="Enter 6-digit code" 
                      class="w-full rounded-2xl px-4 py-3.5 text-center text-lg tracking-[0.3em] font-mono font-bold focus:outline-none transition">
             </div>
 
@@ -682,7 +689,7 @@
               </a>
             </div>
 
-            <div id="otpErrorBox" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-center font-bold"></div>
+            <div id="otpErrorBox" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-center font-bold"></div>
 
             <div class="flex items-center gap-3 pt-3">
               <button type="button" onclick="cancelVerificationView()" title="Back to transfer details"
@@ -920,7 +927,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 3: PROTON-STYLE "KEEP EVERYTHING IN SYNC"                         -->
+  <!-- SECTION 3: KEEP EVERYTHING IN SYNC                                        -->
   <!-- ========================================================================= -->
   <section class="relative z-20 py-20 border-b border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-6">
@@ -1335,6 +1342,10 @@
     let selectedFiles = [];
     let userTier = 'free';
     let pendingOtpEmail = null;
+    let resendCooldown = 0;
+    let resendInterval = null;
+    let otpExpirySeconds = 180;
+    let otpExpiryInterval = null;
 
     function getStoredUserEmail() {
       const direct = localStorage.getItem("user_email") || localStorage.getItem("vp_user_email");
@@ -1428,13 +1439,8 @@
       document.getElementById("securityDrawer").classList.toggle("hidden");
     }
 
-    function handleFileSelectClick() {
-      document.getElementById("fileInput").click();
-    }
-
-    function handleFolderSelectClick() {
-      document.getElementById("folderInput").click();
-    }
+    function handleFileSelectClick() { document.getElementById("fileInput").click(); }
+    function handleFolderSelectClick() { document.getElementById("folderInput").click(); }
 
     document.getElementById("fileInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
     document.getElementById("folderInput").addEventListener("change", (e) => processSelectedItems(e.target.files));
@@ -1468,39 +1474,128 @@
       `).join('');
     }
 
-    // --- WeTransfer-Style Email Verification View Logic ---
+    function startOtpCountdown(seconds = 180) {
+      clearInterval(otpExpiryInterval);
+      otpExpirySeconds = seconds;
+      const badge = document.getElementById("otpCountdownBadge");
+      const submitBtn = document.getElementById("verifyOtpSubmitBtn");
+
+      function render() {
+        const mins = Math.floor(otpExpirySeconds / 60);
+        const secs = otpExpirySeconds % 60;
+        badge.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        
+        if (otpExpirySeconds <= 0) {
+          clearInterval(otpExpiryInterval);
+          badge.innerText = "Expired";
+          badge.className = "text-[11px] font-mono font-bold text-rose-400";
+          submitBtn.disabled = true;
+          const errBox = document.getElementById("otpErrorBox");
+          errBox.innerText = "OTP expired. Click 'Resend code' to get a new one.";
+          errBox.classList.remove("hidden");
+        }
+      }
+
+      badge.className = "text-[11px] font-mono font-bold text-amber-400";
+      render();
+      otpExpiryInterval = setInterval(() => {
+        otpExpirySeconds--;
+        render();
+      }, 1000);
+    }
+
+    function setLockoutUI(isLocked, message) {
+      const otpInput = document.getElementById("emailOtpInput");
+      const submitBtn = document.getElementById("verifyOtpSubmitBtn");
+      const resendBtn = document.getElementById("resendOtpBtn");
+      const errBox = document.getElementById("otpErrorBox");
+      const attemptTracker = document.getElementById("attemptTracker");
+      const badge = document.getElementById("otpCountdownBadge");
+
+      if (isLocked) {
+        clearInterval(otpExpiryInterval);
+        otpInput.disabled = true;
+        submitBtn.disabled = true;
+        if (resendBtn) resendBtn.disabled = true;
+        badge.innerText = "Locked";
+        badge.className = "text-[11px] font-mono font-bold text-rose-400";
+        attemptTracker.innerText = "0 attempts left";
+        attemptTracker.className = "text-[11px] font-mono font-bold text-rose-400";
+        errBox.innerText = message || "Account locked for 30 minutes due to 4 unsuccessful attempts.";
+        errBox.classList.remove("hidden");
+      } else {
+        otpInput.disabled = false;
+        submitBtn.disabled = false;
+        if (resendBtn) resendBtn.disabled = false;
+        attemptTracker.innerText = "4 attempts remaining";
+        attemptTracker.className = "text-[11px] font-mono font-bold text-indigo-400";
+      }
+    }
+
     function cancelVerificationView() {
+      clearInterval(otpExpiryInterval);
       document.getElementById("transferVerificationView").classList.add("hidden");
       document.getElementById("transferStandardView").classList.remove("hidden");
     }
 
     async function resendOtpCode() {
-      if (!pendingOtpEmail) return;
+      if (!pendingOtpEmail || resendCooldown > 0) return;
       const resendBtn = document.getElementById("resendOtpBtn");
+      const errBox = document.getElementById("otpErrorBox");
+
       resendBtn.disabled = true;
-      resendBtn.innerText = "Sending code...";
+      resendBtn.innerText = "Sending...";
+      errBox.classList.add("hidden");
+
       try {
         const res = await fetch("/api/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: pendingOtpEmail })
         });
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || "Failed to resend code.");
+        const data = await res.json();
+
+        if (res.status === 429) {
+          setLockoutUI(true, data.detail);
+          return;
         }
-        alert(`A new verification code was sent to ${pendingOtpEmail}!`);
+        if (!res.ok) throw new Error(data.detail || "Failed to resend code.");
+
+        alert(`New code sent to ${pendingOtpEmail} (valid for 3 mins).`);
+        document.getElementById("verifyOtpSubmitBtn").disabled = false;
+        startOtpCountdown(180);
+        startResendTimer(30);
       } catch (e) {
-        alert(e.message || "Failed to resend code.");
+        errBox.innerText = e.message;
+        errBox.classList.remove("hidden");
+        resendBtn.disabled = false;
+        resendBtn.innerText = "Resend code";
       }
-      resendBtn.disabled = false;
-      resendBtn.innerText = "Resend code";
+    }
+
+    function startResendTimer(seconds) {
+      const resendBtn = document.getElementById("resendOtpBtn");
+      resendCooldown = seconds;
+      resendBtn.disabled = true;
+
+      clearInterval(resendInterval);
+      resendInterval = setInterval(() => {
+        resendCooldown--;
+        if (resendCooldown <= 0) {
+          clearInterval(resendInterval);
+          resendBtn.disabled = false;
+          resendBtn.innerText = "Resend code";
+        } else {
+          resendBtn.innerText = `Resend in ${resendCooldown}s`;
+        }
+      }, 1000);
     }
 
     async function submitEmailVerificationOtp() {
       const otpInput = document.getElementById("emailOtpInput");
       const errBox = document.getElementById("otpErrorBox");
       const submitBtn = document.getElementById("verifyOtpSubmitBtn");
+      const attemptTracker = document.getElementById("attemptTracker");
       const code = otpInput.value.trim();
 
       errBox.classList.add("hidden");
@@ -1522,20 +1617,35 @@
         });
 
         const data = await res.json();
+
+        if (res.status === 429) {
+          setLockoutUI(true, data.detail);
+          return;
+        }
+
         if (!res.ok) {
           throw new Error(data.detail || "Invalid or expired verification code.");
         }
 
-        // Return to standard view and start upload
+        // OTP verified successfully -> clear interval and execute transfer
+        clearInterval(otpExpiryInterval);
         cancelVerificationView();
         executeTransferPayload();
 
       } catch (err) {
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
+
+        const match = err.message.match(/(\d+)\s+attempt\(s\)\s+remaining/i);
+        if (match) {
+          attemptTracker.innerText = `${match[1]} attempts remaining`;
+          attemptTracker.className = "text-[11px] font-mono font-bold text-amber-400";
+        }
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Verify & Transfer";
+        if (!document.getElementById("emailOtpInput").disabled) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Verify & Transfer";
+        }
       }
     }
 
@@ -1556,31 +1666,38 @@
           return;
         }
         if (!fromEmail || !emailPattern.test(fromEmail)) {
-          alert("Please enter a valid email address in the 'Your Email' field.");
+          alert("Please enter your email address in the 'Your Email' field.");
           document.getElementById("emailFrom").focus();
           return;
         }
 
-        // Dynamically lock OTP target to whatever address is entered in "Your Email"
         pendingOtpEmail = fromEmail;
         document.getElementById("verificationEmailDisplay").innerText = fromEmail;
         document.getElementById("emailOtpInput").value = "";
         document.getElementById("otpErrorBox").classList.add("hidden");
+        setLockoutUI(false);
 
         const transferBtn = document.getElementById("transferBtn");
         transferBtn.disabled = true;
         transferBtn.innerText = "Requesting code...";
 
-        // Send OTP to that dynamic email via Brevo HTTP backend
         try {
           const otpRes = await fetch("/api/send-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: fromEmail })
           });
+          const data = await otpRes.json();
+
+          if (otpRes.status === 429) {
+            alert(data.detail);
+            transferBtn.disabled = false;
+            transferBtn.innerText = "Transfer Files";
+            return;
+          }
+
           if (!otpRes.ok) {
-            const errData = await otpRes.json();
-            alert(errData.detail || "Failed to send verification code. Please check your email address.");
+            alert(data.detail || "Failed to send verification code.");
             transferBtn.disabled = false;
             transferBtn.innerText = "Transfer Files";
             return;
@@ -1595,14 +1712,14 @@
         transferBtn.disabled = false;
         transferBtn.innerText = "Transfer Files";
 
-        // Switch to OTP Verification View
         document.getElementById("transferStandardView").classList.add("hidden");
         document.getElementById("transferVerificationView").classList.remove("hidden");
         document.getElementById("emailOtpInput").focus();
+        startOtpCountdown(180);
+        startResendTimer(30);
         return;
       }
 
-      // Link mode directly transfers
       executeTransferPayload();
     }
 
@@ -1650,17 +1767,44 @@
             progressPercent.innerText = `${pct}%`;
           }
         };
-        xhr.onload = () => {
+        xhr.onload = async () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            progressStatus.innerText = "Vault encrypted & active!";
             progressBar.style.width = "100%";
             progressPercent.innerText = "100%";
             document.getElementById("shareUrlInput").value = `${window.location.origin}/share/${data.share_id}`;
             resultBox.classList.remove("hidden");
-            transferBtn.disabled = false;
+
+            // Dispatch download link email to recipient
             if (transferMode === 'email') {
-              alert(`Transfer link generated and scheduled for delivery to ${document.getElementById("emailTo").value.trim()}!`);
+              progressStatus.innerText = "Emailing recipient via Brevo...";
+              try {
+                const notifyRes = await fetch("/api/send-transfer-email", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    recipient_email: document.getElementById("emailTo").value.trim(),
+                    sender_email: document.getElementById("emailFrom").value.trim(),
+                    share_id: data.share_id,
+                    filename: payload.filename,
+                    filesize_mb: payload.filesize_mb,
+                    title: document.getElementById("transferTitle").value.trim(),
+                    message: document.getElementById("transferMessage").value.trim()
+                  })
+                });
+
+                if (!notifyRes.ok) {
+                  const errData = await notifyRes.json();
+                  alert(`Transfer uploaded, but notification email failed: ${errData.detail}`);
+                } else {
+                  alert(`Files and download link successfully sent to ${document.getElementById("emailTo").value.trim()}!`);
+                }
+              } catch (err) {
+                alert("File uploaded, but failed to reach email notification service.");
+              }
             }
+
+            progressStatus.innerText = "Vault encrypted & active!";
+            transferBtn.disabled = false;
           } else {
             alert("Upload failed.");
             progressBox.classList.add("hidden");
