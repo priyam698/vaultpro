@@ -3,10 +3,9 @@ import uuid
 import time
 import random
 import hashlib
-import smtplib
+import json
+import urllib.request
 import traceback
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -79,7 +78,7 @@ s3_client = boto3.client(
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 
-# ----------------- OTP Verification Engine -----------------
+# ----------------- OTP Verification Engine (Resend HTTP API) -----------------
 otp_storage = {}
 
 class SendOtpRequest(BaseModel):
@@ -98,44 +97,51 @@ async def send_verification_otp(req: SendOtpRequest):
         "expires": time.time() + 600  # 10 minutes validity
     }
 
-    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
-    smtp_user = os.getenv("SMTP_USER", "").strip()
-    smtp_pass = os.getenv("SMTP_PASS", "").strip()
+    resend_api_key = os.getenv("RESEND_API_KEY", "").strip()
 
-    if not smtp_user or not smtp_pass:
+    if not resend_api_key:
         print(f"\n[ZEPHYR BACKUP LOG - OTP FOR {target_email}]: {code}\n")
         raise HTTPException(
             status_code=500, 
-            detail="SMTP credentials missing on server. Add SMTP_USER and SMTP_PASS in Render Environment."
+            detail="RESEND_API_KEY missing on server. Add RESEND_API_KEY in Render Environment."
         )
 
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"Your Zephyr Verification Code: {code}"
-        msg["From"] = f"Zephyr Transfers <{smtp_user}>"
-        msg["To"] = target_email
-
-        html_content = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
-            <h2 style="color: #4f46e5; margin-bottom: 8px;">Zephyr Verification</h2>
-            <p style="font-size: 14px; color: #475569; line-height: 1.5;">To verify your email address ({target_email}) and authorize your secure file transfer, enter the following code:</p>
-            <div style="text-align: center; margin: 24px 0;">
-                <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0f172a; background: #e0e7ff; padding: 10px 24px; border-radius: 12px; border: 1px solid #c7d2fe; display: inline-block;">{code}</span>
-            </div>
-            <p style="font-size: 12px; color: #94a3b8;">This code expires in 10 minutes. If you did not initiate this transfer, please disregard this email.</p>
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
+        <h2 style="color: #4f46e5; margin-bottom: 8px;">Zephyr Verification</h2>
+        <p style="font-size: 14px; color: #475569; line-height: 1.5;">To verify your email address ({target_email}) and authorize your secure file transfer, enter the following code:</p>
+        <div style="text-align: center; margin: 24px 0;">
+            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0f172a; background: #e0e7ff; padding: 10px 24px; border-radius: 12px; border: 1px solid #c7d2fe; display: inline-block;">{code}</span>
         </div>
-        """
-        msg.attach(MIMEText(html_content, "html"))
+        <p style="font-size: 12px; color: #94a3b8;">This code expires in 10 minutes. If you did not initiate this transfer, please disregard this email.</p>
+    </div>
+    """
 
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_pass)
-            server.sendmail(smtp_user, target_email, msg.as_string())
+    payload = {
+        "from": "Zephyr Transfers <onboarding@resend.dev>",
+        "to": [target_email],
+        "subject": f"Your Zephyr Verification Code: {code}",
+        "html": html_content
+    }
 
+    req_data = json.dumps(payload).encode("utf-8")
+    http_req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=req_data,
+        headers={
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json"
+        },
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(http_req, timeout=15) as response:
+            if response.status != 200 and response.status != 201:
+                raise Exception(f"Resend API returned status {response.status}")
     except Exception as e:
-        print(f"[OTP EMAIL DISPATCH ERROR]: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to send email via SMTP: {str(e)}")
+        print(f"[RESEND API ERROR]: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email via Resend API: {str(e)}")
 
     return {"message": "Verification code dispatched successfully."}
 
