@@ -79,6 +79,9 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 
 # ----------------- OTP Verification Engine (Brevo HTTP API) -----------------
+# ----------------- OTP Verification Engine (Brevo HTTP API + Rate Limiter) -----------------
+import math
+
 otp_storage = {}
 
 class SendOtpRequest(BaseModel):
@@ -91,17 +94,35 @@ class VerifyOtpRequest(BaseModel):
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
     target_email = req.email.lower().strip()
+    now = time.time()
+
+    entry = otp_storage.get(target_email, {})
+    locked_until = entry.get("locked_until", 0)
+
+    # 30-minute lockout enforcement
+    if now < locked_until:
+        remaining_mins = max(1, math.ceil((locked_until - now) / 60))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Account temporarily locked due to 4 failed attempts. Try again in {remaining_mins} minute(s)."
+        )
+
     code = f"{random.randint(100000, 999999)}"
+    current_attempts = entry.get("attempts", 0) if now < entry.get("expires", 0) else 0
+
     otp_storage[target_email] = {
         "code": code,
-        "expires": time.time() + 600  # 10 minutes validity
+        "expires": now + 600,  # 10 minutes validity
+        "attempts": current_attempts,
+        "locked_until": 0
     }
 
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
+    print(f"\n[ZEPHYR LIVE OTP FOR {target_email}]: {code}\n", flush=True)
+
     if not brevo_api_key:
-        print(f"\n[ZEPHYR BACKUP LOG - OTP FOR {target_email}]: {code}\n")
         raise HTTPException(
             status_code=500, 
             detail="BREVO_API_KEY missing on server. Add BREVO_API_KEY in Render Environment."
@@ -109,12 +130,12 @@ async def send_verification_otp(req: SendOtpRequest):
 
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
-        <h2 style="color: #4f46e5; margin-bottom: 8px;">Zephyr Verification</h2>
-        <p style="font-size: 14px; color: #475569; line-height: 1.5;">To verify your email address ({target_email}) and authorize your secure file transfer, enter the following code:</p>
+        <h2 style="color: #4f46e5; margin-bottom: 8px;">Zephyr Transfer Verification</h2>
+        <p style="font-size: 14px; color: #475569; line-height: 1.5;">To verify your email address (<strong>{target_email}</strong>) and authorize your transfer, enter the following code:</p>
         <div style="text-align: center; margin: 24px 0;">
             <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0f172a; background: #e0e7ff; padding: 10px 24px; border-radius: 12px; border: 1px solid #c7d2fe; display: inline-block;">{code}</span>
         </div>
-        <p style="font-size: 12px; color: #94a3b8;">This code expires in 10 minutes. If you did not initiate this transfer, please disregard this email.</p>
+        <p style="font-size: 12px; color: #94a3b8;">This code expires in 10 minutes. You have <strong>4 attempts</strong> to enter the correct code before a 30-minute lockout is triggered.</p>
     </div>
     """
 
@@ -150,21 +171,44 @@ async def send_verification_otp(req: SendOtpRequest):
 @app.post("/api/verify-otp")
 async def verify_otp(req: VerifyOtpRequest):
     email = req.email.lower().strip()
+    now = time.time()
     entry = otp_storage.get(email)
 
     if not entry:
-        raise HTTPException(status_code=400, detail="No verification code requested for this email.")
+        raise HTTPException(status_code=400, detail="No active verification code found for this email.")
 
-    if time.time() > entry["expires"]:
+    locked_until = entry.get("locked_until", 0)
+    if now < locked_until:
+        remaining_mins = max(1, math.ceil((locked_until - now) / 60))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Too many failed attempts. Locked out for {remaining_mins} more minute(s)."
+        )
+
+    if now > entry.get("expires", 0):
         otp_storage.pop(email, None)
         raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new one.")
 
     if entry["code"] != req.code.strip():
-        raise HTTPException(status_code=400, detail="Invalid verification code. Please check your inbox.")
+        entry["attempts"] = entry.get("attempts", 0) + 1
+        attempts_left = 4 - entry["attempts"]
 
+        if attempts_left <= 0:
+            entry["locked_until"] = now + 1800  # 30-minute lockout
+            entry.pop("code", None)
+            raise HTTPException(
+                status_code=429,
+                detail="4 unsuccessful attempts reached. You are locked out for 30 minutes."
+            )
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Incorrect code. {attempts_left} attempt(s) remaining."
+        )
+
+    # Verification successful: clear session state
     otp_storage.pop(email, None)
     return {"status": "verified", "email": email}
-
 # ----------------- Brand Assets & Favicon -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():
