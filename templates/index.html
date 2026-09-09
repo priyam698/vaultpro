@@ -1483,6 +1483,7 @@
     let otpExpirySeconds = 180;
     let otpExpiryInterval = null;
     let clientDropOwnerId = null;
+    let clientDropOwnerEmail = "";
     let clientDropTitle = "Client Deposit";
 
     function getStoredUserEmail() {
@@ -1632,6 +1633,7 @@
         if (!hashQuery) return;
         const params = new URLSearchParams(hashQuery);
         clientDropOwnerId = params.get("owner");
+        clientDropOwnerEmail = decodeURIComponent(params.get("owner_email") || "");
         clientDropTitle = decodeURIComponent(params.get("title") || "Project Deliverables");
 
         if (clientDropOwnerId) {
@@ -1663,7 +1665,8 @@
 
       try {
         const file = selectedFiles[0];
-        const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}&filename=${encodeURIComponent(file.name)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
+        const emailOwnerParam = clientDropOwnerEmail ? `&owner_email=${encodeURIComponent(clientDropOwnerEmail)}` : "";
+        const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}${emailOwnerParam}&filename=${encodeURIComponent(file.name)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
         
         const xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
@@ -2054,7 +2057,8 @@
       }
       const proj = document.getElementById("reqProjectTitle").value.trim() || "Project Deliverables";
       const reqId = "req_" + Math.random().toString(36).substring(2, 9);
-      const link = `${window.location.origin}/#dropZone?request=${reqId}&owner=${currentUserId}&title=${encodeURIComponent(proj)}`;
+      const emailParam = currentUserEmail ? `&owner_email=${encodeURIComponent(currentUserEmail)}` : "";
+      const link = `${window.location.origin}/#dropZone?request=${reqId}&owner=${currentUserId}${emailParam}&title=${encodeURIComponent(proj)}`;
       document.getElementById("reqLinkInput").value = link;
       document.getElementById("reqResultBox").classList.remove("hidden");
     }

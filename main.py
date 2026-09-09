@@ -608,7 +608,8 @@ async def upload_client_deposit(
     filename: str,
     project_title: str = "Client Deposit",
     client_name: str = "Client",
-    client_email: str = ""
+    client_email: str = "",
+    owner_email: Optional[str] = ""
 ):
     if not owner_id:
         raise HTTPException(status_code=400, detail="Owner ID is required.")
@@ -623,16 +624,29 @@ async def upload_client_deposit(
     cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes, email FROM users WHERE user_id = %s", (owner_id,))
     owner = cursor.fetchone()
 
+    system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
+
+    # Determine recipient email for the owner alert
+    resolved_owner_email = (
+        owner_email.strip()
+        or (owner.get("email") if owner else None)
+        or system_sender
+    )
+
     if not owner:
-        cursor.execute("INSERT INTO users (user_id, tier, storage_used_bytes, storage_quota_bytes) VALUES (%s, 'free', 0, 5368709120)", (owner_id,))
+        cursor.execute(
+            "INSERT INTO users (user_id, email, tier, storage_used_bytes, storage_quota_bytes) VALUES (%s, %s, 'free', 0, 5368709120)",
+            (owner_id, resolved_owner_email)
+        )
         conn.commit()
         used = 0
         quota = 5368709120
-        owner_email = None
     else:
         used = owner.get("storage_used_bytes") or 0
         quota = owner.get("storage_quota_bytes") or 5368709120
-        owner_email = owner.get("email")
+        if not owner.get("email") and resolved_owner_email:
+            cursor.execute("UPDATE users SET email = %s WHERE user_id = %s", (resolved_owner_email, owner_id))
+            conn.commit()
 
     if (used + file_size) > quota:
         conn.close()
@@ -657,31 +671,19 @@ async def upload_client_deposit(
     conn.commit()
     conn.close()
 
-    # Brevo email alert to vault owner
+    # Dispatch notifications via Brevo
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
-    system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
-    if brevo_api_key and owner_email:
-        filesize_mb = round(file_size / (1024 * 1024), 2)
-        html_notify = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
-            <h2 style="color: #4f46e5; margin-top: 0;">New Client Deposit Received</h2>
-            <p style="font-size: 14px; color: #1e293b; line-height: 1.5;">
-                <strong>{client_name or 'A collaborator'}</strong> ({client_email or 'No email specified'}) deposited a file into your Zephyr Vault.
-            </p>
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 13px; color: #475569;">
-                <p style="margin: 0 0 6px 0;"><strong>Project:</strong> {project_title}</p>
-                <p style="margin: 0;"><strong>File:</strong> {filename} ({filesize_mb} MB)</p>
-            </div>
-            <p style="font-size: 12px; color: #64748b;">
-                This file is stored in your <a href="https://vaultpro-02ti.onrender.com/dashboard" style="color: #4f46e5; font-weight: bold;">Cloud Drive Vault</a>.
-            </p>
-        </div>
-        """
+    filesize_mb = round(file_size / (1024 * 1024), 2)
+
+    def dispatch_brevo(to_address: str, subject: str, html_body: str):
+        if not brevo_api_key or not to_address:
+            print(f"[BREVO SKIPPED]: Missing key or address ({to_address})", flush=True)
+            return
         payload = {
             "sender": {"name": "Zephyr Vault Deposit", "email": system_sender},
-            "to": [{"email": owner_email}],
-            "subject": f"📥 Client file received for '{project_title}': {filename}",
-            "htmlContent": html_notify
+            "to": [{"email": to_address}],
+            "subject": subject,
+            "htmlContent": html_body
         }
         try:
             http_req = urllib.request.Request(
@@ -690,13 +692,48 @@ async def upload_client_deposit(
                 headers={"api-key": brevo_api_key, "Content-Type": "application/json", "Accept": "application/json"},
                 method="POST"
             )
-            with urllib.request.urlopen(http_req, timeout=10) as resp:
-                pass
+            with urllib.request.urlopen(http_req, timeout=12) as resp:
+                print(f"[BREVO SUCCESS] Dispatched notification to {to_address} (Status {resp.status})", flush=True)
         except Exception as e:
-            print(f"[CLIENT DEPOSIT NOTIFY ERROR]: {e}")
+            print(f"[BREVO ERROR] Failed sending to {to_address}: {e}", flush=True)
+
+    # 1. Alert to Vault Owner
+    if resolved_owner_email:
+        owner_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
+            <h2 style="color: #4f46e5; margin-top: 0;">📥 New Client File Received</h2>
+            <p style="font-size: 14px; color: #1e293b; line-height: 1.5;">
+                <strong>{client_name or 'A client'}</strong> ({client_email or 'No email specified'}) deposited a file into your vault.
+            </p>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 13px; color: #475569;">
+                <p style="margin: 0 0 6px 0;"><strong>Project:</strong> {project_title}</p>
+                <p style="margin: 0;"><strong>File:</strong> {filename} ({filesize_mb} MB)</p>
+            </div>
+            <p style="font-size: 12px; color: #64748b;">
+                Manage this file inside your <a href="https://vaultpro-02ti.onrender.com/dashboard" style="color: #4f46e5; font-weight: bold;">Cloud Drive Vault</a>.
+            </p>
+        </div>
+        """
+        dispatch_brevo(resolved_owner_email, f"📥 New deposit received for '{project_title}': {filename}", owner_html)
+
+    # 2. Confirmation Receipt to Client (if email provided)
+    if client_email and client_email.strip().lower() != resolved_owner_email.lower():
+        client_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
+            <h2 style="color: #059669; margin-top: 0;">✓ Upload Confirmed</h2>
+            <p style="font-size: 14px; color: #1e293b; line-height: 1.5;">
+                Hello {client_name or 'there'}, your file has been safely encrypted and uploaded to the project vault.
+            </p>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin: 15px 0; font-size: 13px; color: #475569;">
+                <p style="margin: 0 0 6px 0;"><strong>Project:</strong> {project_title}</p>
+                <p style="margin: 0;"><strong>File:</strong> {filename} ({filesize_mb} MB)</p>
+            </div>
+            <p style="font-size: 11px; color: #94a3b8;">Sent securely via Zephyr Systems.</p>
+        </div>
+        """
+        dispatch_brevo(client_email.strip(), f"✓ Upload Confirmation: {filename}", client_html)
 
     return {"status": "success", "file_id": file_id, "filename": stored_filename}
-
 @app.get("/api/drive/download/{file_id}")
 async def download_drive_file(file_id: str, user_id: str):
     conn = get_db()
