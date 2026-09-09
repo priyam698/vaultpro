@@ -6,9 +6,10 @@
   <title>Zephyr | Zero-Knowledge Edge Transfers, Cloud Drive & Client Portals</title>
   
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1627,6 +1628,36 @@
       }
     }
 
+    async function bundleFilesIfMultiple(defaultTitle, progressCallback) {
+      if (selectedFiles.length === 1 && !selectedFiles[0].webkitRelativePath) {
+        return {
+          fileBlob: selectedFiles[0],
+          fileName: selectedFiles[0].name,
+          filesizeMb: parseFloat((selectedFiles[0].size / (1024 * 1024)).toFixed(2))
+        };
+      }
+
+      const zip = new JSZip();
+      for (const file of selectedFiles) {
+        const filePath = file.webkitRelativePath || file.name;
+        zip.file(filePath, file);
+      }
+
+      const zipBlob = await zip.generateAsync({
+        type: "blob",
+        compression: "DEFLATE",
+        compressionOptions: { level: 6 }
+      }, (metadata) => {
+        if (progressCallback) progressCallback(metadata.percent);
+      });
+
+      const sanitizedName = (defaultTitle || "Zephyr_Package").replace(/[^a-zA-Z0-9_\-]/g, "_");
+      const zipFileName = `${sanitizedName}.zip`;
+      const filesizeMb = parseFloat((zipBlob.size / (1024 * 1024)).toFixed(2));
+
+      return { fileBlob: zipBlob, fileName: zipFileName, filesizeMb: filesizeMb };
+    }
+
     function checkDropZoneRoute() {
       if (window.location.hash.startsWith("#dropZone")) {
         const hashQuery = window.location.hash.split("?")[1];
@@ -1658,21 +1689,29 @@
       const progressBox = document.getElementById("clientDropProgressBox");
       const progressBar = document.getElementById("clientDropProgressBar");
       const progressPercent = document.getElementById("clientDropProgressPercent");
+      const progressStatus = document.getElementById("clientDropProgressStatus");
       const submitBtn = document.getElementById("clientDropSubmitBtn");
 
       submitBtn.disabled = true;
       progressBox.classList.remove("hidden");
 
       try {
-        const file = selectedFiles[0];
+        progressStatus.innerText = selectedFiles.length > 1 ? "Bundling files into ZIP archive..." : "Preparing payload...";
+        const { fileBlob, fileName } = await bundleFilesIfMultiple(clientDropTitle || "Client_Deposit", (pct) => {
+          progressStatus.innerText = `Compressing files (${Math.round(pct)}%)...`;
+          progressBar.style.width = `${Math.round(pct * 0.25)}%`;
+          progressPercent.innerText = `${Math.round(pct * 0.25)}%`;
+        });
+
+        progressStatus.innerText = "Streaming to recipient vault...";
         const emailOwnerParam = clientDropOwnerEmail ? `&owner_email=${encodeURIComponent(clientDropOwnerEmail)}` : "";
-        const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}${emailOwnerParam}&filename=${encodeURIComponent(file.name)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
+        const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}${emailOwnerParam}&filename=${encodeURIComponent(fileName)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
         
         const xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 100);
+            const pct = Math.round((e.loaded / e.total) * 75) + 25;
             progressBar.style.width = `${pct}%`;
             progressPercent.innerText = `${pct}%`;
           }
@@ -1687,7 +1726,7 @@
             submitBtn.disabled = false;
           }
         };
-        xhr.send(file);
+        xhr.send(fileBlob);
       } catch (err) {
         alert("Upload error: " + err.message);
         submitBtn.disabled = false;
@@ -1954,14 +1993,24 @@
       transferBtn.disabled = true;
       progressBox.classList.remove("hidden");
       resultBox.classList.add("hidden");
-      progressStatus.innerText = "Reserving cryptographic vault...";
-      progressBar.style.width = "10%";
-      progressPercent.innerText = "10%";
 
       try {
+        const titleVal = document.getElementById("transferTitle").value.trim();
+        progressStatus.innerText = selectedFiles.length > 1 ? "Bundling files into ZIP archive..." : "Preparing payload...";
+        
+        const { fileBlob, fileName, filesizeMb } = await bundleFilesIfMultiple(titleVal || "Transfer_Files", (pct) => {
+          progressStatus.innerText = `Compressing files (${Math.round(pct)}%)...`;
+          progressBar.style.width = `${Math.round(pct * 0.25)}%`;
+          progressPercent.innerText = `${Math.round(pct * 0.25)}%`;
+        });
+
+        progressStatus.innerText = "Reserving cryptographic vault...";
+        progressBar.style.width = "30%";
+        progressPercent.innerText = "30%";
+
         const payload = {
-          filename: selectedFiles[0].name,
-          filesize_mb: parseFloat((selectedFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(2)),
+          filename: fileName,
+          filesize_mb: filesizeMb,
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
           max_downloads: parseInt(document.getElementById("maxDownloads").value),
@@ -1977,12 +2026,12 @@
         if (!res.ok) throw new Error("Failed to initialize share.");
         const data = await res.json();
 
-        progressStatus.innerText = "Streaming to Cloudflare R2 edge...";
+        progressStatus.innerText = "Streaming encrypted payload to Cloudflare R2...";
         const xhr = new XMLHttpRequest();
         xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 88) + 10;
+            const pct = Math.round((e.loaded / e.total) * 65) + 30;
             progressBar.style.width = `${pct}%`;
             progressPercent.innerText = `${pct}%`;
           }
@@ -2031,7 +2080,7 @@
             transferBtn.disabled = false;
           }
         };
-        xhr.send(selectedFiles[0]);
+        xhr.send(fileBlob);
       } catch(err) {
         alert(err.message);
         progressBox.classList.add("hidden");
