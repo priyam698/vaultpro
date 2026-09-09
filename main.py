@@ -58,6 +58,34 @@ def get_db():
         conn_str = conn_str.replace("postgres://", "postgresql://", 1)
     return psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
 
+@app.on_event("startup")
+def init_db_schema():
+    if not DATABASE_URL:
+        return
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS signature_requests (
+                doc_id VARCHAR(32) PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                recipient_name VARCHAR(255) NOT NULL,
+                recipient_email VARCHAR(255) NOT NULL,
+                status VARCHAR(32) DEFAULT 'pending',
+                signature_x INT DEFAULT 150,
+                signature_y INT DEFAULT 250,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                completed_at TIMESTAMP
+            )
+        """)
+        cursor.execute("ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS creator_email VARCHAR(255);")
+        cursor.execute("ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(64);")
+        conn.commit()
+        conn.close()
+        print("[DB STARTUP]: Signature schema verified and migration applied.", flush=True)
+    except Exception as e:
+        print(f"[DB STARTUP WARNING]: {e}", flush=True)
+
 # Cloudflare R2 Config
 R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
@@ -317,7 +345,17 @@ async def sign_page(request: Request):
 
 # ----------------- E-Sign Document & Envelope Dashboard API -----------------
 @app.post("/api/sign/upload")
-async def upload_sign_doc(request: Request, filename: str, recipient_name: str = "Recipient", recipient_email: str = "", title: str = "Agreement", x: int = 150, y: int = 250):
+async def upload_sign_doc(
+    request: Request,
+    filename: str,
+    recipient_name: str = "Recipient",
+    recipient_email: str = "",
+    title: str = "Agreement",
+    x: int = 150,
+    y: int = 250,
+    creator_email: Optional[str] = "",
+    user_id: Optional[str] = ""
+):
     doc_id = uuid.uuid4().hex[:10]
     body = await request.body()
     content_type = request.headers.get("content-type", "application/pdf")
@@ -332,23 +370,19 @@ async def upload_sign_doc(request: Request, filename: str, recipient_name: str =
 
     conn = get_db()
     cursor = conn.cursor()
+
+    # Resolve creator email if empty and user_id is supplied
+    resolved_creator = (creator_email or "").strip()
+    if not resolved_creator and user_id:
+        cursor.execute("SELECT email FROM users WHERE user_id = %s", (user_id,))
+        u = cursor.fetchone()
+        if u and u.get("email"):
+            resolved_creator = u["email"]
+
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS signature_requests (
-            doc_id VARCHAR(32) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            recipient_name VARCHAR(255) NOT NULL,
-            recipient_email VARCHAR(255) NOT NULL,
-            status VARCHAR(32) DEFAULT 'pending',
-            signature_x INT DEFAULT 150,
-            signature_y INT DEFAULT 250,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            completed_at TIMESTAMP
-        )
-    """)
-    cursor.execute("""
-        INSERT INTO signature_requests (doc_id, title, recipient_name, recipient_email, status, signature_x, signature_y)
-        VALUES (%s, %s, %s, %s, 'pending', %s, %s)
-    """, (doc_id, title, recipient_name, recipient_email, x, y))
+        INSERT INTO signature_requests (doc_id, title, recipient_name, recipient_email, status, signature_x, signature_y, creator_email, user_id)
+        VALUES (%s, %s, %s, %s, 'pending', %s, %s, %s, %s)
+    """, (doc_id, title, recipient_name, recipient_email, x, y, resolved_creator, user_id))
     conn.commit()
     conn.close()
 
@@ -358,19 +392,6 @@ async def upload_sign_doc(request: Request, filename: str, recipient_name: str =
 async def get_signature_requests():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS signature_requests (
-            doc_id VARCHAR(32) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            recipient_name VARCHAR(255) NOT NULL,
-            recipient_email VARCHAR(255) NOT NULL,
-            status VARCHAR(32) DEFAULT 'pending',
-            signature_x INT DEFAULT 150,
-            signature_y INT DEFAULT 250,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            completed_at TIMESTAMP
-        )
-    """)
     cursor.execute("SELECT * FROM signature_requests ORDER BY created_at DESC")
     rows = cursor.fetchall()
     conn.close()
@@ -381,6 +402,7 @@ async def get_signature_requests():
             "title": r["title"],
             "recipient_name": r["recipient_name"],
             "recipient_email": r["recipient_email"],
+            "creator_email": r.get("creator_email") or "",
             "status": r["status"],
             "x": r["signature_x"],
             "y": r["signature_y"],
@@ -464,9 +486,64 @@ async def complete_signing(doc_id: str, request: Request):
 
     conn = get_db()
     cursor = conn.cursor()
+    cursor.execute("SELECT * FROM signature_requests WHERE doc_id = %s", (doc_id,))
+    envelope = cursor.fetchone()
+
     cursor.execute("UPDATE signature_requests SET status = 'completed', completed_at = CURRENT_TIMESTAMP WHERE doc_id = %s", (doc_id,))
     conn.commit()
     conn.close()
+
+    # --- Real-Time Brevo Email Notification to Document Creator ---
+    brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
+    system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
+
+    if envelope:
+        creator_target = (envelope.get("creator_email") or "").strip() or system_sender
+        recipient_name = envelope.get("recipient_name") or "Signer"
+        doc_title = envelope.get("title") or "Document"
+        download_url = f"https://vaultpro-02ti.onrender.com/api/sign/document/{doc_id}?download=signed"
+
+        if brevo_api_key and creator_target:
+            notification_html = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #0f172a; color: #f8fafc;">
+                <h2 style="color: #10b981; margin-top: 0;">✓ Document Signed & Sealed</h2>
+                <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5;">
+                    Great news! <strong>{recipient_name}</strong> has signed <strong>{doc_title}</strong>.
+                </p>
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; margin: 20px 0; font-size: 13px;">
+                    <p style="margin: 0 0 6px 0; color: #94a3b8;"><strong>Document:</strong> {doc_title}</p>
+                    <p style="margin: 0 0 6px 0; color: #94a3b8;"><strong>Signed By:</strong> {recipient_name} ({envelope.get('recipient_email') or 'No email'})</p>
+                    <p style="margin: 0; color: #10b981;"><strong>Status:</strong> Completed & Verified</p>
+                </div>
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{download_url}" style="background: #4f46e5; color: #ffffff; padding: 12px 24px; border-radius: 10px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 13px;">
+                        Download Countersigned Copy
+                    </a>
+                </div>
+                <p style="font-size: 11px; color: #64748b; margin-bottom: 0;">
+                    Manage your active documents at any time in your <a href="https://vaultpro-02ti.onrender.com/sign" style="color: #818cf8;">Zephyr Sign Studio</a>.
+                </p>
+            </div>
+            """
+
+            payload = {
+                "sender": {"name": "Zephyr E-Sign", "email": system_sender},
+                "to": [{"email": creator_target}],
+                "subject": f"🖋️ Document Signed: '{doc_title}' has been signed by {recipient_name}",
+                "htmlContent": notification_html
+            }
+
+            try:
+                http_req = urllib.request.Request(
+                    "https://api.brevo.com/v3/smtp/email",
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"api-key": brevo_api_key, "Content-Type": "application/json", "Accept": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(http_req, timeout=12) as resp:
+                    print(f"[BREVO E-SIGN SUCCESS] Dispatched notification to {creator_target} (Status {resp.status})", flush=True)
+            except Exception as e:
+                print(f"[BREVO E-SIGN ERROR] Failed sending to {creator_target}: {e}", flush=True)
 
     return {"status": "saved", "doc_id": doc_id}
 
@@ -734,6 +811,7 @@ async def upload_client_deposit(
         dispatch_brevo(client_email.strip(), f"✓ Upload Confirmation: {filename}", client_html)
 
     return {"status": "success", "file_id": file_id, "filename": stored_filename}
+
 @app.get("/api/drive/download/{file_id}")
 async def download_drive_file(file_id: str, user_id: str):
     conn = get_db()
