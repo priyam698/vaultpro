@@ -1668,10 +1668,37 @@
         clientDropTitle = decodeURIComponent(params.get("title") || "Project Deliverables");
 
         if (clientDropOwnerId) {
+          // Switch to drop zone card view
           document.getElementById("transferStandardView").classList.add("hidden");
           document.getElementById("transferVerificationView").classList.add("hidden");
           document.getElementById("clientDropView").classList.remove("hidden");
           document.getElementById("clientDropProjectTitle").innerText = `Deposit Files for: ${clientDropTitle}`;
+
+          // --- KIOSK LOCKDOWN: Lock all owner navigation, drive access & buttons ---
+          // 1. Hide Drive button, Request button, and owner identity badge
+          const driveBtn = document.querySelector('header a[href="/dashboard"]');
+          if (driveBtn) driveBtn.style.display = "none";
+
+          const reqBtn = document.querySelector('header button[onclick="openRequestModal()"]');
+          if (reqBtn) reqBtn.style.display = "none";
+
+          const userBadge = document.getElementById("userEmailBadge");
+          if (userBadge) {
+            userBadge.classList.add("hidden");
+            userBadge.classList.remove("inline-flex");
+          }
+
+          // 2. Hide quick actions buttons below the hero text
+          const quickActions = document.querySelector('.quick-btn')?.parentElement;
+          if (quickActions) quickActions.style.display = "none";
+
+          // 3. Convert auth button to a neutral clean badge so client cannot access owner actions
+          const authBtn = document.getElementById("navAuthBtn");
+          if (authBtn) {
+            authBtn.innerText = "Secure Deposit";
+            authBtn.href = "#";
+            authBtn.className = "text-[11px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-3.5 py-1.5 rounded-xl pointer-events-none";
+          }
         }
       }
     }

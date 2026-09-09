@@ -612,6 +612,8 @@ async def get_drive_quota(user_id: str):
 
 @app.get("/api/drive/files")
 async def get_drive_files(user_id: str):
+    if not user_id or user_id.strip() == "":
+        return []
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT id, filename, file_type, size_bytes, created_at FROM drive_files WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
@@ -629,7 +631,6 @@ async def get_drive_files(user_id: str):
         }
         for f in files
     ]
-
 @app.post("/api/drive/upload")
 async def upload_drive_file(request: Request, filename: str, user_id: str):
     if not user_id:
