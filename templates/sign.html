@@ -6,7 +6,7 @@
   <title>Zephyr Sign | Multi-Envelope E-Signature Studio & Dashboard</title>
   
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <!-- Tailwind CSS Engine -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,46 +28,22 @@
     }
 
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 20, 32, 0.85) 0%, rgba(9, 11, 20, 0.95) 100%);
+      background: linear-gradient(180deg, rgba(16, 20, 32, 0.88) 0%, rgba(9, 11, 20, 0.98) 100%);
       backdrop-filter: blur(35px);
       -webkit-backdrop-filter: blur(35px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.95);
     }
 
-    .cursive-font-0 {
-      font-family: 'Caveat', cursive;
-    }
+    .cursive-font-0 { font-family: 'Caveat', cursive; }
+    .cursive-font-1 { font-family: 'Dancing Script', cursive; }
+    .cursive-font-2 { font-family: 'Great Vibes', cursive; }
+    .cursive-font-3 { font-family: 'Pacifico', cursive; }
 
-    .cursive-font-1 {
-      font-family: 'Dancing Script', cursive;
-    }
-
-    .cursive-font-2 {
-      font-family: 'Great Vibes', cursive;
-    }
-
-    .cursive-font-3 {
-      font-family: 'Pacifico', cursive;
-    }
-
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.4);
-      border-radius: 4px;
-    }
-
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(99, 102, 241, 0.7);
-    }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
 
     .drag-active {
       cursor: grabbing !important;
@@ -77,12 +53,8 @@
     }
 
     @keyframes pulseGlow {
-      0%, 100% {
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-      }
-      50% {
-        box-shadow: 0 0 0 12px rgba(99, 102, 241, 0);
-      }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+      50% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
     }
 
     .recipient-glow {
@@ -90,35 +62,15 @@
     }
 
     @media print {
-      @page {
-        size: auto;
-        margin: 0mm !important;
-      }
-      header,
-      aside,
-      #zoomControls,
-      #floatingAssignBtn,
-      #uploadPromptContainer,
-      #signerModal,
-      #sendLinkModal,
-      #recipientBanner,
-      #submittedSuccessModal,
-      #viewManage,
-      button,
-      .no-print {
+      @page { size: auto; margin: 0mm !important; }
+      header, aside, #zoomControls, #floatingAssignBtn, #uploadPromptContainer, 
+      #signerModal, #sendLinkModal, #recipientBanner, #submittedSuccessModal, 
+      #viewManage, button, .no-print {
         display: none !important;
       }
-      body,
-      html {
+      body, html {
         background: #ffffff !important;
         color: #000000 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .studio-wrapper,
-      main {
-        display: block !important;
-        width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
       }
@@ -132,14 +84,12 @@
         box-shadow: none !important;
         transform: none !important;
       }
-      #pdfCanvas,
-      #imgViewer {
+      #pdfCanvas, #imgViewer {
         display: block !important;
         width: 100% !important;
         height: auto !important;
       }
-      #signatureTargetBox,
-      #dateTargetBox {
+      #signatureTargetBox, #dateTargetBox {
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
@@ -155,20 +105,20 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
   <!-- ========================================================================= -->
-  <!-- RECIPIENT VIRTUAL SIGNING BANNER (Visible when opened via signing link)    -->
+  <!-- RECIPIENT VIRTUAL SIGNING BANNER (Visible when opened via invite link)     -->
   <!-- ========================================================================= -->
   <div id="recipientBanner" class="hidden bg-gradient-to-r from-indigo-900 via-indigo-700 to-purple-800 text-white px-6 py-3.5 border-b border-indigo-400/30 flex items-center justify-between z-40 sticky top-0 shadow-lg no-print">
     <div class="flex items-center gap-3">
       <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
       <p class="text-xs sm:text-sm font-semibold">
-        Hello <strong id="bannerSignerName" class="text-indigo-200">Priyam</strong>! You have been requested to sign this document online. Click the highlighted signature box to seal and submit.
+        Hello <strong id="bannerSignerName" class="text-indigo-200">Signer</strong>! You have been requested to review and sign this document online. Click the highlighted signature box to sign.
       </p>
     </div>
-    <button onclick="document.getElementById('recipientBanner').classList.add('hidden')" class="text-xs font-bold text-indigo-200 hover:text-white transition">✕ Dismiss</button>
+    <button onclick="document.getElementById('recipientBanner').classList.add('hidden')" class="text-xs font-bold text-indigo-200 hover:text-white transition cursor-pointer">✕ Dismiss</button>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- RECIPIENT SUBMISSION SUCCESS MODAL                                       -->
+  <!-- RECIPIENT SUBMISSION SUCCESS MODAL                                        -->
   <!-- ========================================================================= -->
   <div id="submittedSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
     <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-emerald-500/40 shadow-2xl relative text-center">
@@ -177,13 +127,13 @@
       </div>
       <h3 class="text-xl font-bold text-white mb-2">Document Signed & Saved!</h3>
       <p class="text-xs text-slate-300 leading-relaxed mb-6">
-        Your countersigned document has been permanently transmitted to Cloudflare R2 storage and the envelope status is marked completed.
+        Your countersigned document has been securely sealed and saved to cloud storage. The envelope is now marked completed.
       </p>
       <div class="space-y-2">
         <button onclick="exportCompositePNG()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition cursor-pointer">
           Download Completed Copy (.png)
         </button>
-        <button onclick="document.getElementById('submittedSuccessModal').classList.add('hidden')" class="w-full py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white text-xs font-semibold transition">
+        <button onclick="document.getElementById('submittedSuccessModal').classList.add('hidden')" class="w-full py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white text-xs font-semibold transition cursor-pointer">
           Close Window
         </button>
       </div>
@@ -191,7 +141,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL 1: "Who's signing this field?" / Recipient Signing Dialog          -->
+  <!-- MODAL 1: Signature Configuration & Pen Studio                             -->
   <!-- ========================================================================= -->
   <div id="signerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative text-slate-100">
@@ -201,7 +151,7 @@
         <button onclick="closeSignerModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
       </div>
       <p id="modalSubtitleText" class="text-xs text-slate-400 leading-relaxed mb-5">
-        Choose who should sign this field. Pick "I'm the signer" to apply your signature now, or assign "Someone else" to generate a virtual web envelope.
+        Choose who will sign this field. Pick "I'm the signer" to apply your signature now, or assign "Someone else" to generate a virtual web link.
       </p>
 
       <!-- Pill Selector (Sender View Only) -->
@@ -234,22 +184,26 @@
         <!-- Mode 1: Typing Cursive -->
         <div id="sigTypePane" class="space-y-3">
           <div class="h-32 rounded-2xl bg-[#050711] border border-white/10 flex items-center justify-center p-4 relative overflow-hidden">
-            <input id="sigNameInput" type="text" placeholder="Type your full legal name" value="Priyam" 
+            <input id="sigNameInput" type="text" placeholder="Type your full legal name" value="Priyam Rana" 
                    class="w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 cursive-font-0 focus:outline-none">
           </div>
           <div class="flex items-center justify-between text-xs">
             <span id="fontFamilyLabel" class="text-[11px] text-slate-500 font-mono">Font: Caveat Cursive</span>
             <button onclick="toggleCursiveFont()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 cursor-pointer">
-              <span>Change cursive style ▾</span>
+              <span>Change style ▾</span>
             </button>
           </div>
         </div>
 
-        <!-- Mode 2: Drawing Canvas -->
+        <!-- Mode 2: Realistic Pen Drawing Canvas -->
         <div id="sigDrawPane" class="space-y-2 hidden">
-          <div class="h-36 rounded-2xl bg-[#050711] border border-white/10 relative overflow-hidden flex items-center justify-center">
+          <div class="h-36 rounded-2xl bg-slate-50 border border-slate-300 relative overflow-hidden flex items-center justify-center shadow-inner">
             <canvas id="sigCanvas" width="450" height="144" class="w-full h-full cursor-crosshair touch-none"></canvas>
-            <span id="drawPlaceholder" class="absolute pointer-events-none text-slate-600 text-xs font-medium">Draw your signature with mouse, stylus, or touch</span>
+            <span id="drawPlaceholder" class="absolute pointer-events-none text-slate-400 text-xs font-medium">Draw signature with mouse, stylus, or finger</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span>Ink: Midnight Blue</span>
+            <button onclick="clearCurrentSignature()" class="text-indigo-400 hover:underline cursor-pointer">Clear Canvas</button>
           </div>
         </div>
 
@@ -261,7 +215,7 @@
             <span class="text-xs text-slate-300 font-medium">Upload photo of your signature (PNG / JPG)</span>
           </div>
           <div id="uploadedSigPreviewBox" class="h-16 hidden rounded-xl bg-white/[0.03] p-2 flex items-center justify-center">
-            <img id="uploadedSigImg" src="" class="max-h-full max-w-full object-contain filter invert" />
+            <img id="uploadedSigImg" src="" class="max-h-full max-w-full object-contain" />
           </div>
         </div>
       </div>
@@ -270,16 +224,16 @@
       <div id="signerOtherContainer" class="space-y-3.5 hidden">
         <div>
           <label class="block text-[11px] font-semibold text-slate-300 mb-1">Recipient Name</label>
-          <input id="modalSignerName" type="text" placeholder="e.g. Priyam" value="Priyam" 
+          <input id="modalSignerName" type="text" placeholder="e.g. Alex Smith" value="Alex Smith" 
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
         <div>
           <label class="block text-[11px] font-semibold text-slate-300 mb-1">Recipient Email Address</label>
-          <input id="modalSignerEmail" type="email" placeholder="priyam@example.com" value="priyam@example.com" 
+          <input id="modalSignerEmail" type="email" placeholder="alex@company.com" value="alex@company.com" 
                  class="w-full bg-[#050711] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
         </div>
         <div class="p-3.5 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl text-xs text-indigo-300 leading-relaxed">
-          Zephyr creates a persistent envelope tracked in your Dashboard. When the recipient signs, the document auto-saves back to R2.
+          Zephyr generates a secure signing link. When the recipient deposits their signature, the completed document automatically seals in your Drive.
         </div>
       </div>
 
@@ -288,7 +242,7 @@
           Cancel
         </button>
         <button id="btnApplySignature" onclick="applySignatureToDocument()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer">
-          Apply & Save Field
+          Apply Field
         </button>
       </div>
 
@@ -296,7 +250,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL 2: VIRTUAL SIGNING ENVELOPE SHARING MODAL                           -->
+  <!-- MODAL 2: Virtual Signing Link Sharing Modal                               -->
   <!-- ========================================================================= -->
   <div id="sendLinkModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/40 shadow-2xl relative text-center">
@@ -305,7 +259,7 @@
       </div>
       <h3 class="text-xl font-bold text-white mb-2">Virtual Signing Link Ready</h3>
       <p class="text-xs text-slate-300 leading-relaxed mb-4">
-        Send this link to <strong id="inviteRecipientLabel" class="text-indigo-400">Priyam</strong>. This request is now logged as <strong>Pending</strong> in your Dashboard:
+        Send this link to <strong id="inviteRecipientLabel" class="text-indigo-400">Recipient</strong>. This envelope is now active and tracked in your Dashboard:
       </p>
 
       <div class="flex items-center gap-2 mb-4">
@@ -315,14 +269,13 @@
         </button>
       </div>
 
-      <!-- Real-Time Polling Status Indicator -->
       <div id="statusTrackerBox" class="p-4 rounded-2xl bg-black/40 border border-white/10 mb-4 flex items-center justify-between">
         <div class="flex items-center gap-2.5 text-xs">
           <span id="trackerDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="trackerText" class="text-slate-300 font-medium">Waiting for recipient to sign...</span>
+          <span id="trackerText" class="text-slate-300 font-medium">Waiting for recipient signature...</span>
         </div>
         <a id="completedDownloadBtn" href="#" target="_blank" class="hidden px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">
-          Download Completed Copy ↓
+          Download Copy ↓
         </a>
       </div>
 
@@ -338,12 +291,10 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- TOP APP BAR WITH SUPERSONIC MONOGRAM BRANDING                             -->
+  <!-- TOP APP BAR                                                               -->
   <!-- ========================================================================= -->
   <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print">
     <div class="flex items-center gap-6">
-      
-      <!-- Zephyr Supersonic Monogram Logo -->
       <a href="/" class="flex items-center gap-2.5 text-slate-400 hover:text-white transition group">
         <span class="text-xs font-semibold text-slate-400 group-hover:text-white">✕</span>
         <div class="w-8 h-8 rounded-lg bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-white/20 transition">
@@ -376,7 +327,6 @@
       
       <span class="text-white/20">|</span>
       
-      <!-- Management Tab Selector -->
       <div id="navTabsContainer" class="flex items-center bg-black/40 p-1 rounded-xl border border-white/10 text-xs">
         <button id="tabPrepareBtn" onclick="switchStudioTab('prepare')" class="px-3.5 py-1.5 rounded-lg font-bold text-white bg-indigo-600 transition cursor-pointer">
           Prepare Document
@@ -410,29 +360,28 @@
       <div>
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Signer Details</h4>
         <p id="signersSummary" class="text-xs text-slate-400 leading-relaxed">
-          Configure recipient info, place signature and date fields, then generate their virtual link.
+          Configure recipient info, position signature and date fields, then send their signing envelope.
         </p>
       </div>
 
       <div class="space-y-3.5 pt-1 border-t border-white/10">
         <div>
           <label class="block text-[11px] font-bold text-white mb-1">Recipient Name</label>
-          <input id="otherSignerName" type="text" value="Priyam" placeholder="e.g. Priyam" 
+          <input id="otherSignerName" type="text" value="Client Signer" placeholder="e.g. Alex Smith" 
                  class="w-full bg-[#030408] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none">
         </div>
         <div>
           <label class="block text-[11px] font-bold text-white mb-1">Recipient Email</label>
-          <input id="otherSignerEmail" type="email" value="priyam@example.com" placeholder="priyam@example.com" 
+          <input id="otherSignerEmail" type="email" value="signer@example.com" placeholder="signer@example.com" 
                  class="w-full bg-[#030408] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none">
         </div>
         <div>
           <label class="block text-[11px] font-bold text-white mb-1">Document Title</label>
-          <input id="docTitleInput" type="text" value="Tax_Invoice" 
+          <input id="docTitleInput" type="text" value="Project_Agreement" 
                  class="w-full bg-[#030408] border border-white/10 focus:border-indigo-400 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none">
         </div>
       </div>
 
-      <!-- Field Palette Tools -->
       <div class="space-y-2 pt-2 border-t border-white/10">
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Field Palette</h4>
         
@@ -453,7 +402,6 @@
         </button>
       </div>
 
-      <!-- PDF Multi-Page Pagination Group -->
       <div id="pdfPaginationGroup" class="hidden space-y-2 pt-2 border-t border-white/10">
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Page Navigation</h4>
         <div class="flex items-center justify-between bg-black/40 border border-white/10 rounded-xl p-2 text-xs">
@@ -474,7 +422,7 @@
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
         </div>
         <h3 class="text-sm font-bold text-white">Upload document to sign</h3>
-        <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or invoice</p>
+        <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or document image</p>
       </div>
 
       <!-- Interactive Stage -->
@@ -483,14 +431,14 @@
         <img id="imgViewer" src="" class="hidden w-full h-auto block object-contain" />
 
         <button id="floatingAssignBtn" onclick="openSignerModalAtCenter()" class="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-2xl transition cursor-pointer z-10 flex items-center gap-2 no-print">
-          <span>Assign a new signature field</span>
+          <span>Assign signature position</span>
         </button>
 
         <!-- DRAGGABLE SIGNATURE TARGET BOX -->
         <div id="signatureTargetBox" class="absolute hidden border-2 border-dashed border-indigo-600 bg-indigo-50/95 rounded-xl flex items-center justify-between px-3 py-2 cursor-grab z-30 transition-shadow select-none shadow-md" style="width: 230px; height: 68px; left: 100px; top: 200px;">
           <div class="flex items-center gap-2 pointer-events-none w-full" id="boxContentWrapper">
             <span class="drag-indicator text-indigo-400 text-xs font-mono select-none">⋮⋮</span>
-            <div id="targetBoxContent" class="text-indigo-950 font-bold text-xs font-mono truncate w-full flex items-center">
+            <div id="targetBoxContent" class="text-indigo-950 font-bold text-xs truncate w-full flex items-center justify-center">
               ✎ Click to Sign
             </div>
           </div>
@@ -498,8 +446,11 @@
         </div>
 
         <!-- DRAGGABLE DATE STAMP BOX -->
-        <div id="dateTargetBox" class="absolute hidden border border-dashed border-cyan-600 bg-cyan-50/90 rounded-lg flex items-center justify-between px-2.5 py-1.5 cursor-grab z-30 select-none text-[11px] font-mono font-bold text-cyan-900" style="width: 140px; height: 38px; left: 100px; top: 280px;">
-          <span id="dateContentText">Date: 2026-09-06</span>
+        <div id="dateTargetBox" class="absolute hidden border border-dashed border-cyan-600 bg-cyan-50/90 rounded-lg flex items-center justify-between px-2.5 py-1.5 cursor-grab z-30 select-none text-[11px] font-mono font-bold text-cyan-900 shadow-sm" style="width: 150px; height: 38px; left: 100px; top: 280px;">
+          <div class="flex items-center gap-1.5 pointer-events-none">
+            <span class="text-cyan-400 font-mono text-[10px]">⋮⋮</span>
+            <span id="dateContentText">Date: 2026-09-09</span>
+          </div>
           <button type="button" onclick="document.getElementById('dateTargetBox').classList.add('hidden')" class="text-slate-400 hover:text-rose-600 ml-1 cursor-pointer no-print">✕</button>
         </div>
       </div>
@@ -555,7 +506,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT STUDIO & ROBUST BINARY PDF PARSING ENGINE                     -->
+  <!-- STUDIO RUNTIME JAVASCRIPT                                                 -->
   <!-- ========================================================================= -->
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -569,12 +520,14 @@
     let sigMode = 'type';
     let fontStyleChoice = 0;
     const fontFamilies = ['cursive-font-0', 'cursive-font-1', 'cursive-font-2', 'cursive-font-3'];
-    const fontNames = ['Caveat Cursive', 'Dancing Script', 'Great Vibes', 'Pacifico'];
+    const fontNames = ['Caveat', 'Dancing Script', 'Great Vibes', 'Pacifico'];
 
     let signatureX = 150;
     let signatureY = 250;
+    let dateX = 150;
+    let dateY = 330;
     let activeSignatureDataUrl = null;
-    let isDraggingBox = false;
+    let isDrawing = false;
     let hasMovedDuringDrag = false;
     let currentDocId = null;
     let statusPollingInterval = null;
@@ -587,24 +540,15 @@
 
     // 1. RECIPIENT SESSION INGESTION & DOCUMENT STREAM LOADER
     window.addEventListener("DOMContentLoaded", async () => {
+      initDrawCanvas();
+
       if (inviteRecipient && docIdParam) {
-        const senderSidebar = document.getElementById("senderSidebar");
-        if (senderSidebar) senderSidebar.classList.add("hidden");
-
-        const floatingBtn = document.getElementById("floatingAssignBtn");
-        if (floatingBtn) floatingBtn.classList.add("hidden");
-
-        const clearBtn = document.getElementById("clearAllBtn");
-        if (clearBtn) clearBtn.classList.add("hidden");
-
-        const roleSelector = document.getElementById("signerRoleSelector");
-        if (roleSelector) roleSelector.classList.add("hidden");
-
-        const boxClose = document.getElementById("boxCloseBtn");
-        if (boxClose) boxClose.classList.add("hidden");
-
-        const navTabs = document.getElementById("navTabsContainer");
-        if (navTabs) navTabs.classList.add("hidden");
+        document.getElementById("senderSidebar")?.classList.add("hidden");
+        document.getElementById("floatingAssignBtn")?.classList.add("hidden");
+        document.getElementById("clearAllBtn")?.classList.add("hidden");
+        document.getElementById("signerRoleSelector")?.classList.add("hidden");
+        document.getElementById("boxCloseBtn")?.classList.add("hidden");
+        document.getElementById("navTabsContainer")?.classList.add("hidden");
 
         document.getElementById("topBarTitle").innerText = "Sign Document Online";
         document.getElementById("recipientBanner").classList.remove("hidden");
@@ -627,22 +571,16 @@
         }
 
         try {
-          const res = await fetch(`/api/sign/document/${docIdParam}`);
-          if (!res.ok) throw new Error("Document envelope metadata not found or expired");
-          const data = await res.json();
-
           document.getElementById("uploadPromptContainer").classList.add("hidden");
           document.getElementById("documentStage").classList.remove("hidden");
 
-          // Fetch binary bytes directly to eliminate PDF structure and worker CORS errors
-          const fileTarget = data.url || `/api/sign/file/${docIdParam}`;
+          const fileTarget = `/api/sign/file/${docIdParam}`;
           const fileRes = await fetch(fileTarget);
-          if (!fileRes.ok) throw new Error(`Could not stream document: HTTP ${fileRes.status}`);
+          if (!fileRes.ok) throw new Error(`Could not load document: HTTP ${fileRes.status}`);
 
           const arrayBuffer = await fileRes.arrayBuffer();
           const bytes = new Uint8Array(arrayBuffer);
 
-          // Verify if the payload is a valid PDF (%PDF- is 0x25 0x50 0x44 0x46)
           const isPdf = bytes.length >= 4 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46;
 
           if (isPdf) {
@@ -660,7 +598,6 @@
 
             renderPdfPage(1);
           } else {
-            // Render non-PDF uploads (PNG, JPEG) safely in the image viewer
             const blob = new Blob([arrayBuffer]);
             const objectUrl = URL.createObjectURL(blob);
             const img = document.getElementById("imgViewer");
@@ -672,12 +609,12 @@
 
           setupRecipientBox(signatureX, signatureY, inviteRecipient);
         } catch (err) {
-          alert("Error loading document: " + err.message);
+          alert("Error loading document envelope: " + err.message);
         }
       }
     });
 
-    // 2. TAB SWITCHING (PREPARE STUDIO VS MANAGE DASHBOARD)
+    // 2. TAB SWITCHING
     function switchStudioTab(tab) {
       document.getElementById("viewPrepare").classList.toggle("hidden", tab !== 'prepare');
       document.getElementById("viewManage").classList.toggle("hidden", tab !== 'manage');
@@ -690,12 +627,10 @@
         ? "px-3.5 py-1.5 rounded-lg font-bold text-white bg-indigo-600 transition cursor-pointer" 
         : "px-3.5 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition cursor-pointer";
 
-      if (tab === 'manage') {
-        loadManageRequests();
-      }
+      if (tab === 'manage') loadManageRequests();
     }
 
-    // 3. DOCUMENT UPLOAD & INITIAL RENDERING
+    // 3. DOCUMENT UPLOAD & RENDERING
     async function loadUserDocument(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -704,7 +639,7 @@
       document.getElementById("uploadPromptContainer").classList.add("hidden");
       document.getElementById("documentStage").classList.remove("hidden");
 
-      const rName = document.getElementById("otherSignerName").value.trim() || "Priyam";
+      const rName = document.getElementById("otherSignerName").value.trim() || "Recipient";
       const rEmail = document.getElementById("otherSignerEmail").value.trim() || "";
       const title = document.getElementById("docTitleInput").value;
 
@@ -778,7 +713,7 @@
       document.getElementById("pageCounterText").innerText = `Page ${currentPdfPage} of ${totalPdfPages}`;
     }
 
-    // 4. RECIPIENT PULSING TARGET BOX SETUP
+    // 4. RECIPIENT TARGET BOX
     function setupRecipientBox(x, y, name) {
       const targetBox = document.getElementById("signatureTargetBox");
       const targetContent = document.getElementById("targetBoxContent");
@@ -797,7 +732,7 @@
       };
     }
 
-    // 5. CLICK TO POSITION SIGNATURE (SENDER MODE)
+    // 5. PLACEMENT CLICKS
     const stage = document.getElementById("documentStage");
     stage.addEventListener("click", function(e) {
       if (inviteRecipient) return;
@@ -808,22 +743,20 @@
       if (e.target.id === 'floatingAssignBtn' || e.target.closest('#signatureTargetBox') || e.target.closest('#dateTargetBox')) return;
 
       const rect = stage.getBoundingClientRect();
-      signatureX = Math.round(e.clientX - rect.left - 115);
-      signatureY = Math.round(e.clientY - rect.top - 34);
+      signatureX = Math.round((e.clientX - rect.left) / currentScale - 115);
+      signatureY = Math.round((e.clientY - rect.top) / currentScale - 34);
 
       openSignerModal();
     });
 
     function openSignerModalAtCenter() {
-      const rect = stage.getBoundingClientRect();
-      signatureX = Math.round((rect.width / 2) - 115);
-      signatureY = Math.round((rect.height / 2) - 34);
+      signatureX = Math.round((stage.clientWidth / 2) - 115);
+      signatureY = Math.round((stage.clientHeight / 2) - 34);
       openSignerModal();
     }
 
     function openSignerModal() {
       document.getElementById("signerModal").classList.remove("hidden");
-      initDrawCanvas();
     }
 
     function closeSignerModal() {
@@ -868,32 +801,55 @@
       fontStyleChoice = (fontStyleChoice + 1) % fontFamilies.length;
       const input = document.getElementById("sigNameInput");
       input.className = `w-full text-center bg-transparent border-none text-3xl sm:text-4xl text-slate-100 ${fontFamilies[fontStyleChoice]} focus:outline-none`;
-      document.getElementById("fontFamilyLabel").innerText = `Font: ${fontNames[fontStyleChoice]}`;
+      document.getElementById("fontFamilyLabel").innerText = `Font: ${fontNames[fontStyleChoice]} Cursive`;
     }
 
-    // 6. DRAWING CANVAS ENGINE
-    let isDrawing = false;
+    // 6. DRAWING CANVAS ENGINE (Midnight Blue Realistic Ink + Touch Support)
     const drawCanvas = document.getElementById("sigCanvas");
     const dCtx = drawCanvas.getContext("2d");
 
     function initDrawCanvas() {
-      dCtx.strokeStyle = "#ffffff";
-      dCtx.lineWidth = 2.5;
+      dCtx.strokeStyle = "#0f172a";
+      dCtx.lineWidth = 2.8;
       dCtx.lineCap = "round";
       dCtx.lineJoin = "round";
 
-      drawCanvas.onmousedown = (e) => {
+      const getPos = (e) => {
+        const rect = drawCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (drawCanvas.width / rect.width),
+          y: (clientY - rect.top) * (drawCanvas.height / rect.height)
+        };
+      };
+
+      const start = (e) => {
         isDrawing = true;
         document.getElementById("drawPlaceholder").classList.add("hidden");
+        const pos = getPos(e);
         dCtx.beginPath();
-        dCtx.moveTo(e.offsetX, e.offsetY);
+        dCtx.moveTo(pos.x, pos.y);
+        if (e.cancelable) e.preventDefault();
       };
-      drawCanvas.onmousemove = (e) => {
+
+      const move = (e) => {
         if (!isDrawing) return;
-        dCtx.lineTo(e.offsetX, e.offsetY);
+        const pos = getPos(e);
+        dCtx.lineTo(pos.x, pos.y);
         dCtx.stroke();
+        if (e.cancelable) e.preventDefault();
       };
-      window.onmouseup = () => { isDrawing = false; };
+
+      const stop = () => { isDrawing = false; };
+
+      drawCanvas.onmousedown = start;
+      drawCanvas.onmousemove = move;
+      window.onmouseup = stop;
+
+      drawCanvas.addEventListener("touchstart", start, { passive: false });
+      drawCanvas.addEventListener("touchmove", move, { passive: false });
+      window.addEventListener("touchend", stop);
     }
 
     function clearCurrentSignature() {
@@ -917,7 +873,7 @@
       reader.readAsDataURL(file);
     }
 
-    // 7. APPLY SIGNATURE TO STAGE
+    // 7. APPLY SIGNATURE TO DOCUMENT STAGE
     function applySignatureToDocument() {
       const targetBox = document.getElementById("signatureTargetBox");
       const targetContent = document.getElementById("targetBoxContent");
@@ -929,12 +885,12 @@
 
       if (signerType === 'me' || inviteRecipient) {
         if (sigMode === 'type') {
-          const val = document.getElementById("sigNameInput").value.trim() || (inviteRecipient || "Priyam");
-          targetContent.innerHTML = `<span class="text-3xl text-slate-900 ${fontFamilies[fontStyleChoice]}">${val}</span>`;
+          const val = document.getElementById("sigNameInput").value.trim() || (inviteRecipient || "Priyam Rana");
+          targetContent.innerHTML = `<span class="text-3xl text-slate-900 leading-none ${fontFamilies[fontStyleChoice]}">${val}</span>`;
         } else if (sigMode === 'draw') {
-          targetContent.innerHTML = `<img src="${drawCanvas.toDataURL()}" class="max-h-12 max-w-[150px] object-contain filter invert" />`;
+          targetContent.innerHTML = `<img src="${drawCanvas.toDataURL()}" class="max-h-12 max-w-[170px] object-contain" />`;
         } else if (sigMode === 'upload' && activeSignatureDataUrl) {
-          targetContent.innerHTML = `<img src="${activeSignatureDataUrl}" class="max-h-12 max-w-[150px] object-contain" />`;
+          targetContent.innerHTML = `<img src="${activeSignatureDataUrl}" class="max-h-12 max-w-[170px] object-contain" />`;
         }
 
         if (inviteRecipient) {
@@ -945,7 +901,7 @@
         }
         targetBox.classList.remove("recipient-glow");
       } else {
-        const oName = document.getElementById("modalSignerName").value.trim() || document.getElementById("otherSignerName").value.trim() || "Priyam";
+        const oName = document.getElementById("modalSignerName").value.trim() || document.getElementById("otherSignerName").value.trim() || "Recipient";
         document.getElementById("otherSignerName").value = oName;
         targetContent.innerHTML = `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span><span>Sign here: <strong>${oName}</strong></span></div>`;
         actionBtn.innerText = "Next: Generate Link";
@@ -954,6 +910,7 @@
 
       actionBtn.disabled = false;
       document.getElementById("downloadImageBtn").disabled = false;
+      document.getElementById("fieldsStatusIndicator").innerText = "Signature Field Placed";
       closeSignerModal();
     }
 
@@ -966,16 +923,15 @@
       document.getElementById("dateContentText").innerText = `Date: ${today}`;
     }
 
-    // 8. FINALIZATION: RECIPIENT SUBMISSION VS SENDER LINK GENERATION
+    // 8. FINALIZATION (SUBMISSION & ENVELOPE GENERATION)
     async function handleFinalizeAction() {
       if (inviteRecipient) {
         const pBtn = document.getElementById("primaryActionBtn");
         pBtn.disabled = true;
         pBtn.innerText = "Saving to cloud...";
 
-        const compositeBlob = await generateCompositeBlob();
-
         try {
+          const compositeBlob = await generateCompositeBlob();
           const res = await fetch(`/api/sign/complete/${currentDocId}`, {
             method: "POST",
             headers: { "Content-Type": "image/png" },
@@ -993,7 +949,7 @@
       } else if (signerType === 'me') {
         exportCleanPrintPDF();
       } else {
-        const oName = document.getElementById("otherSignerName").value.trim() || "Priyam";
+        const oName = document.getElementById("otherSignerName").value.trim() || "Recipient";
         const inviteUrl = `${window.location.origin}/sign?doc_id=${currentDocId}&invite=${encodeURIComponent(oName)}&x=${signatureX}&y=${signatureY}`;
         document.getElementById("recipientSigningUrl").value = inviteUrl;
         document.getElementById("inviteRecipientLabel").innerText = oName;
@@ -1003,7 +959,6 @@
       }
     }
 
-    // 9. LIVE STATUS POLLING (FOR CURRENT OPEN SENDER MODAL)
     function startStatusPolling(docId) {
       if (statusPollingInterval) clearInterval(statusPollingInterval);
       const dot = document.getElementById("trackerDot");
@@ -1025,41 +980,78 @@
       }, 3000);
     }
 
-    // 10. COMPOSITE BLOB GENERATOR FOR AUTO-SAVING TO R2
-    function generateCompositeBlob() {
-      return new Promise((resolve) => {
-        const stage = document.getElementById("documentStage");
-        const canvas = document.createElement("canvas");
-        const baseCanvas = document.getElementById("pdfCanvas");
-        const baseImg = document.getElementById("imgViewer");
+    // 9. HIGH-RESOLUTION COMPOSITE BLOB GENERATION
+    async function generateCompositeBlob() {
+      const stage = document.getElementById("documentStage");
+      const canvas = document.createElement("canvas");
+      const baseCanvas = document.getElementById("pdfCanvas");
+      const baseImg = document.getElementById("imgViewer");
 
-        canvas.width = baseCanvas.classList.contains("hidden") ? baseImg.naturalWidth : baseCanvas.width;
-        canvas.height = baseCanvas.classList.contains("hidden") ? baseImg.naturalHeight : baseCanvas.height;
+      const isPdf = !baseCanvas.classList.contains("hidden");
+      canvas.width = isPdf ? baseCanvas.width : (baseImg.naturalWidth || baseImg.width);
+      canvas.height = isPdf ? baseCanvas.height : (baseImg.naturalHeight || baseImg.height);
 
-        const ctx = canvas.getContext("2d");
-        if (!baseCanvas.classList.contains("hidden")) {
-          ctx.drawImage(baseCanvas, 0, 0);
+      const ctx = canvas.getContext("2d");
+      if (isPdf) {
+        ctx.drawImage(baseCanvas, 0, 0);
+      } else {
+        ctx.drawImage(baseImg, 0, 0);
+      }
+
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      const scaleX = canvas.width / stageW;
+      const scaleY = canvas.height / stageH;
+
+      // Draw Signature
+      const targetBox = document.getElementById("signatureTargetBox");
+      if (!targetBox.classList.contains("hidden")) {
+        const boxX = parseFloat(targetBox.style.left || 0) * scaleX;
+        const boxY = parseFloat(targetBox.style.top || 0) * scaleY;
+        const boxW = targetBox.offsetWidth * scaleX;
+        const boxH = targetBox.offsetHeight * scaleY;
+
+        if (sigMode === 'draw') {
+          const sigImg = new Image();
+          await new Promise((res) => {
+            sigImg.onload = res;
+            sigImg.src = drawCanvas.toDataURL();
+          });
+          ctx.drawImage(sigImg, boxX + (12 * scaleX), boxY + (8 * scaleY), boxW - (24 * scaleX), boxH - (16 * scaleY));
+        } else if (sigMode === 'upload' && activeSignatureDataUrl) {
+          const upImg = new Image();
+          await new Promise((res) => {
+            upImg.onload = res;
+            upImg.src = activeSignatureDataUrl;
+          });
+          ctx.drawImage(upImg, boxX + (12 * scaleX), boxY + (8 * scaleY), boxW - (24 * scaleX), boxH - (16 * scaleY));
         } else {
-          ctx.drawImage(baseImg, 0, 0);
+          const nameVal = document.getElementById("sigNameInput").value.trim() || (inviteRecipient || "Priyam Rana");
+          ctx.font = `${Math.round(32 * scaleX)}px '${fontNames[fontStyleChoice]}', cursive`;
+          ctx.fillStyle = "#0f172a";
+          ctx.textBaseline = "middle";
+          ctx.fillText(nameVal, boxX + (16 * scaleX), boxY + (boxH / 2));
         }
+      }
 
-        const targetBox = document.getElementById("signatureTargetBox");
-        const stageRect = stage.getBoundingClientRect();
-        const scaleX = canvas.width / stageRect.width;
-        const scaleY = canvas.height / stageRect.height;
+      // Draw Date
+      const dateBox = document.getElementById("dateTargetBox");
+      if (!dateBox.classList.contains("hidden")) {
+        const dateBoxX = parseFloat(dateBox.style.left || 0) * scaleX;
+        const dateBoxY = parseFloat(dateBox.style.top || 0) * scaleY;
+        const dateBoxH = dateBox.offsetHeight * scaleY;
+        const dateText = document.getElementById("dateContentText").innerText || `Date: ${new Date().toISOString().slice(0, 10)}`;
 
-        const sigX = parseFloat(targetBox.style.left) * scaleX;
-        const sigY = (parseFloat(targetBox.style.top) + 40) * scaleY;
-
-        ctx.font = `${Math.round(30 * scaleX)}px '${fontNames[fontStyleChoice]}', cursive`;
+        ctx.font = `bold ${Math.round(13 * scaleX)}px monospace, sans-serif`;
         ctx.fillStyle = "#0f172a";
-        ctx.fillText(document.getElementById("sigNameInput").value || (inviteRecipient || "Priyam"), sigX, sigY);
+        ctx.textBaseline = "middle";
+        ctx.fillText(dateText, dateBoxX + (12 * scaleX), dateBoxY + (dateBoxH / 2));
+      }
 
-        canvas.toBlob((blob) => resolve(blob), "image/png");
-      });
+      return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
     }
 
-    // 11. DASHBOARD ENVELOPE TRACKING LIST
+    // 10. ENVELOPE DASHBOARD MANAGER
     async function loadManageRequests() {
       const tbody = document.getElementById("requestsTableBody");
       try {
@@ -1105,12 +1097,9 @@
     }
 
     async function deleteEnvelope(docId) {
-      if (!confirm("Are you sure you want to delete this envelope? This will permanently delete the file and signature records.")) return;
-
+      if (!confirm("Are you sure you want to delete this envelope?")) return;
       try {
-        const res = await fetch(`/api/sign/request/${docId}`, {
-          method: "DELETE"
-        });
+        const res = await fetch(`/api/sign/request/${docId}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Failed to delete envelope");
         loadManageRequests();
       } catch (err) {
@@ -1131,15 +1120,15 @@
       document.getElementById("sendLinkModal").classList.add("hidden");
     }
 
-    // 12. RESET STUDIO
+    // 11. RESET STUDIO
     function resetStudio() {
       currentDocument = null;
       currentDocId = null;
 
       document.getElementById("docFileInput").value = "";
-      document.getElementById("docTitleInput").value = "New_Agreement";
-      document.getElementById("otherSignerName").value = "";
-      document.getElementById("otherSignerEmail").value = "";
+      document.getElementById("docTitleInput").value = "Project_Agreement";
+      document.getElementById("otherSignerName").value = "Client Signer";
+      document.getElementById("otherSignerEmail").value = "signer@example.com";
 
       document.getElementById("uploadPromptContainer").classList.remove("hidden");
       document.getElementById("documentStage").classList.add("hidden");
@@ -1153,7 +1142,7 @@
       switchStudioTab('prepare');
     }
 
-    // 13. PRINT & IMAGE EXPORTS
+    // 12. EXPORTS & CLEAN PRINT
     function exportCleanPrintPDF() {
       const previousScale = currentScale;
       document.getElementById("documentStage").style.transform = "none";
@@ -1197,56 +1186,70 @@
       document.getElementById("documentStage").style.transformOrigin = "top center";
     }
 
-    // 14. DRAG AND DROP RUNTIME HANDLER
-    const box = document.getElementById("signatureTargetBox");
-    let startX = 0, startY = 0, initialBoxLeft = 0, initialBoxTop = 0;
+    // 13. DRAG AND DROP HANDLERS (FOR BOTH SIGNATURE & DATE BOXES)
+    function attachBoxDrag(element, onCoordChange) {
+      let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+      let isDragging = false;
 
-    box.addEventListener("mousedown", dragStart);
-    box.addEventListener("touchstart", dragStart, { passive: false });
+      const dragStart = (e) => {
+        if (inviteRecipient) return;
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        hasMovedDuringDrag = false;
+        const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+        startX = clientX;
+        startY = clientY;
+        initialLeft = parseFloat(element.style.left) || element.offsetLeft;
+        initialTop = parseFloat(element.style.top) || element.offsetTop;
+        element.classList.add("drag-active");
 
-    function dragStart(e) {
-      if (inviteRecipient) return;
-      if (e.target.tagName === 'BUTTON') return;
-      isDraggingBox = true;
-      hasMovedDuringDrag = false;
-      const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-      const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-      startX = clientX;
-      startY = clientY;
-      initialBoxLeft = parseFloat(box.style.left) || box.offsetLeft;
-      initialBoxTop = parseFloat(box.style.top) || box.offsetTop;
-      box.classList.add("drag-active");
-      document.addEventListener("mousemove", dragMove);
-      document.addEventListener("mouseup", dragEnd);
-      document.addEventListener("touchmove", dragMove, { passive: false });
-      document.addEventListener("touchend", dragEnd);
+        const dragMove = (moveEvt) => {
+          if (!isDragging) return;
+          const cx = moveEvt.type.startsWith('touch') ? moveEvt.touches[0].clientX : moveEvt.clientX;
+          const cy = moveEvt.type.startsWith('touch') ? moveEvt.touches[0].clientY : moveEvt.clientY;
+          const dx = (cx - startX) / currentScale;
+          const dy = (cy - startY) / currentScale;
+          if (Math.abs(dx) > 2 || Math.abs(dy) > 2) hasMovedDuringDrag = true;
+
+          const newLeft = Math.max(0, Math.min(initialLeft + dx, stage.clientWidth - element.offsetWidth));
+          const newTop = Math.max(0, Math.min(initialTop + dy, stage.clientHeight - element.offsetHeight));
+
+          element.style.left = `${newLeft}px`;
+          element.style.top = `${newTop}px`;
+          if (onCoordChange) onCoordChange(newLeft, newTop);
+          if (moveEvt.cancelable) moveEvt.preventDefault();
+        };
+
+        const dragEnd = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          element.classList.remove("drag-active");
+          document.removeEventListener("mousemove", dragMove);
+          document.removeEventListener("mouseup", dragEnd);
+          document.removeEventListener("touchmove", dragMove);
+          document.removeEventListener("touchend", dragEnd);
+        };
+
+        document.addEventListener("mousemove", dragMove);
+        document.addEventListener("mouseup", dragEnd);
+        document.addEventListener("touchmove", dragMove, { passive: false });
+        document.addEventListener("touchend", dragEnd);
+      };
+
+      element.addEventListener("mousedown", dragStart);
+      element.addEventListener("touchstart", dragStart, { passive: false });
     }
 
-    function dragMove(e) {
-      if (!isDraggingBox) return;
-      const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-      const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-      const deltaX = clientX - startX;
-      const deltaY = clientY - startY;
-      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) hasMovedDuringDrag = true;
-      let newLeft = Math.max(0, Math.min(initialBoxLeft + deltaX, stage.clientWidth - box.offsetWidth));
-      let newTop = Math.max(0, Math.min(initialBoxTop + deltaY, stage.clientHeight - box.offsetHeight));
-      box.style.left = `${newLeft}px`;
-      box.style.top = `${newTop}px`;
-      signatureX = newLeft;
-      signatureY = newTop;
-      if (e.cancelable) e.preventDefault();
-    }
+    attachBoxDrag(document.getElementById("signatureTargetBox"), (x, y) => {
+      signatureX = x;
+      signatureY = y;
+    });
 
-    function dragEnd() {
-      if (!isDraggingBox) return;
-      isDraggingBox = false;
-      box.classList.remove("drag-active");
-      document.removeEventListener("mousemove", dragMove);
-      document.removeEventListener("mouseup", dragEnd);
-      document.removeEventListener("touchmove", dragMove);
-      document.removeEventListener("touchend", dragEnd);
-    }
+    attachBoxDrag(document.getElementById("dateTargetBox"), (x, y) => {
+      dateX = x;
+      dateY = y;
+    });
   </script>
 </body>
 </html>
