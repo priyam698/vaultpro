@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage</title>
   
-  <!-- Supersonic Monogram Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -103,7 +102,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
-  <!-- Mountain Backdrop -->
   <div class="site-mountain-backdrop"></div>
 
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
@@ -140,6 +138,9 @@
             Zephyr
           </span>
           <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-semibold border border-indigo-500/30">Drive</span>
+          <span id="navProBadge" class="hidden items-center gap-1 text-[10px] tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white border border-indigo-300/40 shadow-md shadow-indigo-500/30 uppercase">
+            ★ PRO
+          </span>
         </a>
       </div>
 
@@ -174,7 +175,7 @@
           </div>
         </div>
 
-        <div class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
+        <div id="upgradeBox" class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
           <p class="text-[11px] opacity-75">Need 200 GB permanent space?</p>
           <a href="https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
             Upgrade ($4/mo)
@@ -298,10 +299,36 @@
         const pct = Math.min(100, Math.round((data.used_bytes / data.quota_bytes) * 100));
         document.getElementById("storageBar").style.width = `${pct}%`;
 
+        const navBadge = document.getElementById("navProBadge");
+        const upgradeBox = document.getElementById("upgradeBox");
+        const tierBadge = document.getElementById("tierBadge");
+
         if (data.tier === 'pro') {
-          const badge = document.getElementById("tierBadge");
-          badge.innerText = "PRO 200 GB";
-          badge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
+          tierBadge.innerText = "PRO 200 GB";
+          tierBadge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+          
+          if (navBadge) {
+            navBadge.classList.remove("hidden");
+            navBadge.classList.add("inline-flex");
+          }
+
+          if (upgradeBox) {
+            upgradeBox.innerHTML = `
+              <p class="text-[11px] text-emerald-400 font-bold flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                Pro Membership Active
+              </p>
+              <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">200 GB Vault</span>
+            `;
+          }
+        } else {
+          tierBadge.innerText = "Free Tier";
+          tierBadge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
+          
+          if (navBadge) {
+            navBadge.classList.add("hidden");
+            navBadge.classList.remove("inline-flex");
+          }
         }
       } catch(e) {}
 

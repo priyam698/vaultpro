@@ -642,7 +642,7 @@ async def complete_signing(doc_id: str, request: Request):
         creator_target = (envelope.get("creator_email") or "").strip() or system_sender
         recipient_name = envelope.get("recipient_name") or "Signer"
         doc_title = envelope.get("title") or "Document"
-        download_url = f"https://vaultpro-02ti.onrender.com/api/sign/document/{doc_id}?download=signed"
+        download_url = f"https://zephyr-drive.onrender.com/api/sign/document/{doc_id}?download=signed"
 
         if brevo_api_key and creator_target:
             notification_html = f"""
@@ -662,7 +662,7 @@ async def complete_signing(doc_id: str, request: Request):
                     </a>
                 </div>
                 <p style="font-size: 11px; color: #64748b; margin-bottom: 0;">
-                    Manage your active documents at any time in your <a href="https://vaultpro-02ti.onrender.com/sign" style="color: #818cf8;">Zephyr Sign Studio</a>.
+                    Manage your active documents at any time in your <a href="https://zephyr-drive.onrender.com/sign" style="color: #818cf8;">Zephyr Sign Studio</a>.
                 </p>
             </div>
             """
@@ -927,7 +927,7 @@ async def upload_client_deposit(
                 <p style="margin: 0;"><strong>File:</strong> {filename} ({filesize_mb} MB)</p>
             </div>
             <p style="font-size: 12px; color: #64748b;">
-                Manage this file inside your <a href="https://vaultpro-02ti.onrender.com/dashboard" style="color: #4f46e5; font-weight: bold;">Cloud Drive Vault</a>.
+                Manage this file inside your <a href="https://zephyr-drive.onrender.com/dashboard" style="color: #4f46e5; font-weight: bold;">Cloud Drive Vault</a>.
             </p>
         </div>
         """
@@ -1143,13 +1143,14 @@ async def get_user_profile(user_id: str):
 async def lemon_webhook(request: Request):
     payload = await request.json()
     event_name = payload.get("meta", {}).get("event_name", "")
+    custom_data = payload.get("meta", {}).get("custom_data", {})
+    user_id = custom_data.get("user_id")
+    user_email = payload.get("data", {}).get("attributes", {}).get("user_email")
 
-    # Listen for all successful purchase events
+    print(f"[LEMON SQUEEZY WEBHOOK] Event: {event_name}, Email: {user_email}, User ID: {user_id}", flush=True)
+
+    # 1. UPGRADE: Triggered on successful purchase or active subscription
     if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
-        custom_data = payload.get("meta", {}).get("custom_data", {})
-        user_id = custom_data.get("user_id")
-        user_email = payload.get("data", {}).get("attributes", {}).get("user_email")
-
         conn = get_db()
         cursor = conn.cursor()
 
@@ -1160,10 +1161,30 @@ async def lemon_webhook(request: Request):
                 ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', storage_quota_bytes = 214748364800, email = EXCLUDED.email
             """, (user_id, user_email))
         elif user_email:
-            # Upgrades the user automatically based on their checkout email
             cursor.execute("""
                 UPDATE users 
                 SET tier = 'pro', storage_quota_bytes = 214748364800 
+                WHERE LOWER(email) = LOWER(%s)
+            """, (user_email,))
+
+        conn.commit()
+        conn.close()
+
+    # 2. DOWNGRADE: Triggered when subscription is cancelled, paused, or expires
+    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        if user_id:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'free', storage_quota_bytes = 5368709120 
+                WHERE user_id = %s
+            """, (user_id,))
+        elif user_email:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'free', storage_quota_bytes = 5368709120 
                 WHERE LOWER(email) = LOWER(%s)
             """, (user_email,))
 
