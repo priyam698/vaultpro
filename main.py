@@ -1159,5 +1159,15 @@ async def lemon_webhook(request: Request):
             """, (user_id, user_email))
             conn.commit()
             conn.close()
+        elif user_email:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'pro', storage_quota_bytes = 214748364800 
+                WHERE email = %s
+            """, (user_email,))
+            conn.commit()
+            conn.close()
 
     return {"status": "received"}
