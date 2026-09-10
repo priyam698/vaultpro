@@ -268,6 +268,16 @@
 
     .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
     body { top: 0px !important; }
+
+    /* Chat Light Mode Overrides */
+    body.light-theme #chatMessages .bg-white\/\[0\.06\] {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+    body.light-theme #chatDrawer {
+      border-color: rgba(99, 102, 241, 0.3) !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
@@ -1435,6 +1445,70 @@
     </div>
   </footer>
 
+  <!-- ========================================================================= -->
+  <!-- ZEPHYR COPILOT AI CHATBOT WIDGET                                          -->
+  <!-- ========================================================================= -->
+  <div id="zephyrChatWidget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    
+    <!-- Chat Drawer Panel -->
+    <div id="chatDrawer" class="hidden obsidian-panel w-80 sm:w-96 h-[480px] rounded-3xl p-4 flex flex-col justify-between shadow-2xl border border-indigo-500/30 mb-3 transition-all duration-200">
+      
+      <!-- Chat Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-1.5 flex items-center justify-center shadow-md">
+            <svg class="w-full h-full text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div>
+            <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+              <span>Zephyr Copilot</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono">AI</span>
+            </h4>
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-[10px] opacity-70">Online • Zero-Knowledge Support</span>
+            </div>
+          </div>
+        </div>
+        <button onclick="toggleChatDrawer()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+      </div>
+
+      <!-- Quick Chips -->
+      <div class="py-2 flex items-center gap-1.5 overflow-x-auto custom-scroll text-[10px]">
+        <button onclick="sendQuickPrompt('What is the Free vs Pro difference?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Pricing & Limits</button>
+        <button onclick="sendQuickPrompt('How does Burn-on-Read work?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Burn-on-Read</button>
+        <button onclick="sendQuickPrompt('How do I request files from a client?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Client Drop</button>
+        <button onclick="sendQuickPrompt('How do I sign a document?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">E-Sign</button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chatMessages" class="flex-1 overflow-y-auto custom-scroll space-y-2.5 pr-1 py-1 text-xs">
+        <div class="flex items-start gap-2">
+          <div class="w-6 h-6 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold">AI</div>
+          <div class="bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm p-3 max-w-[85%] text-slate-200 text-xs leading-relaxed">
+            Welcome to Zephyr! I'm your Copilot. How can I assist you with transfers, vaults, or e-signatures today?
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <form id="chatForm" onsubmit="submitChatMessage(event)" class="mt-2 pt-2 border-t border-white/10 flex items-center gap-2">
+        <input id="chatInput" type="text" placeholder="Ask Zephyr Copilot anything..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-500 transition">
+        <button type="submit" id="chatSendBtn" class="w-8 h-8 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-md transition shrink-0 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- Floating Trigger Launcher -->
+    <button id="chatToggleBtn" onclick="toggleChatDrawer()" class="group flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:opacity-95 text-white shadow-xl shadow-indigo-600/30 active:scale-95 transition duration-200 cursor-pointer">
+      <div class="relative w-5 h-5 flex items-center justify-center">
+        <svg class="w-5 h-5 transition transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      </div>
+      <span class="text-xs font-black tracking-tight">Zephyr Copilot</span>
+    </button>
+  </div>
+
   <!-- Translation Engine -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
@@ -1452,7 +1526,7 @@
   </script>
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- Core Pipeline & Email OTP Scripts -->
+  <!-- Core Pipeline, Email OTP & Chatbot Scripts -->
   <script>
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -1492,11 +1566,9 @@
     }
 
     function getStoredUserEmail() {
-      // Check session storage first (per-session login)
       const sessionEmail = sessionStorage.getItem("user_email") || sessionStorage.getItem("vp_user_email");
       if (sessionEmail) return sessionEmail;
 
-      // Only inspect localStorage if the user explicitly opted into "Keep me signed in"
       if (isRemembered()) {
         const direct = localStorage.getItem("user_email") || localStorage.getItem("vp_user_email");
         if (direct) return direct;
@@ -1514,11 +1586,9 @@
     }
 
     function getStoredUserId() {
-      // Check session storage first (per-session login)
       const sessionId = sessionStorage.getItem("user_id") || sessionStorage.getItem("vp_user_id");
       if (sessionId) return sessionId;
 
-      // Only inspect localStorage if the user explicitly opted into "Keep me signed in"
       if (isRemembered()) {
         const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
         if (direct) return direct;
@@ -2155,6 +2225,96 @@
     function copyReqLink() {
       navigator.clipboard.writeText(document.getElementById("reqLinkInput").value);
       alert("Client deposit portal link copied!");
+    }
+
+    // =========================================================================
+    // ZEPHYR COPILOT AI CHATBOT CONTROLLER
+    // =========================================================================
+    function toggleChatDrawer() {
+      const drawer = document.getElementById("chatDrawer");
+      drawer.classList.toggle("hidden");
+      if (!drawer.classList.contains("hidden")) {
+        document.getElementById("chatInput").focus();
+      }
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById("chatInput").value = promptText;
+      submitChatMessage(new Event("submit"));
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function submitChatMessage(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const container = document.getElementById("chatMessages");
+      const sendBtn = document.getElementById("chatSendBtn");
+
+      // 1. Append User Message
+      container.innerHTML += `
+        <div class="flex items-start justify-end gap-2">
+          <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] text-xs leading-relaxed font-medium">
+            ${escapeHtml(msg)}
+          </div>
+        </div>
+      `;
+      input.value = "";
+      container.scrollTop = container.scrollHeight;
+
+      // 2. Append Typing Indicator
+      const typingId = "typing_" + Date.now();
+      container.innerHTML += `
+        <div id="${typingId}" class="flex items-start gap-2">
+          <div class="w-6 h-6 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold">AI</div>
+          <div class="bg-white/[0.04] border border-white/10 rounded-2xl rounded-tl-sm px-3.5 py-2 text-slate-400 text-xs">
+            <span class="animate-pulse">Thinking...</span>
+          </div>
+        </div>
+      `;
+      container.scrollTop = container.scrollHeight;
+      sendBtn.disabled = true;
+
+      // 3. Dispatch to Copilot Support API
+      try {
+        const res = await fetch("/api/support/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        document.getElementById(typingId)?.remove();
+
+        const reply = data.reply || "I'm having trouble retrieving an answer right now. Please try again.";
+        container.innerHTML += `
+          <div class="flex items-start gap-2">
+            <div class="w-6 h-6 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold">AI</div>
+            <div class="bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm p-3 max-w-[85%] text-slate-200 text-xs leading-relaxed">
+              ${reply}
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        document.getElementById(typingId)?.remove();
+        container.innerHTML += `
+          <div class="flex items-start gap-2">
+            <div class="w-6 h-6 rounded-lg bg-rose-600/30 text-rose-400 flex items-center justify-center shrink-0 text-[10px] font-bold">!</div>
+            <div class="bg-rose-500/10 border border-rose-500/20 rounded-2xl rounded-tl-sm p-3 max-w-[85%] text-rose-300 text-xs">
+              Unable to connect to Copilot support service.
+            </div>
+          </div>
+        `;
+      } finally {
+        sendBtn.disabled = false;
+        container.scrollTop = container.scrollHeight;
+      }
     }
   </script>
 </body>

@@ -313,6 +313,98 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
     return {"status": "dispatched", "recipient": req.recipient_email}
 
+# ----------------- Zephyr Copilot AI Support Engine -----------------
+class SupportChatRequest(BaseModel):
+    message: str
+    history: Optional[list] = []
+
+ZEPHYR_SYSTEM_KNOWLEDGE = """
+You are Zephyr Copilot, the official AI support assistant for Zephyr Vault.
+Zephyr is a zero-knowledge cloud transfer, encrypted cloud drive, and e-signature platform.
+Key facts about Zephyr:
+- Security: End-to-end client-side AES-256 encryption. Zero-knowledge architecture means keys and unencrypted files are never accessible to servers.
+- Storage & Tiers: Free Starter tier includes 5 GB permanent Cloud Drive and 2.00 GB single transfer packages. Zephyr Pro ($4/month) includes 200 GB permanent Cloud Drive, 50 GB single transfers, and white-label branding.
+- Burn-on-Read: Setting maximum downloads to 1 purges/shreds the file on Cloudflare R2 the moment the download is finished.
+- OTP Verification: 6-digit verification code sent via Brevo email to verify sender addresses. Valid for 3 minutes, 4 attempts allowed before a 30-minute lockout.
+- Client Deposit Portals: Generate secure drop links for collaborators to upload files directly into your vault without an account.
+- E-Sign Studio: Multi-envelope document signing at /sign with typed, drawn, or uploaded signatures and automated completion email alerts to the creator.
+Keep answers concise, helpful, friendly, and accurate.
+"""
+
+@app.post("/api/support/chat")
+async def support_chat(req: SupportChatRequest):
+    user_msg = req.message.strip()
+    if not user_msg:
+        raise HTTPException(status_code=400, detail="Empty query.")
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+
+    # 1. Gemini API
+    if gemini_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            payload = {
+                "system_instruction": {"parts": [{"text": ZEPHYR_SYSTEM_KNOWLEDGE}]},
+                "contents": [{"role": "user", "parts": [{"text": user_msg}]}]
+            }
+            http_req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                reply = data["candidates"][0]["content"]["parts"][0]["text"]
+                return {"reply": reply}
+        except Exception as e:
+            print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
+
+    # 2. OpenAI API
+    if openai_key:
+        try:
+            url = "https://api.openai.com/v1/chat/completions"
+            payload = {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
+                    {"role": "user", "content": user_msg}
+                ],
+                "max_tokens": 250
+            }
+            http_req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                reply = data["choices"][0]["message"]["content"]
+                return {"reply": reply}
+        except Exception as e:
+            print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
+
+    # 3. Deterministic Knowledge Fallback
+    query_lower = user_msg.lower()
+    if any(k in query_lower for k in ["price", "cost", "pro", "plan", "upgrade", "subscription"]):
+        reply = "Zephyr Starter is free forever with 5 GB Cloud Drive and 2 GB single transfers. Zephyr Pro is $4/mo and unlocks 200 GB permanent drive storage, 50 GB single transfers, and customizable expiry retention."
+    elif any(k in query_lower for k in ["burn", "shred", "self-destruct", "limit"]):
+        reply = "When you configure Burn-on-Read under Security options (Max Downloads = 1), your uploaded file is permanently destroyed on Cloudflare R2 the exact millisecond the recipient finishes downloading it."
+    elif any(k in query_lower for k in ["encrypt", "zero-knowledge", "safe", "privacy", "security"]):
+        reply = "Zephyr operates on a strict zero-knowledge architecture. Encryption keys and optional passcodes are derived directly in your browser using AES-256 before streaming to R2. We never hold your decryption keys."
+    elif any(k in query_lower for k in ["sign", "e-sign", "contract", "signature"]):
+        reply = "You can prepare agreements or sign documents online via the E-Sign Studio at /sign. Place signature fields, generate an invite link for your recipient, and you will receive an automatic email notification the moment it is signed."
+    elif any(k in query_lower for k in ["deposit", "client", "request", "drop"]):
+        reply = "Click the 'Request' button in the header to create a client drop link. Anyone with this link can upload files directly into your Zephyr Drive vault without needing an account."
+    elif any(k in query_lower for k in ["otp", "code", "verification", "email"]):
+        reply = "Sender verification codes prevent spoofing. A 6-digit OTP valid for 3 minutes is emailed via Brevo. You have 4 attempts before triggering a temporary 30-minute lockout."
+    else:
+        reply = "Hello! I am Zephyr Copilot. I can help you with zero-knowledge transfers, folder compression, drive quotas, E-Sign workflows, or client deposit links. What would you like to know?"
+
+    return {"reply": reply}
+
 # ----------------- Brand Assets & Favicon -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():
@@ -371,7 +463,6 @@ async def upload_sign_doc(
     conn = get_db()
     cursor = conn.cursor()
 
-    # Resolve creator email if empty and user_id is supplied
     resolved_creator = (creator_email or "").strip()
     if not resolved_creator and user_id:
         cursor.execute("SELECT email FROM users WHERE user_id = %s", (user_id,))
@@ -631,6 +722,7 @@ async def get_drive_files(user_id: str):
         }
         for f in files
     ]
+
 @app.post("/api/drive/upload")
 async def upload_drive_file(request: Request, filename: str, user_id: str):
     if not user_id:
@@ -704,7 +796,6 @@ async def upload_client_deposit(
 
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
-    # Determine recipient email for the owner alert
     resolved_owner_email = (
         owner_email.strip()
         or (owner.get("email") if owner else None)
@@ -749,7 +840,6 @@ async def upload_client_deposit(
     conn.commit()
     conn.close()
 
-    # Dispatch notifications via Brevo
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     filesize_mb = round(file_size / (1024 * 1024), 2)
 
