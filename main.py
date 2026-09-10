@@ -415,40 +415,40 @@ async def support_chat(req: SupportChatRequest):
     # 4. Comprehensive Easy-Language Deterministic Offline Engine
     q = user_msg.lower()
 
-    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "datacenter", "r2"]):
+    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "datacenter", "r2", "cloudflare"]):
         reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted on your device first—meaning no one, not even the server hosts, can see what's inside."
 
-    elif any(k in q for k in ["password", "reset", "forgot", "recovery"]):
+    elif any(k in q for k in ["password", "reset", "forgot", "recovery", "change password"]):
         reply = "To reset your password, head to the Sign In page (/auth) and click 'Forgot password?'. Enter your email, and we'll send you a secure link to choose a new password. If you get stuck, contact human support at priyamrana069@gmail.com."
 
-    elif any(k in q for k in ["price", "cost", "free", "pro", "plan", "upgrade", "subscription", "$4", "limit", "storage", "quota"]):
-        reply = "Zephyr has two simple plans:\n• Free Starter ($0): 5 GB permanent cloud drive storage, up to 2 GB per transfer, and Burn-on-Read shredding.\n• Zephyr Pro ($4/mo): 200 GB permanent drive storage, up to 50 GB per transfer, and custom link expiry times."
+    elif any(k in q for k in ["pricing", "price", "cost", "free", "pro", "plan", "upgrade", "subscription", "$4", "limit", "storage", "quota", "10 gb", "gigabyte", "mb", "file size", "how big", "send a"]):
+        reply = "Zephyr has two simple plans:\n• Free Starter ($0): 5 GB permanent cloud drive storage, up to 2.00 GB per single transfer, and Burn-on-Read shredding.\n• Zephyr Pro ($4/mo): 200 GB permanent drive storage, and single transfers up to 50 GB. If you are on the Free tier, a 10 GB file will exceed the 2 GB limit, so you would need to upgrade to Pro!"
 
-    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct", "one-time"]):
+    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct", "one-time", "delete link"]):
         reply = "Burn-on-Read completely erases your file. When you choose '1 (Burn on Read 🔥)' under Security, the file is deleted from our cloud servers the second your recipient finishes downloading it. After that, the link will never work again."
 
-    elif any(k in q for k in ["safe", "security", "encrypt", "privacy", "hack", "zero-knowledge", "aes"]):
+    elif any(k in q for k in ["safe", "security", "encrypt", "privacy", "hack", "zero-knowledge", "aes", "key"]):
         reply = "Zephyr is 100% zero-knowledge. Your files are locked with AES-256 encryption right inside your web browser before they are uploaded. We do not keep your passwords or keys, so even if our databases were breached, your files cannot be read."
 
-    elif any(k in q for k in ["otp", "code", "verify", "verification", "lockout", "timer", "minutes", "brevo"]):
+    elif any(k in q for k in ["otp", "code", "verify", "verification", "lockout", "timer", "minutes", "brevo", "email"]):
         reply = "When you send files via email, we send a 6-digit verification code to prove it's really you. The code stays valid for 3 minutes. If you type the wrong code 4 times in a row, the system locks transfers for 30 minutes to prevent spam."
 
-    elif any(k in q for k in ["sign", "e-sign", "contract", "agreement", "draw", "signature"]):
+    elif any(k in q for k in ["sign", "e-sign", "contract", "agreement", "draw", "signature", "pdf"]):
         reply = "You can sign documents or send them to others at /sign. Just upload a PDF or image, place your signature box, and either sign it yourself or create a link for someone else. Once the other person signs, you'll receive an email notification with the signed copy."
 
-    elif any(k in q for k in ["deposit", "request", "receive", "client", "drop"]):
-        reply = "Want to receive files from clients? Click the 'Request' button at the top of the page to generate a Client Drop link. Anyone with the link can upload large files directly into your personal vault without needing to create an account."
+    elif any(k in q for k in ["deposit", "request", "receive", "client", "drop", "kiosk"]):
+        reply = "Want to receive files from clients? Click the 'Request' button at the top of the page to generate a Client Drop link. Anyone with the link can upload large files directly into your personal vault without needing to create an account, and your private files stay hidden."
 
-    elif any(k in q for k in ["folder", "zip", "directory", "multiple"]):
+    elif any(k in q for k in ["folder", "zip", "jszip", "directory", "multiple", "tree"]):
         reply = "You can upload entire folders or multiple files at once. Zephyr automatically compresses them into a single clean .zip file right in your browser before uploading, keeping your folder structure intact."
 
-    elif any(k in q for k in ["keep me signed in", "remember", "session", "logout"]):
-        reply = "On the sign-in page, checking 'Keep me signed in' saves your login on that device. If you leave it unchecked, Zephyr will protect your privacy by asking you to sign in again whenever you open a new browser session."
+    elif any(k in q for k in ["keep me signed in", "remember", "session", "logout", "login", "device"]):
+        reply = "On the sign-in page, checking 'Keep me signed in' saves your login on that device across browser restarts. If you leave it unchecked, Zephyr protects your privacy by asking you to sign in again whenever you open a new browser session."
 
-    elif any(k in q for k in ["human", "support", "help", "contact", "email", "priyam", "developer", "agent"]):
-        reply = "Need help from a real person? You can reach human support directly by emailing Priyam Rana at priyamrana069@gmail.com."
+    elif any(k in q for k in ["human", "support", "help", "contact", "email", "priyam", "developer", "agent", "bug"]):
+        reply = "Need help from a real person or want to report a bug? You can reach human support directly by emailing Priyam Rana at priyamrana069@gmail.com."
 
-    elif any(k in q for k in ["hi", "hello", "hey"]):
+    elif any(k in q for k in ["hi", "hello", "hey", "greetings"]):
         reply = "Hi there! I'm Zephyr Copilot. I can help you with file transfers, vault storage, password resets, E-Sign, and privacy features. What would you like to know?"
 
     else:
