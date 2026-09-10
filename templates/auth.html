@@ -73,10 +73,15 @@
       color: #0f172a !important;
     }
 
-    body.light-theme input {
+    body.light-theme input:not([type="checkbox"]) {
       background-color: rgba(255, 255, 255, 0.9) !important;
       border-color: rgba(148, 163, 184, 0.6) !important;
       color: #0f172a !important;
+    }
+
+    body.light-theme input[type="checkbox"] {
+      background-color: #ffffff !important;
+      border-color: #94a3b8 !important;
     }
   </style>
 </head>
@@ -136,6 +141,14 @@
           <button type="button" id="forgotPwdBtn" onclick="toggleForgotView(true)" class="text-xs text-indigo-400 hover:underline transition">Forgot password?</button>
         </div>
         <input id="password" type="password" placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-400/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition" />
+      </div>
+
+      <!-- Keep Me Signed In Checkbox -->
+      <div class="flex items-center justify-between pt-1">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="rememberMeCheckbox" class="w-4 h-4 rounded bg-slate-900/40 border border-slate-400/30 text-indigo-600 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-indigo-600">
+          <span class="text-xs opacity-80 font-medium">Keep me signed in on this device</span>
+        </label>
       </div>
 
       <button id="authBtn" onclick="handleAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
@@ -246,6 +259,33 @@
       hideMsg('authMsg');
     }
 
+    function persistAuthSession(userId, userEmail, sessionToken = null) {
+      const remember = document.getElementById("rememberMeCheckbox")?.checked || false;
+      
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("vp_user_id");
+      localStorage.removeItem("vp_user_email");
+      localStorage.removeItem("vp_token");
+      sessionStorage.clear();
+
+      if (remember) {
+        localStorage.setItem("zephyr_remember_me", "true");
+        localStorage.setItem("user_id", userId);
+        localStorage.setItem("user_email", userEmail);
+        localStorage.setItem("vp_user_id", userId);
+        localStorage.setItem("vp_user_email", userEmail);
+        if (sessionToken) localStorage.setItem("vp_token", sessionToken);
+      } else {
+        localStorage.setItem("zephyr_remember_me", "false");
+        sessionStorage.setItem("user_id", userId);
+        sessionStorage.setItem("user_email", userEmail);
+        sessionStorage.setItem("vp_user_id", userId);
+        sessionStorage.setItem("vp_user_email", userEmail);
+        if (sessionToken) sessionStorage.setItem("vp_token", sessionToken);
+      }
+    }
+
     async function handleAuth() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -264,11 +304,12 @@
       if (res.error) {
         showMsg('authMsg', res.error.message, "text-rose-400");
       } else {
-        if (res.data?.session?.access_token) {
-          localStorage.setItem("vp_token", res.data.session.access_token);
-        }
-        if (res.data?.user?.id) {
-          localStorage.setItem("user_id", res.data.user.id);
+        const userId = res.data?.user?.id;
+        const userEmail = res.data?.user?.email || email;
+        const token = res.data?.session?.access_token || null;
+
+        if (userId) {
+          persistAuthSession(userId, userEmail, token);
         }
         window.location.href = "/dashboard";
       }

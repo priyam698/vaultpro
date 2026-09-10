@@ -1487,31 +1487,49 @@
     let clientDropOwnerEmail = "";
     let clientDropTitle = "Client Deposit";
 
+    function isRemembered() {
+      return localStorage.getItem("zephyr_remember_me") === "true";
+    }
+
     function getStoredUserEmail() {
-      const direct = localStorage.getItem("user_email") || localStorage.getItem("vp_user_email");
-      if (direct) return direct;
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(k));
-            if (parsed?.user?.email) return parsed.user.email;
-          } catch(e) {}
+      // Check session storage first (per-session login)
+      const sessionEmail = sessionStorage.getItem("user_email") || sessionStorage.getItem("vp_user_email");
+      if (sessionEmail) return sessionEmail;
+
+      // Only inspect localStorage if the user explicitly opted into "Keep me signed in"
+      if (isRemembered()) {
+        const direct = localStorage.getItem("user_email") || localStorage.getItem("vp_user_email");
+        if (direct) return direct;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
+            try {
+              const parsed = JSON.parse(localStorage.getItem(k));
+              if (parsed?.user?.email) return parsed.user.email;
+            } catch(e) {}
+          }
         }
       }
       return null;
     }
 
     function getStoredUserId() {
-      const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
-      if (direct) return direct;
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(k));
-            if (parsed?.user?.id) return parsed.user.id;
-          } catch(e) {}
+      // Check session storage first (per-session login)
+      const sessionId = sessionStorage.getItem("user_id") || sessionStorage.getItem("vp_user_id");
+      if (sessionId) return sessionId;
+
+      // Only inspect localStorage if the user explicitly opted into "Keep me signed in"
+      if (isRemembered()) {
+        const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
+        if (direct) return direct;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
+            try {
+              const parsed = JSON.parse(localStorage.getItem(k));
+              if (parsed?.user?.id) return parsed.user.id;
+            } catch(e) {}
+          }
         }
       }
       return null;
@@ -1528,6 +1546,7 @@
       navBtn.onclick = (e) => {
         e.preventDefault();
         localStorage.clear();
+        sessionStorage.clear();
         window.location.reload();
       };
 
@@ -1668,14 +1687,12 @@
         clientDropTitle = decodeURIComponent(params.get("title") || "Project Deliverables");
 
         if (clientDropOwnerId) {
-          // Switch to drop zone card view
           document.getElementById("transferStandardView").classList.add("hidden");
           document.getElementById("transferVerificationView").classList.add("hidden");
           document.getElementById("clientDropView").classList.remove("hidden");
           document.getElementById("clientDropProjectTitle").innerText = `Deposit Files for: ${clientDropTitle}`;
 
-          // --- KIOSK LOCKDOWN: Lock all owner navigation, drive access & buttons ---
-          // 1. Hide Drive button, Request button, and owner identity badge
+          // --- KIOSK LOCKDOWN ---
           const driveBtn = document.querySelector('header a[href="/dashboard"]');
           if (driveBtn) driveBtn.style.display = "none";
 
@@ -1688,14 +1705,12 @@
             userBadge.classList.remove("inline-flex");
           }
 
-          // 2. Hide quick actions buttons below the hero text
           const quickActions = document.querySelector('.quick-btn')?.parentElement;
           if (quickActions) quickActions.style.display = "none";
 
-          // 3. Convert auth button to a neutral clean badge so client cannot access owner actions
           const authBtn = document.getElementById("navAuthBtn");
           if (authBtn) {
-            authBtn.innerText = "Secure Deposit";
+            authBtn.innerText = "Secure Portal";
             authBtn.href = "#";
             authBtn.className = "text-[11px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-3.5 py-1.5 rounded-xl pointer-events-none";
           }
@@ -1913,7 +1928,6 @@
           throw new Error(data.detail || "Invalid or expired verification code.");
         }
 
-        // OTP verified successfully -> clear interval and execute transfer
         clearInterval(otpExpiryInterval);
         cancelVerificationView();
         executeTransferPayload();
@@ -2070,7 +2084,6 @@
             document.getElementById("shareUrlInput").value = `${window.location.origin}/share/${data.share_id}`;
             resultBox.classList.remove("hidden");
 
-            // Dispatch download link email to recipient
             if (transferMode === 'email') {
               progressStatus.innerText = "Emailing recipient via Brevo...";
               try {
