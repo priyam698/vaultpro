@@ -314,59 +314,24 @@ class SupportChatRequest(BaseModel):
     history: Optional[list] = []
 
 ZEPHYR_SYSTEM_KNOWLEDGE = """
-You are Zephyr Copilot, the official AI support specialist and technical guide for Zephyr Systems (vaultpro-02ti.onrender.com).
-Always provide concise, authoritative, and helpful answers. Whenever users need manual assistance, bug fixes, or enterprise onboarding, direct them to human support at priyamrana069@gmail.com.
+You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
+Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
 
-Comprehensive Zephyr Knowledge Base:
-1. Core Architecture & Security:
-   - Zero-Knowledge Philosophy: Server and databases never inspect, log, or store unencrypted files or user passcodes.
-   - Client-Side Cryptography: Payloads are hashed and encrypted client-side using AES-256 and SHA-256 before streaming.
-   - Storage Infrastructure: Cloudflare R2 edge object storage with zero egress fees, replicated across global edge points.
-   - Database: PostgreSQL on Render storing share tokens, user storage byte counters, and signature envelopes.
+Rules:
+1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable (2 to 4 sentences max unless detailed step-by-step instructions are required).
+2. If the user asks for human support, needs developer escalation, or encounters a bug, direct them to Priyam Rana at priyamrana069@gmail.com.
 
-2. Tiers, Quotas & Pricing:
-   - Free Starter Tier: $0/forever. Includes 5 GB permanent Cloud Drive vault, 2.00 GB maximum single transfer package limit, and 4 complimentary guest transfers before requiring free account registration.
-   - Zephyr Pro Tier: $4.00/month (billed via Lemon Squeezy). Unlocks 200 GB permanent Cloud Drive storage, up to 50 GB single transfers, customizable extended retention (1h, 24h, 3d, 7d, 14d, 30d, or Never), and white-label branded download screens.
-
-3. Transfer Modes & Features:
-   - "Get Link": Generates a cryptographic public share link (/share/{share_id}) instantly.
-   - "Send Email": Sender provides recipient email, sender email, and completes a 6-digit OTP verification via Brevo. The recipient automatically receives an email notification containing the direct download URL.
-   - Multi-File & Folder Support: Complete folder trees and multiple files are bundled in-browser into a single ZIP file using JSZip (DEFLATE compression, level 6) before upload.
-   - Expiry Options: 1 Hour, 24 Hours (default), 3 Days, or "Never (Store in Drive Vault)".
-   - Burn-on-Read: Under Security options, set Max Downloads to "1 (Burn on Read 🔥)". The underlying object in Cloudflare R2 is immediately shredded/purged the instant download completes.
-   - Passcode Protection: Client-side derived password verified via SHA-256 hash check prior to generating presigned download URLs.
-
-4. Sender Email Verification (OTP Rules):
-   - Prevents email spoofing and spam.
-   - OTP codes are 6-digit numbers generated on the backend and dispatched via Brevo HTTP API.
-   - Validity: Exactly 3 minutes (180 seconds).
-   - Lockout Rule: Users have 4 consecutive incorrect attempts. Entering an invalid code 4 times triggers a strict 30-minute security lockout.
-
-5. Client Deposit Portals (#dropZone):
-   - Created via the "Request" button in the navigation header.
-   - Generates a drop portal URL (/#dropZone?request=...&owner=...&title=...).
-   - Allows clients, vendors, or external parties to deposit files directly into the account holder's Zephyr Drive Vault without registering an account.
-   - Kiosk Lockdown: In drop-zone mode, all owner navigation, drive access buttons, and user email badges are stripped so depositors cannot browse the vault owner's private files.
-   - Dual Notifications: When a client deposits files, the vault owner receives an alert via Brevo, and the client receives an upload confirmation receipt.
-
-6. E-Sign Studio (/sign):
-   - Web agreement workflow powered by PDF.js.
-   - Supported Documents: Standard PDF documents, PNG, and JPEG agreements.
-   - Signature Methods: Type (with 4 cursive styles: Caveat, Dancing Script, Great Vibes, Pacifico), Draw (smooth realistic digital ink with touch support), or Upload image (PNG/JPG).
-   - Signer Routing: "I'm the signer" (countersign and print/export clean PDF/PNG immediately) or "Someone else" (assigns recipient name and email).
-   - Recipient Invite Links: Generates a virtual signing URL (/sign?doc_id=...&invite=...&x=...&y=...).
-   - Live Tracking: Real-time status polling every 3 seconds updates the sender dashboard when signed.
-   - Owner Notification: The envelope creator receives an automated Brevo email alert with a one-click download link the moment the recipient signs.
-
-7. Authentication & Device Persistence (/auth):
-   - Powered by Supabase Auth with email & password.
-   - Password Reset: Users can click "Forgot password?" at /auth, enter their registered email, and receive an instant recovery link (/auth#type=recovery) to create a new password.
-   - "Keep me signed in on this device":
-     * Checked: Writes credentials to localStorage for permanent login across browser restarts.
-     * Unchecked (Default): Writes credentials strictly to sessionStorage, automatically requiring sign-in every time a new browser session is opened.
-
-8. Contact & Escalation:
-   - For technical support, custom enterprise plans, or bug reports, contact Priyam Rana directly at priyamrana069@gmail.com.
+Platform Knowledge & Micro-Details:
+- Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, files are encrypted directly on your local device before transmission, so neither Zephyr nor Cloudflare can see or decrypt your data.
+- Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
+- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage and single transfers up to 2.00 GB (plus 4 free guest transfers before requiring free account registration).
+- Zephyr Pro Tier: $4.00/month (billed via Lemon Squeezy). Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, extended retention windows (1h, 24h, 3d, 7d, 14d, 30d, or Never), and white-label download screens.
+- Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded and permanently deleted the exact millisecond the recipient finishes downloading it.
+- Email Transfers & OTP: Senders verify with a 6-digit code sent to their email via Brevo. The code is valid for 3 minutes, with 4 allowed attempts before a 30-minute lockout.
+- Client Deposit Portals: Created by clicking 'Request' in the header. Anyone with the drop link can upload files straight into your vault without an account. In drop-zone mode, your private drive and profile links are locked so depositors cannot view your personal files.
+- E-Sign Studio (/sign): Allows users to sign PDFs and agreements by typing (with 4 cursive font styles: Caveat, Dancing Script, Great Vibes, Pacifico), drawing realistic ink signatures, or uploading image files. When the other party signs, you receive an automated email notification with the signed copy.
+- Keep Me Signed In: Check the box to save your login in localStorage across browser restarts. Leave it unchecked to use temporary session storage, requiring you to sign in each new browser session.
+- Password Reset: Users can click 'Forgot password?' on /auth to receive a password recovery link.
 """
 
 @app.post("/api/support/chat")
@@ -378,7 +343,7 @@ async def support_chat(req: SupportChatRequest):
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     openai_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-    # 1. Try Gemini API
+    # 1. Live Gemini AI
     if gemini_key:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
@@ -394,12 +359,11 @@ async def support_chat(req: SupportChatRequest):
             )
             with urllib.request.urlopen(http_req, timeout=10) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                reply = data["candidates"][0]["content"]["parts"][0]["text"]
-                return {"reply": reply}
+                return {"reply": data["candidates"][0]["content"]["parts"][0]["text"]}
         except Exception as e:
             print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
 
-    # 2. Try OpenAI API
+    # 2. Live OpenAI
     if openai_key:
         try:
             url = "https://api.openai.com/v1/chat/completions"
@@ -409,7 +373,7 @@ async def support_chat(req: SupportChatRequest):
                     {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
                     {"role": "user", "content": user_msg}
                 ],
-                "max_tokens": 300
+                "max_tokens": 250
             }
             http_req = urllib.request.Request(
                 url,
@@ -419,80 +383,51 @@ async def support_chat(req: SupportChatRequest):
             )
             with urllib.request.urlopen(http_req, timeout=10) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                reply = data["choices"][0]["message"]["content"]
-                return {"reply": reply}
+                return {"reply": data["choices"][0]["message"]["content"]}
         except Exception as e:
             print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
 
-    # 3. Exhaustive Deterministic Knowledge Fallback Engine
+    # 3. Comprehensive Easy-Language Deterministic Offline Engine
     q = user_msg.lower()
 
-    if any(k in q for k in ["password", "reset", "forgot", "recovery", "change password"]):
-        reply = (
-            "To reset your password:\n"
-            "1. Visit the Access Portal at /auth.\n"
-            "2. Click the 'Forgot password?' link above the password input.\n"
-            "3. Enter your account email and click 'Send Reset Link'.\n"
-            "4. Open the recovery link sent to your inbox and set your new password.\n"
-            "For account lockouts or manual assistance, contact priyamrana069@gmail.com."
-        )
-    elif any(k in q for k in ["pricing", "price", "cost", "pro", "plan", "upgrade", "subscription", "$4", "free"]):
-        reply = (
-            "Zephyr offers two transparent tiers:\n"
-            "• Free Starter ($0/forever): 5 GB permanent Cloud Drive, 2.00 GB single transfer package limit, Burn-on-Read, and folder hierarchy support.\n"
-            "• Zephyr Pro ($4.00/month): 200 GB permanent Cloud Drive, 50 GB single transfer limit, extended retention (up to 30 days or Never), and white-label branding.\n"
-            "Upgrades are managed securely via Lemon Squeezy."
-        )
-    elif any(k in q for k in ["burn", "shred", "self-destruct", "one-time", "download limit"]):
-        reply = (
-            "Zephyr's Burn-on-Read feature ensures ephemeral security. When you expand the 'Security' drawer on the transfer card and choose '1 (Burn on Read 🔥)', "
-            "the file stored in Cloudflare R2 is immediately deleted and purged the millisecond the recipient finishes downloading it. The share link is permanently destroyed."
-        )
-    elif any(k in q for k in ["security", "encrypt", "zero-knowledge", "privacy", "aes", "safe"]):
-        reply = (
-            "Zephyr operates on a zero-knowledge architecture. Files and custom passcodes are encrypted client-side in your browser using AES-256 before being streamed to Cloudflare R2 edge storage. "
-            "Neither Zephyr nor any intermediary server has access to your private decryption keys."
-        )
-    elif any(k in q for k in ["otp", "code", "verification", "attempts", "lockout", "brevo"]):
-        reply = (
-            "To prevent spoofing during email transfers, a 6-digit verification code is sent to your sender email address via Brevo.\n"
-            "• Validity: 3 minutes (180 seconds).\n"
-            "• Rate Limiter: You have 4 attempts to enter the code correctly. Entering an incorrect code 4 times places your email in a 30-minute security lockout."
-        )
-    elif any(k in q for k in ["sign", "e-sign", "contract", "signature", "envelope"]):
-        reply = (
-            "Zephyr Sign (/sign) is our built-in e-signature studio:\n"
-            "1. Upload any PDF, PNG, or JPG document.\n"
-            "2. Drag and drop signature boxes and date stamps.\n"
-            "3. Choose 'I'm the signer' to seal immediately (type with 4 cursive fonts, draw, or upload an image), or 'Someone else' to generate an envelope invite link.\n"
-            "4. The document creator automatically receives an email notification when the recipient completes signing."
-        )
-    elif any(k in q for k in ["deposit", "request", "drop", "client drop", "portal"]):
-        reply = (
-            "The Client Deposit feature allows external collaborators to upload files directly into your vault without an account:\n"
-            "1. Click the 'Request' button in the navigation header.\n"
-            "2. Name your project and generate a drop link (/#dropZone?...).\n"
-            "3. When opened, the portal runs in kiosk mode—clients can only upload files and cannot access your private drive files or account details."
-        )
-    elif any(k in q for k in ["keep me signed in", "remember", "session", "logout", "login"]):
-        reply = (
-            "On the /auth login screen:\n"
-            "• Leaving 'Keep me signed in on this device' UNCHECKED stores your session in temporary browser memory. You will be prompted to sign in every time you open a new browser session.\n"
-            "• CHECKING the box saves your session in localStorage so you stay signed in across browser restarts."
-        )
-    elif any(k in q for k in ["folder", "zip", "jszip", "directory", "multiple files"]):
-        reply = (
-            "You can transfer multiple files or complete folder trees using the 'Add folders' button. Zephyr uses JSZip client-side compression to package your entire directory structure into a single secure .zip file before streaming to edge storage."
-        )
-    elif any(k in q for k in ["human", "support", "contact", "email", "help", "priyam", "developer"]):
-        reply = (
-            "For human technical support, enterprise deployments, bug reports, or manual account assistance, please email Priyam Rana directly at priyamrana069@gmail.com."
-        )
+    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "datacenter", "r2"]):
+        reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted on your device first—meaning no one, not even the server hosts, can see what's inside."
+
+    elif any(k in q for k in ["password", "reset", "forgot", "recovery"]):
+        reply = "To reset your password, head to the Sign In page (/auth) and click 'Forgot password?'. Enter your email, and we'll send you a secure link to choose a new password. If you get stuck, contact human support at priyamrana069@gmail.com."
+
+    elif any(k in q for k in ["price", "cost", "free", "pro", "plan", "upgrade", "subscription", "$4", "limit", "storage", "quota"]):
+        reply = "Zephyr has two simple plans:\n• Free Starter ($0): 5 GB permanent cloud drive storage, up to 2 GB per transfer, and Burn-on-Read shredding.\n• Zephyr Pro ($4/mo): 200 GB permanent drive storage, up to 50 GB per transfer, and custom link expiry times."
+
+    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct", "one-time"]):
+        reply = "Burn-on-Read completely erases your file. When you choose '1 (Burn on Read 🔥)' under Security, the file is deleted from our cloud servers the second your recipient finishes downloading it. After that, the link will never work again."
+
+    elif any(k in q for k in ["safe", "security", "encrypt", "privacy", "hack", "zero-knowledge", "aes"]):
+        reply = "Zephyr is 100% zero-knowledge. Your files are locked with AES-256 encryption right inside your web browser before they are uploaded. We do not keep your passwords or keys, so even if our databases were breached, your files cannot be read."
+
+    elif any(k in q for k in ["otp", "code", "verify", "verification", "lockout", "timer", "minutes", "brevo"]):
+        reply = "When you send files via email, we send a 6-digit verification code to prove it's really you. The code stays valid for 3 minutes. If you type the wrong code 4 times in a row, the system locks transfers for 30 minutes to prevent spam."
+
+    elif any(k in q for k in ["sign", "e-sign", "contract", "agreement", "draw", "signature"]):
+        reply = "You can sign documents or send them to others at /sign. Just upload a PDF or image, place your signature box, and either sign it yourself or create a link for someone else. Once the other person signs, you'll receive an email notification with the signed copy."
+
+    elif any(k in q for k in ["deposit", "request", "receive", "client", "drop"]):
+        reply = "Want to receive files from clients? Click the 'Request' button at the top of the page to generate a Client Drop link. Anyone with the link can upload large files directly into your personal vault without needing to create an account."
+
+    elif any(k in q for k in ["folder", "zip", "directory", "multiple"]):
+        reply = "You can upload entire folders or multiple files at once. Zephyr automatically compresses them into a single clean .zip file right in your browser before uploading, keeping your folder structure intact."
+
+    elif any(k in q for k in ["keep me signed in", "remember", "session", "logout"]):
+        reply = "On the sign-in page, checking 'Keep me signed in' saves your login on that device. If you leave it unchecked, Zephyr will protect your privacy by asking you to sign in again whenever you open a new browser session."
+
+    elif any(k in q for k in ["human", "support", "help", "contact", "email", "priyam", "developer", "agent"]):
+        reply = "Need help from a real person? You can reach human support directly by emailing Priyam Rana at priyamrana069@gmail.com."
+
+    elif any(k in q for k in ["hi", "hello", "hey"]):
+        reply = "Hi there! I'm Zephyr Copilot. I can help you with file transfers, vault storage, password resets, E-Sign, and privacy features. What would you like to know?"
+
     else:
-        reply = (
-            "I am Zephyr Copilot, your zero-knowledge transfer and vault assistant. I can answer questions regarding AES-256 encryption, Free vs. Pro tiers, Burn-on-Read shredding, email OTP verification, E-Sign workflows, and client drop portals.\n\n"
-            "For direct human support, reach out to priyamrana069@gmail.com."
-        )
+        reply = "I'm here to help with all things Zephyr—like how our zero-knowledge encryption works, storage limits, E-Sign, Burn-on-Read, or password resets. If you have a specific question or need manual help, feel free to email human support at priyamrana069@gmail.com!"
 
     return {"reply": reply}
 
