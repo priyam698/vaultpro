@@ -1144,7 +1144,7 @@ async def lemon_webhook(request: Request):
     payload = await request.json()
     event_name = payload.get("meta", {}).get("event_name", "")
 
-    if event_name in ["order_created", "subscription_created", "subscription_resumed"]:
+    if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
         custom_data = payload.get("meta", {}).get("custom_data", {})
         user_id = custom_data.get("user_id")
         user_email = payload.get("data", {}).get("attributes", {}).get("user_email")
@@ -1157,6 +1157,16 @@ async def lemon_webhook(request: Request):
                 VALUES (%s, %s, 'pro', 214748364800)
                 ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', storage_quota_bytes = 214748364800, email = EXCLUDED.email
             """, (user_id, user_email))
+            conn.commit()
+            conn.close()
+        elif user_email:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'pro', storage_quota_bytes = 214748364800 
+                WHERE email = %s
+            """, (user_email,))
             conn.commit()
             conn.close()
         elif user_email:
