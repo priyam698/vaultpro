@@ -340,10 +340,35 @@ async def support_chat(req: SupportChatRequest):
     if not user_msg:
         raise HTTPException(status_code=400, detail="Empty query.")
 
+    grok_key = (os.getenv("GROK_API_KEY", "") or os.getenv("XAI_API_KEY", "")).strip()
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     openai_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-    # 1. Live Gemini AI
+    # 1. Live xAI Grok API
+    if grok_key:
+        try:
+            url = "https://api.x.ai/v1/chat/completions"
+            payload = {
+                "model": "grok-beta",
+                "messages": [
+                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
+                    {"role": "user", "content": user_msg}
+                ],
+                "temperature": 0.3
+            }
+            http_req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Authorization": f"Bearer {grok_key}", "Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=12) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return {"reply": data["choices"][0]["message"]["content"]}
+        except Exception as e:
+            print(f"[COPILOT GROK ERROR]: {e}", flush=True)
+
+    # 2. Live Gemini AI
     if gemini_key:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
@@ -363,7 +388,7 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
 
-    # 2. Live OpenAI
+    # 3. Live OpenAI
     if openai_key:
         try:
             url = "https://api.openai.com/v1/chat/completions"
@@ -387,7 +412,7 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
 
-    # 3. Comprehensive Easy-Language Deterministic Offline Engine
+    # 4. Comprehensive Easy-Language Deterministic Offline Engine
     q = user_msg.lower()
 
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "datacenter", "r2"]):
