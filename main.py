@@ -1144,40 +1144,30 @@ async def lemon_webhook(request: Request):
     payload = await request.json()
     event_name = payload.get("meta", {}).get("event_name", "")
 
+    # Listen for all successful purchase events
     if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
         custom_data = payload.get("meta", {}).get("custom_data", {})
         user_id = custom_data.get("user_id")
         user_email = payload.get("data", {}).get("attributes", {}).get("user_email")
 
+        conn = get_db()
+        cursor = conn.cursor()
+
         if user_id:
-            conn = get_db()
-            cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO users (user_id, email, tier, storage_quota_bytes)
                 VALUES (%s, %s, 'pro', 214748364800)
                 ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', storage_quota_bytes = 214748364800, email = EXCLUDED.email
             """, (user_id, user_email))
-            conn.commit()
-            conn.close()
         elif user_email:
-            conn = get_db()
-            cursor = conn.cursor()
+            # Upgrades the user automatically based on their checkout email
             cursor.execute("""
                 UPDATE users 
                 SET tier = 'pro', storage_quota_bytes = 214748364800 
-                WHERE email = %s
+                WHERE LOWER(email) = LOWER(%s)
             """, (user_email,))
-            conn.commit()
-            conn.close()
-        elif user_email:
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE users 
-                SET tier = 'pro', storage_quota_bytes = 214748364800 
-                WHERE email = %s
-            """, (user_email,))
-            conn.commit()
-            conn.close()
+
+        conn.commit()
+        conn.close()
 
     return {"status": "received"}
