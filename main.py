@@ -1141,40 +1141,54 @@ async def get_user_profile(user_id: str):
 
 @app.post("/api/webhook/lemonsqueezy")
 async def lemon_webhook(request: Request):
-    payload = await request.json()
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
     event_name = payload.get("meta", {}).get("event_name", "")
-    custom_data = payload.get("meta", {}).get("custom_data", {})
-    user_id = custom_data.get("user_id")
-    user_email = payload.get("data", {}).get("attributes", {}).get("user_email")
+    custom_data = payload.get("meta", {}).get("custom_data") or {}
+    user_id = custom_data.get("user_id") if isinstance(custom_data, dict) else None
 
-    print(f"[LEMON SQUEEZY WEBHOOK] Event: {event_name}, Email: {user_email}, User ID: {user_id}", flush=True)
+    attributes = payload.get("data", {}).get("attributes") or {}
+    user_email = attributes.get("user_email")
 
-    # 1. UPGRADE: Triggered on successful purchase or active subscription
+    print(f"[LEMON SQUEEZY WEBHOOK] Event: {event_name} | Email: {user_email} | User ID: {user_id}", flush=True)
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. If user_id wasn't in custom_data, resolve it from Supabase auth.users by email
+    if not user_id and user_email:
+        try:
+            cursor.execute("SELECT id FROM auth.users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
+            auth_row = cursor.fetchone()
+            if auth_row and auth_row.get("id"):
+                user_id = str(auth_row["id"])
+        except Exception as e:
+            print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
+
+    # 2. UPGRADE: Order or subscription successful
     if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
-        conn = get_db()
-        cursor = conn.cursor()
-
         if user_id:
             cursor.execute("""
                 INSERT INTO users (user_id, email, tier, storage_quota_bytes)
                 VALUES (%s, %s, 'pro', 214748364800)
-                ON CONFLICT (user_id) DO UPDATE SET tier = 'pro', storage_quota_bytes = 214748364800, email = EXCLUDED.email
+                ON CONFLICT (user_id) DO UPDATE SET 
+                    tier = 'pro', 
+                    storage_quota_bytes = 214748364800, 
+                    email = COALESCE(EXCLUDED.email, users.email)
             """, (user_id, user_email))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
                 SET tier = 'pro', storage_quota_bytes = 214748364800 
                 WHERE LOWER(email) = LOWER(%s)
-            """, (user_email,))
-
+            """, (user_email.strip(),))
         conn.commit()
-        conn.close()
 
-    # 2. DOWNGRADE: Triggered when subscription is cancelled, paused, or expires
+    # 3. DOWNGRADE: Subscription lapsed or cancelled
     elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
-        conn = get_db()
-        cursor = conn.cursor()
-
         if user_id:
             cursor.execute("""
                 UPDATE users 
@@ -1186,9 +1200,8 @@ async def lemon_webhook(request: Request):
                 UPDATE users 
                 SET tier = 'free', storage_quota_bytes = 5368709120 
                 WHERE LOWER(email) = LOWER(%s)
-            """, (user_email,))
-
+            """, (user_email.strip(),))
         conn.commit()
-        conn.close()
 
+    conn.close()
     return {"status": "received"}

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cdefs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,7 +177,7 @@
 
         <div id="upgradeBox" class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
           <p class="text-[11px] opacity-75">Need 200 GB permanent space?</p>
-          <a href="https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
+          <a id="vaultUpgradeBtn" href="https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
             Upgrade ($4/mo)
           </a>
         </div>
@@ -263,23 +263,44 @@
       return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     }
 
-    function getStoredUserId() {
-      const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
-      if (direct) return direct;
+    function getStoredUserData() {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
           try {
             const parsed = JSON.parse(localStorage.getItem(k));
-            if (parsed?.user?.id) return parsed.user.id;
+            if (parsed?.user?.id) {
+              return { id: parsed.user.id, email: parsed.user.email || "" };
+            }
           } catch(e) {}
         }
       }
-      return null;
+      const directId = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
+      const directEmail = localStorage.getItem("user_email") || "";
+      if (directId) return { id: directId, email: directEmail };
+      return { id: null, email: null };
     }
 
-    const currentUserId = getStoredUserId();
-    if (!currentUserId) window.location.href = "/auth";
+    const userData = getStoredUserData();
+    const currentUserId = userData.id;
+    const currentUserEmail = userData.email;
+
+    if (!currentUserId) {
+      window.location.href = "/auth";
+    }
+
+    // Attach user_id and email directly to checkout URL so Lemon Squeezy identifies the purchase
+    function setupCheckoutLink() {
+      const btn = document.getElementById("vaultUpgradeBtn");
+      if (btn && currentUserId) {
+        let checkoutUrl = `https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd?checkout[custom][user_id]=${encodeURIComponent(currentUserId)}`;
+        if (currentUserEmail) {
+          checkoutUrl += `&checkout[email]=${encodeURIComponent(currentUserEmail)}`;
+        }
+        btn.href = checkoutUrl;
+      }
+    }
+    setupCheckoutLink();
 
     function signOut() {
       localStorage.clear();
@@ -329,6 +350,7 @@
             navBadge.classList.add("hidden");
             navBadge.classList.remove("inline-flex");
           }
+          setupCheckoutLink();
         }
       } catch(e) {}
 
