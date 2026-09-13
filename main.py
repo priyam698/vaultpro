@@ -4,6 +4,7 @@ import time
 import math
 import random
 import hashlib
+import hmac
 import json
 import urllib.request
 import traceback
@@ -26,7 +27,7 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 # Supersonic Monogram SVG Asset
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -105,6 +106,7 @@ s3_client = boto3.client(
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
+DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 
 # ----------------- OTP Verification Engine (Brevo HTTP API + Rate Limiter) -----------------
 otp_storage = {}
@@ -325,7 +327,7 @@ Platform Knowledge & Micro-Details:
 - Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, files are encrypted directly on your local device before transmission, so neither Zephyr nor Cloudflare can see or decrypt your data.
 - Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
 - Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage and single transfers up to 2.00 GB (plus 4 free guest transfers before requiring free account registration).
-- Zephyr Pro Tier: $4.00/month (billed via Lemon Squeezy). Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, extended retention windows (1h, 24h, 3d, 7d, 14d, 30d, or Never), and white-label download screens.
+- Zephyr Pro Tier: $4.00/month (billed via Dodo Payments). Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, extended retention windows (1h, 24h, 3d, 7d, 14d, 30d, or Never), and white-label download screens.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded and permanently deleted the exact millisecond the recipient finishes downloading it.
 - Email Transfers & OTP: Senders verify with a 6-digit code sent to their email via Brevo. The code is valid for 3 minutes, with 4 allowed attempts before a 30-minute lockout.
 - Client Deposit Portals: Created by clicking 'Request' in the header. Anyone with the drop link can upload files straight into your vault without an account. In drop-zone mode, your private drive and profile links are locked so depositors cannot view your personal files.
@@ -344,7 +346,6 @@ async def support_chat(req: SupportChatRequest):
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     openai_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-    # 1. Live xAI Grok API
     if grok_key:
         try:
             url = "https://api.x.ai/v1/chat/completions"
@@ -368,7 +369,6 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT GROK ERROR]: {e}", flush=True)
 
-    # 2. Live Gemini AI
     if gemini_key:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
@@ -388,7 +388,6 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
 
-    # 3. Live OpenAI
     if openai_key:
         try:
             url = "https://api.openai.com/v1/chat/completions"
@@ -412,7 +411,6 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
 
-    # 4. Comprehensive Easy-Language Deterministic Offline Engine
     q = user_msg.lower()
 
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "datacenter", "r2", "cloudflare"]):
@@ -1139,6 +1137,86 @@ async def get_user_profile(user_id: str):
         return {"tier": "free", "user_id": user_id}
     return {"tier": row.get("tier", "free"), "email": row.get("email"), "user_id": row.get("user_id")}
 
+# ----------------- Dodo Payments Webhook Handler -----------------
+@app.post("/api/webhook/dodo")
+async def dodo_webhook(request: Request):
+    try:
+        raw_body = await request.body()
+        payload = json.loads(raw_body.decode("utf-8")) if raw_body else {}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    event_type = payload.get("type", "")
+    data_block = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+
+    # Extract user identifiers
+    metadata = data_block.get("metadata") or payload.get("metadata") or {}
+    user_id = metadata.get("user_id") or metadata.get("userId")
+
+    customer_info = data_block.get("customer") or payload.get("customer") or {}
+    user_email = (
+        (customer_info.get("email") if isinstance(customer_info, dict) else None)
+        or data_block.get("customer_email")
+        or payload.get("customer_email")
+        or metadata.get("email")
+    )
+
+    print(f"[DODO WEBHOOK] Event: {event_type} | Email: {user_email} | User ID: {user_id}", flush=True)
+
+    # 1. Fallback: Resolve user_id from Supabase auth.users if only email exists
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if not user_id and user_email:
+        try:
+            cursor.execute("SELECT id FROM auth.users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
+            auth_row = cursor.fetchone()
+            if auth_row and auth_row.get("id"):
+                user_id = str(auth_row["id"])
+        except Exception as e:
+            print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
+
+    # 2. Upgrade to Pro: 200 GB vault storage (214748364800 bytes)
+    if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
+        if user_id:
+            cursor.execute("""
+                INSERT INTO users (user_id, email, tier, storage_quota_bytes)
+                VALUES (%s, %s, 'pro', 214748364800)
+                ON CONFLICT (user_id) DO UPDATE SET 
+                    tier = 'pro', 
+                    storage_quota_bytes = 214748364800, 
+                    email = COALESCE(EXCLUDED.email, users.email)
+            """, (user_id, user_email))
+        elif user_email:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'pro', storage_quota_bytes = 214748364800 
+                WHERE LOWER(email) = LOWER(%s)
+            """, (user_email.strip(),))
+        conn.commit()
+        print(f"[PRO TIER ACTIVATED]: Provisioned 200 GB for {user_email or user_id}", flush=True)
+
+    # 3. Downgrade to Free: 5 GB storage (5368709120 bytes)
+    elif event_type in ["subscription.cancelled", "subscription.expired", "subscription.failed"]:
+        if user_id:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'free', storage_quota_bytes = 5368709120 
+                WHERE user_id = %s
+            """, (user_id,))
+        elif user_email:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'free', storage_quota_bytes = 5368709120 
+                WHERE LOWER(email) = LOWER(%s)
+            """, (user_email.strip(),))
+        conn.commit()
+        print(f"[PRO TIER DEACTIVATED]: Reverted to 5 GB for {user_email or user_id}", flush=True)
+
+    conn.close()
+    return {"status": "success", "event": event_type}
+
+# ----------------- Lemon Squeezy Fallback Webhook -----------------
 @app.post("/api/webhook/lemonsqueezy")
 async def lemon_webhook(request: Request):
     try:
@@ -1158,7 +1236,6 @@ async def lemon_webhook(request: Request):
     conn = get_db()
     cursor = conn.cursor()
 
-    # 1. If user_id wasn't in custom_data, resolve it from Supabase auth.users by email
     if not user_id and user_email:
         try:
             cursor.execute("SELECT id FROM auth.users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
@@ -1168,7 +1245,6 @@ async def lemon_webhook(request: Request):
         except Exception as e:
             print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
 
-    # 2. UPGRADE: Order or subscription successful
     if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
         if user_id:
             cursor.execute("""
@@ -1187,7 +1263,6 @@ async def lemon_webhook(request: Request):
             """, (user_email.strip(),))
         conn.commit()
 
-    # 3. DOWNGRADE: Subscription lapsed or cancelled
     elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
         if user_id:
             cursor.execute("""
