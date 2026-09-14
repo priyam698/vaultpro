@@ -17,7 +17,7 @@ from typing import Optional, List, Dict, Any
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from fastapi import FastAPI, Request, HTTPException, status, Form, File, UploadFile, Query
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -266,7 +266,7 @@ class BrandingUpdatePayload(BaseModel):
 
 class InitiatePaywallRequest(BaseModel):
     share_id: str
-    buyer_email: EmailStr
+    buyer_email: str
 
 class CreateShareRequest(BaseModel):
     filename: str
