@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Drive | Encrypted Cloud Storage</title>
+  <title>Zephyr Drive | Encrypted Cloud Storage & Studio Branding</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,6 +48,11 @@
       transition: all 0.3s ease;
     }
 
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
+
     body.light-theme {
       background-color: #cbd5e1;
       color: #090d16;
@@ -67,12 +72,13 @@
     }
 
     body.light-theme header a,
-    body.light-theme header span {
+    body.light-theme header span,
+    body.light-theme header button {
       color: #090d16 !important;
     }
 
     body.light-theme .obsidian-card {
-      background: rgba(248, 250, 252, 0.82) !important;
+      background: rgba(248, 250, 252, 0.85) !important;
       border-color: rgba(255, 255, 255, 0.7) !important;
       color: #0f172a !important;
       box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
@@ -83,8 +89,9 @@
       color: #0f172a !important;
     }
 
-    body.light-theme input {
-      background-color: rgba(255, 255, 255, 0.9) !important;
+    body.light-theme input,
+    body.light-theme textarea {
+      background-color: rgba(255, 255, 255, 0.95) !important;
       border-color: rgba(148, 163, 184, 0.6) !important;
       color: #0f172a !important;
     }
@@ -200,6 +207,142 @@
     </div>
   </div>
 
+  <div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+    <div class="obsidian-card max-w-2xl w-full rounded-3xl p-6 sm:p-8 relative border border-indigo-500/40 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-black uppercase tracking-wider mb-1">
+            Studio Identity
+          </div>
+          <h3 class="text-xl font-black card-heading">Custom Transfer & Vault Branding</h3>
+          <p class="text-xs opacity-70">Customize the client transfer wallpaper, brand logo, and download theme.</p>
+        </div>
+        <button onclick="closeBrandingModal()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+      </div>
+
+      <div id="brandingUpgradeLock" class="hidden p-6 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/30 to-slate-900/40 border border-purple-500/30 text-center space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-400 mx-auto flex items-center justify-center text-xl">
+          🎨
+        </div>
+        <h4 class="text-sm font-black text-white">Custom Studio Branding is Locked</h4>
+        <p class="text-xs opacity-75 max-w-md mx-auto leading-relaxed">
+          Transform your client file delivery into a bespoke white-label portfolio. Upgrade to <strong>Zephyr Plus ($4.50/mo)</strong> or <strong>Zephyr Pro ($7.00/mo)</strong> to activate custom wallpapers and logos.
+        </p>
+        <div class="pt-2 flex items-center justify-center gap-3">
+          <button onclick="openUpgradeModal('plus')" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-lg shadow-purple-600/30 transition cursor-pointer">
+            Get Plus ($4.50)
+          </button>
+          <button onclick="openUpgradeModal('pro')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+            Get Pro ($7.00)
+          </button>
+        </div>
+      </div>
+
+      <form id="brandingForm" class="space-y-5">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-1.5 opacity-80">Studio / Brand Name</label>
+            <input id="brandTitleInput" type="text" placeholder="e.g. Acme Visual Studios" 
+                   class="w-full rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:border-indigo-400 transition bg-slate-900/60 border border-slate-400/30 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5 opacity-80">Brand Accent Color</label>
+            <div class="flex items-center gap-2">
+              <input id="brandColorPicker" type="color" value="#6366f1" onchange="syncColorInput(this.value)"
+                     class="w-10 h-10 p-1 rounded-xl border border-white/20 bg-transparent cursor-pointer shrink-0">
+              <input id="brandColorText" type="text" value="#6366f1" oninput="syncColorPicker(this.value)"
+                     class="flex-1 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold focus:outline-none focus:border-indigo-400 transition bg-slate-900/60 border border-slate-400/30 text-white">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold">Studio Logo</span>
+                <span class="text-[10px] opacity-60 font-mono">PNG, SVG (max 5MB)</span>
+              </div>
+              <p class="text-[11px] opacity-70">Replaces the top Zephyr monogram icon on all your download pages.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div id="logoPreviewWrapper" class="w-12 h-12 rounded-xl bg-black/40 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+                <img id="brandLogoImg" src="" alt="Studio Logo" class="hidden w-full h-full object-contain p-1">
+                <span id="brandLogoPlaceholder" class="text-xs opacity-40">Logo</span>
+              </div>
+              <div class="flex-1">
+                <input type="file" id="logoFileInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                <button type="button" onclick="document.getElementById('logoFileInput').click()" class="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold transition cursor-pointer">
+                  Upload Logo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold">Custom Transfer Wallpaper</span>
+                <span class="text-[10px] opacity-60 font-mono">JPG, PNG (1920x1080)</span>
+              </div>
+              <p class="text-[11px] opacity-70">Displayed as the full-screen backdrop when clients receive and download your files.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div id="bgPreviewWrapper" class="w-16 h-12 rounded-xl bg-black/40 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+                <img id="brandBgImg" src="" alt="Custom Wallpaper" class="hidden w-full h-full object-cover">
+                <span id="brandBgPlaceholder" class="text-[10px] opacity-40">Wall</span>
+              </div>
+              <div class="flex-1">
+                <input type="file" id="bgFileInput" accept="image/*" class="hidden" onchange="handleBgUpload(event)">
+                <button type="button" onclick="document.getElementById('bgFileInput').click()" class="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold transition cursor-pointer">
+                  Upload Wallpaper
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <label class="block text-xs font-bold mb-2 opacity-80">Live Download Page Preview</label>
+          <div id="livePreviewContainer" class="relative rounded-2xl overflow-hidden h-48 border border-white/15 bg-slate-900 flex items-center justify-center p-4">
+            <div id="previewBackdropImg" class="absolute inset-0 bg-cover bg-center opacity-60 transition duration-300"></div>
+            <div class="absolute inset-0 bg-black/40"></div>
+
+            <div class="relative z-10 w-full max-w-xs p-3.5 rounded-2xl bg-[#080d1c]/90 border border-white/15 backdrop-blur-md space-y-2 shadow-2xl">
+              <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                <div class="flex items-center gap-2">
+                  <div id="previewMiniLogo" class="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-[10px] font-black text-white">
+                    Z
+                  </div>
+                  <span id="previewStudioTitle" class="text-xs font-black truncate max-w-[140px]">Acme Studios</span>
+                </div>
+                <span id="previewBadge" class="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400">ENCRYPTED</span>
+              </div>
+              <div class="text-[10px] opacity-75 font-mono">Deliverables_Final_8K.zip (14.2 GB)</div>
+              <button type="button" id="previewCtaBtn" class="w-full py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[10px] text-center shadow">
+                Download Transfer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+          <button type="button" onclick="closeBrandingModal()" class="px-5 py-2.5 rounded-xl border border-white/15 hover:bg-white/5 text-xs font-bold transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="button" id="saveBrandingBtn" onclick="saveBrandingPreferences()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-lg shadow-purple-600/30 transition cursor-pointer">
+            Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -240,11 +383,15 @@
         </a>
       </div>
 
-      <div class="flex items-center gap-3 sm:gap-4">
+      <div class="flex items-center gap-2.5 sm:gap-4">
+        <button onclick="openBrandingModal()" class="text-xs font-bold hover:opacity-80 transition flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 cursor-pointer">
+          <span class="text-purple-400">🎨</span>
+          <span class="hidden sm:inline">Branding</span>
+        </button>
+        <a href="/" class="text-xs font-bold hover:opacity-80 transition hidden md:inline-block">Transfer Pipeline</a>
         <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <a href="/" class="text-xs font-bold hover:opacity-80 transition">Transfer Pipeline</a>
         <button onclick="signOut()" class="text-xs bg-white/[0.08] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-bold border border-white/15 transition cursor-pointer">
           Sign Out
         </button>
@@ -352,8 +499,13 @@
   </footer>
 
   <script>
-    // Dodo Payments Base Checkout or Product IDs
-    const DODO_CHECKOUT_BASE_URL = "https://checkout.dodopayments.com/buy/pdt_ONrnVvaQ9xDPDhpjrniuR3A";
+    // Exact Dodo Payments Product IDs mapped across all 4 tiers
+    const DODO_PRODUCT_IDS = {
+      micro: "pdt_0NnaihWSsabCnJhTUZspz",
+      lite: "pdt_0Nnaj4zAkRMRoDf8pylkT",
+      plus: "pdt_0NnajLUyCZX2ARDgk003r",
+      pro: "pdt_0NrnVvaQ9xDPDhpjrniuR3A"
+    };
 
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -420,6 +572,12 @@
     let currentRenamingFileId = null;
     let currentAccountTier = "free";
     let selectedUpgradeTarget = "pro";
+    let currentBrandingData = {
+      brand_title: "",
+      brand_accent_color: "#6366f1",
+      brand_logo_url: null,
+      brand_bg_url: null
+    };
 
     async function loadDriveData() {
       try {
@@ -440,14 +598,6 @@
         const banner = document.getElementById("expiryAlertBanner");
         const bannerTitle = document.getElementById("expiryAlertTitle");
         const bannerMsg = document.getElementById("expiryAlertMsg");
-
-        const tierTitles = {
-          free: "Free Starter (5 GB)",
-          micro: "Zephyr Micro (15 GB)",
-          lite: "Zephyr Lite (30 GB)",
-          plus: "Zephyr Plus (80 GB)",
-          pro: "Zephyr Pro (200 GB)"
-        };
 
         if (currentAccountTier !== "free") {
           tierBadge.innerText = `${currentAccountTier.toUpperCase()} ${formatBytes(data.quota_bytes, 0)}`;
@@ -473,7 +623,7 @@
           const daysLeft = Math.max(0, Math.ceil((graceEnd - now) / (1000 * 60 * 60 * 24)));
           
           bannerTitle.innerText = "⚠️ 20-Day Grace Period Active";
-          bannerMsg.innerText = `Your subscription has lapsed. You have ${daysLeft} day(s) left before stored files exceeding the 5 GB free limit are permanently shredded.`;
+          bannerMsg.innerText = `Your subscription has lapsed. You have ${daysLeft} day(s) left before stored files exceeding your plan limit are permanently shredded.`;
           banner.classList.remove("hidden");
         } else if (data.subscription_end_at && currentAccountTier !== "free") {
           const subEnd = new Date(data.subscription_end_at);
@@ -602,7 +752,7 @@
       }
     }
 
-    // Mid-cycle Upgrade / Plan Change Logic
+    // Upgrade Modal Logic
     function openUpgradeModal(defaultTier = "pro") {
       document.getElementById("upgradePlanModal").classList.remove("hidden");
       selectUpgradeTarget(defaultTier);
@@ -648,7 +798,9 @@
     }
 
     function executePlanUpgrade() {
-      let targetUrl = DODO_CHECKOUT_BASE_URL;
+      const productId = DODO_PRODUCT_IDS[selectedUpgradeTarget] || DODO_PRODUCT_IDS["pro"];
+      let targetUrl = `https://checkout.dodopayments.com/buy/${productId}`;
+      
       const params = new URLSearchParams();
       if (currentUserEmail) params.append("email", currentUserEmail);
       if (currentUserId) params.append("metadata_user_id", currentUserId);
@@ -656,11 +808,180 @@
 
       const qs = params.toString();
       if (qs) {
-        targetUrl += (targetUrl.includes("?") ? "&" : "?") + qs;
+        targetUrl += "?" + qs;
       }
       window.location.href = targetUrl;
     }
 
+    // =========================================================================
+    // STUDIO BRANDING ENGINE
+    // =========================================================================
+    async function openBrandingModal() {
+      document.getElementById("brandingModal").classList.remove("hidden");
+      const isEligible = ["plus", "pro"].includes(currentAccountTier);
+
+      const lockBox = document.getElementById("brandingUpgradeLock");
+      const formBox = document.getElementById("brandingForm");
+
+      if (!isEligible) {
+        lockBox.classList.remove("hidden");
+        formBox.classList.add("opacity-30", "pointer-events-none");
+      } else {
+        lockBox.classList.add("hidden");
+        formBox.classList.remove("opacity-30", "pointer-events-none");
+      }
+
+      try {
+        const res = await fetch(`/api/branding/${currentUserId}`);
+        if (res.ok) {
+          const b = await res.json();
+          currentBrandingData = b;
+          document.getElementById("brandTitleInput").value = b.brand_title || "";
+          syncColorInput(b.brand_accent_color || "#6366f1");
+          
+          if (b.brand_logo_url) {
+            document.getElementById("brandLogoImg").src = b.brand_logo_url;
+            document.getElementById("brandLogoImg").classList.remove("hidden");
+            document.getElementById("brandLogoPlaceholder").classList.add("hidden");
+          }
+          if (b.brand_bg_url) {
+            document.getElementById("brandBgImg").src = b.brand_bg_url;
+            document.getElementById("brandBgImg").classList.remove("hidden");
+            document.getElementById("brandBgPlaceholder").classList.add("hidden");
+          }
+          updateLivePreview();
+        }
+      } catch(e) {}
+    }
+
+    function closeBrandingModal() {
+      document.getElementById("brandingModal").classList.add("hidden");
+    }
+
+    function syncColorInput(val) {
+      document.getElementById("brandColorPicker").value = val;
+      document.getElementById("brandColorText").value = val;
+      currentBrandingData.brand_accent_color = val;
+      updateLivePreview();
+    }
+
+    function syncColorPicker(val) {
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        document.getElementById("brandColorPicker").value = val;
+        currentBrandingData.brand_accent_color = val;
+        updateLivePreview();
+      }
+    }
+
+    document.getElementById("brandTitleInput").addEventListener("input", (e) => {
+      currentBrandingData.brand_title = e.target.value;
+      updateLivePreview();
+    });
+
+    function updateLivePreview() {
+      const titleEl = document.getElementById("previewStudioTitle");
+      const ctaBtn = document.getElementById("previewCtaBtn");
+      const miniLogo = document.getElementById("previewMiniLogo");
+      const backdrop = document.getElementById("previewBackdropImg");
+
+      const title = currentBrandingData.brand_title || "My Studio";
+      titleEl.innerText = title;
+
+      const color = currentBrandingData.brand_accent_color || "#6366f1";
+      ctaBtn.style.backgroundColor = color;
+      miniLogo.style.backgroundColor = color;
+
+      if (currentBrandingData.brand_logo_url) {
+        miniLogo.innerHTML = `<img src="${currentBrandingData.brand_logo_url}" class="w-full h-full object-contain p-0.5">`;
+      } else {
+        miniLogo.innerText = title.charAt(0).toUpperCase();
+      }
+
+      if (currentBrandingData.brand_bg_url) {
+        backdrop.style.backgroundImage = `url('${currentBrandingData.brand_bg_url}')`;
+      } else {
+        backdrop.style.backgroundImage = `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1000&q=80')`;
+      }
+    }
+
+    async function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const fd = new FormData();
+      fd.append("user_id", currentUserId);
+      fd.append("asset_type", "logo");
+      fd.append("file", file);
+
+      try {
+        const res = await fetch("/api/branding/upload-asset", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Logo upload failed");
+
+        currentBrandingData.brand_logo_url = data.url;
+        document.getElementById("brandLogoImg").src = data.url;
+        document.getElementById("brandLogoImg").classList.remove("hidden");
+        document.getElementById("brandLogoPlaceholder").classList.add("hidden");
+        updateLivePreview();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function handleBgUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const fd = new FormData();
+      fd.append("user_id", currentUserId);
+      fd.append("asset_type", "background");
+      fd.append("file", file);
+
+      try {
+        const res = await fetch("/api/branding/upload-asset", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Wallpaper upload failed");
+
+        currentBrandingData.brand_bg_url = data.url;
+        document.getElementById("brandBgImg").src = data.url;
+        document.getElementById("brandBgImg").classList.remove("hidden");
+        document.getElementById("brandBgPlaceholder").classList.add("hidden");
+        updateLivePreview();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function saveBrandingPreferences() {
+      const btn = document.getElementById("saveBrandingBtn");
+      btn.disabled = true;
+      btn.innerText = "Saving...";
+
+      try {
+        const res = await fetch("/api/branding/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: currentUserId,
+            brand_title: document.getElementById("brandTitleInput").value.trim(),
+            brand_accent_color: document.getElementById("brandColorText").value.trim()
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Save failed.");
+
+        alert("Studio Branding saved successfully! Your custom logo, colors, and background are now live on your transfers.");
+        closeBrandingModal();
+      } catch (err) {
+        alert("Branding Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Save Changes";
+      }
+    }
+
+    // Drive File Actions
     async function shareFile(fileId) {
       try {
         const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);

@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import time
 import math
@@ -9,13 +10,13 @@ import json
 import urllib.request
 import traceback
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 import boto3
 from botocore.config import Config
-from pydantic import BaseModel
-from fastapi import FastAPI, Request, HTTPException, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+from pydantic import BaseModel, EmailStr
+from fastapi import FastAPI, Request, HTTPException, status, Form, File, UploadFile, Query
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -26,12 +27,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-# Supersonic Monogram SVG Asset
 SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.0.0",
+    version="2.5.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -58,13 +58,12 @@ def get_db():
         conn_str = conn_str.replace("postgres://", "postgresql://", 1)
     return psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
 
-# ----------------- Plan Architecture, Quotas & Daily E-Sign Limits -----------------
 PLAN_CONFIG = {
     "free":  {"name": "Free Starter", "price": 0.00, "quota": 5 * 1024**3,   "single_mb": 2048,  "esign_daily": 7},
     "micro": {"name": "Zephyr Micro", "price": 1.80, "quota": 15 * 1024**3,  "single_mb": 5000,  "esign_daily": 15},
     "lite":  {"name": "Zephyr Lite",  "price": 2.50, "quota": 30 * 1024**3,  "single_mb": 10000, "esign_daily": 30},
     "plus":  {"name": "Zephyr Plus",  "price": 4.50, "quota": 80 * 1024**3,  "single_mb": 25000, "esign_daily": 50},
-    "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}  # -1 = Unlimited
+    "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
 @app.on_event("startup")
@@ -74,6 +73,38 @@ def init_db_schema():
     try:
         conn = get_db()
         cursor = conn.cursor()
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id VARCHAR(120) PRIMARY KEY,
+                email VARCHAR(255) UNIQUE,
+                tier VARCHAR(30) DEFAULT 'free',
+                storage_used_bytes BIGINT DEFAULT 0,
+                storage_quota_bytes BIGINT DEFAULT 5368709120,
+                plan_price NUMERIC(5,2) DEFAULT 0.00,
+                subscription_end_at TIMESTAMP,
+                grace_period_end_at TIMESTAMP,
+                brand_title VARCHAR(120),
+                brand_slug VARCHAR(60) UNIQUE,
+                brand_logo_url TEXT,
+                brand_bg_url TEXT,
+                brand_accent_color VARCHAR(10) DEFAULT '#6366f1',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
+        cursor.execute("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_price NUMERIC(5,2) DEFAULT 0.00;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_title VARCHAR(120);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_slug VARCHAR(60) UNIQUE;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo_url TEXT;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_bg_url TEXT;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_accent_color VARCHAR(10) DEFAULT '#6366f1';
+        """)
+
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS signature_requests (
                 doc_id VARCHAR(32) PRIMARY KEY,
@@ -83,30 +114,54 @@ def init_db_schema():
                 status VARCHAR(32) DEFAULT 'pending',
                 signature_x INT DEFAULT 150,
                 signature_y INT DEFAULT 250,
+                creator_email VARCHAR(255),
+                user_id VARCHAR(64),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 completed_at TIMESTAMP
-            )
+            );
         """)
-        cursor.execute("ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS creator_email VARCHAR(255);")
-        cursor.execute("ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(64);")
 
-        # Users lifecycle, proration & 20-day grace period fields
-        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;")
-        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;")
-        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_price NUMERIC(5,2) DEFAULT 0.00;")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS drive_files (
+                id VARCHAR(64) PRIMARY KEY,
+                user_id VARCHAR(120) NOT NULL,
+                filename TEXT NOT NULL,
+                file_type VARCHAR(100),
+                size_bytes BIGINT NOT NULL,
+                s3_key TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS shares (
+                id VARCHAR(64) PRIMARY KEY,
+                user_id VARCHAR(120),
+                filename TEXT NOT NULL,
+                filesize_mb NUMERIC(10, 2) NOT NULL,
+                s3_key TEXT NOT NULL,
+                password_hash TEXT,
+                expiry_hours INT DEFAULT 24,
+                expires_at TIMESTAMP NOT NULL,
+                max_downloads INT DEFAULT 0,
+                downloads INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
 
         conn.commit()
+        cursor.close()
         conn.close()
-        print("[DB STARTUP]: Schema verified, subscription and grace period migrations applied.", flush=True)
+        print("[DB STARTUP]: Schema verified and branding columns migrated successfully.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP WARNING]: {e}", flush=True)
 
-# Cloudflare R2 Config
 R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
 R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "").strip()
 R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "vault-storage-backend").strip()
+R2_PUBLIC_DOMAIN = os.getenv("R2_PUBLIC_DOMAIN", "").strip().rstrip("/")
 
 R2_ENDPOINT = R2_ENDPOINT_URL or (f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com" if R2_ACCOUNT_ID else None)
 
@@ -123,7 +178,6 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
 DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 
-# ----------------- OTP Verification Engine (Brevo HTTP API + Rate Limiter) -----------------
 otp_storage = {}
 
 class SendOtpRequest(BaseModel):
@@ -141,6 +195,12 @@ class SendTransferEmailRequest(BaseModel):
     filesize_mb: float
     title: Optional[str] = "Files shared via Zephyr"
     message: Optional[str] = ""
+
+class BrandingUpdatePayload(BaseModel):
+    user_id: str
+    brand_title: Optional[str] = None
+    brand_slug: Optional[str] = None
+    brand_accent_color: Optional[str] = "#6366f1"
 
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
@@ -169,8 +229,6 @@ async def send_verification_otp(req: SendOtpRequest):
 
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
-
-    print(f"\n[ZEPHYR LIVE OTP FOR {target_email}]: {code} (Valid for 3 mins)\n", flush=True)
 
     if not brevo_api_key:
         raise HTTPException(
@@ -214,7 +272,6 @@ async def send_verification_otp(req: SendOtpRequest):
             if response.status not in (200, 201, 202):
                 raise Exception(f"Brevo API returned status {response.status}")
     except Exception as e:
-        print(f"[BREVO API ERROR]: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to send email via Brevo API: {str(e)}")
 
     return {"message": "Verification code dispatched successfully."}
@@ -320,15 +377,9 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
             if response.status not in (200, 201, 202):
                 raise Exception(f"Brevo API returned status {response.status}")
     except Exception as e:
-        print(f"[RECIPIENT NOTIFICATION ERROR]: {e}")
         raise HTTPException(status_code=500, detail=f"Files uploaded, but failed to email recipient: {str(e)}")
 
     return {"status": "dispatched", "recipient": req.recipient_email}
-
-# ----------------- Zephyr Copilot Comprehensive Knowledge & AI Support -----------------
-class SupportChatRequest(BaseModel):
-    message: str
-    history: Optional[list] = []
 
 ZEPHYR_SYSTEM_KNOWLEDGE = """
 You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
@@ -344,12 +395,17 @@ Platform Knowledge & Pricing Tiers:
 - Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage, 2 GB single transfers, and 7 E-Sign documents per day.
 - Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage, 5 GB single transfers, and 15 E-Sign documents per day.
 - Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
-- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, and 50 E-Sign documents per day.
-- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, and unlimited daily E-Sign documents.
-- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the 5 GB free limit are pruned starting from the oldest uploaded files.
+- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
+- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
+- Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
+- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the active plan limit are pruned starting from the oldest uploaded files.
 - Mid-Cycle Upgrades: Users can upgrade plans mid-cycle. The charge is prorated for the remaining days of their billing cycle plus a $0.50 upgrade fee.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
+
+class SupportChatRequest(BaseModel):
+    message: str
+    history: Optional[list] = []
 
 @app.post("/api/support/chat")
 async def support_chat(req: SupportChatRequest):
@@ -427,15 +483,16 @@ async def support_chat(req: SupportChatRequest):
             print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
 
     q = user_msg.lower()
-
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
         reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
     elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
-        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs."
+        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding."
+    elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
+        reply = "Studio Branding is available exclusively on our Plus ($4.50/mo) and Pro ($7.00/mo) tiers. It lets you customize public transfer backgrounds, showcase your studio logo, and set custom accent colors."
     elif any(k in q for k in ["esign", "e-sign", "signature", "limit", "daily"]):
         reply = "Daily E-Sign document creation limits: Free Starter (7/day), Micro (15/day), Lite (30/day), Plus (50/day), and Pro (Unlimited). Limits reset every night at midnight."
     elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
-        reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding the 5 GB free limit will be permanently deleted starting from the oldest files."
+        reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding your current plan limit will be automatically deleted starting from the oldest files."
     elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
         reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the second your recipient finishes downloading it. After that, the link is destroyed permanently."
     else:
@@ -443,12 +500,10 @@ async def support_chat(req: SupportChatRequest):
 
     return {"reply": reply}
 
-# ----------------- Brand Assets & Favicon -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():
     return Response(content=SUPERSONIC_FAVICON_SVG, media_type="image/svg+xml")
 
-# ----------------- UI Pages -----------------
 @app.get("/", response_class=HTMLResponse)
 async def index_page(request: Request):
     return render_template("index.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
@@ -473,7 +528,95 @@ async def privacy_page(request: Request):
 async def sign_page(request: Request):
     return render_template("sign.html", request)
 
-# ----------------- E-Sign Document & Envelope Dashboard API -----------------
+# ----------------- Studio Custom Branding (Plus & Pro Tiers) -----------------
+@app.get("/api/branding/{user_id}")
+async def get_branding(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT tier, brand_title, brand_slug, brand_logo_url, brand_bg_url, brand_accent_color 
+        FROM users WHERE user_id = %s
+    """, (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return dict(row)
+
+@app.post("/api/branding/update")
+async def update_branding(data: BrandingUpdatePayload):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tier FROM users WHERE user_id = %s", (data.user_id,))
+    user = cursor.fetchone()
+    
+    if not user or (user.get("tier") or "").lower() not in ["plus", "pro"]:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Custom Studio Branding requires an active Plus or Pro subscription.")
+
+    cursor.execute("""
+        UPDATE users 
+        SET brand_title = %s, 
+            brand_slug = %s, 
+            brand_accent_color = %s,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = %s
+    """, (data.brand_title, data.brand_slug, data.brand_accent_color, data.user_id))
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Branding customizations saved successfully."}
+
+@app.post("/api/branding/upload-asset")
+async def upload_branding_asset(
+    user_id: str = Form(...),
+    asset_type: str = Form(...),
+    file: UploadFile = File(...)
+):
+    asset_type = asset_type.lower().strip()
+    if asset_type not in ["logo", "background"]:
+        raise HTTPException(status_code=400, detail="Invalid asset_type. Must be 'logo' or 'background'.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tier FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user or (user.get("tier") or "").lower() not in ["plus", "pro"]:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Custom Studio Branding requires an active Plus or Pro subscription.")
+
+    ext = file.filename.split(".")[-1] if "." in file.filename else "png"
+    s3_key = f"branding/{user_id}/{asset_type}_{int(datetime.utcnow().timestamp())}.{ext}"
+    file_bytes = await file.read()
+
+    try:
+        s3_client.put_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=s3_key,
+            Body=file_bytes,
+            ContentType=file.content_type or "image/png"
+        )
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"R2 storage error: {str(e)}")
+
+    if R2_PUBLIC_DOMAIN:
+        public_url = f"{R2_PUBLIC_DOMAIN}/{s3_key}"
+    else:
+        public_url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
+            ExpiresIn=604800
+        )
+
+    column = "brand_logo_url" if asset_type == "logo" else "brand_bg_url"
+    cursor.execute(f"UPDATE users SET {column} = %s, updated_at = CURRENT_TIMESTAMP WHERE user_id = %s", (public_url, user_id))
+    conn.commit()
+    conn.close()
+
+    return {"status": "success", "url": public_url}
+
+# ----------------- E-Sign Document & Envelope API -----------------
 @app.get("/api/sign/quota")
 async def get_sign_quota(user_id: Optional[str] = None, email: Optional[str] = None):
     conn = get_db()
@@ -553,7 +696,6 @@ async def upload_sign_doc(
     tier_cfg = PLAN_CONFIG.get(user_tier, PLAN_CONFIG["free"])
     daily_limit = tier_cfg.get("esign_daily", 7)
 
-    # Enforce Daily E-Sign Quota Check
     if daily_limit != -1:
         if user_id:
             cursor.execute("""
@@ -803,7 +945,7 @@ async def delete_signature_request(doc_id: str):
 
     return {"status": "deleted", "doc_id": doc_id}
 
-# ----------------- Zephyr Drive Core API -----------------
+# ----------------- Zephyr Drive Storage Engine -----------------
 @app.get("/api/drive/quota")
 async def get_drive_quota(user_id: str):
     conn = get_db()
@@ -987,7 +1129,6 @@ async def upload_client_deposit(
 
     def dispatch_brevo(to_address: str, subject: str, html_body: str):
         if not brevo_api_key or not to_address:
-            print(f"[BREVO SKIPPED]: Missing key or address ({to_address})", flush=True)
             return
         payload = {
             "sender": {"name": "Zephyr Vault Deposit", "email": system_sender},
@@ -1003,7 +1144,7 @@ async def upload_client_deposit(
                 method="POST"
             )
             with urllib.request.urlopen(http_req, timeout=12) as resp:
-                print(f"[BREVO SUCCESS] Dispatched notification to {to_address} (Status {resp.status})", flush=True)
+                print(f"[BREVO SUCCESS] Dispatched notification to {to_address}", flush=True)
         except Exception as e:
             print(f"[BREVO ERROR] Failed sending to {to_address}: {e}", flush=True)
 
@@ -1091,6 +1232,36 @@ async def delete_drive_file(file_id: str, user_id: str):
 
     return {"status": "deleted"}
 
+class RenameFileRequest(BaseModel):
+    file_id: str
+    new_filename: str
+    user_id: Optional[str] = None
+
+@app.post("/api/drive/rename-file")
+async def rename_drive_file(payload: RenameFileRequest):
+    new_name = payload.new_filename.strip()
+    if not new_name:
+        raise HTTPException(status_code=400, detail="Filename cannot be empty")
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        if payload.user_id:
+            cursor.execute(
+                "UPDATE drive_files SET filename = %s WHERE id = %s AND user_id = %s",
+                (new_name, payload.file_id, payload.user_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE drive_files SET filename = %s WHERE id = %s",
+                (new_name, payload.file_id)
+            )
+        conn.commit()
+        conn.close()
+        return {"status": "success", "new_filename": new_name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
+
 # ----------------- Mid-Cycle Prorated Upgrades -----------------
 class UpgradeQuoteRequest(BaseModel):
     user_id: str
@@ -1112,7 +1283,6 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
     current_price = float(user.get("plan_price") or 0.0) if user else 0.0
     sub_end = user.get("subscription_end_at") if user else None
 
-    # Free users or accounts without active end date pay full tier price
     if not sub_end or current_price <= 0.0:
         return {
             "target_tier": target_tier_key,
@@ -1138,7 +1308,6 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
             "target_quota_bytes": target["quota"]
         }
 
-    # Prorated difference + $0.50 mid-cycle upgrade surcharge
     price_diff = max(0.0, target["price"] - current_price)
     prorated_base = (price_diff / 30.0) * days_remaining
     final_amount = round(prorated_base + 0.50, 2)
@@ -1163,7 +1332,6 @@ async def prune_expired_vaults(secret: str = ""):
     cursor = conn.cursor()
     now = datetime.utcnow()
 
-    # Find users past their 20-day grace period whose storage exceeds their current tier quota
     cursor.execute("""
         SELECT user_id, tier, storage_used_bytes, storage_quota_bytes 
         FROM users 
@@ -1177,9 +1345,8 @@ async def prune_expired_vaults(secret: str = ""):
     for u in over_limit_users:
         uid = u["user_id"]
         used = u["storage_used_bytes"]
-        allowed_quota = u["storage_quota_bytes"] or 5368709120  # Fallback to 5 GB
+        allowed_quota = u["storage_quota_bytes"] or PLAN_CONFIG["free"]["quota"]
 
-        # Fetch oldest files first
         cursor.execute("SELECT id, s3_key, size_bytes FROM drive_files WHERE user_id = %s ORDER BY created_at ASC", (uid,))
         files = cursor.fetchall()
 
@@ -1195,7 +1362,6 @@ async def prune_expired_vaults(secret: str = ""):
             used -= f["size_bytes"]
             pruned_count += 1
 
-        # Clear grace period lock and update exact current storage used
         cursor.execute("""
             UPDATE users 
             SET storage_used_bytes = %s, 
@@ -1206,6 +1372,7 @@ async def prune_expired_vaults(secret: str = ""):
 
     conn.close()
     return {"status": "success", "processed_users": len(over_limit_users), "files_pruned": pruned_count}
+
 # ----------------- Ephemeral Transfers -----------------
 class CreateShareRequest(BaseModel):
     filename: str
@@ -1224,13 +1391,14 @@ async def share_page(request: Request, share_id: str):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
     row = cursor.fetchone()
-    conn.close()
 
     if not row:
+        conn.close()
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
     max_downloads = row.get("max_downloads", 0) or 0
     if max_downloads > 0 and row["downloads"] >= max_downloads:
+        conn.close()
         raise HTTPException(status_code=410, detail="This link reached its maximum download limit and was shredded.")
 
     if row["expiry_hours"] != 0:
@@ -1238,15 +1406,68 @@ async def share_page(request: Request, share_id: str):
         if isinstance(expires_at, str):
             expires_at = datetime.fromisoformat(expires_at)
         if datetime.utcnow().astimezone() > expires_at:
+            conn.close()
             raise HTTPException(status_code=410, detail="This vault link has expired.")
+
+    branding = None
+    if row.get("user_id"):
+        cursor.execute("""
+            SELECT tier, brand_title, brand_slug, brand_logo_url, brand_bg_url, brand_accent_color 
+            FROM users WHERE user_id = %s
+        """, (row["user_id"],))
+        u_brand = cursor.fetchone()
+        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
+            branding = dict(u_brand)
+
+    conn.close()
 
     return render_template("download.html", request, {
         "share_id": share_id,
         "filename": row["filename"],
         "filesize": row["filesize_mb"],
         "downloads": row["downloads"],
-        "has_password": bool(row["password_hash"])
+        "has_password": bool(row["password_hash"]),
+        "branding": branding
     })
+
+@app.get("/api/share-details/{share_id}")
+async def get_share_details(share_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="File share expired or purged.")
+
+    if row["expiry_hours"] != 0:
+        expires_at = row["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if datetime.utcnow().astimezone() > expires_at:
+            conn.close()
+            raise HTTPException(status_code=410, detail="Transfer link has expired.")
+
+    branding = None
+    if row.get("user_id"):
+        cursor.execute("""
+            SELECT tier, brand_title, brand_logo_url, brand_bg_url, brand_accent_color 
+            FROM users WHERE user_id = %s
+        """, (row["user_id"],))
+        u_brand = cursor.fetchone()
+        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
+            branding = dict(u_brand)
+
+    conn.close()
+
+    return {
+        "share_id": row["id"],
+        "filename": row["filename"],
+        "filesize_mb": float(row["filesize_mb"]),
+        "has_password": bool(row["password_hash"]),
+        "sender_branding": branding
+    }
 
 @app.post("/api/create-share")
 async def create_share(payload: CreateShareRequest):
@@ -1348,11 +1569,16 @@ async def get_user_profile(user_id: str):
         "tier": row.get("tier", "free"),
         "email": row.get("email"),
         "user_id": row.get("user_id"),
+        "brand_title": row.get("brand_title"),
+        "brand_slug": row.get("brand_slug"),
+        "brand_logo_url": row.get("brand_logo_url"),
+        "brand_bg_url": row.get("brand_bg_url"),
+        "brand_accent_color": row.get("brand_accent_color") or "#6366f1",
         "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
 
-# ----------------- Dodo Payments Webhook Handler -----------------
+# ----------------- Dodo Payments Webhook -----------------
 @app.post("/api/webhook/dodo")
 async def dodo_webhook(request: Request):
     try:
@@ -1360,6 +1586,12 @@ async def dodo_webhook(request: Request):
         payload = json.loads(raw_body.decode("utf-8")) if raw_body else {}
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    webhook_signature = request.headers.get("webhook-signature") or request.headers.get("x-dodo-signature")
+    if DODO_WEBHOOK_SECRET and webhook_signature:
+        expected = hmac.new(DODO_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(expected, webhook_signature.replace("sha256=", "")):
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
     event_type = payload.get("type", "")
     data_block = payload.get("data") if isinstance(payload.get("data"), dict) else payload
@@ -1397,7 +1629,6 @@ async def dodo_webhook(request: Request):
         except Exception as e:
             print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
 
-    # Subscription activated or renewed: Set quota, plan price, 30-day renewal cycle, clear grace period
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
         sub_end = datetime.utcnow() + timedelta(days=30)
         if user_id:
@@ -1425,7 +1656,6 @@ async def dodo_webhook(request: Request):
         conn.commit()
         print(f"[TIER ACTIVATED]: Provisioned {tier_info['name']} ({target_quota / (1024**3):.0f} GB) for {user_email or user_id}", flush=True)
 
-    # Subscription cancelled or failed: Revert to Free, start 20-day grace period
     elif event_type in ["subscription.cancelled", "subscription.expired", "subscription.failed"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
@@ -1522,33 +1752,6 @@ async def lemon_webhook(request: Request):
     conn.close()
     return {"status": "received"}
 
-# ----------------- Vault File Renaming -----------------
-class RenameFileRequest(BaseModel):
-    file_id: str
-    new_filename: str
-    user_id: Optional[str] = None
-
-@app.post("/api/drive/rename-file")
-async def rename_drive_file(payload: RenameFileRequest):
-    new_name = payload.new_filename.strip()
-    if not new_name:
-        raise HTTPException(status_code=400, detail="Filename cannot be empty")
-
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-        if payload.user_id:
-            cursor.execute(
-                "UPDATE drive_files SET filename = %s WHERE id = %s AND user_id = %s",
-                (new_name, payload.file_id, payload.user_id)
-            )
-        else:
-            cursor.execute(
-                "UPDATE drive_files SET filename = %s WHERE id = %s",
-                (new_name, payload.file_id)
-            )
-        conn.commit()
-        conn.close()
-        return {"status": "success", "new_filename": new_name}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
