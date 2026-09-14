@@ -14,9 +14,11 @@ from typing import Optional, List, Dict, Any
 
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from pydantic import BaseModel, EmailStr
 from fastapi import FastAPI, Request, HTTPException, status, Form, File, UploadFile, Query
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -27,13 +29,29 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
     version="2.5.0",
     swagger_favicon_url="/favicon.ico"
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Server error: {str(exc)}"}
+    )
 
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -72,6 +90,7 @@ def init_db_schema():
         return
     try:
         conn = get_db()
+        conn.autocommit = True
         cursor = conn.cursor()
         
         cursor.execute("""
@@ -94,16 +113,23 @@ def init_db_schema():
             );
         """)
 
-        cursor.execute("""
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_price NUMERIC(5,2) DEFAULT 0.00;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_title VARCHAR(120);
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_slug VARCHAR(60) UNIQUE;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo_url TEXT;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_bg_url TEXT;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_accent_color VARCHAR(10) DEFAULT '#6366f1';
-        """)
+        migrations = [
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_price NUMERIC(5,2) DEFAULT 0.00;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_title VARCHAR(120);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_slug VARCHAR(60);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo_url TEXT;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_bg_url TEXT;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_accent_color VARCHAR(10) DEFAULT '#6366f1';",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+        ]
+
+        for m in migrations:
+            try:
+                cursor.execute(m)
+            except Exception as ex:
+                print(f"[MIGRATION WARNING]: {ex}", flush=True)
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS signature_requests (
@@ -149,12 +175,11 @@ def init_db_schema():
             );
         """)
 
-        conn.commit()
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Schema verified and branding columns migrated successfully.", flush=True)
+        print("[DB STARTUP]: Schema verified and branding migrations successfully synchronized.", flush=True)
     except Exception as e:
-        print(f"[DB STARTUP WARNING]: {e}", flush=True)
+        print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
 R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
@@ -528,7 +553,7 @@ async def privacy_page(request: Request):
 async def sign_page(request: Request):
     return render_template("sign.html", request)
 
-# ----------------- Studio Custom Branding (Plus & Pro Tiers) -----------------
+# ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
 async def get_branding(user_id: str):
     conn = get_db()
@@ -540,7 +565,14 @@ async def get_branding(user_id: str):
     row = cursor.fetchone()
     conn.close()
     if not row:
-        raise HTTPException(status_code=404, detail="User not found.")
+        return {
+            "tier": "free",
+            "brand_title": "",
+            "brand_slug": None,
+            "brand_logo_url": None,
+            "brand_bg_url": None,
+            "brand_accent_color": "#6366f1"
+        }
     return dict(row)
 
 @app.post("/api/branding/update")
@@ -549,19 +581,27 @@ async def update_branding(data: BrandingUpdatePayload):
     cursor = conn.cursor()
     cursor.execute("SELECT tier FROM users WHERE user_id = %s", (data.user_id,))
     user = cursor.fetchone()
+
+    if not user:
+        cursor.execute("INSERT INTO users (user_id, tier) VALUES (%s, 'free') RETURNING *", (data.user_id,))
+        conn.commit()
+        user = cursor.fetchone()
     
-    if not user or (user.get("tier") or "").lower() not in ["plus", "pro"]:
+    tier = (user.get("tier") or "free").lower()
+    if tier not in ["plus", "pro"]:
         conn.close()
         raise HTTPException(status_code=403, detail="Custom Studio Branding requires an active Plus or Pro subscription.")
+
+    accent = (data.brand_accent_color or "#6366f1").strip()
+    title = (data.brand_title or "").strip()
 
     cursor.execute("""
         UPDATE users 
         SET brand_title = %s, 
-            brand_slug = %s, 
-            brand_accent_color = %s,
-            updated_at = CURRENT_TIMESTAMP
+            brand_accent_color = %s
         WHERE user_id = %s
-    """, (data.brand_title, data.brand_slug, data.brand_accent_color, data.user_id))
+    """, (title, accent, data.user_id))
+    
     conn.commit()
     conn.close()
     return {"status": "success", "message": "Branding customizations saved successfully."}
@@ -610,7 +650,7 @@ async def upload_branding_asset(
         )
 
     column = "brand_logo_url" if asset_type == "logo" else "brand_bg_url"
-    cursor.execute(f"UPDATE users SET {column} = %s, updated_at = CURRENT_TIMESTAMP WHERE user_id = %s", (public_url, user_id))
+    cursor.execute(f"UPDATE users SET {column} = %s WHERE user_id = %s", (public_url, user_id))
     conn.commit()
     conn.close()
 
@@ -1345,7 +1385,9 @@ async def prune_expired_vaults(secret: str = ""):
     for u in over_limit_users:
         uid = u["user_id"]
         used = u["storage_used_bytes"]
-        allowed_quota = u["storage_quota_bytes"] or PLAN_CONFIG["free"]["quota"]
+        user_tier = (u.get("tier") or "free").lower()
+        default_quota = PLAN_CONFIG.get(user_tier, PLAN_CONFIG["free"])["quota"]
+        allowed_quota = u["storage_quota_bytes"] or default_quota
 
         cursor.execute("SELECT id, s3_key, size_bytes FROM drive_files WHERE user_id = %s ORDER BY created_at ASC", (uid,))
         files = cursor.fetchall()
@@ -1696,8 +1738,6 @@ async def lemon_webhook(request: Request):
 
     attributes = payload.get("data", {}).get("attributes") or {}
     user_email = attributes.get("user_email")
-
-    print(f"[LEMON SQUEEZY WEBHOOK] Event: {event_name} | Email: {user_email} | User ID: {user_id}", flush=True)
 
     conn = get_db()
     cursor = conn.cursor()
