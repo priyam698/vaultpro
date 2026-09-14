@@ -4,10 +4,12 @@ import uuid
 import time
 import math
 import random
+import secrets
 import hashlib
 import hmac
 import json
 import urllib.request
+import urllib.parse
 import traceback
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
@@ -29,11 +31,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.5.0",
+    version="2.6.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -171,13 +173,45 @@ def init_db_schema():
                 expires_at TIMESTAMP NOT NULL,
                 max_downloads INT DEFAULT 0,
                 downloads INT DEFAULT 0,
+                is_paywalled BOOLEAN DEFAULT FALSE,
+                unlock_price NUMERIC(10, 2) DEFAULT 0.00,
+                paywall_creator_id VARCHAR(120),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
 
+        share_migrations = [
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS is_paywalled BOOLEAN DEFAULT FALSE;",
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS unlock_price NUMERIC(10, 2) DEFAULT 0.00;",
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS paywall_creator_id VARCHAR(120);"
+        ]
+        for sm in share_migrations:
+            try:
+                cursor.execute(sm)
+            except Exception:
+                pass
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS paywall_purchases (
+                id SERIAL PRIMARY KEY,
+                share_id VARCHAR(64) REFERENCES shares(id) ON DELETE CASCADE,
+                buyer_email VARCHAR(255) NOT NULL,
+                access_token VARCHAR(64) UNIQUE NOT NULL,
+                amount_paid NUMERIC(10, 2) NOT NULL,
+                payment_status VARCHAR(30) DEFAULT 'unpaid',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                unlocked_at TIMESTAMP
+            );
+        """)
+
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_paywall_lookup 
+            ON paywall_purchases (share_id, buyer_email, payment_status);
+        """)
+
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Schema verified and branding migrations successfully synchronized.", flush=True)
+        print("[DB STARTUP]: Schema verified, paywall escrow tables and columns synchronized.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -229,6 +263,37 @@ class BrandingUpdatePayload(BaseModel):
     brand_logo_url: Optional[str] = None
     brand_bg_url: Optional[str] = None
     reset_default: Optional[bool] = False
+
+class InitiatePaywallRequest(BaseModel):
+    share_id: str
+    buyer_email: EmailStr
+
+class CreateShareRequest(BaseModel):
+    filename: str
+    filesize_mb: float
+    password: Optional[str] = None
+    expiry_hours: int = 24
+    max_downloads: int = 0
+    user_id: Optional[str] = None
+    is_paywalled: Optional[bool] = False
+    unlock_price: Optional[float] = 0.00
+
+class DownloadPayload(BaseModel):
+    password: Optional[str] = None
+    access_token: Optional[str] = None
+
+class RenameFileRequest(BaseModel):
+    file_id: str
+    new_filename: str
+    user_id: Optional[str] = None
+
+class UpgradeQuoteRequest(BaseModel):
+    user_id: str
+    target_tier: str
+
+class SupportChatRequest(BaseModel):
+    message: str
+    history: Optional[list] = []
 
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
@@ -426,14 +491,11 @@ Platform Knowledge & Pricing Tiers:
 - Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
 - Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
 - Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
+- Pay-to-Unlock Transfers: Creators can attach invoice prices to shared files. In group shares, each buyer unlocks their own unique access token without compromising group access. Protected files feature forensic moving watermarks and anti-screenshot shielding.
 - 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the active plan limit are pruned starting from the oldest uploaded files.
 - Mid-Cycle Upgrades: Users can upgrade plans mid-cycle. The charge is prorated for the remaining days of their billing cycle plus a $0.50 upgrade fee.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
-
-class SupportChatRequest(BaseModel):
-    message: str
-    history: Optional[list] = []
 
 @app.post("/api/support/chat")
 async def support_chat(req: SupportChatRequest):
@@ -513,6 +575,8 @@ async def support_chat(req: SupportChatRequest):
     q = user_msg.lower()
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
         reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
+    elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
+        reply = "Zephyr Pay-to-Unlock allows creators to monetize deliveries. When sent to a group, each recipient purchases their own individual access token. Media is served inside a protected viewer with moving forensic watermarks and focus-loss anti-screenshot shielding."
     elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
         reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding."
     elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
@@ -524,7 +588,7 @@ async def support_chat(req: SupportChatRequest):
     elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
         reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the second your recipient finishes downloading it. After that, the link is destroyed permanently."
     else:
-        reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
+        reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
 
     return {"reply": reply}
 
@@ -555,6 +619,29 @@ async def privacy_page(request: Request):
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)
+
+@app.get("/secure-view/{share_id}", response_class=HTMLResponse)
+async def secure_viewer_page(request: Request, share_id: str, token: str = Query(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.buyer_email, p.payment_status, s.filename 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
+    """, (share_id, token))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=403, detail="Unauthorized access. Payment required to view this secured file.")
+
+    return render_template("secure_viewer.html", request, {
+        "share_id": share_id,
+        "filename": row["filename"],
+        "buyer_email": row["buyer_email"],
+        "token": token
+    })
 
 # ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
@@ -1293,11 +1380,6 @@ async def delete_drive_file(file_id: str, user_id: str):
 
     return {"status": "deleted"}
 
-class RenameFileRequest(BaseModel):
-    file_id: str
-    new_filename: str
-    user_id: Optional[str] = None
-
 @app.post("/api/drive/rename-file")
 async def rename_drive_file(payload: RenameFileRequest):
     new_name = payload.new_filename.strip()
@@ -1324,10 +1406,6 @@ async def rename_drive_file(payload: RenameFileRequest):
         raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
 
 # ----------------- Mid-Cycle Prorated Upgrades -----------------
-class UpgradeQuoteRequest(BaseModel):
-    user_id: str
-    target_tier: str
-
 @app.post("/api/drive/upgrade-quote")
 async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
     conn = get_db()
@@ -1436,18 +1514,7 @@ async def prune_expired_vaults(secret: str = ""):
     conn.close()
     return {"status": "success", "processed_users": len(over_limit_users), "files_pruned": pruned_count}
 
-# ----------------- Ephemeral Transfers -----------------
-class CreateShareRequest(BaseModel):
-    filename: str
-    filesize_mb: float
-    password: Optional[str] = None
-    expiry_hours: int = 24
-    max_downloads: int = 0
-    user_id: Optional[str] = None
-
-class DownloadPayload(BaseModel):
-    password: Optional[str] = None
-
+# ----------------- Ephemeral Transfers & Paywall Escrow -----------------
 @app.get("/share/{share_id}", response_class=HTMLResponse)
 async def share_page(request: Request, share_id: str):
     conn = get_db()
@@ -1490,6 +1557,8 @@ async def share_page(request: Request, share_id: str):
         "filesize": row["filesize_mb"],
         "downloads": row["downloads"],
         "has_password": bool(row["password_hash"]),
+        "is_paywalled": bool(row.get("is_paywalled", False)),
+        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
         "branding": branding
     })
 
@@ -1529,6 +1598,8 @@ async def get_share_details(share_id: str):
         "filename": row["filename"],
         "filesize_mb": float(row["filesize_mb"]),
         "has_password": bool(row["password_hash"]),
+        "is_paywalled": bool(row.get("is_paywalled", False)),
+        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
         "sender_branding": branding
     }
 
@@ -1555,9 +1626,17 @@ async def create_share(payload: CreateShareRequest):
     password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
 
     cursor.execute("""
-        INSERT INTO shares (id, filename, filesize_mb, s3_key, password_hash, expiry_hours, max_downloads, created_at, expires_at, downloads, user_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s)
-    """, (share_id, payload.filename, payload.filesize_mb, s3_key, password_hash, payload.expiry_hours, payload.max_downloads, created_at, expires_at, payload.user_id))
+        INSERT INTO shares (
+            id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
+            max_downloads, created_at, expires_at, downloads, user_id, 
+            is_paywalled, unlock_price, paywall_creator_id
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s)
+    """, (
+        share_id, payload.filename, payload.filesize_mb, s3_key, password_hash, 
+        payload.expiry_hours, payload.max_downloads, created_at, expires_at, 
+        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id
+    ))
     conn.commit()
     conn.close()
 
@@ -1575,8 +1654,114 @@ async def upload_file_direct(share_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Vault record not found.")
 
     file_bytes = await request.body()
-    s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"], Body=file_bytes, ContentType=request.headers.get("content-type", "application/octet-stream"))
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=row["s3_key"],
+        Body=file_bytes,
+        ContentType=request.headers.get("content-type", "application/octet-stream")
+    )
     return {"status": "success", "share_id": share_id}
+
+# ----------------- Group Paywall Multi-Buyer Escrow Engine -----------------
+@app.post("/api/paywall/initiate")
+async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM shares WHERE id = %s AND is_paywalled = TRUE", (payload.share_id,))
+    share = cursor.fetchone()
+    if not share:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Paywalled transfer session not found or inactive.")
+
+    buyer = payload.buyer_email.lower().strip()
+
+    cursor.execute("""
+        SELECT access_token FROM paywall_purchases 
+        WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
+    """, (payload.share_id, buyer))
+    existing = cursor.fetchone()
+
+    if existing:
+        conn.close()
+        return {
+            "status": "already_unlocked",
+            "access_token": existing["access_token"],
+            "viewer_url": f"/secure-view/{payload.share_id}?token={existing['access_token']}"
+        }
+
+    access_token = f"pwtk_{secrets.token_hex(20)}"
+    price = float(share.get("unlock_price") or 0.00)
+
+    cursor.execute("""
+        INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status)
+        VALUES (%s, %s, %s, %s, 'pending')
+        RETURNING id
+    """, (payload.share_id, buyer, access_token, price))
+    conn.commit()
+    conn.close()
+
+    dodo_product_id = os.getenv("DODO_PAYWALL_PRODUCT_ID", "pdt_0NrnVvaQ9xDPDhpjrniuR3A")
+    checkout_url = (
+        f"https://checkout.dodopayments.com/buy/{dodo_product_id}"
+        f"?email={urllib.parse.quote(buyer)}"
+        f"&metadata_share_id={payload.share_id}"
+        f"&metadata_access_token={access_token}"
+        f"&metadata_buyer_email={urllib.parse.quote(buyer)}"
+    )
+
+    return {
+        "status": "checkout_ready",
+        "checkout_url": checkout_url,
+        "access_token": access_token
+    }
+
+@app.get("/api/paywall/verify-access")
+async def verify_buyer_access(share_id: str = Query(...), access_token: str = Query(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT buyer_email, payment_status 
+        FROM paywall_purchases 
+        WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
+    """, (share_id, access_token))
+    purchase = cursor.fetchone()
+    conn.close()
+
+    if not purchase:
+        raise HTTPException(status_code=403, detail="Payment required to access this file.")
+
+    return {"unlocked": True, "buyer_email": purchase["buyer_email"]}
+
+@app.get("/api/paywall/stream/{share_id}")
+async def stream_paywall_media(share_id: str, token: str = Query(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.buyer_email, s.s3_key, s.filename 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
+    """, (share_id, token))
+    item = cursor.fetchone()
+    conn.close()
+
+    if not item:
+        raise HTTPException(status_code=403, detail="Protected content stream access denied.")
+
+    try:
+        obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
+        content_type = obj.get("ContentType", "application/octet-stream")
+        return StreamingResponse(
+            obj["Body"].iter_chunks(),
+            media_type=content_type,
+            headers={
+                "Cache-Control": "no-store, no-cache, must-revalidate, private",
+                "Content-Disposition": f'inline; filename="{item["filename"]}"'
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Streaming pipe error: {str(e)}")
 
 @app.post("/share/{share_id}/download")
 @app.post("/api/download/{share_id}")
@@ -1589,6 +1774,22 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
     if not row:
         conn.close()
         raise HTTPException(status_code=404, detail="Share link not found or expired.")
+
+    # Enforce Individual Multi-Buyer Escrow Lock
+    if row.get("is_paywalled"):
+        token = payload.access_token if payload else None
+        if not token:
+            conn.close()
+            raise HTTPException(status_code=402, detail="Payment required. Each recipient must unlock their personal access token.")
+
+        cursor.execute("""
+            SELECT id FROM paywall_purchases 
+            WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
+        """, (share_id, token))
+        verified = cursor.fetchone()
+        if not verified:
+            conn.close()
+            raise HTTPException(status_code=403, detail="Invalid or unpaid access token.")
 
     max_downloads = row.get("max_downloads", 0) or 0
     if max_downloads > 0 and row["downloads"] >= max_downloads:
@@ -1658,10 +1859,25 @@ async def dodo_webhook(request: Request):
 
     event_type = payload.get("type", "")
     data_block = payload.get("data") if isinstance(payload.get("data"), dict) else payload
-
     metadata = data_block.get("metadata") or payload.get("metadata") or {}
-    user_id = metadata.get("user_id") or metadata.get("userId") or metadata.get("metadata_user_id")
 
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Handle Individual Paywall Escrow Unlocks (Multi-Buyer Group Links)
+    paywall_token = metadata.get("access_token") or metadata.get("metadata_access_token")
+    if paywall_token and event_type in ["payment.succeeded", "checkout.session.completed"]:
+        cursor.execute("""
+            UPDATE paywall_purchases 
+            SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP 
+            WHERE access_token = %s
+        """, (paywall_token,))
+        conn.commit()
+        conn.close()
+        print(f"[DODO PAYWALL UNLOCKED] Activated purchase token: {paywall_token}", flush=True)
+        return {"status": "success", "paywall_token": paywall_token}
+
+    user_id = metadata.get("user_id") or metadata.get("userId") or metadata.get("metadata_user_id")
     customer_info = data_block.get("customer") or payload.get("customer") or {}
     user_email = (
         (customer_info.get("email") if isinstance(customer_info, dict) else None)
@@ -1679,9 +1895,6 @@ async def dodo_webhook(request: Request):
     target_price = tier_info["price"]
 
     print(f"[DODO WEBHOOK] Event: {event_type} | Email: {user_email} | User ID: {user_id} | Tier: {requested_tier}", flush=True)
-
-    conn = get_db()
-    cursor = conn.cursor()
 
     if not user_id and user_email:
         try:

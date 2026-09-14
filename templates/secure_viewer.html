@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zephyr Protected Stream</title>
+  <style>
+    /* Block Print Previews */
+    @media print {
+      body { display: none !important; }
+    }
+    
+    body {
+      margin: 0;
+      background: #05070e;
+      color: #fff;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Privacy Curtain: Active during screenshot or focus loss */
+    #privacyCurtain {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
+      font-size: 14px;
+      color: #ef4444;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="privacyCurtain">
+    🔒 Display shielded due to screenshot tool or window focus change.
+  </div>
+
+  <div class="relative w-screen h-screen flex items-center justify-center">
+    <canvas id="protectedCanvas" class="max-w-full max-h-full"></canvas>
+  </div>
+
+  <script>
+    const buyerEmail = "{{ buyer_email }}";
+    const canvas = document.getElementById("protectedCanvas");
+    const ctx = canvas.getContext("2d");
+    const curtain = document.getElementById("privacyCurtain");
+
+    // 1. Shield display when window loses focus (Alt+Tab, Snipping Tool, Notification overlays)
+    window.addEventListener("blur", () => {
+      curtain.style.display = "flex";
+    });
+    window.addEventListener("focus", () => {
+      curtain.style.display = "none";
+    });
+
+    // 2. Intercept PrintScreen and clear clipboard
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "PrintScreen" || e.keyCode === 44) {
+        navigator.clipboard.writeText("");
+        curtain.style.display = "flex";
+        setTimeout(() => curtain.style.display = "none", 1200);
+      }
+    });
+
+    // 3. Block Right-Click and Save Shortcuts
+    window.addEventListener("contextmenu", (e) => e.preventDefault());
+    window.addEventListener("keydown", (e) => {
+      if (
+        (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u')) ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        e.key === 'F12'
+      ) {
+        e.preventDefault();
+      }
+    });
+
+    // 4. Render media to canvas with dynamic floating forensic watermark
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ stream_url }}";
+
+    let watermarkX = 40;
+    let watermarkY = 60;
+    let dx = 1.2;
+    let dy = 1.0;
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      animate();
+    };
+
+    function animate() {
+      // Draw actual media frame
+      ctx.drawImage(img, 0, 0);
+
+      // Render moving forensic watermark (burns identity into unauthorized phone recordings)
+      ctx.font = "bold 20px monospace";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
+      ctx.fillText(`LICENSED TO: ${buyerEmail} | IP: LOGGED`, watermarkX, watermarkY);
+
+      watermarkX += dx;
+      watermarkY += dy;
+
+      if (watermarkX < 20 || watermarkX > canvas.width - 450) dx = -dx;
+      if (watermarkY < 40 || watermarkY > canvas.height - 30) dy = -dy;
+
+      requestAnimationFrame(animate);
+    }
+  </script>
+</body>
+</html>
