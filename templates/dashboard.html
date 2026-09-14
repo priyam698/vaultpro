@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cdefs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,6 +104,27 @@
 
   <div class="site-mountain-backdrop"></div>
 
+  <div id="renameModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+    <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 relative border border-white/15 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h4 class="text-sm font-black card-heading">Rename Vault File</h4>
+        <button onclick="closeRenameModal()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold opacity-75 mb-1.5">New Filename</label>
+        <input id="renameFileInput" type="text" onkeydown="if(event.key==='Enter') submitFileRename()" class="w-full rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-400 transition font-mono bg-slate-900/60 border border-slate-400/30 text-white">
+      </div>
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" onclick="closeRenameModal()" class="flex-1 py-2 rounded-xl border border-white/15 hover:bg-white/5 text-xs font-bold transition cursor-pointer">
+          Cancel
+        </button>
+        <button id="saveRenameBtn" type="button" onclick="submitFileRename()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
+          Save Name
+        </button>
+      </div>
+    </div>
+  </div>
+
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -177,7 +198,7 @@
 
         <div id="upgradeBox" class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
           <p class="text-[11px] opacity-75">Need 200 GB permanent space?</p>
-          <a id="vaultUpgradeBtn" href="https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
+          <a id="vaultUpgradeBtn" href="https://checkout.dodopayments.com/buy/pdt_YOUR_PRODUCT_ID" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition">
             Upgrade ($4/mo)
           </a>
         </div>
@@ -289,13 +310,13 @@
       window.location.href = "/auth";
     }
 
-    // Attach user_id and email directly to checkout URL so Lemon Squeezy identifies the purchase
+    // Attach user_id and email directly to checkout URL so Dodo identifies the upgrade
     function setupCheckoutLink() {
       const btn = document.getElementById("vaultUpgradeBtn");
       if (btn && currentUserId) {
-        let checkoutUrl = `https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd?checkout[custom][user_id]=${encodeURIComponent(currentUserId)}`;
+        let checkoutUrl = `https://checkout.dodopayments.com/buy/pdt_YOUR_PRODUCT_ID?metadata_user_id=${encodeURIComponent(currentUserId)}`;
         if (currentUserEmail) {
-          checkoutUrl += `&checkout[email]=${encodeURIComponent(currentUserEmail)}`;
+          checkoutUrl += `&email=${encodeURIComponent(currentUserEmail)}`;
         }
         btn.href = checkoutUrl;
       }
@@ -308,6 +329,7 @@
     }
 
     let allFiles = [];
+    let currentRenamingFileId = null;
 
     async function loadDriveData() {
       try {
@@ -388,11 +410,12 @@
         <tr class="hover:bg-white/[0.04] transition">
           <td class="py-3.5 px-4 font-medium flex items-center gap-2.5">
             ${getFileIcon(f.filename)}
-            <span class="truncate max-w-xs sm:max-w-sm" title="${f.filename}">${f.filename}</span>
+            <span class="truncate max-w-xs sm:max-w-sm font-semibold" title="${f.filename}">${f.filename}</span>
           </td>
           <td class="py-3.5 px-4 font-mono opacity-80">${formatBytes(f.size_bytes)}</td>
           <td class="py-3.5 px-4 opacity-60">${f.created_at}</td>
-          <td class="py-3.5 px-4 text-right space-x-2">
+          <td class="py-3.5 px-4 text-right space-x-1.5 sm:space-x-2">
+            <button onclick="openRenameModal('${f.id}')" class="px-2.5 py-1 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/20 rounded-lg font-semibold transition cursor-pointer">Rename</button>
             <button onclick="shareFile('${f.id}')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 rounded-lg font-semibold transition cursor-pointer">Share Link</button>
             <button onclick="downloadFile('${f.id}')" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg font-semibold transition cursor-pointer">Download</button>
             <button onclick="deleteFile('${f.id}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg font-semibold transition cursor-pointer">Delete</button>
@@ -404,6 +427,61 @@
     function filterFiles() {
       const q = document.getElementById("searchBox").value.toLowerCase();
       renderFiles(allFiles.filter(f => f.filename.toLowerCase().includes(q)));
+    }
+
+    function openRenameModal(fileId) {
+      const file = allFiles.find(item => item.id === fileId);
+      if (!file) return;
+      currentRenamingFileId = fileId;
+      const input = document.getElementById("renameFileInput");
+      input.value = file.filename;
+      document.getElementById("renameModal").classList.remove("hidden");
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 50);
+    }
+
+    function closeRenameModal() {
+      document.getElementById("renameModal").classList.add("hidden");
+      currentRenamingFileId = null;
+    }
+
+    async function submitFileRename() {
+      const input = document.getElementById("renameFileInput");
+      const newName = input.value.trim();
+
+      if (!newName) {
+        alert("Please enter a valid filename.");
+        return;
+      }
+
+      const saveBtn = document.getElementById("saveRenameBtn");
+      saveBtn.disabled = true;
+      saveBtn.innerText = "Saving...";
+
+      try {
+        const res = await fetch("/api/drive/rename-file", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            file_id: currentRenamingFileId,
+            new_filename: newName,
+            user_id: currentUserId
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to rename file.");
+
+        closeRenameModal();
+        loadDriveData();
+      } catch (err) {
+        alert("Rename error: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Save Name";
+      }
     }
 
     async function shareFile(fileId) {
