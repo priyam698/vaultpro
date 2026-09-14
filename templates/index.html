@@ -16,7 +16,7 @@
   
   <style>
     /* ========================================================================= */
-    /* THEME SYSTEM & BACKGROUND ENGINE                                          */
+    /* THEME SYSTEM & BACKGROUND ENGINE                                         */
     /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -322,7 +322,7 @@
         The files you selected exceed the Free Tier limit of <strong>2.00 GB</strong>. Upgrade to Zephyr Pro for single uploads up to 50 GB and 200 GB permanent drive storage.
       </p>
       <div class="space-y-2">
-        <a href="https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd" class="mt-8 block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/40 active:scale-[0.98] transition duration-200"></a>
+        <a href="https://checkout.dodopayments.com/buy/pdt_YOUR_PRODUCT_ID" onclick="openDodoCheckout(event)" class="mt-8 block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/40 active:scale-[0.98] transition duration-200">
           Upgrade to Pro ($4/mo) • Up to 50 GB
         </a>
         <button onclick="closeLimitModal()" class="w-full py-2.5 rounded-xl border border-slate-400/30 hover:bg-white/5 text-xs font-semibold transition cursor-pointer">
@@ -1242,7 +1242,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 6: PRICING PLANS                                                 -->
+  <!-- SECTION 6: PRICING PLANS                                                  -->
   <!-- ========================================================================= -->
   <section id="pricing" class="relative z-20 max-w-6xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-14">
@@ -1323,7 +1323,7 @@
           </ul>
         </div>
 
-        <a href="https://autocloud-ai.lemonsqueezy.com/checkout/buy/6fc33baa-7c82-4902-ae3e-a4c4cc9c0cdd" class="mt-8 block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/40 active:scale-[0.98] transition duration-200">
+        <a href="https://checkout.dodopayments.com/buy/pdt_YOUR_PRODUCT_ID" onclick="openDodoCheckout(event)" class="mt-8 block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/40 active:scale-[0.98] transition duration-200">
           Upgrade to Pro ($4/mo)
         </a>
       </div>
@@ -1548,6 +1548,24 @@
     }
 
     initTheme();
+
+    // Dodo Payments Checkout Link (Paste your exact product checkout URL here)
+    const DODO_CHECKOUT_BASE_URL = "https://checkout.dodopayments.com/buy/pdt_YOUR_PRODUCT_ID";
+
+    function openDodoCheckout(e) {
+      if (e) e.preventDefault();
+      let targetUrl = DODO_CHECKOUT_BASE_URL;
+      const uid = getStoredUserId();
+      const email = getStoredUserEmail();
+      const params = new URLSearchParams();
+      if (email) params.append("email", email);
+      if (uid) params.append("metadata_user_id", uid);
+      const qs = params.toString();
+      if (qs) {
+        targetUrl += (targetUrl.includes("?") ? "&" : "?") + qs;
+      }
+      window.location.href = targetUrl;
+    }
 
     let transferMode = 'link';
     let selectedFiles = [];
