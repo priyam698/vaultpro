@@ -16,7 +16,7 @@
   
   <style>
     /* ========================================================================= */
-    /* THEME SYSTEM & BACKGROUND ENGINE                                         */
+    /* THEME SYSTEM & BACKGROUND ENGINE                                          */
     /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -364,7 +364,6 @@
             </div>
           </div>
 
-          <!-- QR Code Container with Share & Save -->
           <div class="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10">
             <div class="p-2 bg-white rounded-xl shadow-lg shrink-0">
               <img id="reqQrImage" src="" alt="Client Deposit QR Code" class="w-24 h-24 sm:w-28 sm:h-28 object-contain">
@@ -378,7 +377,6 @@
                 Scan this code directly on any smartphone to deposit raw files, photos, or documents straight into your vault without an account.
               </p>
 
-              <!-- Action Buttons -->
               <div class="flex items-center justify-center sm:justify-start gap-2 pt-1">
                 <button type="button" onclick="shareQrCode()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition cursor-pointer">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
@@ -430,11 +428,17 @@
         <span class="font-black text-2xl tracking-tight">Zephyr</span>
       </a>
 
-      <!-- Controls: Languages, Theme Switcher, Email Badge & Auth -->
+      <!-- Controls: Navigation, Theme Switcher, Email Badge & Auth -->
       <div class="flex items-center gap-2.5 sm:gap-4">
         <a href="#control" class="text-xs font-bold hover:opacity-80 transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs font-bold hover:opacity-80 transition hidden sm:inline-block">Pricing</a>
         
+        <!-- Branding Quick Access Link -->
+        <a href="/dashboard" class="header-pill text-xs font-bold border px-3 py-2 rounded-xl transition hidden sm:inline-flex items-center gap-1.5 cursor-pointer hover:border-purple-400/50">
+          <span>🎨</span>
+          <span>Branding</span>
+        </a>
+
         <div class="relative flex items-center">
           <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
           <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl border text-xs font-bold focus:outline-none transition cursor-pointer appearance-none">
@@ -505,7 +509,7 @@
       </h1>
 
       <p class="hero-desc text-base sm:text-lg leading-relaxed max-w-lg font-medium opacity-90">
-        Transfer massive project deliverables, raw mountain footage, and folder trees directly via zero-knowledge edge storage with instant link shredding and client-side passcodes.
+        Transfer massive project deliverables, raw mountain footage, and folder trees directly via zero-knowledge edge storage with instant link shredding, pay-to-unlock escrow, and client-side passcodes.
       </p>
 
       <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
@@ -637,6 +641,7 @@
                         class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
             </div>
 
+            <!-- Expiry & Security Row -->
             <div class="flex items-center gap-2 pt-1">
               <div class="flex-1">
                 <select id="expiryHours" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
@@ -654,6 +659,7 @@
               </button>
             </div>
 
+            <!-- Collapsible Security Drawer -->
             <div id="securityDrawer" class="hidden p-4 rounded-2xl bg-black/40 border border-slate-400/20 space-y-3">
               <div>
                 <label class="block text-xs font-bold mb-1">Passcode Protection</label>
@@ -668,6 +674,31 @@
                   <option value="5">5 Downloads</option>
                   <option value="10">10 Downloads</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- STAR FEATURE: PAY-TO-UNLOCK ESCROW CARD -->
+            <div class="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-black/40 border border-indigo-500/30 space-y-2.5 transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs font-bold">
+                    $
+                  </div>
+                  <div>
+                    <span class="text-xs font-black text-white block">Pay-to-Unlock Escrow</span>
+                    <span class="text-[10px] text-slate-400 block leading-tight">Require payment before buyers can unlock & stream files.</span>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="paywallToggle" onchange="togglePaywallInput()" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+              </div>
+
+              <div id="paywallPriceContainer" class="hidden flex items-center gap-2 pt-2 border-t border-white/10">
+                <span class="text-xs font-bold text-slate-300">Price per unlock ($):</span>
+                <input type="number" id="paywallPriceInput" min="0.50" step="0.50" placeholder="10.00" 
+                       class="flex-1 bg-black/60 border border-white/20 rounded-xl px-3.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:outline-none focus:border-emerald-400">
               </div>
             </div>
 
@@ -851,7 +882,7 @@
               <div>
                 <h4 class="text-sm font-black">File sharing</h4>
                 <p class="text-xs leading-relaxed opacity-85 mt-1">
-                  Share files, photos, documents, and spreadsheets with anyone. Stay in control of who can access your data using password protection and expiry dates.
+                  Share files, photos, documents, and spreadsheets with anyone. Stay in control of who can access your data using password protection, paywalls, and expiry dates.
                 </p>
               </div>
             </div>
@@ -867,7 +898,7 @@
           </div>
         </div>
 
-        <!-- Proton 2-Card Row -->
+        <!-- 2-Card Mockup Row -->
         <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
           
           <!-- Card 1: App UI Mockup -->
@@ -948,7 +979,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 2: PROTON-STYLE "PROTECT YOUR FAVORITE MEMORIES"                  -->
+  <!-- SECTION 2: PROTECT YOUR FAVORITE MEMORIES                                 -->
   <!-- ========================================================================= -->
   <section class="relative z-20 py-20 border-b border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-6">
@@ -1280,7 +1311,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 6: PRICING PLANS (5 TIERS WITH DAILY E-SIGN ALLOTMENTS)           -->
+  <!-- SECTION 6: PRICING PLANS                                                  -->
   <!-- ========================================================================= -->
   <section id="pricing" class="relative z-20 max-w-7xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-14">
@@ -1434,7 +1465,7 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-3.5 h-3.5 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-              <span>Extended retention windows</span>
+              <span>Studio Branding Suite</span>
             </li>
           </ul>
         </div>
@@ -1475,7 +1506,7 @@
             </li>
             <li class="flex items-center gap-2">
               <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-              <span>20-Day Retention Grace</span>
+              <span>Studio Branding & Paywalls</span>
             </li>
           </ul>
         </div>
@@ -1488,7 +1519,7 @@
     </div>
   </section>
 
-  <!-- Full FAQ Accordion -->
+  <!-- Knowledge Base Accordion -->
   <section class="relative z-20 max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.08] w-full">
     <div class="text-center mb-12">
       <span class="text-xs font-black uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
@@ -1499,6 +1530,16 @@
     </div>
 
     <div class="space-y-4">
+      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
+        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
+          <span>How does the Pay-to-Unlock Escrow service work in groups?</span>
+          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
+        </summary>
+        <p class="text-xs opacity-75 mt-3 leading-relaxed">
+          When Pay-to-Unlock is enabled, sharing the link in a group lets each member purchase their own personal access token. Unlocking is strictly individual—one person's purchase will not expose the file to unpaid recipients. Files stream inside a secure viewer protected by dynamic watermarking and anti-screenshot shields.
+        </p>
+      </details>
+
       <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
         <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
           <span>How do daily E-Sign creation limits work across plans?</span>
@@ -1558,26 +1599,6 @@
           When you set the download limit to <strong>1 (Burn on Read 🔥)</strong> under Security options, the underlying object stored in our Cloudflare R2 edge pipe is immediately purged the millisecond the recipient finishes their download. The link is permanently destroyed and cannot be accessed again.
         </p>
       </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>How does sender email verification and OTP security work?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          To prevent spoofing and spam abuse, email transfers require a 6-digit verification code sent directly to the address provided in "Your Email". Each OTP is valid for <strong>3 minutes</strong>. If an incorrect code is entered <strong>4 consecutive times</strong>, that address is placed into a strict <strong>30-minute security lockout</strong>.
-        </p>
-      </details>
-
-      <details class="obsidian-panel p-5 rounded-2xl group cursor-pointer">
-        <summary class="font-bold text-sm list-none flex justify-between items-center select-none">
-          <span>What is the Client File Request link & QR code?</span>
-          <span class="text-indigo-500 text-lg group-open:rotate-180 transition duration-200">▾</span>
-        </summary>
-        <p class="text-xs opacity-75 mt-3 leading-relaxed">
-          The <strong>Request</strong> feature generates a branded drop portal link and scannable QR code you can share with clients or collaborators. Anyone with the link can deposit massive video footage or assets directly into your personal Zephyr Vault without needing to create an account.
-        </p>
-      </details>
     </div>
   </section>
 
@@ -1623,10 +1644,10 @@
 
       <!-- Quick Chips -->
       <div class="py-2 flex items-center gap-1.5 overflow-x-auto custom-scroll text-[10px]">
+        <button onclick="sendQuickPrompt('How does Pay-to-Unlock Escrow work?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Paywall Escrow</button>
         <button onclick="sendQuickPrompt('What is the difference between plans?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Pricing & Limits</button>
         <button onclick="sendQuickPrompt('How do daily E-Sign limits work?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">E-Sign Quotas</button>
-        <button onclick="sendQuickPrompt('How does the 20-day grace period work?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">20-Day Grace Period</button>
-        <button onclick="sendQuickPrompt('How do mid-cycle upgrades work?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Upgrades</button>
+        <button onclick="sendQuickPrompt('How does the 20-day grace period work?')" class="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium transition cursor-pointer">Grace Period</button>
       </div>
 
       <!-- Messages Stream -->
@@ -1634,7 +1655,7 @@
         <div class="flex items-start gap-2">
           <div class="w-6 h-6 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-[10px] font-bold">AI</div>
           <div class="bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm p-3 max-w-[85%] text-slate-200 text-xs leading-relaxed">
-            Welcome to Zephyr! I'm your Copilot. How can I assist you with transfers, vaults, E-Sign, or storage tiers today?
+            Welcome to Zephyr! I'm your Copilot. How can I assist you with transfers, vaults, E-Sign, paywall escrow, or studio branding today?
           </div>
         </div>
       </div>
@@ -1697,12 +1718,11 @@
 
     initTheme();
 
-    // Dodo Payments Product IDs Mapping for all 4 tiers
     const DODO_PRODUCT_IDS = {
       micro: "pdt_0NnaihWSsabCnJhTUZspz",
-      lite: "pdt_0Nnaj4zAkRMRoDf8pyikT",
+      lite: "pdt_0Nnaj4zAkRMRoDf8pylkT",
       plus: "pdt_0NnajLUyCZX2ARDgk003r",
-      pro: "pdt_ONrnVvaQ9xDPDhpjrniuR3A"
+      pro: "pdt_0NrnVvaQ9xDPDhpjrniuR3A"
     };
 
     function openDodoCheckout(e, tier = "pro") {
@@ -1736,6 +1756,17 @@
     let clientDropOwnerId = null;
     let clientDropOwnerEmail = "";
     let clientDropTitle = "Client Deposit";
+
+    function togglePaywallInput() {
+      const toggle = document.getElementById("paywallToggle");
+      const container = document.getElementById("paywallPriceContainer");
+      if (toggle && toggle.checked) {
+        container.classList.remove("hidden");
+        document.getElementById("paywallPriceInput").focus();
+      } else if (container) {
+        container.classList.add("hidden");
+      }
+    }
 
     function isRemembered() {
       return localStorage.getItem("zephyr_remember_me") === "true";
@@ -1947,7 +1978,6 @@
           document.getElementById("clientDropView").classList.remove("hidden");
           document.getElementById("clientDropProjectTitle").innerText = `Deposit Files for: ${clientDropTitle}`;
 
-          // --- KIOSK LOCKDOWN ---
           const driveBtn = document.querySelector('header a[href="/dashboard"]');
           if (driveBtn) driveBtn.style.display = "none";
 
@@ -2313,13 +2343,18 @@
         progressBar.style.width = "30%";
         progressPercent.innerText = "30%";
 
+        const isPaywalled = document.getElementById("paywallToggle") ? document.getElementById("paywallToggle").checked : false;
+        const unlockPrice = isPaywalled ? parseFloat(document.getElementById("paywallPriceInput").value || 0.0) : 0.0;
+
         const payload = {
           filename: fileName,
           filesize_mb: filesizeMb,
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
           max_downloads: parseInt(document.getElementById("maxDownloads").value),
-          user_id: currentUserId
+          user_id: currentUserId,
+          is_paywalled: isPaywalled,
+          unlock_price: unlockPrice
         };
 
         const res = await fetch("/api/create-share", {
@@ -2418,7 +2453,6 @@
       
       document.getElementById("reqLinkInput").value = link;
 
-      // Render sharp PNG QR code suitable for native device sharing
       const qrImg = document.getElementById("reqQrImage");
       if (qrImg) {
         qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=${encodeURIComponent(link)}`;
@@ -2513,7 +2547,6 @@
       const container = document.getElementById("chatMessages");
       const sendBtn = document.getElementById("chatSendBtn");
 
-      // 1. Append User Message
       container.innerHTML += `
         <div class="flex items-start justify-end gap-2">
           <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] text-xs leading-relaxed font-medium">
@@ -2524,7 +2557,6 @@
       input.value = "";
       container.scrollTop = container.scrollHeight;
 
-      // 2. Append Typing Indicator
       const typingId = "typing_" + Date.now();
       container.innerHTML += `
         <div id="${typingId}" class="flex items-start gap-2">
@@ -2537,7 +2569,6 @@
       container.scrollTop = container.scrollHeight;
       sendBtn.disabled = true;
 
-      // 3. Dispatch to Copilot Support API
       try {
         const res = await fetch("/api/support/chat", {
           method: "POST",
