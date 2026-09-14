@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage & Studio Branding</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,6 +111,7 @@
 
   <div class="site-mountain-backdrop"></div>
 
+  <!-- Rename Modal -->
   <div id="renameModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 relative border border-white/15 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -132,6 +133,7 @@
     </div>
   </div>
 
+  <!-- Upgrade / Change Plan Modal -->
   <div id="upgradePlanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-7 relative border border-indigo-500/40 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -207,6 +209,7 @@
     </div>
   </div>
 
+  <!-- STUDIO BRANDING MODAL WITH INTERNAL SCROLLING & REMOVE/DEFAULT BUTTONS -->
   <div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-2xl w-full rounded-3xl p-6 sm:p-8 relative border border-indigo-500/40 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       
@@ -221,6 +224,7 @@
         <button onclick="closeBrandingModal()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
       </div>
 
+      <!-- Upgrade Blocker for Free, Micro, and Lite Tiers -->
       <div id="brandingUpgradeLock" class="hidden p-6 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/30 to-slate-900/40 border border-purple-500/30 text-center space-y-3">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-400 mx-auto flex items-center justify-center text-xl">
           🎨
@@ -239,6 +243,7 @@
         </div>
       </div>
 
+      <!-- Active Branding Form -->
       <form id="brandingForm" class="space-y-5">
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -259,6 +264,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          <!-- Logo Upload Box with Remove Button -->
           <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
             <div>
               <div class="flex items-center justify-between mb-1">
@@ -273,15 +279,19 @@
                 <img id="brandLogoImg" src="" alt="Studio Logo" class="hidden w-full h-full object-contain p-1">
                 <span id="brandLogoPlaceholder" class="text-xs opacity-40">Logo</span>
               </div>
-              <div class="flex-1">
+              <div class="flex-1 flex items-center gap-2">
                 <input type="file" id="logoFileInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
-                <button type="button" onclick="document.getElementById('logoFileInput').click()" class="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold transition cursor-pointer">
+                <button type="button" onclick="document.getElementById('logoFileInput').click()" class="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold transition cursor-pointer">
                   Upload Logo
+                </button>
+                <button id="removeLogoBtn" type="button" onclick="removeLogo()" class="hidden py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 text-xs font-bold transition cursor-pointer">
+                  Remove
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- Background Wallpaper Upload Box with Remove Button -->
           <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
             <div>
               <div class="flex items-center justify-between mb-1">
@@ -296,16 +306,20 @@
                 <img id="brandBgImg" src="" alt="Custom Wallpaper" class="hidden w-full h-full object-cover">
                 <span id="brandBgPlaceholder" class="text-[10px] opacity-40">Wall</span>
               </div>
-              <div class="flex-1">
+              <div class="flex-1 flex items-center gap-2">
                 <input type="file" id="bgFileInput" accept="image/*" class="hidden" onchange="handleBgUpload(event)">
-                <button type="button" onclick="document.getElementById('bgFileInput').click()" class="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold transition cursor-pointer">
+                <button type="button" onclick="document.getElementById('bgFileInput').click()" class="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold transition cursor-pointer">
                   Upload Wallpaper
+                </button>
+                <button id="removeBgBtn" type="button" onclick="removeWallpaper()" class="hidden py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 text-xs font-bold transition cursor-pointer">
+                  Remove
                 </button>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Live Preview Simulation Card -->
         <div class="pt-2">
           <label class="block text-xs font-bold mb-2 opacity-80">Live Download Page Preview</label>
           <div id="livePreviewContainer" class="relative rounded-2xl overflow-hidden h-48 border border-white/15 bg-slate-900 flex items-center justify-center p-4">
@@ -330,19 +344,27 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
-          <button type="button" onclick="closeBrandingModal()" class="px-5 py-2.5 rounded-xl border border-white/15 hover:bg-white/5 text-xs font-bold transition cursor-pointer">
-            Cancel
+        <!-- Footer with Apply as Default, Cancel, and Save Changes -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/10">
+          <button type="button" onclick="resetToDefaultBranding()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>↺</span> Apply as Default
           </button>
-          <button type="button" id="saveBrandingBtn" onclick="saveBrandingPreferences()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-lg shadow-purple-600/30 transition cursor-pointer">
-            Save Changes
-          </button>
+          
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button type="button" onclick="closeBrandingModal()" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl border border-white/15 hover:bg-white/5 text-xs font-bold transition cursor-pointer">
+              Cancel
+            </button>
+            <button type="button" id="saveBrandingBtn" onclick="saveBrandingPreferences()" class="flex-1 sm:flex-none px-6 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-lg shadow-purple-600/30 transition cursor-pointer">
+              Save Changes
+            </button>
+          </div>
         </div>
 
       </form>
     </div>
   </div>
 
+  <!-- Transparent Header -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -399,6 +421,7 @@
     </div>
   </header>
 
+  <!-- Plan Expiration / Grace Period Alert Banner -->
   <div id="expiryAlertBanner" class="hidden relative z-30 max-w-7xl mx-auto px-6 pt-6 w-full">
     <div id="expiryAlertContainer" class="p-4 sm:p-5 rounded-3xl bg-rose-500/15 border-2 border-rose-500/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl backdrop-blur-md">
       <div class="flex items-center gap-3.5 text-center sm:text-left">
@@ -499,7 +522,6 @@
   </footer>
 
   <script>
-    // Exact Dodo Payments Product IDs mapped across all 4 tiers
     const DODO_PRODUCT_IDS = {
       micro: "pdt_0NnaihWSsabCnJhTUZspz",
       lite: "pdt_0Nnaj4zAkRMRoDf8pylkT",
@@ -616,7 +638,6 @@
           cycleInfo.innerText = "Plan: Free (5 GB max)";
         }
 
-        // Check for 20-Day Grace Period or ≤ 6 Days Plan Expiration
         if (data.grace_period_end_at) {
           const graceEnd = new Date(data.grace_period_end_at);
           const now = new Date();
@@ -696,7 +717,6 @@
       renderFiles(allFiles.filter(f => f.filename.toLowerCase().includes(q)));
     }
 
-    // Rename logic
     function openRenameModal(fileId) {
       const file = allFiles.find(item => item.id === fileId);
       if (!file) return;
@@ -752,7 +772,6 @@
       }
     }
 
-    // Upgrade Modal Logic
     function openUpgradeModal(defaultTier = "pro") {
       document.getElementById("upgradePlanModal").classList.remove("hidden");
       selectUpgradeTarget(defaultTier);
@@ -843,11 +862,18 @@
             document.getElementById("brandLogoImg").src = b.brand_logo_url;
             document.getElementById("brandLogoImg").classList.remove("hidden");
             document.getElementById("brandLogoPlaceholder").classList.add("hidden");
+            document.getElementById("removeLogoBtn").classList.remove("hidden");
+          } else {
+            removeLogo();
           }
+
           if (b.brand_bg_url) {
             document.getElementById("brandBgImg").src = b.brand_bg_url;
             document.getElementById("brandBgImg").classList.remove("hidden");
             document.getElementById("brandBgPlaceholder").classList.add("hidden");
+            document.getElementById("removeBgBtn").classList.remove("hidden");
+          } else {
+            removeWallpaper();
           }
           updateLivePreview();
         }
@@ -856,6 +882,65 @@
 
     function closeBrandingModal() {
       document.getElementById("brandingModal").classList.add("hidden");
+    }
+
+    function removeLogo() {
+      currentBrandingData.brand_logo_url = null;
+      document.getElementById("brandLogoImg").src = "";
+      document.getElementById("brandLogoImg").classList.add("hidden");
+      document.getElementById("brandLogoPlaceholder").classList.remove("hidden");
+      document.getElementById("removeLogoBtn").classList.add("hidden");
+      document.getElementById("logoFileInput").value = "";
+      updateLivePreview();
+    }
+
+    function removeWallpaper() {
+      currentBrandingData.brand_bg_url = null;
+      document.getElementById("brandBgImg").src = "";
+      document.getElementById("brandBgImg").classList.add("hidden");
+      document.getElementById("brandBgPlaceholder").classList.remove("hidden");
+      document.getElementById("removeBgBtn").classList.add("hidden");
+      document.getElementById("bgFileInput").value = "";
+      updateLivePreview();
+    }
+
+    async function resetToDefaultBranding() {
+      if (!confirm("Reset to default Zephyr styling? This will clear your custom logo, wallpaper, studio title, and reset accent color to default.")) return;
+
+      const btn = document.getElementById("saveBrandingBtn");
+      btn.disabled = true;
+      btn.innerText = "Resetting...";
+
+      try {
+        const res = await fetch("/api/branding/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: currentUserId,
+            reset_default: true
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to reset");
+
+        currentBrandingData = {
+          brand_title: "",
+          brand_accent_color: "#6366f1",
+          brand_logo_url: null,
+          brand_bg_url: null
+        };
+        document.getElementById("brandTitleInput").value = "";
+        syncColorInput("#6366f1");
+        removeLogo();
+        removeWallpaper();
+        alert("Branding restored to default!");
+        closeBrandingModal();
+      } catch(err) {
+        alert("Reset error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Save Changes";
+      }
     }
 
     function syncColorInput(val) {
@@ -922,6 +1007,7 @@
         document.getElementById("brandLogoImg").src = data.url;
         document.getElementById("brandLogoImg").classList.remove("hidden");
         document.getElementById("brandLogoPlaceholder").classList.add("hidden");
+        document.getElementById("removeLogoBtn").classList.remove("hidden");
         updateLivePreview();
       } catch (err) {
         alert(err.message);
@@ -946,6 +1032,7 @@
         document.getElementById("brandBgImg").src = data.url;
         document.getElementById("brandBgImg").classList.remove("hidden");
         document.getElementById("brandBgPlaceholder").classList.add("hidden");
+        document.getElementById("removeBgBtn").classList.remove("hidden");
         updateLivePreview();
       } catch (err) {
         alert(err.message);
@@ -964,14 +1051,16 @@
           body: JSON.stringify({
             user_id: currentUserId,
             brand_title: document.getElementById("brandTitleInput").value.trim(),
-            brand_accent_color: document.getElementById("brandColorText").value.trim()
+            brand_accent_color: document.getElementById("brandColorText").value.trim(),
+            brand_logo_url: currentBrandingData.brand_logo_url,
+            brand_bg_url: currentBrandingData.brand_bg_url
           })
         });
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Save failed.");
 
-        alert("Studio Branding saved successfully! Your custom logo, colors, and background are now live on your transfers.");
+        alert("Studio Branding saved successfully!");
         closeBrandingModal();
       } catch (err) {
         alert("Branding Error: " + err.message);
@@ -981,7 +1070,6 @@
       }
     }
 
-    // Drive File Actions
     async function shareFile(fileId) {
       try {
         const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);
