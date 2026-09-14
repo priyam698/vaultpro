@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Download {{ filename }} | Zephyr</title>
   
-  <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
-  
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -79,7 +77,8 @@
       box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
     }
 
-    body.light-theme .obsidian-card h1 {
+    body.light-theme .obsidian-card h1,
+    body.light-theme .obsidian-card h2 {
       color: #0f172a !important;
     }
 
@@ -98,13 +97,25 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
-  <div class="site-mountain-backdrop"></div>
+  <div id="backdropBg" class="site-mountain-backdrop"></div>
+
+  <!-- Server Metadata Transport -->
+  <div id="serverConfig" 
+       class="hidden" 
+       data-share-id="{{ share_id }}" 
+       data-paywalled="{% if is_paywalled %}true{% else %}false{% endif %}"
+       data-password="{% if has_password %}true{% else %}false{% endif %}">
+  </div>
+  <script id="brandingConfig" type="application/json">
+    {{ branding | tojson if branding else 'null' }}
+  </script>
 
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
+        <div id="brandLogoContainer" class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
+          <img id="brandLogoCustom" src="" alt="Studio Logo" class="hidden w-full h-full object-contain">
+          <svg id="defaultLogoSvg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="dlRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -129,7 +140,7 @@
           </svg>
         </div>
         
-        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
+        <span id="brandTitleDisplay" class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
           Zephyr
         </span>
       </a>
@@ -150,10 +161,8 @@
     
     <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative">
       
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20">
-        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-        </svg>
+      <div id="iconBox" class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20 text-2xl">
+        {% if is_paywalled %}💰{% else %}📦{% endif %}
       </div>
 
       <h1 class="text-xl sm:text-2xl font-bold tracking-tight break-all">
@@ -163,6 +172,59 @@
         {{ filesize }} MB • Total Downloads: <span id="downloadCount" class="font-bold">{{ downloads }}</span>
       </p>
 
+      {% if is_paywalled %}
+      <!-- PAY-TO-UNLOCK ESCROW SECTION -->
+      <div id="paywallContainer" class="mt-6 space-y-4 text-left">
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900/60 border border-emerald-500/30 space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Pay-to-Unlock Escrow
+            </span>
+            <span class="text-lg font-black font-mono text-emerald-400">${{ "%.2f"|format(unlock_price) }}</span>
+          </div>
+          <p class="text-[11px] opacity-75 leading-relaxed">
+            Payment required. Each group member unlocks their own personal access token and watermarked stream.
+          </p>
+        </div>
+
+        <div id="buyerInputSection" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold opacity-80 mb-1">Your Email (for personal receipt & license)</label>
+            <input id="buyerEmailInput" type="email" placeholder="recipient@company.com" 
+                   class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-emerald-400 rounded-xl px-4 py-3 text-xs focus:outline-none transition">
+          </div>
+
+          <div id="paywallErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
+
+          <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
+                  class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 via-teal-600 hover:via-teal-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+            Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
+          </button>
+        </div>
+
+        <div id="unlockedActionsSection" class="hidden space-y-2.5">
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300 flex items-center justify-between">
+            <span class="font-bold flex items-center gap-2">
+              <span>✓</span> Personal License Active
+            </span>
+            <span id="verifiedBuyerBadge" class="font-mono text-[11px] opacity-80"></span>
+          </div>
+
+          <a id="secureViewerLink" href="#" 
+             class="block text-center w-full py-3.5 bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-500 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/30 transition">
+            🔒 Open Protected Viewer (Anti-Screenshot)
+          </a>
+
+          <button onclick="handleDownloadWithToken()" 
+                  class="w-full py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+            Direct File Download
+          </button>
+        </div>
+      </div>
+
+      {% else %}
+      <!-- STANDARD TRANSFER VIEW -->
       <div class="mt-8 space-y-4 text-left">
         <div id="passwordSection" class="{% if not has_password %}hidden{% endif %} space-y-4">
           <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
@@ -181,11 +243,12 @@
 
         <div id="errorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
 
-        <button id="downloadBtn" onclick="handleDownload()" 
+        <button id="downloadBtn" onclick="handleStandardDownload()" 
                 class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
           {% if has_password %}Unlock & Download{% else %}Download File{% endif %}
         </button>
       </div>
+      {% endif %}
 
     </div>
 
@@ -221,22 +284,152 @@
 
     initTheme();
 
-    async function handleDownload() {
-      const btn = document.getElementById("downloadBtn");
-      const errBox = document.getElementById("errorMsg");
-      const pwdSection = document.getElementById("passwordSection");
-      const pwdInput = document.getElementById("passwordInput");
-      const password = pwdInput ? pwdInput.value.trim() : null;
+    // Clean DOM-based data retrieval (eliminates VS Code JS linter syntax errors)
+    const serverConfig = document.getElementById("serverConfig");
+    const shareId = serverConfig.dataset.shareId;
+    const isPaywalled = serverConfig.dataset.paywalled === "true";
+    const hasPassword = serverConfig.dataset.password === "true";
+
+    let brandingData = null;
+    try {
+      brandingData = JSON.parse(document.getElementById("brandingConfig").textContent);
+    } catch (e) {
+      brandingData = null;
+    }
+
+    // Studio Custom Branding Injection
+    if (brandingData) {
+      if (brandingData.brand_title) {
+        const titleEl = document.getElementById("brandTitleDisplay");
+        if (titleEl) {
+          titleEl.innerText = brandingData.brand_title;
+          titleEl.className = "font-extrabold text-2xl tracking-tight text-white";
+        }
+        document.title = "Download from " + brandingData.brand_title + " | Zephyr";
+      }
+      if (brandingData.brand_logo_url) {
+        const customLogo = document.getElementById("brandLogoCustom");
+        const defaultLogo = document.getElementById("defaultLogoSvg");
+        if (customLogo && defaultLogo) {
+          customLogo.src = brandingData.brand_logo_url;
+          customLogo.classList.remove("hidden");
+          defaultLogo.classList.add("hidden");
+        }
+      }
+      if (brandingData.brand_bg_url) {
+        const bg = document.getElementById("backdropBg");
+        if (bg) {
+          bg.style.backgroundImage = "linear-gradient(rgba(4, 6, 14, 0.7), rgba(4, 6, 14, 0.85)), url('" + brandingData.brand_bg_url + "')";
+        }
+      }
+    }
+
+    // Auto-verify if the buyer already possesses an access token
+    const urlParams = new URLSearchParams(window.location.search);
+    let activeToken = urlParams.get("token") || localStorage.getItem("pwtk_" + shareId);
+
+    if (isPaywalled && activeToken) {
+      verifyExistingToken(activeToken);
+    }
+
+    async function verifyExistingToken(token) {
+      try {
+        const res = await fetch("/api/paywall/verify-access?share_id=" + shareId + "&access_token=" + token);
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById("buyerInputSection").classList.add("hidden");
+          const unlockedSection = document.getElementById("unlockedActionsSection");
+          unlockedSection.classList.remove("hidden");
+          
+          document.getElementById("verifiedBuyerBadge").innerText = data.buyer_email;
+          document.getElementById("secureViewerLink").href = "/secure-view/" + shareId + "?token=" + token;
+          localStorage.setItem("pwtk_" + shareId, token);
+          activeToken = token;
+        }
+      } catch (e) {}
+    }
+
+    async function handlePaywallCheckout() {
+      const emailInput = document.getElementById("buyerEmailInput");
+      const email = emailInput.value.trim().toLowerCase();
+      const errBox = document.getElementById("paywallErrorMsg");
+      const btn = document.getElementById("paywallCheckoutBtn");
 
       errBox.classList.add("hidden");
+
+      if (!email || !email.includes("@")) {
+        errBox.innerText = "Please enter a valid email address to receive your personal unlock key.";
+        errBox.classList.remove("hidden");
+        emailInput.focus();
+        return;
+      }
+
       btn.disabled = true;
-      btn.innerText = "Verifying & Generating Link...";
+      btn.innerText = "Initializing Checkout...";
 
       try {
-        const res = await fetch(window.location.pathname + "/download", {
+        const res = await fetch("/api/paywall/initiate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: password })
+          body: JSON.stringify({
+            share_id: shareId,
+            buyer_email: email
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to initialize payment session.");
+
+        if (data.status === "already_unlocked") {
+          localStorage.setItem("pwtk_" + shareId, data.access_token);
+          window.location.href = data.viewer_url || ("/secure-view/" + shareId + "?token=" + data.access_token);
+          return;
+        }
+
+        if (data.checkout_url) {
+          localStorage.setItem("pwtk_" + shareId, data.access_token);
+          window.location.href = data.checkout_url;
+        } else {
+          throw new Error("Checkout link could not be generated.");
+        }
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.classList.remove("hidden");
+        btn.disabled = false;
+        btn.innerText = "Retry Checkout";
+      }
+    }
+
+    async function handleDownloadWithToken() {
+      executeDownloadRequest(null, activeToken);
+    }
+
+    async function handleStandardDownload() {
+      const pwdInput = document.getElementById("passwordInput");
+      const password = pwdInput ? pwdInput.value.trim() : null;
+      executeDownloadRequest(password, null);
+    }
+
+    async function executeDownloadRequest(password, token) {
+      password = password || null;
+      token = token || null;
+
+      const btn = document.getElementById("downloadBtn") || document.getElementById("paywallCheckoutBtn");
+      const errBox = document.getElementById("errorMsg") || document.getElementById("paywallErrorMsg");
+      const pwdSection = document.getElementById("passwordSection");
+      const pwdInput = document.getElementById("passwordInput");
+
+      errBox.classList.add("hidden");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Verifying & Generating Link...";
+      }
+
+      try {
+        const res = await fetch("/api/download/" + shareId, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: password, access_token: token })
         });
 
         const data = await res.json();
@@ -244,10 +437,9 @@
         if (!res.ok) {
           if (res.status === 401 || (data.detail && data.detail.toLowerCase().includes("passcode"))) {
             if (pwdSection) pwdSection.classList.remove("hidden");
-            btn.innerText = "Unlock & Download";
             if (pwdInput) pwdInput.focus();
           }
-          throw new Error(data.detail || "Incorrect passcode or vault expired.");
+          throw new Error(data.detail || "Download authorization failed.");
         }
 
         const a = document.createElement("a");
@@ -262,17 +454,21 @@
           countSpan.innerText = parseInt(countSpan.innerText || 0) + 1;
         }
 
-        btn.innerText = "✓ Download Started";
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.innerText = "Download Again";
-        }, 3000);
+        if (btn) {
+          btn.innerText = "✓ Download Started";
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = "Download Again";
+          }, 3000);
+        }
 
       } catch (err) {
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
-        btn.disabled = false;
-        btn.innerText = (pwdSection && !pwdSection.classList.contains("hidden")) ? "Unlock & Download" : "Download File";
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "Download File";
+        }
       }
     }
   </script>
