@@ -58,6 +58,15 @@ def get_db():
         conn_str = conn_str.replace("postgres://", "postgresql://", 1)
     return psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
 
+# ----------------- Plan Architecture & Quotas -----------------
+PLAN_CONFIG = {
+    "free":  {"name": "Free Starter", "price": 0.00, "quota": 5 * 1024**3,   "single_mb": 2048},
+    "micro": {"name": "Zephyr Micro", "price": 1.80, "quota": 15 * 1024**3,  "single_mb": 5000},
+    "lite":  {"name": "Zephyr Lite",  "price": 2.50, "quota": 30 * 1024**3,  "single_mb": 10000},
+    "plus":  {"name": "Zephyr Plus",  "price": 4.50, "quota": 80 * 1024**3,  "single_mb": 25000},
+    "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000}
+}
+
 @app.on_event("startup")
 def init_db_schema():
     if not DATABASE_URL:
@@ -80,9 +89,15 @@ def init_db_schema():
         """)
         cursor.execute("ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS creator_email VARCHAR(255);")
         cursor.execute("ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(64);")
+
+        # Users lifecycle, proration & 20-day grace period fields
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;")
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;")
+        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_price NUMERIC(5,2) DEFAULT 0.00;")
+
         conn.commit()
         conn.close()
-        print("[DB STARTUP]: Signature schema verified and migration applied.", flush=True)
+        print("[DB STARTUP]: Schema verified, subscription and grace period migrations applied.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP WARNING]: {e}", flush=True)
 
@@ -323,17 +338,17 @@ Rules:
 1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable (2 to 4 sentences max unless detailed step-by-step instructions are required).
 2. If the user asks for human support, needs developer escalation, or encounters a bug, direct them to Priyam Rana at priyamrana069@gmail.com.
 
-Platform Knowledge & Micro-Details:
-- Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, files are encrypted directly on your local device before transmission, so neither Zephyr nor Cloudflare can see or decrypt your data.
+Platform Knowledge & Pricing Tiers:
+- Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network with zero egress costs.
 - Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
-- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage and single transfers up to 2.00 GB (plus 4 free guest transfers before requiring free account registration).
-- Zephyr Pro Tier: $4.00/month (billed via Dodo Payments). Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, extended retention windows (1h, 24h, 3d, 7d, 14d, 30d, or Never), and white-label download screens.
-- Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded and permanently deleted the exact millisecond the recipient finishes downloading it.
-- Email Transfers & OTP: Senders verify with a 6-digit code sent to their email via Brevo. The code is valid for 3 minutes, with 4 allowed attempts before a 30-minute lockout.
-- Client Deposit Portals: Created by clicking 'Request' in the header. Anyone with the drop link can upload files straight into your vault without an account. In drop-zone mode, your private drive and profile links are locked so depositors cannot view your personal files.
-- E-Sign Studio (/sign): Allows users to sign PDFs and agreements by typing (with 4 cursive font styles: Caveat, Dancing Script, Great Vibes, Pacifico), drawing realistic ink signatures, or uploading image files. When the other party signs, you receive an automated email notification with the signed copy.
-- Keep Me Signed In: Check the box to save your login in localStorage across browser restarts. Leave it unchecked to use temporary session storage, requiring you to sign in each new browser session.
-- Password Reset: Users can click 'Forgot password?' on /auth to receive a password recovery link.
+- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage and single transfers up to 2.00 GB.
+- Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage and 5 GB single transfers.
+- Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage and 10 GB single transfers.
+- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage and 25 GB single transfers.
+- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault and 50 GB single transfers.
+- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the 5 GB free limit are pruned starting from the oldest uploaded files.
+- Mid-Cycle Upgrades: Users can upgrade plans mid-cycle. The charge is prorated for the remaining days of their billing cycle plus a $0.50 upgrade fee.
+- Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
 
 @app.post("/api/support/chat")
@@ -413,44 +428,16 @@ async def support_chat(req: SupportChatRequest):
 
     q = user_msg.lower()
 
-    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "datacenter", "r2", "cloudflare"]):
-        reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted on your device first—meaning no one, not even the server hosts, can see what's inside."
-
-    elif any(k in q for k in ["password", "reset", "forgot", "recovery", "change password"]):
-        reply = "To reset your password, head to the Sign In page (/auth) and click 'Forgot password?'. Enter your email, and we'll send you a secure link to choose a new password. If you get stuck, contact human support at priyamrana069@gmail.com."
-
-    elif any(k in q for k in ["pricing", "price", "cost", "free", "pro", "plan", "upgrade", "subscription", "$4", "limit", "storage", "quota", "10 gb", "gigabyte", "mb", "file size", "how big", "send a"]):
-        reply = "Zephyr has two simple plans:\n• Free Starter ($0): 5 GB permanent cloud drive storage, up to 2.00 GB per single transfer, and Burn-on-Read shredding.\n• Zephyr Pro ($4/mo): 200 GB permanent drive storage, and single transfers up to 50 GB. If you are on the Free tier, a 10 GB file will exceed the 2 GB limit, so you would need to upgrade to Pro!"
-
-    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct", "one-time", "delete link"]):
-        reply = "Burn-on-Read completely erases your file. When you choose '1 (Burn on Read 🔥)' under Security, the file is deleted from our cloud servers the second your recipient finishes downloading it. After that, the link will never work again."
-
-    elif any(k in q for k in ["safe", "security", "encrypt", "privacy", "hack", "zero-knowledge", "aes", "key"]):
-        reply = "Zephyr is 100% zero-knowledge. Your files are locked with AES-256 encryption right inside your web browser before they are uploaded. We do not keep your passwords or keys, so even if our databases were breached, your files cannot be read."
-
-    elif any(k in q for k in ["otp", "code", "verify", "verification", "lockout", "timer", "minutes", "brevo", "email"]):
-        reply = "When you send files via email, we send a 6-digit verification code to prove it's really you. The code stays valid for 3 minutes. If you type the wrong code 4 times in a row, the system locks transfers for 30 minutes to prevent spam."
-
-    elif any(k in q for k in ["sign", "e-sign", "contract", "agreement", "draw", "signature", "pdf"]):
-        reply = "You can sign documents or send them to others at /sign. Just upload a PDF or image, place your signature box, and either sign it yourself or create a link for someone else. Once the other person signs, you'll receive an email notification with the signed copy."
-
-    elif any(k in q for k in ["deposit", "request", "receive", "client", "drop", "kiosk"]):
-        reply = "Want to receive files from clients? Click the 'Request' button at the top of the page to generate a Client Drop link. Anyone with the link can upload large files directly into your personal vault without needing to create an account, and your private files stay hidden."
-
-    elif any(k in q for k in ["folder", "zip", "jszip", "directory", "multiple", "tree"]):
-        reply = "You can upload entire folders or multiple files at once. Zephyr automatically compresses them into a single clean .zip file right in your browser before uploading, keeping your folder structure intact."
-
-    elif any(k in q for k in ["keep me signed in", "remember", "session", "logout", "login", "device"]):
-        reply = "On the sign-in page, checking 'Keep me signed in' saves your login on that device across browser restarts. If you leave it unchecked, Zephyr protects your privacy by asking you to sign in again whenever you open a new browser session."
-
-    elif any(k in q for k in ["human", "support", "help", "contact", "email", "priyam", "developer", "agent", "bug"]):
-        reply = "Need help from a real person or want to report a bug? You can reach human support directly by emailing Priyam Rana at priyamrana069@gmail.com."
-
-    elif any(k in q for k in ["hi", "hello", "hey", "greetings"]):
-        reply = "Hi there! I'm Zephyr Copilot. I can help you with file transfers, vault storage, password resets, E-Sign, and privacy features. What would you like to know?"
-
+    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
+        reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
+    elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
+        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers."
+    elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
+        reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding the 5 GB free limit will be permanently deleted starting from the oldest files."
+    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
+        reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the second your recipient finishes downloading it. After that, the link is destroyed permanently."
     else:
-        reply = "I'm here to help with all things Zephyr—like how our zero-knowledge encryption works, storage limits, E-Sign, Burn-on-Read, or password resets. If you have a specific question or need manual help, feel free to email human support at priyamrana069@gmail.com!"
+        reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
 
     return {"reply": reply}
 
@@ -735,18 +722,35 @@ async def delete_signature_request(doc_id: str):
 async def get_drive_quota(user_id: str):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("""
+        SELECT tier, storage_used_bytes, storage_quota_bytes, plan_price, subscription_end_at, grace_period_end_at 
+        FROM users 
+        WHERE user_id = %s
+    """, (user_id,))
     user = cursor.fetchone()
     conn.close()
 
     if not user:
-        return {"tier": "free", "used_bytes": 0, "quota_bytes": 5368709120}
+        return {
+            "tier": "free",
+            "used_bytes": 0,
+            "quota_bytes": 5368709120,
+            "plan_price": 0.00,
+            "subscription_end_at": None,
+            "grace_period_end_at": None
+        }
 
-    quota = user.get("storage_quota_bytes") or (214748364800 if user.get("tier") == "pro" else 5368709120)
+    tier_key = (user.get("tier") or "free").lower()
+    default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
+    quota = user.get("storage_quota_bytes") or default_quota
+
     return {
-        "tier": user.get("tier", "free"),
+        "tier": tier_key,
         "used_bytes": user.get("storage_used_bytes", 0) or 0,
-        "quota_bytes": quota
+        "quota_bytes": quota,
+        "plan_price": float(user.get("plan_price") or 0.0),
+        "subscription_end_at": str(user.get("subscription_end_at"))[:19] if user.get("subscription_end_at") else None,
+        "grace_period_end_at": str(user.get("grace_period_end_at"))[:19] if user.get("grace_period_end_at") else None
     }
 
 @app.get("/api/drive/files")
@@ -793,11 +797,13 @@ async def upload_drive_file(request: Request, filename: str, user_id: str):
         quota = 5368709120
     else:
         used = user.get("storage_used_bytes") or 0
-        quota = user.get("storage_quota_bytes") or 5368709120
+        tier_key = (user.get("tier") or "free").lower()
+        default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
+        quota = user.get("storage_quota_bytes") or default_quota
 
     if (used + file_size) > quota:
         conn.close()
-        raise HTTPException(status_code=403, detail="Drive storage quota exceeded. Upgrade to Pro for 200 GB.")
+        raise HTTPException(status_code=403, detail="Drive storage quota exceeded. Upgrade your plan for more space.")
 
     file_id = uuid.uuid4().hex
     s3_key = f"drive/{user_id}/{file_id}_{filename}"
@@ -860,7 +866,9 @@ async def upload_client_deposit(
         quota = 5368709120
     else:
         used = owner.get("storage_used_bytes") or 0
-        quota = owner.get("storage_quota_bytes") or 5368709120
+        tier_key = (owner.get("tier") or "free").lower()
+        default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
+        quota = owner.get("storage_quota_bytes") or default_quota
         if not owner.get("email") and resolved_owner_email:
             cursor.execute("UPDATE users SET email = %s WHERE user_id = %s", (resolved_owner_email, owner_id))
             conn.commit()
@@ -997,6 +1005,115 @@ async def delete_drive_file(file_id: str, user_id: str):
 
     return {"status": "deleted"}
 
+# ----------------- Mid-Cycle Prorated Upgrades -----------------
+class UpgradeQuoteRequest(BaseModel):
+    user_id: str
+    target_tier: str
+
+@app.post("/api/drive/upgrade-quote")
+async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (payload.user_id,))
+    user = cursor.fetchone()
+    conn.close()
+
+    target_tier_key = payload.target_tier.lower().strip()
+    target = PLAN_CONFIG.get(target_tier_key)
+    if not target or target_tier_key == "free":
+        raise HTTPException(status_code=400, detail="Invalid target plan.")
+
+    current_price = float(user.get("plan_price") or 0.0) if user else 0.0
+    sub_end = user.get("subscription_end_at") if user else None
+
+    # Free users or accounts without active end date pay full tier price
+    if not sub_end or current_price <= 0.0:
+        return {
+            "target_tier": target_tier_key,
+            "target_name": target["name"],
+            "charge_amount": target["price"],
+            "days_remaining": 0,
+            "surcharge": 0.00,
+            "target_quota_bytes": target["quota"]
+        }
+
+    now = datetime.utcnow()
+    if isinstance(sub_end, str):
+        sub_end = datetime.fromisoformat(sub_end)
+
+    days_remaining = max(0, (sub_end - now).days)
+    if days_remaining <= 0:
+        return {
+            "target_tier": target_tier_key,
+            "target_name": target["name"],
+            "charge_amount": target["price"],
+            "days_remaining": 0,
+            "surcharge": 0.00,
+            "target_quota_bytes": target["quota"]
+        }
+
+    # Prorated difference + $0.50 mid-cycle upgrade surcharge
+    price_diff = max(0.0, target["price"] - current_price)
+    prorated_base = (price_diff / 30.0) * days_remaining
+    final_amount = round(prorated_base + 0.50, 2)
+
+    return {
+        "target_tier": target_tier_key,
+        "target_name": target["name"],
+        "charge_amount": final_amount,
+        "days_remaining": days_remaining,
+        "surcharge": 0.50,
+        "target_quota_bytes": target["quota"]
+    }
+
+# ----------------- 20-Day Grace Period Automated Cleaner -----------------
+@app.post("/api/maintenance/prune-expired-vaults")
+async def prune_expired_vaults(secret: str = ""):
+    maintenance_key = os.getenv("MAINTENANCE_SECRET", "zephyr_cron_secret").strip()
+    if secret != maintenance_key:
+        raise HTTPException(status_code=401, detail="Unauthorized maintenance invocation.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    now = datetime.utcnow()
+
+    # Locate expired users past their 20-day grace period with storage exceeding the 5 GB free limit
+    cursor.execute("""
+        SELECT user_id, storage_used_bytes 
+        FROM users 
+        WHERE grace_period_end_at IS NOT NULL 
+          AND grace_period_end_at <= %s 
+          AND storage_used_bytes > 5368709120
+    """, (now,))
+    over_limit_users = cursor.fetchall()
+
+    pruned_count = 0
+    for u in over_limit_users:
+        uid = u["user_id"]
+        used = u["storage_used_bytes"]
+
+        # Fetch oldest files first
+        cursor.execute("SELECT id, s3_key, size_bytes FROM drive_files WHERE user_id = %s ORDER BY created_at ASC", (uid,))
+        files = cursor.fetchall()
+
+        for f in files:
+            if used <= 5368709120:
+                break
+            try:
+                s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=f["s3_key"])
+            except Exception:
+                pass
+            
+            cursor.execute("DELETE FROM drive_files WHERE id = %s", (f["id"],))
+            used -= f["size_bytes"]
+            pruned_count += 1
+
+        cursor.execute("UPDATE users SET storage_used_bytes = %s, grace_period_end_at = NULL WHERE user_id = %s", (max(0, used), uid))
+        conn.commit()
+
+    conn.close()
+    return {"status": "success", "processed_users": len(over_limit_users), "files_pruned": pruned_count}
+
 # ----------------- Ephemeral Transfers -----------------
 class CreateShareRequest(BaseModel):
     filename: str
@@ -1048,12 +1165,12 @@ async def create_share(payload: CreateShareRequest):
         cursor.execute("SELECT tier FROM users WHERE user_id = %s", (payload.user_id,))
         user_row = cursor.fetchone()
         if user_row and user_row.get("tier"):
-            user_tier = user_row["tier"]
+            user_tier = user_row["tier"].lower()
 
-    max_mb = 50000 if user_tier == "pro" else 2048
+    max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
     if payload.filesize_mb > max_mb:
         conn.close()
-        raise HTTPException(status_code=400, detail=f"File exceeds limit for {user_tier.upper()} tier.")
+        raise HTTPException(status_code=400, detail=f"File exceeds the {max_mb} MB limit for your {user_tier.upper()} tier.")
 
     created_at = datetime.utcnow()
     expires_at = created_at + timedelta(days=36500) if payload.expiry_hours == 0 else created_at + timedelta(hours=payload.expiry_hours)
@@ -1135,7 +1252,13 @@ async def get_user_profile(user_id: str):
     conn.close()
     if not row:
         return {"tier": "free", "user_id": user_id}
-    return {"tier": row.get("tier", "free"), "email": row.get("email"), "user_id": row.get("user_id")}
+    return {
+        "tier": row.get("tier", "free"),
+        "email": row.get("email"),
+        "user_id": row.get("user_id"),
+        "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
+        "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
+    }
 
 # ----------------- Dodo Payments Webhook Handler -----------------
 @app.post("/api/webhook/dodo")
@@ -1151,7 +1274,7 @@ async def dodo_webhook(request: Request):
 
     # Extract user identifiers
     metadata = data_block.get("metadata") or payload.get("metadata") or {}
-    user_id = metadata.get("user_id") or metadata.get("userId")
+    user_id = metadata.get("user_id") or metadata.get("userId") or metadata.get("metadata_user_id")
 
     customer_info = data_block.get("customer") or payload.get("customer") or {}
     user_email = (
@@ -1161,9 +1284,17 @@ async def dodo_webhook(request: Request):
         or metadata.get("email")
     )
 
-    print(f"[DODO WEBHOOK] Event: {event_type} | Email: {user_email} | User ID: {user_id}", flush=True)
+    # Determine Tier from metadata or default to Pro
+    requested_tier = (metadata.get("tier") or metadata.get("plan") or "pro").lower().strip()
+    if requested_tier not in PLAN_CONFIG or requested_tier == "free":
+        requested_tier = "pro"
 
-    # 1. Fallback: Resolve user_id from Supabase auth.users if only email exists
+    tier_info = PLAN_CONFIG[requested_tier]
+    target_quota = tier_info["quota"]
+    target_price = tier_info["price"]
+
+    print(f"[DODO WEBHOOK] Event: {event_type} | Email: {user_email} | User ID: {user_id} | Tier: {requested_tier}", flush=True)
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -1176,42 +1307,57 @@ async def dodo_webhook(request: Request):
         except Exception as e:
             print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
 
-    # 2. Upgrade to Pro: 200 GB vault storage (214748364800 bytes)
+    # Subscription activated or renewed: Set quota, plan price, 30-day renewal cycle, clear grace period
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
+        sub_end = datetime.utcnow() + timedelta(days=30)
         if user_id:
             cursor.execute("""
-                INSERT INTO users (user_id, email, tier, storage_quota_bytes)
-                VALUES (%s, %s, 'pro', 214748364800)
+                INSERT INTO users (user_id, email, tier, storage_quota_bytes, plan_price, subscription_end_at, grace_period_end_at)
+                VALUES (%s, %s, %s, %s, %s, %s, NULL)
                 ON CONFLICT (user_id) DO UPDATE SET 
-                    tier = 'pro', 
-                    storage_quota_bytes = 214748364800, 
+                    tier = EXCLUDED.tier, 
+                    storage_quota_bytes = EXCLUDED.storage_quota_bytes,
+                    plan_price = EXCLUDED.plan_price,
+                    subscription_end_at = EXCLUDED.subscription_end_at,
+                    grace_period_end_at = NULL,
                     email = COALESCE(EXCLUDED.email, users.email)
-            """, (user_id, user_email))
+            """, (user_id, user_email, requested_tier, target_quota, target_price, sub_end))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'pro', storage_quota_bytes = 214748364800 
+                SET tier = %s, 
+                    storage_quota_bytes = %s,
+                    plan_price = %s,
+                    subscription_end_at = %s,
+                    grace_period_end_at = NULL
                 WHERE LOWER(email) = LOWER(%s)
-            """, (user_email.strip(),))
+            """, (requested_tier, target_quota, target_price, sub_end, user_email.strip()))
         conn.commit()
-        print(f"[PRO TIER ACTIVATED]: Provisioned 200 GB for {user_email or user_id}", flush=True)
+        print(f"[TIER ACTIVATED]: Provisioned {tier_info['name']} ({target_quota / (1024**3):.0f} GB) for {user_email or user_id}", flush=True)
 
-    # 3. Downgrade to Free: 5 GB storage (5368709120 bytes)
+    # Subscription cancelled or failed: Revert to Free, start 20-day grace period
     elif event_type in ["subscription.cancelled", "subscription.expired", "subscription.failed"]:
+        grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'free', storage_quota_bytes = 5368709120 
+                SET tier = 'free', 
+                    storage_quota_bytes = 5368709120,
+                    plan_price = 0.00,
+                    grace_period_end_at = %s
                 WHERE user_id = %s
-            """, (user_id,))
+            """, (grace_end, user_id))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'free', storage_quota_bytes = 5368709120 
+                SET tier = 'free', 
+                    storage_quota_bytes = 5368709120,
+                    plan_price = 0.00,
+                    grace_period_end_at = %s
                 WHERE LOWER(email) = LOWER(%s)
-            """, (user_email.strip(),))
+            """, (grace_end, user_email.strip()))
         conn.commit()
-        print(f"[PRO TIER DEACTIVATED]: Reverted to 5 GB for {user_email or user_id}", flush=True)
+        print(f"[GRACE PERIOD ACTIVATED]: 20-day countdown started for {user_email or user_id}", flush=True)
 
     conn.close()
     return {"status": "success", "event": event_type}
@@ -1246,36 +1392,41 @@ async def lemon_webhook(request: Request):
             print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
 
     if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
+        sub_end = datetime.utcnow() + timedelta(days=30)
         if user_id:
             cursor.execute("""
-                INSERT INTO users (user_id, email, tier, storage_quota_bytes)
-                VALUES (%s, %s, 'pro', 214748364800)
+                INSERT INTO users (user_id, email, tier, storage_quota_bytes, plan_price, subscription_end_at, grace_period_end_at)
+                VALUES (%s, %s, 'pro', 214748364800, 7.00, %s, NULL)
                 ON CONFLICT (user_id) DO UPDATE SET 
                     tier = 'pro', 
                     storage_quota_bytes = 214748364800, 
+                    plan_price = 7.00,
+                    subscription_end_at = EXCLUDED.subscription_end_at,
+                    grace_period_end_at = NULL,
                     email = COALESCE(EXCLUDED.email, users.email)
-            """, (user_id, user_email))
+            """, (user_id, user_email, sub_end))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'pro', storage_quota_bytes = 214748364800 
+                SET tier = 'pro', storage_quota_bytes = 214748364800, plan_price = 7.00, subscription_end_at = %s, grace_period_end_at = NULL
                 WHERE LOWER(email) = LOWER(%s)
-            """, (user_email.strip(),))
+            """, (sub_end, user_email.strip(),))
         conn.commit()
 
     elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
+        grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'free', storage_quota_bytes = 5368709120 
+                SET tier = 'free', storage_quota_bytes = 5368709120, plan_price = 0.00, grace_period_end_at = %s 
                 WHERE user_id = %s
-            """, (user_id,))
+            """, (grace_end, user_id,))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'free', storage_quota_bytes = 5368709120 
+                SET tier = 'free', storage_quota_bytes = 5368709120, plan_price = 0.00, grace_period_end_at = %s 
                 WHERE LOWER(email) = LOWER(%s)
-            """, (user_email.strip(),))
+            """, (grace_end, user_email.strip(),))
         conn.commit()
 
     conn.close()
