@@ -1163,13 +1163,13 @@ async def prune_expired_vaults(secret: str = ""):
     cursor = conn.cursor()
     now = datetime.utcnow()
 
-    # Locate expired users past their 20-day grace period with storage exceeding the 5 GB free limit
+    # Find users past their 20-day grace period whose storage exceeds their current tier quota
     cursor.execute("""
-        SELECT user_id, storage_used_bytes 
+        SELECT user_id, tier, storage_used_bytes, storage_quota_bytes 
         FROM users 
         WHERE grace_period_end_at IS NOT NULL 
           AND grace_period_end_at <= %s 
-          AND storage_used_bytes > 5368709120
+          AND storage_used_bytes > storage_quota_bytes
     """, (now,))
     over_limit_users = cursor.fetchall()
 
@@ -1177,13 +1177,14 @@ async def prune_expired_vaults(secret: str = ""):
     for u in over_limit_users:
         uid = u["user_id"]
         used = u["storage_used_bytes"]
+        allowed_quota = u["storage_quota_bytes"] or 5368709120  # Fallback to 5 GB
 
         # Fetch oldest files first
         cursor.execute("SELECT id, s3_key, size_bytes FROM drive_files WHERE user_id = %s ORDER BY created_at ASC", (uid,))
         files = cursor.fetchall()
 
         for f in files:
-            if used <= 5368709120:
+            if used <= allowed_quota:
                 break
             try:
                 s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=f["s3_key"])
@@ -1194,12 +1195,17 @@ async def prune_expired_vaults(secret: str = ""):
             used -= f["size_bytes"]
             pruned_count += 1
 
-        cursor.execute("UPDATE users SET storage_used_bytes = %s, grace_period_end_at = NULL WHERE user_id = %s", (max(0, used), uid))
+        # Clear grace period lock and update exact current storage used
+        cursor.execute("""
+            UPDATE users 
+            SET storage_used_bytes = %s, 
+                grace_period_end_at = NULL 
+            WHERE user_id = %s
+        """, (max(0, used), uid))
         conn.commit()
 
     conn.close()
     return {"status": "success", "processed_users": len(over_limit_users), "files_pruned": pruned_count}
-
 # ----------------- Ephemeral Transfers -----------------
 class CreateShareRequest(BaseModel):
     filename: str
