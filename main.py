@@ -27,7 +27,7 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 # Supersonic Monogram SVG Asset
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -58,13 +58,13 @@ def get_db():
         conn_str = conn_str.replace("postgres://", "postgresql://", 1)
     return psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
 
-# ----------------- Plan Architecture & Quotas -----------------
+# ----------------- Plan Architecture, Quotas & Daily E-Sign Limits -----------------
 PLAN_CONFIG = {
-    "free":  {"name": "Free Starter", "price": 0.00, "quota": 5 * 1024**3,   "single_mb": 2048},
-    "micro": {"name": "Zephyr Micro", "price": 1.80, "quota": 15 * 1024**3,  "single_mb": 5000},
-    "lite":  {"name": "Zephyr Lite",  "price": 2.50, "quota": 30 * 1024**3,  "single_mb": 10000},
-    "plus":  {"name": "Zephyr Plus",  "price": 4.50, "quota": 80 * 1024**3,  "single_mb": 25000},
-    "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000}
+    "free":  {"name": "Free Starter", "price": 0.00, "quota": 5 * 1024**3,   "single_mb": 2048,  "esign_daily": 7},
+    "micro": {"name": "Zephyr Micro", "price": 1.80, "quota": 15 * 1024**3,  "single_mb": 5000,  "esign_daily": 15},
+    "lite":  {"name": "Zephyr Lite",  "price": 2.50, "quota": 30 * 1024**3,  "single_mb": 10000, "esign_daily": 30},
+    "plus":  {"name": "Zephyr Plus",  "price": 4.50, "quota": 80 * 1024**3,  "single_mb": 25000, "esign_daily": 50},
+    "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}  # -1 = Unlimited
 }
 
 @app.on_event("startup")
@@ -341,11 +341,11 @@ Rules:
 Platform Knowledge & Pricing Tiers:
 - Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network with zero egress costs.
 - Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
-- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage and single transfers up to 2.00 GB.
-- Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage and 5 GB single transfers.
-- Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage and 10 GB single transfers.
-- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage and 25 GB single transfers.
-- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault and 50 GB single transfers.
+- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage, 2 GB single transfers, and 7 E-Sign documents per day.
+- Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage, 5 GB single transfers, and 15 E-Sign documents per day.
+- Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
+- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, and 50 E-Sign documents per day.
+- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, and unlimited daily E-Sign documents.
 - 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the 5 GB free limit are pruned starting from the oldest uploaded files.
 - Mid-Cycle Upgrades: Users can upgrade plans mid-cycle. The charge is prorated for the remaining days of their billing cycle plus a $0.50 upgrade fee.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
@@ -431,7 +431,9 @@ async def support_chat(req: SupportChatRequest):
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
         reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
     elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
-        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers."
+        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs."
+    elif any(k in q for k in ["esign", "e-sign", "signature", "limit", "daily"]):
+        reply = "Daily E-Sign document creation limits: Free Starter (7/day), Micro (15/day), Lite (30/day), Plus (50/day), and Pro (Unlimited). Limits reset every night at midnight."
     elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
         reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding the 5 GB free limit will be permanently deleted starting from the oldest files."
     elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
@@ -472,6 +474,50 @@ async def sign_page(request: Request):
     return render_template("sign.html", request)
 
 # ----------------- E-Sign Document & Envelope Dashboard API -----------------
+@app.get("/api/sign/quota")
+async def get_sign_quota(user_id: Optional[str] = None, email: Optional[str] = None):
+    conn = get_db()
+    cursor = conn.cursor()
+    user_tier = "free"
+    
+    if user_id:
+        cursor.execute("SELECT tier FROM users WHERE user_id = %s", (user_id,))
+        u = cursor.fetchone()
+        if u and u.get("tier"):
+            user_tier = u["tier"].lower()
+    elif email:
+        cursor.execute("SELECT tier FROM users WHERE LOWER(email) = LOWER(%s)", (email.strip(),))
+        u = cursor.fetchone()
+        if u and u.get("tier"):
+            user_tier = u["tier"].lower()
+
+    tier_cfg = PLAN_CONFIG.get(user_tier, PLAN_CONFIG["free"])
+    daily_limit = tier_cfg.get("esign_daily", 7)
+
+    today_count = 0
+    if daily_limit != -1:
+        if user_id:
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM signature_requests 
+                WHERE user_id = %s AND created_at >= CURRENT_DATE
+            """, (user_id,))
+        elif email:
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM signature_requests 
+                WHERE LOWER(creator_email) = LOWER(%s) AND created_at >= CURRENT_DATE
+            """, (email.strip(),))
+        row = cursor.fetchone()
+        today_count = row["cnt"] if row else 0
+
+    conn.close()
+    return {
+        "tier": user_tier,
+        "plan_name": tier_cfg["name"],
+        "daily_limit": daily_limit,
+        "used_today": today_count,
+        "remaining": "Unlimited" if daily_limit == -1 else max(0, daily_limit - today_count)
+    }
+
 @app.post("/api/sign/upload")
 async def upload_sign_doc(
     request: Request,
@@ -484,27 +530,67 @@ async def upload_sign_doc(
     creator_email: Optional[str] = "",
     user_id: Optional[str] = ""
 ):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    resolved_creator = (creator_email or "").strip()
+    user_tier = "free"
+
+    if user_id:
+        cursor.execute("SELECT email, tier FROM users WHERE user_id = %s", (user_id,))
+        u = cursor.fetchone()
+        if u:
+            if u.get("email") and not resolved_creator:
+                resolved_creator = u["email"]
+            if u.get("tier"):
+                user_tier = u["tier"].lower()
+    elif resolved_creator:
+        cursor.execute("SELECT tier FROM users WHERE LOWER(email) = LOWER(%s)", (resolved_creator,))
+        u = cursor.fetchone()
+        if u and u.get("tier"):
+            user_tier = u["tier"].lower()
+
+    tier_cfg = PLAN_CONFIG.get(user_tier, PLAN_CONFIG["free"])
+    daily_limit = tier_cfg.get("esign_daily", 7)
+
+    # Enforce Daily E-Sign Quota Check
+    if daily_limit != -1:
+        if user_id:
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM signature_requests 
+                WHERE user_id = %s AND created_at >= CURRENT_DATE
+            """, (user_id,))
+        else:
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM signature_requests 
+                WHERE LOWER(creator_email) = LOWER(%s) AND created_at >= CURRENT_DATE
+            """, (resolved_creator.lower(),))
+        
+        row = cursor.fetchone()
+        today_count = row["cnt"] if row else 0
+
+        if today_count >= daily_limit:
+            conn.close()
+            raise HTTPException(
+                status_code=403,
+                detail=f"Daily E-Sign limit reached ({today_count}/{daily_limit} created today). Upgrade your plan to sign more documents."
+            )
+
     doc_id = uuid.uuid4().hex[:10]
     body = await request.body()
     content_type = request.headers.get("content-type", "application/pdf")
     s3_key = f"sign_docs/{doc_id}/{filename}"
     
-    s3_client.put_object(
-        Bucket=R2_BUCKET_NAME,
-        Key=s3_key,
-        Body=body,
-        ContentType=content_type
-    )
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    resolved_creator = (creator_email or "").strip()
-    if not resolved_creator and user_id:
-        cursor.execute("SELECT email FROM users WHERE user_id = %s", (user_id,))
-        u = cursor.fetchone()
-        if u and u.get("email"):
-            resolved_creator = u["email"]
+    try:
+        s3_client.put_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=s3_key,
+            Body=body,
+            ContentType=content_type
+        )
+    except Exception as err:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Storage error: {str(err)}")
 
     cursor.execute("""
         INSERT INTO signature_requests (doc_id, title, recipient_name, recipient_email, status, signature_x, signature_y, creator_email, user_id)
@@ -1272,7 +1358,6 @@ async def dodo_webhook(request: Request):
     event_type = payload.get("type", "")
     data_block = payload.get("data") if isinstance(payload.get("data"), dict) else payload
 
-    # Extract user identifiers
     metadata = data_block.get("metadata") or payload.get("metadata") or {}
     user_id = metadata.get("user_id") or metadata.get("userId") or metadata.get("metadata_user_id")
 
@@ -1284,7 +1369,6 @@ async def dodo_webhook(request: Request):
         or metadata.get("email")
     )
 
-    # Determine Tier from metadata or default to Pro
     requested_tier = (metadata.get("tier") or metadata.get("plan") or "pro").lower().strip()
     if requested_tier not in PLAN_CONFIG or requested_tier == "free":
         requested_tier = "pro"

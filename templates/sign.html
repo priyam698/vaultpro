@@ -6,7 +6,7 @@
   <title>Zephyr Sign | Multi-Envelope E-Signature Studio & Dashboard</title>
   
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <!-- Tailwind CSS Engine -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -64,7 +64,7 @@
     @media print {
       @page { size: auto; margin: 0mm !important; }
       header, aside, #zoomControls, #floatingAssignBtn, #uploadPromptContainer, 
-      #signerModal, #sendLinkModal, #recipientBanner, #submittedSuccessModal, 
+      #signerModal, #sendLinkModal, #recipientBanner, #submittedSuccessModal, #esignQuotaModal,
       #viewManage, button, .no-print {
         display: none !important;
       }
@@ -115,6 +115,49 @@
       </p>
     </div>
     <button onclick="document.getElementById('recipientBanner').classList.add('hidden')" class="text-xs font-bold text-indigo-200 hover:text-white transition cursor-pointer">✕ Dismiss</button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DAILY E-SIGN LIMIT EXCEEDED                                        -->
+  <!-- ========================================================================= -->
+  <div id="esignQuotaModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 no-print">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 border border-rose-500/40 shadow-2xl relative text-center">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mb-3 text-2xl font-bold">
+        ⏳
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Daily E-Sign Limit Reached</h3>
+      <p id="esignQuotaModalMsg" class="text-xs text-slate-300 leading-relaxed mb-6">
+        You have reached your daily envelope creation limit. Daily limits reset every night at midnight, or you can upgrade for higher allowances.
+      </p>
+
+      <div class="grid grid-cols-2 gap-2 text-left mb-6 text-xs">
+        <a href="/dashboard" class="p-3 rounded-xl bg-white/[0.04] border border-white/10 hover:border-cyan-400 transition block">
+          <span class="text-cyan-400 font-bold block text-[10px] uppercase">Micro ($1.80)</span>
+          <span class="font-black text-white">15 docs / day</span>
+        </a>
+        <a href="/dashboard" class="p-3 rounded-xl bg-white/[0.04] border border-white/10 hover:border-indigo-400 transition block">
+          <span class="text-indigo-400 font-bold block text-[10px] uppercase">Lite ($2.50)</span>
+          <span class="font-black text-white">30 docs / day</span>
+        </a>
+        <a href="/dashboard" class="p-3 rounded-xl bg-white/[0.04] border border-white/10 hover:border-purple-400 transition block">
+          <span class="text-purple-400 font-bold block text-[10px] uppercase">Plus ($4.50)</span>
+          <span class="font-black text-white">50 docs / day</span>
+        </a>
+        <a href="/dashboard" class="p-3 rounded-xl bg-indigo-600/20 border border-indigo-500/40 hover:border-indigo-400 transition block">
+          <span class="text-indigo-300 font-bold block text-[10px] uppercase">Pro ($7.00)</span>
+          <span class="font-black text-white">Unlimited Docs</span>
+        </a>
+      </div>
+
+      <div class="space-y-2">
+        <a href="/dashboard" class="block w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition">
+          Upgrade Storage & E-Sign Plan
+        </a>
+        <button onclick="document.getElementById('esignQuotaModal').classList.add('hidden')" class="w-full py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white text-xs font-semibold transition cursor-pointer">
+          Dismiss
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ========================================================================= -->
@@ -294,7 +337,7 @@
   <!-- TOP APP BAR                                                               -->
   <!-- ========================================================================= -->
   <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print">
-    <div class="flex items-center gap-6">
+    <div class="flex items-center gap-4 sm:gap-6">
       <a href="/" class="flex items-center gap-2.5 text-slate-400 hover:text-white transition group">
         <span class="text-xs font-semibold text-slate-400 group-hover:text-white">✕</span>
         <div class="w-8 h-8 rounded-lg bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-white/20 transition">
@@ -335,8 +378,13 @@
           Manage Envelopes
         </button>
       </div>
+
+      <!-- Live Daily E-Sign Quota Badge -->
+      <span id="esignQuotaBadge" class="hidden sm:inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">
+        Checking Quota...
+      </span>
       
-      <span id="fieldsStatusIndicator" class="text-xs text-slate-400 ml-2 hidden sm:inline">No fields placed yet</span>
+      <span id="fieldsStatusIndicator" class="text-xs text-slate-400 ml-2 hidden lg:inline">No fields placed yet</span>
       <button id="clearAllBtn" onclick="clearAllFields()" class="text-xs text-slate-500 hover:text-rose-400 transition ml-2 cursor-pointer">Clear All</button>
     </div>
 
@@ -416,13 +464,13 @@
     <main class="flex-1 flex flex-col items-center justify-start p-6 relative overflow-y-auto min-h-[550px] custom-scroll">
       
       <!-- Upload Initial State -->
-      <div id="uploadPromptContainer" class="max-w-md w-full my-auto text-center obsidian-card p-8 rounded-3xl border border-dashed border-white/20 hover:border-indigo-400/60 transition cursor-pointer no-print" onclick="document.getElementById('docFileInput').click()">
+      <div id="uploadPromptContainer" class="max-w-md w-full my-auto text-center obsidian-card p-8 rounded-3xl border border-dashed border-white/20 hover:border-indigo-400/60 transition cursor-pointer no-print" onclick="handleDocumentUploadPromptClick()">
         <input type="file" id="docFileInput" accept="application/pdf, image/png, image/jpeg" class="hidden" onchange="loadUserDocument(event)">
         <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center mb-3">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
         </div>
-        <h3 class="text-sm font-bold text-white">Upload document to sign</h3>
-        <p class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or document image</p>
+        <h3 id="uploadPromptHeading" class="text-sm font-bold text-white">Upload document to sign</h3>
+        <p id="uploadPromptSubtext" class="text-xs text-slate-400 mt-1">Select any agreement, contract, PDF, or document image</p>
       </div>
 
       <!-- Interactive Stage -->
@@ -532,15 +580,94 @@
     let currentDocId = null;
     let statusPollingInterval = null;
 
+    // Daily E-Sign Quota State
+    let esignRemaining = null;
+    let esignDailyLimit = 7;
+    let esignUserTier = "free";
+
     const urlParams = new URLSearchParams(window.location.search);
     const inviteRecipient = urlParams.get("invite");
     const docIdParam = urlParams.get("doc_id");
     const paramX = urlParams.get("x");
     const paramY = urlParams.get("y");
 
+    function getStoredUserData() {
+      const directId = localStorage.getItem("user_id") || sessionStorage.getItem("user_id");
+      const directEmail = localStorage.getItem("user_email") || sessionStorage.getItem("user_email");
+      if (directId) return { id: directId, email: directEmail || "" };
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(k));
+            if (parsed?.user?.id) return { id: parsed.user.id, email: parsed.user.email || "" };
+          } catch(e) {}
+        }
+      }
+      return { id: null, email: null };
+    }
+
+    const userData = getStoredUserData();
+    const currentUserId = userData.id;
+    const currentUserEmail = userData.email;
+
+    // 0. DAILY E-SIGN QUOTA ENGINE
+    async function checkDailyEsignQuota() {
+      if (inviteRecipient && docIdParam) return; // Recipients completing envelopes bypass creator limits
+
+      try {
+        const queryParams = new URLSearchParams();
+        if (currentUserId) queryParams.append("user_id", currentUserId);
+        if (currentUserEmail) queryParams.append("email", currentUserEmail);
+
+        const res = await fetch(`/api/sign/quota?${queryParams.toString()}`);
+        const data = await res.json();
+
+        esignRemaining = data.remaining;
+        esignDailyLimit = data.daily_limit;
+        esignUserTier = (data.tier || "free").toLowerCase();
+
+        const badge = document.getElementById("esignQuotaBadge");
+        if (badge) {
+          badge.classList.remove("hidden");
+          if (data.daily_limit === -1) {
+            badge.innerText = "E-Sign: Unlimited (Pro)";
+            badge.className = "hidden sm:inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono";
+          } else if (data.remaining === 0) {
+            badge.innerText = `E-Sign: 0 / ${data.daily_limit} left today`;
+            badge.className = "hidden sm:inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 font-mono animate-pulse";
+            showQuotaExceededUI();
+          } else {
+            badge.innerText = `E-Sign: ${data.remaining} / ${data.daily_limit} left today`;
+            badge.className = "hidden sm:inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono";
+          }
+        }
+      } catch (err) {
+        console.warn("Could not retrieve daily e-sign quota:", err);
+      }
+    }
+
+    function showQuotaExceededUI() {
+      const heading = document.getElementById("uploadPromptHeading");
+      const sub = document.getElementById("uploadPromptSubtext");
+      if (heading) heading.innerText = "Daily E-Sign Limit Reached";
+      if (sub) sub.innerText = `You have used your ${esignDailyLimit} daily documents. Click to upgrade your plan.`;
+    }
+
+    function handleDocumentUploadPromptClick() {
+      if (esignRemaining === 0) {
+        document.getElementById("esignQuotaModalMsg").innerText = `You have used all ${esignDailyLimit} of your daily ${esignUserTier.toUpperCase()} envelope allowances. Upgrade to Micro (15), Lite (30), Plus (50), or Pro (Unlimited) to continue signing today.`;
+        document.getElementById("esignQuotaModal").classList.remove("hidden");
+        return;
+      }
+      document.getElementById('docFileInput').click();
+    }
+
     // 1. RECIPIENT SESSION INGESTION & DOCUMENT STREAM LOADER
     window.addEventListener("DOMContentLoaded", async () => {
       initDrawCanvas();
+      checkDailyEsignQuota();
 
       if (inviteRecipient && docIdParam) {
         document.getElementById("senderSidebar")?.classList.add("hidden");
@@ -549,6 +676,7 @@
         document.getElementById("signerRoleSelector")?.classList.add("hidden");
         document.getElementById("boxCloseBtn")?.classList.add("hidden");
         document.getElementById("navTabsContainer")?.classList.add("hidden");
+        document.getElementById("esignQuotaBadge")?.classList.add("hidden");
 
         document.getElementById("topBarTitle").innerText = "Sign Document Online";
         document.getElementById("recipientBanner").classList.remove("hidden");
@@ -635,25 +763,58 @@
       const file = event.target.files[0];
       if (!file) return;
 
-      document.getElementById("docTitleInput").value = file.name.replace(/\.[^/.]+$/, "");
-      document.getElementById("uploadPromptContainer").classList.add("hidden");
-      document.getElementById("documentStage").classList.remove("hidden");
+      if (esignRemaining === 0) {
+        event.target.value = "";
+        document.getElementById("esignQuotaModal").classList.remove("hidden");
+        return;
+      }
 
       const rName = document.getElementById("otherSignerName").value.trim() || "Recipient";
       const rEmail = document.getElementById("otherSignerEmail").value.trim() || "";
-      const title = document.getElementById("docTitleInput").value;
+      const title = file.name.replace(/\.[^/.]+$/, "");
+      document.getElementById("docTitleInput").value = title;
+
+      const uploadBtn = document.getElementById("primaryActionBtn");
+      uploadBtn.disabled = true;
 
       try {
-        const uploadRes = await fetch(`/api/sign/upload?filename=${encodeURIComponent(file.name)}&recipient_name=${encodeURIComponent(rName)}&recipient_email=${encodeURIComponent(rEmail)}&title=${encodeURIComponent(title)}&x=${signatureX}&y=${signatureY}`, {
+        const queryParams = new URLSearchParams();
+        queryParams.append("filename", file.name);
+        queryParams.append("recipient_name", rName);
+        queryParams.append("recipient_email", rEmail);
+        queryParams.append("title", title);
+        queryParams.append("x", signatureX);
+        queryParams.append("y", signatureY);
+        if (currentUserId) queryParams.append("user_id", currentUserId);
+        if (currentUserEmail) queryParams.append("creator_email", currentUserEmail);
+
+        const uploadRes = await fetch(`/api/sign/upload?${queryParams.toString()}`, {
           method: "POST",
           headers: { "Content-Type": file.type || "application/pdf" },
           body: file
         });
+        
         const uploadData = await uploadRes.json();
+
+        if (uploadRes.status === 403) {
+          event.target.value = "";
+          document.getElementById("esignQuotaModalMsg").innerText = uploadData.detail || "Daily E-Sign limit reached.";
+          document.getElementById("esignQuotaModal").classList.remove("hidden");
+          return;
+        }
+
+        if (!uploadRes.ok) throw new Error(uploadData.detail || "Server error uploading document.");
+
         currentDocId = uploadData.doc_id;
-        document.getElementById("primaryActionBtn").disabled = false;
+        document.getElementById("uploadPromptContainer").classList.add("hidden");
+        document.getElementById("documentStage").classList.remove("hidden");
+        uploadBtn.disabled = false;
+
+        checkDailyEsignQuota();
       } catch (err) {
-        console.error("Cloud upload error:", err);
+        alert("Upload error: " + err.message);
+        event.target.value = "";
+        return;
       }
 
       if (file.type === 'application/pdf') {
@@ -804,7 +965,7 @@
       document.getElementById("fontFamilyLabel").innerText = `Font: ${fontNames[fontStyleChoice]} Cursive`;
     }
 
-    // 6. DRAWING CANVAS ENGINE (Midnight Blue Realistic Ink + Touch Support)
+    // 6. DRAWING CANVAS ENGINE
     const drawCanvas = document.getElementById("sigCanvas");
     const dCtx = drawCanvas.getContext("2d");
 
@@ -1139,6 +1300,7 @@
       document.getElementById("primaryActionBtn").disabled = true;
       document.getElementById("downloadImageBtn").disabled = true;
 
+      checkDailyEsignQuota();
       switchStudioTab('prepare');
     }
 
