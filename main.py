@@ -29,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -226,6 +226,9 @@ class BrandingUpdatePayload(BaseModel):
     brand_title: Optional[str] = None
     brand_slug: Optional[str] = None
     brand_accent_color: Optional[str] = "#6366f1"
+    brand_logo_url: Optional[str] = None
+    brand_bg_url: Optional[str] = None
+    reset_default: Optional[bool] = False
 
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
@@ -592,15 +595,33 @@ async def update_branding(data: BrandingUpdatePayload):
         conn.close()
         raise HTTPException(status_code=403, detail="Custom Studio Branding requires an active Plus or Pro subscription.")
 
+    if data.reset_default:
+        cursor.execute("""
+            UPDATE users 
+            SET brand_title = NULL,
+                brand_slug = NULL,
+                brand_logo_url = NULL,
+                brand_bg_url = NULL,
+                brand_accent_color = '#6366f1'
+            WHERE user_id = %s
+        """, (data.user_id,))
+        conn.commit()
+        conn.close()
+        return {"status": "success", "message": "Studio branding restored to default."}
+
     accent = (data.brand_accent_color or "#6366f1").strip()
     title = (data.brand_title or "").strip()
+    logo_url = data.brand_logo_url.strip() if data.brand_logo_url else None
+    bg_url = data.brand_bg_url.strip() if data.brand_bg_url else None
 
     cursor.execute("""
         UPDATE users 
         SET brand_title = %s, 
-            brand_accent_color = %s
+            brand_accent_color = %s,
+            brand_logo_url = %s,
+            brand_bg_url = %s
         WHERE user_id = %s
-    """, (title, accent, data.user_id))
+    """, (title, accent, logo_url, bg_url, data.user_id))
     
     conn.commit()
     conn.close()
