@@ -85,6 +85,7 @@
     }
 
     body.light-theme .obsidian-card h2,
+    body.light-theme .obsidian-card h3,
     body.light-theme .obsidian-card .card-heading {
       color: #0f172a !important;
     }
@@ -111,7 +112,10 @@
 
   <div class="site-mountain-backdrop"></div>
 
-  <!-- Rename Modal -->
+  <form id="stripeOnboardForm" action="/api/stripe/onboard" method="POST" class="hidden">
+    <input type="hidden" name="user_id" id="stripeUserIdHidden">
+  </form>
+
   <div id="renameModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 relative border border-white/15 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -133,7 +137,6 @@
     </div>
   </div>
 
-  <!-- Upgrade / Change Plan Modal -->
   <div id="upgradePlanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-7 relative border border-indigo-500/40 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -209,7 +212,6 @@
     </div>
   </div>
 
-  <!-- STUDIO BRANDING MODAL WITH INTERNAL SCROLLING & REMOVE/DEFAULT BUTTONS -->
   <div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-2xl w-full rounded-3xl p-6 sm:p-8 relative border border-indigo-500/40 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       
@@ -224,7 +226,6 @@
         <button onclick="closeBrandingModal()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
       </div>
 
-      <!-- Upgrade Blocker for Free, Micro, and Lite Tiers -->
       <div id="brandingUpgradeLock" class="hidden p-6 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/30 to-slate-900/40 border border-purple-500/30 text-center space-y-3">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-400 mx-auto flex items-center justify-center text-xl">
           🎨
@@ -243,7 +244,6 @@
         </div>
       </div>
 
-      <!-- Active Branding Form -->
       <form id="brandingForm" class="space-y-5">
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -264,7 +264,6 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          <!-- Logo Upload Box with Remove Button -->
           <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
             <div>
               <div class="flex items-center justify-between mb-1">
@@ -291,7 +290,6 @@
             </div>
           </div>
 
-          <!-- Background Wallpaper Upload Box with Remove Button -->
           <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
             <div>
               <div class="flex items-center justify-between mb-1">
@@ -319,7 +317,22 @@
           </div>
         </div>
 
-        <!-- Live Preview Simulation Card -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-indigo-950/30 to-black/40 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm">🏦</span>
+              <h5 class="text-xs font-black text-emerald-400">Pay-to-Unlock Bank Payouts</h5>
+              <span id="modalStripeStatusBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10 font-bold">Unlinked</span>
+            </div>
+            <p class="text-[11px] opacity-75 mt-0.5 leading-relaxed">
+              Connect your bank account with Stripe to receive <strong>88% of your sales</strong> automatically on every file unlock.
+            </p>
+          </div>
+          <button type="button" id="modalStripeConnectBtn" onclick="triggerStripeBankLink()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md transition whitespace-nowrap cursor-pointer">
+            Link Bank Account
+          </button>
+        </div>
+
         <div class="pt-2">
           <label class="block text-xs font-bold mb-2 opacity-80">Live Download Page Preview</label>
           <div id="livePreviewContainer" class="relative rounded-2xl overflow-hidden h-48 border border-white/15 bg-slate-900 flex items-center justify-center p-4">
@@ -344,7 +357,6 @@
           </div>
         </div>
 
-        <!-- Footer with Apply as Default, Cancel, and Save Changes -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/10">
           <button type="button" onclick="resetToDefaultBranding()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
             <span>↺</span> Apply as Default
@@ -364,7 +376,6 @@
     </div>
   </div>
 
-  <!-- Transparent Header -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -421,7 +432,6 @@
     </div>
   </header>
 
-  <!-- Plan Expiration / Grace Period Alert Banner -->
   <div id="expiryAlertBanner" class="hidden relative z-30 max-w-7xl mx-auto px-6 pt-6 w-full">
     <div id="expiryAlertContainer" class="p-4 sm:p-5 rounded-3xl bg-rose-500/15 border-2 border-rose-500/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl backdrop-blur-md">
       <div class="flex items-center gap-3.5 text-center sm:text-left">
@@ -443,33 +453,62 @@
     
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <div class="lg:col-span-4 obsidian-card rounded-3xl p-6 flex flex-col justify-between">
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-xs uppercase font-bold opacity-70">Vault Storage</span>
-            <span id="tierBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Free Tier</span>
-          </div>
-          <div class="text-2xl font-black card-heading mt-1">
-            <span id="usedDisplay">0 B</span> <span class="text-xs font-normal opacity-70">of <span id="quotaDisplay">5.00 GB</span></span>
-          </div>
-          
-          <div class="w-full h-2 bg-black/40 rounded-full mt-4 overflow-hidden border border-white/10">
-            <div id="storageBar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+      <div class="lg:col-span-4 space-y-6">
+        
+        <div class="obsidian-card rounded-3xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs uppercase font-bold opacity-70">Vault Storage</span>
+              <span id="tierBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Free Tier</span>
+            </div>
+            <div class="text-2xl font-black card-heading mt-1">
+              <span id="usedDisplay">0 B</span> <span class="text-xs font-normal opacity-70">of <span id="quotaDisplay">5.00 GB</span></span>
+            </div>
+            
+            <div class="w-full h-2 bg-black/40 rounded-full mt-4 overflow-hidden border border-white/10">
+              <div id="storageBar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <div id="cycleInfo" class="mt-3 text-[11px] opacity-60 font-mono">
+              Plan: Free (5 GB max)
+            </div>
           </div>
 
-          <div id="cycleInfo" class="mt-3 text-[11px] opacity-60 font-mono">
-            Plan: Free (5 GB max)
+          <div id="upgradeBox" class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
+            <div class="pr-2">
+              <p id="upgradeBoxHint" class="text-[11px] font-semibold opacity-85">Expand vault to 15 GB, 30 GB, 80 GB or 200 GB?</p>
+            </div>
+            <button id="vaultUpgradeBtn" onclick="openUpgradeModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition shrink-0 cursor-pointer">
+              Upgrade Plan
+            </button>
           </div>
         </div>
 
-        <div id="upgradeBox" class="pt-6 border-t border-slate-400/20 mt-6 flex items-center justify-between">
-          <div class="pr-2">
-            <p id="upgradeBoxHint" class="text-[11px] font-semibold opacity-85">Expand vault to 15 GB, 30 GB, 80 GB or 200 GB?</p>
+        <div class="obsidian-card rounded-3xl p-6 border border-emerald-500/30 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm">
+                $
+              </div>
+              <div>
+                <h3 class="text-xs font-black text-white">Escrow & Bank Payouts</h3>
+                <span class="text-[10px] text-emerald-400 font-mono font-bold">12% Fee / 88% Direct Payout</span>
+              </div>
+            </div>
+            <span id="dashboardStripeBadge" class="text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10">
+              Pending
+            </span>
           </div>
-          <button id="vaultUpgradeBtn" onclick="openUpgradeModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition shrink-0 cursor-pointer">
-            Upgrade Plan
+
+          <p class="text-[11px] opacity-75 leading-relaxed">
+            Link your bank account to enable Pay-to-Unlock. When buyers unlock your files, 88% of the payout is directly wired to your bank.
+          </p>
+
+          <button type="button" id="dashboardStripeActionBtn" onclick="triggerStripeBankLink()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition cursor-pointer">
+            Link Bank Account via Stripe
           </button>
         </div>
+
       </div>
 
       <div id="dropZoneContainer" 
@@ -594,6 +633,7 @@
     let currentRenamingFileId = null;
     let currentAccountTier = "free";
     let selectedUpgradeTarget = "pro";
+    let isStripeConnected = false;
     let currentBrandingData = {
       brand_title: "",
       brand_accent_color: "#6366f1",
@@ -601,7 +641,58 @@
       brand_bg_url: null
     };
 
+    // Trigger Stripe Bank Onboarding
+    function triggerStripeBankLink() {
+      const hiddenInput = document.getElementById("stripeUserIdHidden");
+      const form = document.getElementById("stripeOnboardForm");
+      if (hiddenInput && form && currentUserId) {
+        hiddenInput.value = currentUserId;
+        form.submit();
+      } else {
+        alert("Session error. Please sign in again.");
+      }
+    }
+
     async function loadDriveData() {
+      // Check if redirected back from Stripe onboarding
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("stripe_connected") === "true") {
+        alert("✓ Bank account successfully linked! You are now set up to receive 88% Pay-to-Unlock earnings directly to your bank.");
+      }
+
+      // Check user profile for Stripe Connect status
+      try {
+        const profileRes = await fetch(`/api/user-profile?user_id=${currentUserId}`);
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          isStripeConnected = Boolean(profileData.stripe_connected);
+
+          const dashBadge = document.getElementById("dashboardStripeBadge");
+          const dashBtn = document.getElementById("dashboardStripeActionBtn");
+          const modalBadge = document.getElementById("modalStripeStatusBadge");
+          const modalBtn = document.getElementById("modalStripeConnectBtn");
+
+          if (isStripeConnected) {
+            if (dashBadge) {
+              dashBadge.innerText = "Connected ✓";
+              dashBadge.className = "text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            }
+            if (dashBtn) {
+              dashBtn.innerText = "Manage Connected Bank Account";
+              dashBtn.className = "w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold transition cursor-pointer";
+            }
+            if (modalBadge) {
+              modalBadge.innerText = "Connected ✓";
+              modalBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold";
+            }
+            if (modalBtn) {
+              modalBtn.innerText = "Manage Bank Details";
+              modalBtn.className = "px-4 py-2 bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 rounded-xl text-xs font-bold transition cursor-pointer";
+            }
+          }
+        }
+      } catch (e) {}
+
       try {
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();

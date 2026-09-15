@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
 import boto3
+import stripe
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from pydantic import BaseModel
@@ -35,7 +36,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.6.0",
+    version="2.7.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -69,6 +70,10 @@ def render_template(template_name: str, request: Request, context: Optional[dict
         return templates.TemplateResponse(template_name, ctx)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
+# Stripe Configuration
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "").strip()
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 
 def get_db():
     if not DATABASE_URL:
@@ -110,6 +115,7 @@ def init_db_schema():
                 brand_logo_url TEXT,
                 brand_bg_url TEXT,
                 brand_accent_color VARCHAR(10) DEFAULT '#6366f1',
+                stripe_account_id VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -124,6 +130,7 @@ def init_db_schema():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo_url TEXT;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_bg_url TEXT;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_accent_color VARCHAR(10) DEFAULT '#6366f1';",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
         ]
 
@@ -211,7 +218,7 @@ def init_db_schema():
 
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Schema verified, paywall escrow tables and columns synchronized.", flush=True)
+        print("[DB STARTUP]: Schema verified, Stripe Connect and escrow synchronized.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -479,7 +486,7 @@ You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr V
 Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
 
 Rules:
-1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable (2 to 4 sentences max unless detailed step-by-step instructions are required).
+1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable.
 2. If the user asks for human support, needs developer escalation, or encounters a bug, direct them to Priyam Rana at priyamrana069@gmail.com.
 
 Platform Knowledge & Pricing Tiers:
@@ -491,9 +498,8 @@ Platform Knowledge & Pricing Tiers:
 - Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
 - Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
 - Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
-- Pay-to-Unlock Transfers: Creators can attach invoice prices to shared files. In group shares, each buyer unlocks their own unique access token without compromising group access. Protected files feature forensic moving watermarks and anti-screenshot shielding.
+- Pay-to-Unlock Escrow: Creators can attach invoice prices to shared files. Buyers securely pay via Stripe. The platform automatically takes a 12% fee and directly transfers 88% to the creator's connected bank account.
 - 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the active plan limit are pruned starting from the oldest uploaded files.
-- Mid-Cycle Upgrades: Users can upgrade plans mid-cycle. The charge is prorated for the remaining days of their billing cycle plus a $0.50 upgrade fee.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
 
@@ -642,6 +648,52 @@ async def secure_viewer_page(request: Request, share_id: str, token: str = Query
         "buyer_email": row["buyer_email"],
         "token": token
     })
+
+# ----------------- Stripe Connect (Creator Onboarding) -----------------
+@app.post("/api/stripe/onboard")
+async def stripe_onboard(user_id: str = Form(...)):
+    if not stripe.api_key:
+        raise HTTPException(status_code=500, detail="Stripe integration is not configured on the server.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT email, stripe_account_id FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+    
+    if not user:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    account_id = user.get("stripe_account_id")
+
+    # Create a Stripe Express account if they don't have one
+    if not account_id:
+        try:
+            account = stripe.Account.create(
+                type="express",
+                email=user["email"] if user.get("email") else None,
+                capabilities={"transfers": {"requested": True}},
+            )
+            account_id = account.id
+            cursor.execute("UPDATE users SET stripe_account_id = %s WHERE user_id = %s", (account_id, user_id))
+            conn.commit()
+        except Exception as e:
+            conn.close()
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    conn.close()
+
+    # Generate the link for the creator to add their bank details
+    try:
+        account_link = stripe.AccountLink.create(
+            account=account_id,
+            refresh_url="https://zephyr-drive.onrender.com/dashboard",
+            return_url="https://zephyr-drive.onrender.com/dashboard?stripe_connected=true",
+            type="account_onboarding",
+        )
+        return RedirectResponse(url=account_link.url, status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
@@ -1662,20 +1714,34 @@ async def upload_file_direct(share_id: str, request: Request):
     )
     return {"status": "success", "share_id": share_id}
 
-# ----------------- Group Paywall Multi-Buyer Escrow Engine -----------------
+# ----------------- Stripe Connect (Paywall Escrow Checkout) -----------------
 @app.post("/api/paywall/initiate")
 async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
+    if not stripe.api_key:
+        raise HTTPException(status_code=500, detail="Stripe integration is not configured on the server.")
+
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM shares WHERE id = %s AND is_paywalled = TRUE", (payload.share_id,))
+    cursor.execute("""
+        SELECT s.*, u.stripe_account_id 
+        FROM shares s 
+        LEFT JOIN users u ON s.paywall_creator_id = u.user_id 
+        WHERE s.id = %s AND s.is_paywalled = TRUE
+    """, (payload.share_id,))
     share = cursor.fetchone()
+    
     if not share:
         conn.close()
         raise HTTPException(status_code=404, detail="Paywalled transfer session not found or inactive.")
 
+    if not share.get("stripe_account_id"):
+        conn.close()
+        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments. Escrow disabled.")
+
     buyer = payload.buyer_email.lower().strip()
 
+    # Check if this buyer already bought this file
     cursor.execute("""
         SELECT access_token FROM paywall_purchases 
         WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
@@ -1691,30 +1757,49 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
         }
 
     access_token = f"pwtk_{secrets.token_hex(20)}"
-    price = float(share.get("unlock_price") or 0.00)
-
+    price_usd = float(share.get("unlock_price") or 0.00)
+    
     cursor.execute("""
         INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status)
         VALUES (%s, %s, %s, %s, 'pending')
         RETURNING id
-    """, (payload.share_id, buyer, access_token, price))
+    """, (payload.share_id, buyer, access_token, price_usd))
     conn.commit()
     conn.close()
 
-    dodo_product_id = os.getenv("DODO_PAYWALL_PRODUCT_ID", "pdt_0NrnVvaQ9xDPDhpjrniuR3A")
-    checkout_url = (
-        f"https://checkout.dodopayments.com/buy/{dodo_product_id}"
-        f"?email={urllib.parse.quote(buyer)}"
-        f"&metadata_share_id={payload.share_id}"
-        f"&metadata_access_token={access_token}"
-        f"&metadata_buyer_email={urllib.parse.quote(buyer)}"
-    )
+    # Calculate 12% Platform Fee
+    price_cents = int(price_usd * 100)
+    platform_fee_cents = int(price_cents * 0.12)
 
-    return {
-        "status": "checkout_ready",
-        "checkout_url": checkout_url,
-        "access_token": access_token
-    }
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
+                    'unit_amount': price_cents,
+                },
+                'quantity': 1,
+            }],
+            payment_intent_data={
+                'application_fee_amount': platform_fee_cents,
+                'transfer_data': {'destination': share['stripe_account_id']},
+            },
+            mode='payment',
+            success_url=f"https://zephyr-drive.onrender.com/secure-view/{payload.share_id}?token={access_token}",
+            cancel_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}",
+            metadata={"access_token": access_token}
+        )
+
+        return {
+            "status": "checkout_ready",
+            "checkout_url": session.url,
+            "access_token": access_token
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stripe Checkout Error: {str(e)}")
+
 
 @app.get("/api/paywall/verify-access")
 async def verify_buyer_access(share_id: str = Query(...), access_token: str = Query(...)):
@@ -1828,7 +1913,7 @@ async def get_user_profile(user_id: str):
     row = cursor.fetchone()
     conn.close()
     if not row:
-        return {"tier": "free", "user_id": user_id}
+        return {"tier": "free", "user_id": user_id, "stripe_connected": False}
     return {
         "tier": row.get("tier", "free"),
         "email": row.get("email"),
@@ -1838,11 +1923,45 @@ async def get_user_profile(user_id: str):
         "brand_logo_url": row.get("brand_logo_url"),
         "brand_bg_url": row.get("brand_bg_url"),
         "brand_accent_color": row.get("brand_accent_color") or "#6366f1",
+        "stripe_connected": bool(row.get("stripe_account_id")),
         "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
 
-# ----------------- Dodo Payments Webhook -----------------
+# ----------------- Stripe Webhook (Escrow Fulfillment) -----------------
+@app.post("/api/webhook/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get('STRIPE_SIGNATURE')
+    
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        paywall_token = session.get('metadata', {}).get('access_token')
+        
+        if paywall_token:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE paywall_purchases 
+                SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP 
+                WHERE access_token = %s
+            """, (paywall_token,))
+            conn.commit()
+            conn.close()
+            print(f"[STRIPE PAYWALL UNLOCKED] Granted access to token: {paywall_token}", flush=True)
+
+    return {"status": "success"}
+
+# ----------------- Dodo Payments Webhook (SaaS Subscriptions Only) -----------------
 @app.post("/api/webhook/dodo")
 async def dodo_webhook(request: Request):
     try:
@@ -1863,19 +1982,6 @@ async def dodo_webhook(request: Request):
 
     conn = get_db()
     cursor = conn.cursor()
-
-    # Handle Individual Paywall Escrow Unlocks (Multi-Buyer Group Links)
-    paywall_token = metadata.get("access_token") or metadata.get("metadata_access_token")
-    if paywall_token and event_type in ["payment.succeeded", "checkout.session.completed"]:
-        cursor.execute("""
-            UPDATE paywall_purchases 
-            SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP 
-            WHERE access_token = %s
-        """, (paywall_token,))
-        conn.commit()
-        conn.close()
-        print(f"[DODO PAYWALL UNLOCKED] Activated purchase token: {paywall_token}", flush=True)
-        return {"status": "success", "paywall_token": paywall_token}
 
     user_id = metadata.get("user_id") or metadata.get("userId") or metadata.get("metadata_user_id")
     customer_info = data_block.get("customer") or payload.get("customer") or {}
