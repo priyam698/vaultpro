@@ -35,10 +35,10 @@
       height: 100vh;
       background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 15% 15%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 90%, rgba(14, 165, 233, 0.09) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        radial-gradient(ellipse at 16% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 88%, rgba(14, 165, 233, 0.09) 0%, transparent 60%),
+        radial-gradient(ellipse at 78% 68%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
         linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
@@ -291,33 +291,73 @@
   <div class="site-mountain-backdrop"></div>
   <div id="google_translate_element" style="display:none"></div>
 
-  <!-- Outer Ambient Atmospheric Artifacts (Visible on Extra-Wide Displays without Overlap) -->
-  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden hidden 2xl:block">
-    <!-- Outer Left: Pastel RAW Pill & Vault Tag -->
-    <div class="absolute top-36 left-12 float-editorial-2 opacity-80">
-      <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#0e162c]/85 border border-white/10 backdrop-blur-xl shadow-2xl">
-        <div class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
-          📁
+  <!-- WeTransfer-Inspired Studio & Photo Elements (Arranged Responsively Without Overlaps) -->
+  <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden lg:block">
+    
+    <!-- 1. Top-Left Margin: Audio Stem Pill -->
+    <div class="absolute top-24 left-6 xl:left-14 float-editorial-2 opacity-85">
+      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#0c1222]/85 border border-white/12 backdrop-blur-xl shadow-xl">
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
+          🎵
         </div>
-        <span class="text-[10px] font-mono font-bold text-slate-200">Zephyr_Studio_v02</span>
+        <div>
+          <p class="text-[10px] font-mono font-bold text-slate-200 leading-tight">Master_Mix_96k.wav</p>
+          <span class="text-[9px] font-mono text-emerald-400">Lossless 24-bit</span>
+        </div>
       </div>
     </div>
 
-    <!-- Outer Right: Architectural Sculpture Card -->
-    <div class="absolute top-44 right-14 float-editorial-1 opacity-80">
-      <div class="relative bg-[#0d1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)] flex items-center gap-3">
-        <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=260&q=95" 
-             alt="Studio Minimal Chair" 
-             class="w-14 h-14 rounded-2xl object-cover border border-white/15">
-        <div class="pr-3">
-          <p class="text-[11px] font-bold text-white leading-tight">Lookbook_Campaign.tif</p>
-          <div class="flex items-center gap-1.5 mt-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span class="text-[9px] font-mono text-cyan-300 font-semibold">16-bit Master</span>
-          </div>
-        </div>
+    <!-- 2. Top-Center Gap: Curated Editorial Ceramic Still (Well above the transfer card) -->
+    <div class="absolute top-20 left-[45%] -translate-x-1/2 float-editorial-1 opacity-90">
+      <div class="relative bg-[#0d1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]">
+        <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=350&q=95" 
+             alt="Studio Ceramic" 
+             class="w-32 h-24 object-cover rounded-2xl">
+        <span class="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[8px] font-mono text-amber-300 font-bold border border-amber-300/30">
+          .dng
+        </span>
       </div>
     </div>
+
+    <!-- 3. Upper Right Margin: Pastel Peach RAW Tile -->
+    <div class="absolute top-32 right-6 xl:right-14 float-editorial-2 opacity-85">
+      <div class="px-4 py-3 rounded-2xl bg-[#ff9f7d]/20 border border-[#ff9f7d]/35 backdrop-blur-md shadow-xl text-center">
+        <span class="text-xs font-mono font-black text-[#ffcaa6] tracking-wider block">.raw</span>
+      </div>
+    </div>
+
+    <!-- 4. Mid Right Margin: Soft Violet Vector Pill -->
+    <div class="absolute top-72 right-6 xl:right-14 float-editorial-3 opacity-80">
+      <div class="px-4 py-3 rounded-2xl bg-purple-500/15 border border-purple-400/30 backdrop-blur-md shadow-xl text-center">
+        <span class="text-xs font-mono font-black text-purple-300 tracking-wider block">.fig</span>
+      </div>
+    </div>
+
+    <!-- 5. Center-Bottom Gap: Minimalist Studio Folder -->
+    <div class="absolute bottom-20 left-[41%] float-editorial-3 opacity-90">
+      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#0b1020]/90 border border-indigo-500/30 backdrop-blur-xl shadow-2xl">
+        <div class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
+          📁
+        </div>
+        <span class="text-[10px] font-mono font-bold text-slate-200">Zephyr_Archive_v01</span>
+      </div>
+    </div>
+
+    <!-- 6. Bottom-Right Margin: 4K Film Reel (Safely positioned to the right of the card) -->
+    <div class="absolute bottom-12 right-6 xl:right-16 float-editorial-1 opacity-90">
+      <div class="relative bg-[#0e1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)]">
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=360&q=95" 
+             alt="Cinematic Sunset Reel" 
+             class="w-36 h-24 object-cover rounded-2xl">
+        <div class="absolute top-3 right-3 px-1.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[8px] font-mono text-white flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 4K
+        </div>
+        <span class="absolute bottom-3 left-3 px-1.5 py-0.5 rounded-md bg-cyan-500/20 backdrop-blur-md text-[8px] font-mono text-cyan-300 font-bold border border-cyan-400/30">
+          .mov
+        </span>
+      </div>
+    </div>
+
   </div>
 
   <!-- Free Guest Limit Modal -->
@@ -567,56 +607,10 @@
         <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📁 Cloud Drive Vault</a>
         <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">✨ E-Sign Studio</a>
       </div>
-
-      <!-- In-Flow Editorial Accent (Fills the lower left whitespace naturally without collisions) -->
-      <div class="pt-4 hidden lg:flex items-center gap-3 pointer-events-none">
-        <div class="float-editorial-1 p-2 rounded-2xl bg-[#0c1222]/85 border border-white/12 shadow-2xl backdrop-blur-xl flex items-center gap-3">
-          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=180&h=120&q=95" class="w-16 h-12 rounded-xl object-cover border border-white/10" alt="Studio Master Still">
-          <div class="pr-2">
-            <p class="text-[11px] font-bold text-white leading-tight">Spatial_Architecture_8K.raw</p>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              <span class="text-[9px] font-mono text-amber-300">28.4 GB • RAW Camera Stills</span>
-            </div>
-          </div>
-        </div>
-        <div class="float-editorial-3 px-3 py-2 rounded-xl bg-purple-500/15 border border-purple-400/25 text-[11px] font-mono font-bold text-purple-300">
-          .psd
-        </div>
-      </div>
-
     </div>
 
-    <!-- Right Column: Transfer Card with Well-Arranged Editorial Anchors -->
+    <!-- Right Column: Transfer Card -->
     <div class="lg:col-span-6 relative">
-      
-      <!-- Top-Right Flank: Ultra-Sharp Curated Still -->
-      <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-editorial-1 pointer-events-none items-center gap-3 glass-chip p-2.5 rounded-2xl border border-white/15 shadow-2xl">
-        <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=200&h=160&q=95" alt="Ceramic Still" class="w-12 h-12 rounded-xl object-cover border border-white/15">
-        <div class="pr-2">
-          <p class="text-[11px] font-bold leading-tight text-white">Sculpture_Still_8K.dng</p>
-          <div class="flex items-center gap-1.5 mt-0.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            <span class="text-[10px] font-mono font-semibold text-amber-300">14.2 GB • .dng</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom-Left Flank: Cinematic 4K Film Reel -->
-      <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-editorial-2 pointer-events-none items-center gap-3 glass-chip p-2.5 rounded-2xl border border-white/15 shadow-2xl">
-        <div class="relative w-12 h-12 rounded-xl overflow-hidden border border-white/15 shrink-0">
-          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&h=160&q=95" alt="Sunset Film Reel" class="w-full h-full object-cover">
-          <span class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white">▶</span>
-        </div>
-        <div class="pr-2">
-          <p class="text-[11px] font-bold leading-tight text-white">Sunset_Grade_ProRes.mov</p>
-          <div class="flex items-center gap-1.5 mt-0.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[10px] font-mono font-semibold text-emerald-300">ProRes 422 HQ • 4K</span>
-          </div>
-        </div>
-      </div>
-
       <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10">
         
         <input type="file" id="fileInput" multiple class="hidden">
