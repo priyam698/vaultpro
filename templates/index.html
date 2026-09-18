@@ -35,10 +35,10 @@
       height: 100vh;
       background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 18% 12%, rgba(251, 146, 60, 0.09) 0%, transparent 45%),
-        radial-gradient(ellipse at 82% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 85%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
-        radial-gradient(ellipse at 75% 65%, rgba(168, 85, 247, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse at 18% 12%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 82% 14%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 60%),
+        radial-gradient(ellipse at 75% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
         linear-gradient(180deg, #07090f 0%, #040508 100%);
       pointer-events: none;
       z-index: 0;
@@ -47,7 +47,7 @@
 
     /* WeTransfer-Inspired Obsidian Panels */
     .obsidian-panel {
-      background: linear-gradient(180deg, rgba(16, 22, 38, 0.84) 0%, rgba(9, 12, 22, 0.94) 100%);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.88) 0%, rgba(9, 12, 22, 0.96) 100%);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -67,15 +67,15 @@
     /* Fluid Editorial Floating Animations */
     @keyframes floatEditorialA {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-14px) rotate(1.2deg); }
+      50% { transform: translateY(-12px) rotate(1.2deg); }
     }
     @keyframes floatEditorialB {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(16px) rotate(-1.5deg); }
+      50% { transform: translateY(14px) rotate(-1.5deg); }
     }
     @keyframes floatEditorialC {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(-1deg); }
+      50% { transform: translateY(-8px) rotate(-1deg); }
     }
 
     .float-editorial-1 { animation: floatEditorialA 8.5s ease-in-out infinite; }
@@ -291,70 +291,32 @@
   <div class="site-mountain-backdrop"></div>
   <div id="google_translate_element" style="display:none"></div>
 
-  <!-- WeTransfer-Inspired Curated Studio Artifacts (Desktop Enhanced) -->
-  <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden xl:block">
+  <!-- WeTransfer-Inspired Curated Ambient Studio Artifacts (Placed Exclusively in Safe Outer Margins) -->
+  <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden 2xl:block">
     
-    <!-- 1. Top-Left: Audio Master Pill (Fills upper-left negative space) -->
-    <div class="absolute top-28 left-12 float-editorial-2 opacity-85">
-      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#0c1222]/80 border border-white/12 backdrop-blur-xl shadow-xl">
-        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
-          🎵
-        </div>
-        <div>
-          <p class="text-[10px] font-mono font-bold text-slate-200 leading-tight">Master_Mix_96k.wav</p>
-          <span class="text-[9px] font-mono text-emerald-400">Lossless 24-bit</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Top-Center: Framed Editorial Sculpture -->
-    <div class="absolute top-20 left-[47%] -translate-x-1/2 float-editorial-1 opacity-90">
-      <div class="relative bg-[#0d1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]">
+    <!-- Left Atmosphere: Curated Editorial Ceramic Still -->
+    <div class="absolute top-36 left-10 float-editorial-1 opacity-80 hover:opacity-100 transition duration-300">
+      <div class="relative bg-[#0d1424]/90 p-2.5 rounded-3xl border border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]">
         <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=400&q=95" 
              alt="Studio Ceramic" 
              class="w-32 h-26 object-cover rounded-2xl">
-        <span class="absolute bottom-3.5 left-3.5 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono text-amber-300 font-bold border border-amber-300/30">
+        <span class="absolute bottom-4 left-4 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono text-amber-300 font-bold border border-amber-300/30">
           .dng
         </span>
       </div>
     </div>
 
-    <!-- 3. Upper-Right: Soft Coral Extension Pill -->
-    <div class="absolute top-36 right-10 float-editorial-2 opacity-85">
-      <div class="px-4 py-3 rounded-2xl bg-[#ff9f7d]/20 border border-[#ff9f7d]/35 backdrop-blur-md shadow-xl text-center">
+    <!-- Right Atmosphere (Top): Soft Coral RAW Tag -->
+    <div class="absolute top-40 right-12 float-editorial-2 opacity-85">
+      <div class="px-5 py-3.5 rounded-2xl bg-[#ff9f7d]/20 border border-[#ff9f7d]/35 backdrop-blur-md shadow-xl text-center">
         <span class="text-xs font-mono font-black text-[#ffcaa6] tracking-wider block">.raw</span>
       </div>
     </div>
 
-    <!-- 4. Mid-Right: Soft Violet Design Vector Pill -->
-    <div class="absolute top-80 right-8 float-editorial-3 opacity-80">
+    <!-- Right Atmosphere (Mid): Soft Violet Vector Pill -->
+    <div class="absolute top-84 right-10 float-editorial-3 opacity-80">
       <div class="px-4 py-3 rounded-2xl bg-purple-500/15 border border-purple-400/30 backdrop-blur-md shadow-xl text-center">
         <span class="text-xs font-mono font-black text-purple-300 tracking-wider block">.fig</span>
-      </div>
-    </div>
-
-    <!-- 5. Center-Bottom: Studio Project Folder -->
-    <div class="absolute bottom-24 left-[36%] float-editorial-3 opacity-90">
-      <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#0b1020]/90 border border-indigo-500/30 backdrop-blur-xl shadow-2xl">
-        <div class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
-          📁
-        </div>
-        <span class="text-[11px] font-mono font-bold text-slate-200">Zephyr_Archive_v01</span>
-      </div>
-    </div>
-
-    <!-- 6. Bottom-Right: 4K Film Reel -->
-    <div class="absolute bottom-14 right-14 float-editorial-1 opacity-90">
-      <div class="relative bg-[#0e1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)]">
-        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=420&q=95" 
-             alt="Cinematic Sunset Reel" 
-             class="w-40 h-28 object-cover rounded-2xl">
-        <div class="absolute top-3.5 right-3.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[8px] font-mono text-white flex items-center gap-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 4K
-        </div>
-        <span class="absolute bottom-3.5 left-3.5 px-2 py-0.5 rounded-md bg-cyan-500/20 backdrop-blur-md text-[9px] font-mono text-cyan-300 font-bold border border-cyan-400/30">
-          .mov
-        </span>
       </div>
     </div>
 
@@ -607,13 +569,37 @@
         <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📁 Cloud Drive Vault</a>
         <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">✨ E-Sign Studio</a>
       </div>
+
+      <!-- Balanced In-Flow Editorial Artifacts (Fills bottom-left negative void cleanly) -->
+      <div class="pt-4 hidden sm:flex items-center gap-3">
+        <div class="glass-chip float-editorial-3 px-3.5 py-2 rounded-2xl flex items-center gap-2.5 border border-white/10 shadow-lg">
+          <div class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
+            📁
+          </div>
+          <div>
+            <p class="text-[10px] font-mono font-bold text-slate-200">Zephyr_Archive_v01</p>
+            <span class="text-[9px] font-mono text-cyan-400">AES-256 Verified</span>
+          </div>
+        </div>
+
+        <div class="glass-chip float-editorial-2 px-3 py-2 rounded-2xl flex items-center gap-2 border border-white/10 shadow-lg">
+          <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+            🎵
+          </div>
+          <div>
+            <p class="text-[10px] font-mono font-bold text-slate-200">Master_Mix_96k.wav</p>
+            <span class="text-[9px] font-mono text-slate-400">24-bit Lossless</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Right Column: Transfer Card -->
     <div class="lg:col-span-6 relative">
       
-      <!-- Micro floating cards framing the upload box -->
-      <div class="hidden sm:flex absolute -top-8 -right-6 z-20 float-editorial-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
+      <!-- Micro-chips framing the transfer card directly -->
+      <div class="hidden sm:flex absolute -top-7 -right-5 z-20 float-editorial-1 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=95" alt="Creative RAW" class="w-11 h-11 rounded-xl object-cover border border-white/15">
         <div class="pr-3">
           <p class="text-[11px] font-bold leading-tight">Studio_Cut_8K.raw</p>
@@ -624,7 +610,7 @@
         </div>
       </div>
 
-      <div class="hidden sm:flex absolute -bottom-8 -left-6 z-20 float-editorial-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
+      <div class="hidden sm:flex absolute -bottom-7 -left-5 z-20 float-editorial-2 pointer-events-none items-center gap-3 glass-chip p-2 rounded-2xl">
         <div class="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-400/20">
           <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=150&q=95" alt="Film Cut" class="w-full h-full object-cover">
           <span class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white">▶</span>
