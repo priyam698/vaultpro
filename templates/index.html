@@ -167,7 +167,7 @@
     }
 
     /* ========================================================================= */
-    /* 2-COLOR THEME: SKY CYAN + PERIWINKLE INDIGO (MATCHING SIGN.HTML)          */
+    /* 2-COLOR THEME: SKY CYAN + PERIWINKLE INDIGO                               */
     /* ========================================================================= */
     body.light-theme {
       background-color: #dbe4f0;
@@ -410,6 +410,19 @@
       color: #0f172a !important;
     }
     body.light-theme .mockup-item span { color: #0f172a !important; }
+
+    /* Light Theme Glass Chip Support for Hero & Showcase Cards */
+    body.light-theme .glass-chip {
+      background: rgba(241, 245, 250, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #0f172a !important;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.1) !important;
+    }
+    body.light-theme .glass-chip span,
+    body.light-theme .glass-chip p,
+    body.light-theme .glass-chip strong {
+      color: #0f172a !important;
+    }
 
     body.light-theme table tr td { color: #0f172a !important; }
     body.light-theme table tr th { color: #0f172a !important; background-color: rgba(215, 224, 236, 0.8) !important; }
@@ -1489,6 +1502,84 @@
               <div class="absolute bottom-4 right-4 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15 text-[11px] text-white">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>End-to-end encrypted</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 4.5: ZEPHYR E-SIGN STUDIO SHOWCASE CARD                           -->
+  <!-- ========================================================================= -->
+  <section class="relative z-20 py-8">
+    <div class="max-w-7xl mx-auto px-6">
+      
+      <div class="rounded-[36px] obsidian-panel p-8 sm:p-12 lg:p-14 relative overflow-hidden shadow-2xl">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+          
+          <div class="lg:col-span-6 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30">
+              <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+              Zephyr E-Sign Studio
+            </div>
+            
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+              Sign, seal, and verify contracts in seconds
+            </h2>
+
+            <p class="text-sm sm:text-base leading-relaxed max-w-lg opacity-85">
+              Execute multi-envelope digital agreements with drag-and-drop signatures, realistic ink calligraphy, timestamped audit trails, and client-side encryption.
+            </p>
+
+            <div class="pt-2 flex items-center gap-3">
+              <a href="/sign" class="px-6 py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
+                <span>✨</span>
+                <span>Open E-Sign Studio</span>
+              </a>
+              <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
+                View E-Sign Limits
+              </a>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6 relative">
+            <div class="rounded-3xl overflow-hidden h-[340px] relative shadow-2xl border border-white/10">
+              <img src="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1000&q=90" alt="Signing legal document" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+
+              <!-- Interactive E-Sign Mockup Pill Card -->
+              <div class="absolute top-6 left-6 max-w-xs w-full glass-chip rounded-2xl p-4 shadow-2xl space-y-2.5">
+                <div class="flex items-center justify-between border-b border-slate-400/20 pb-2 text-[10px]">
+                  <span class="font-bold opacity-80 flex items-center gap-1.5">
+                    <span>📑</span> Commercial_NDA.pdf
+                  </span>
+                  <span class="text-emerald-400 font-mono font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">✓ Certified</span>
+                </div>
+                <div class="space-y-1.5 text-[11px]">
+                  <div class="flex items-center justify-between">
+                    <span class="opacity-75">Signer 1 (You):</span>
+                    <span class="text-emerald-400 font-bold font-mono">Signed ✓</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="opacity-75">Signer 2 (Client):</span>
+                    <span class="text-amber-400 font-bold font-mono animate-pulse">Pending Review...</span>
+                  </div>
+                </div>
+                <div class="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px]">
+                  <span class="opacity-60 font-mono">SHA-256 Audit Trail</span>
+                  <span class="text-indigo-400 font-bold">2 / 2 Fields Set</span>
+                </div>
+              </div>
+
+              <div class="absolute bottom-4 right-4 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15 text-[11px] text-white">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Legally Binding & Timestamped</span>
               </div>
             </div>
           </div>
