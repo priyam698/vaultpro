@@ -36,7 +36,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.8.0",
+    version="2.9.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -301,6 +301,9 @@ class UpgradeQuoteRequest(BaseModel):
 class SupportChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
+
+class StripeDisconnectPayload(BaseModel):
+    user_id: str
 
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
@@ -649,7 +652,7 @@ async def secure_viewer_page(request: Request, share_id: str, token: str = Query
         "token": token
     })
 
-# ----------------- Stripe Connect (Creator Onboarding) -----------------
+# ----------------- Stripe Connect (Creator Bank Link & Management) -----------------
 @app.post("/api/stripe/onboard")
 async def stripe_onboard(user_id: str = Form(...)):
     if not stripe.api_key:
@@ -672,6 +675,7 @@ async def stripe_onboard(user_id: str = Form(...)):
                 type="express",
                 email=user["email"] if user.get("email") else None,
                 capabilities={"transfers": {"requested": True}},
+                metadata={"user_id": user_id}
             )
             account_id = account.id
             cursor.execute("UPDATE users SET stripe_account_id = %s WHERE user_id = %s", (account_id, user_id))
@@ -692,6 +696,94 @@ async def stripe_onboard(user_id: str = Form(...)):
         return RedirectResponse(url=account_link.url, status_code=303)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/stripe/manage")
+async def stripe_manage(request: Request, user_id: Optional[str] = Form(None)):
+    """Generates a secure Stripe Express portal link to modify bank details, debit cards, or payout settings."""
+    if not user_id:
+        try:
+            body = await request.json()
+            user_id = body.get("user_id")
+        except Exception:
+            user_id = None
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required.")
+
+    if not stripe.api_key:
+        raise HTTPException(status_code=500, detail="Stripe integration is not configured on the server.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT stripe_account_id FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user or not user.get("stripe_account_id"):
+        raise HTTPException(status_code=400, detail="No connected Stripe bank account found to manage.")
+
+    account_id = user["stripe_account_id"]
+
+    try:
+        # Create a single-use login link to Stripe's hosted Express dashboard
+        login_link = stripe.Account.create_login_link(account_id)
+        target_url = login_link.url
+    except stripe.error.InvalidRequestError:
+        # Fallback: If onboarding was not yet finished, generate an onboarding link to complete details
+        account_link = stripe.AccountLink.create(
+            account=account_id,
+            refresh_url="https://zephyr-drive.onrender.com/dashboard",
+            return_url="https://zephyr-drive.onrender.com/dashboard?stripe_connected=true",
+            type="account_onboarding"
+        )
+        target_url = account_link.url
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stripe portal error: {str(e)}")
+
+    accept_hdr = request.headers.get("accept", "")
+    content_hdr = request.headers.get("content-type", "")
+    if "application/json" in accept_hdr or "application/json" in content_hdr:
+        return {"url": target_url}
+    return RedirectResponse(url=target_url, status_code=303)
+
+@app.post("/api/stripe/disconnect")
+async def stripe_disconnect(request: Request):
+    """Disconnects and removes the bank account link from the user's Zephyr account."""
+    user_id = None
+    try:
+        body = await request.json()
+        user_id = body.get("user_id")
+    except Exception:
+        try:
+            form_data = await request.form()
+            user_id = form_data.get("user_id")
+        except Exception:
+            user_id = None
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT stripe_account_id FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    account_id = user.get("stripe_account_id")
+    if account_id and stripe.api_key:
+        try:
+            stripe.Account.delete(account_id)
+        except Exception as e:
+            print(f"[STRIPE DISCONNECT NOTICE]: {e}", flush=True)
+
+    cursor.execute("UPDATE users SET stripe_account_id = NULL WHERE user_id = %s", (user_id,))
+    conn.commit()
+    conn.close()
+
+    return {"status": "success", "message": "Bank account disconnected successfully."}
 
 # ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
@@ -1907,7 +1999,7 @@ async def get_user_profile(user_id: str):
     row = cursor.fetchone()
     conn.close()
     if not row:
-        return {"tier": "free", "user_id": user_id, "stripe_connected": False}
+        return {"tier": "free", "user_id": user_id, "stripe_connected": False, "stripe_account_id": None}
     return {
         "tier": row.get("tier", "free"),
         "email": row.get("email"),
@@ -1918,6 +2010,7 @@ async def get_user_profile(user_id: str):
         "brand_bg_url": row.get("brand_bg_url"),
         "brand_accent_color": row.get("brand_accent_color") or "#6366f1",
         "stripe_connected": bool(row.get("stripe_account_id")),
+        "stripe_account_id": row.get("stripe_account_id"),
         "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }

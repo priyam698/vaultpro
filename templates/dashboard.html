@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage & Studio Branding</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,6 +193,9 @@
 
   <form id="stripeOnboardForm" action="/api/stripe/onboard" method="POST" class="hidden">
     <input type="hidden" name="user_id" id="stripeUserIdHidden">
+  </form>
+  <form id="stripeManageForm" action="/api/stripe/manage" method="POST" class="hidden">
+    <input type="hidden" name="user_id" id="stripeManageUserIdHidden">
   </form>
 
   <div id="renameModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
@@ -407,9 +410,20 @@
               Connect your bank account with Stripe to receive <strong>88% of your sales</strong> automatically on every file unlock.
             </p>
           </div>
-          <button type="button" id="modalStripeConnectBtn" onclick="triggerStripeBankLink()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md transition whitespace-nowrap cursor-pointer">
-            Link Bank Account
-          </button>
+          
+          <div class="flex items-center gap-2">
+            <button type="button" id="modalStripeConnectBtn" onclick="triggerStripeBankLink()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md transition whitespace-nowrap cursor-pointer">
+              Link Bank Account
+            </button>
+            <div id="modalStripeConnectedControls" class="hidden flex items-center gap-2">
+              <button type="button" onclick="manageStripeBank()" class="px-3.5 py-2 bg-white/10 hover:bg-white/15 border border-white/15 text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap">
+                Manage Bank Details
+              </button>
+              <button type="button" onclick="disconnectStripeBank()" class="px-3 py-2 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap">
+                Disconnect
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="pt-2">
@@ -575,17 +589,27 @@
               </div>
             </div>
             <span id="dashboardStripeBadge" class="text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10">
-              Pending
+              Unlinked
             </span>
           </div>
 
-          <p class="text-[11px] opacity-75 leading-relaxed">
+          <p id="stripeAccountDesc" class="text-[11px] opacity-75 leading-relaxed">
             Link your bank account to enable Pay-to-Unlock. When buyers unlock your files, 88% of the payout is directly wired to your bank.
           </p>
 
           <button type="button" id="dashboardStripeActionBtn" onclick="triggerStripeBankLink()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition cursor-pointer">
             Link Bank Account via Stripe
           </button>
+
+          <div id="stripeConnectedControls" class="hidden space-y-2 pt-1">
+            <button type="button" onclick="manageStripeBank()" class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>⚙️</span>
+              <span>Modify / Change Bank Details</span>
+            </button>
+            <button type="button" onclick="disconnectStripeBank()" class="w-full py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 text-xs font-bold transition cursor-pointer">
+              Disconnect Bank Account
+            </button>
+          </div>
         </div>
 
       </div>
@@ -732,6 +756,88 @@
       }
     }
 
+    // Trigger Stripe Express Management Portal (Modify / Change Bank Details)
+    function manageStripeBank() {
+      const hiddenInput = document.getElementById("stripeManageUserIdHidden");
+      const form = document.getElementById("stripeManageForm");
+      if (hiddenInput && form && currentUserId) {
+        hiddenInput.value = currentUserId;
+        form.submit();
+      } else {
+        alert("Session error. Please sign in again.");
+      }
+    }
+
+    // Disconnect Stripe Bank Account
+    async function disconnectStripeBank() {
+      if (!confirm("Are you sure you want to disconnect your bank account? Pay-to-Unlock earnings cannot be routed to your bank until a new account is connected.")) {
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/stripe/disconnect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: currentUserId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to disconnect bank account.");
+
+        alert("✓ Bank account successfully disconnected.");
+        updateStripeUI(false);
+      } catch (err) {
+        alert("Disconnection error: " + err.message);
+      }
+    }
+
+    function updateStripeUI(connected) {
+      isStripeConnected = connected;
+      const dashBadge = document.getElementById("dashboardStripeBadge");
+      const dashBtn = document.getElementById("dashboardStripeActionBtn");
+      const dashControls = document.getElementById("stripeConnectedControls");
+      const dashDesc = document.getElementById("stripeAccountDesc");
+
+      const modalBadge = document.getElementById("modalStripeStatusBadge");
+      const modalBtn = document.getElementById("modalStripeConnectBtn");
+      const modalControls = document.getElementById("modalStripeConnectedControls");
+
+      if (connected) {
+        if (dashBadge) {
+          dashBadge.innerText = "Connected ✓";
+          dashBadge.className = "text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        }
+        if (dashDesc) {
+          dashDesc.innerText = "Your bank account is linked. Payouts (88%) are deposited automatically upon file unlock.";
+        }
+        if (dashBtn) dashBtn.classList.add("hidden");
+        if (dashControls) dashControls.classList.remove("hidden");
+
+        if (modalBadge) {
+          modalBadge.innerText = "Connected ✓";
+          modalBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold";
+        }
+        if (modalBtn) modalBtn.classList.add("hidden");
+        if (modalControls) modalControls.classList.remove("hidden");
+      } else {
+        if (dashBadge) {
+          dashBadge.innerText = "Unlinked";
+          dashBadge.className = "text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10";
+        }
+        if (dashDesc) {
+          dashDesc.innerText = "Link your bank account to enable Pay-to-Unlock. When buyers unlock your files, 88% of the payout is directly wired to your bank.";
+        }
+        if (dashBtn) dashBtn.classList.remove("hidden");
+        if (dashControls) dashControls.classList.add("hidden");
+
+        if (modalBadge) {
+          modalBadge.innerText = "Unlinked";
+          modalBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/10 font-bold";
+        }
+        if (modalBtn) modalBtn.classList.remove("hidden");
+        if (modalControls) modalControls.classList.add("hidden");
+      }
+    }
+
     async function loadDriveData() {
       // Check if redirected back from Stripe onboarding
       const urlParams = new URLSearchParams(window.location.search);
@@ -744,31 +850,7 @@
         const profileRes = await fetch(`/api/user-profile?user_id=${currentUserId}`);
         if (profileRes.ok) {
           const profileData = await profileRes.json();
-          isStripeConnected = Boolean(profileData.stripe_connected);
-
-          const dashBadge = document.getElementById("dashboardStripeBadge");
-          const dashBtn = document.getElementById("dashboardStripeActionBtn");
-          const modalBadge = document.getElementById("modalStripeStatusBadge");
-          const modalBtn = document.getElementById("modalStripeConnectBtn");
-
-          if (isStripeConnected) {
-            if (dashBadge) {
-              dashBadge.innerText = "Connected ✓";
-              dashBadge.className = "text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-            }
-            if (dashBtn) {
-              dashBtn.innerText = "Manage Connected Bank Account";
-              dashBtn.className = "w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold transition cursor-pointer";
-            }
-            if (modalBadge) {
-              modalBadge.innerText = "Connected ✓";
-              modalBadge.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold";
-            }
-            if (modalBtn) {
-              modalBtn.innerText = "Manage Bank Details";
-              modalBtn.className = "px-4 py-2 bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 rounded-xl text-xs font-bold transition cursor-pointer";
-            }
-          }
+          updateStripeUI(Boolean(profileData.stripe_connected));
         }
       } catch (e) {}
 
@@ -776,7 +858,7 @@
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
         
-        currentAccountTier = (data.tier || "free").toLowerCase();
+        currentAccountTier = (data.tier || "free").lower();
 
         document.getElementById("usedDisplay").innerText = formatBytes(data.used_bytes);
         document.getElementById("quotaDisplay").innerText = formatBytes(data.quota_bytes);
