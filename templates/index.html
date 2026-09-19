@@ -16,14 +16,14 @@
   
   <style>
     /* ========================================================================= */
-    /* EDITORIAL STUDIO BACKGROUND & ATMOSPHERIC ENGINE                          */
+    /* THEME SYSTEM & EDITORIAL BACKGROUND CANVAS                                */
     /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #06070b;
       color: #f8fafc;
       overflow-x: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
     /* Dark Mode Ambient Studio Canvas */
@@ -35,10 +35,10 @@
       height: 100vh;
       background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 15% 15%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 90%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
         linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
@@ -47,7 +47,7 @@
 
     /* Dark Mode Obsidian Panels */
     .obsidian-panel {
-      background: linear-gradient(180deg, rgba(16, 22, 38, 0.88) 0%, rgba(9, 12, 22, 0.96) 100%);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -101,7 +101,7 @@
       transition: all 0.3s ease;
     }
 
-    /* Fluid Floating Animations */
+    /* Floating Animations */
     @keyframes floatEditorialA {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-12px) rotate(1.2deg); }
@@ -119,7 +119,7 @@
     .float-editorial-2 { animation: floatEditorialB 10.5s ease-in-out infinite; }
     .float-editorial-3 { animation: floatEditorialC 9.5s ease-in-out infinite; }
 
-    /* Form Fields */
+    /* Default (Dark Mode) Form Inputs */
     input, textarea, select {
       background-color: rgba(15, 23, 42, 0.75) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -146,7 +146,7 @@
       color: #f8fafc;
     }
 
-    /* Hero Headline */
+    /* Hero Typography */
     .hero-headline {
       color: #ffffff;
       text-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
@@ -167,34 +167,54 @@
     }
 
     /* ========================================================================= */
-    /* DUAL-TONE EDITORIAL DAYLIGHT THEME                                        */
+    /* DUAL-TONE EDITORIAL DAYLIGHT THEME (COMPLETE HARMONY)                     */
     /* ========================================================================= */
     body.light-theme {
-      background-color: #f6f8fd;
+      background-color: #f5f7fd;
       color: #0f172a;
     }
 
-    /* Rich Dual-Color Silk Backdrop (Warm Peach-Amber + Cool Periwinkle-Indigo) */
+    /* Dual-Tone Silk Ambient Canvas (Warm Sunset Peach + Cool Indigo/Periwinkle) */
     body.light-theme .site-mountain-backdrop {
-      background-color: #f6f8fd;
+      background-color: #f5f7fd;
       background-image: 
-        radial-gradient(circle at 12% 18%, rgba(255, 182, 133, 0.38) 0%, transparent 48%),
-        radial-gradient(circle at 88% 15%, rgba(165, 180, 252, 0.45) 0%, transparent 52%),
-        radial-gradient(circle at 50% 88%, rgba(147, 197, 253, 0.28) 0%, transparent 55%),
-        radial-gradient(circle at 85% 78%, rgba(244, 114, 182, 0.22) 0%, transparent 48%),
-        linear-gradient(155deg, #fdfbf7 0%, #eef3f9 100%);
+        radial-gradient(circle at 14% 18%, rgba(255, 187, 145, 0.42) 0%, transparent 48%),
+        radial-gradient(circle at 86% 14%, rgba(165, 180, 252, 0.48) 0%, transparent 52%),
+        radial-gradient(circle at 50% 88%, rgba(147, 197, 253, 0.32) 0%, transparent 55%),
+        radial-gradient(circle at 82% 78%, rgba(244, 114, 182, 0.24) 0%, transparent 48%),
+        linear-gradient(160deg, #fefcf9 0%, #eef3fb 100%);
     }
 
+    /* Upper Header & Navigation */
     body.light-theme header {
-      background: rgba(255, 255, 255, 0.6) !important;
-      border-color: rgba(15, 23, 42, 0.08) !important;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.65) !important;
+      border-bottom: 1px solid rgba(99, 102, 241, 0.14) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    body.light-theme .brand-logo-box {
+      background: rgba(255, 255, 255, 0.9) !important;
+      border: 1px solid rgba(99, 102, 241, 0.22) !important;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12) !important;
     }
 
     body.light-theme header a,
     body.light-theme header span {
       color: #0f172a !important;
+    }
+
+    body.light-theme #worldLangSelect,
+    body.light-theme #themeToggleBtn,
+    body.light-theme header .header-pill,
+    body.light-theme #userEmailBadge {
+      background: rgba(255, 255, 255, 0.85) !important;
+      border: 1px solid rgba(99, 102, 241, 0.18) !important;
+      color: #1e293b !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.05) !important;
+    }
+    body.light-theme #themeToggleBtn {
+      color: #d97706 !important;
     }
 
     body.light-theme .hero-headline {
@@ -215,12 +235,16 @@
       text-shadow: none !important;
     }
 
+    /* Main Transfer Card & Modal Panels */
     body.light-theme .obsidian-panel {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 25px 60px -15px rgba(30, 41, 59, 0.10), 0 0 1px 1px rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.82) !important;
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 
+        0 30px 70px -15px rgba(99, 102, 241, 0.14),
+        0 10px 30px -10px rgba(15, 23, 42, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
       color: #0f172a;
     }
 
@@ -237,81 +261,149 @@
       color: #334155 !important;
     }
 
-    /* Light Theme Artifact Overrides */
-    body.light-theme .editorial-card {
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 20px 45px -12px rgba(30, 41, 59, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
-      color: #0f172a;
+    /* Transfer Tab Switcher Track */
+    body.light-theme .mode-tab-track {
+      background: rgba(241, 245, 249, 0.9) !important;
+      border: 1px solid rgba(203, 213, 225, 0.8) !important;
     }
-    body.light-theme .editorial-card-title {
-      color: #0f172a !important;
+    body.light-theme .inactive-tab {
+      color: #64748b !important;
     }
-    body.light-theme .editorial-tag-raw {
-      background: rgba(255, 237, 213, 0.92);
-      border: 1px solid rgba(251, 146, 60, 0.6);
-      color: #c2410c;
-    }
-    body.light-theme .editorial-tag-psd {
-      background: rgba(224, 242, 254, 0.92);
-      border: 1px solid rgba(56, 189, 248, 0.55);
-      color: #0369a1;
-    }
-    body.light-theme .editorial-tag-fig {
-      background: rgba(243, 232, 255, 0.92);
-      border: 1px solid rgba(192, 132, 252, 0.55);
-      color: #7e22ce;
-    }
-    body.light-theme .editorial-folder {
-      background: rgba(255, 255, 255, 0.94);
-      border: 1px solid rgba(59, 130, 246, 0.35);
-      box-shadow: 0 20px 40px -10px rgba(30, 41, 59, 0.10);
-      color: #0f172a;
-    }
-    body.light-theme .editorial-folder span {
-      color: #0f172a !important;
+    body.light-theme #tierCapBadge {
+      background: rgba(99, 102, 241, 0.08) !important;
+      border: 1px solid rgba(99, 102, 241, 0.2) !important;
+      color: #4338ca !important;
     }
 
+    /* Drop Zone Buttons */
+    body.light-theme .drop-zone-btn {
+      background: rgba(248, 250, 252, 0.75) !important;
+      border: 2px dashed rgba(203, 213, 225, 0.95) !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .drop-zone-btn:hover {
+      background: rgba(238, 242, 255, 0.8) !important;
+      border-color: #6366f1 !important;
+    }
+    body.light-theme .drop-zone-btn span {
+      color: #0f172a !important;
+    }
+    body.light-theme .drop-zone-btn span:last-child {
+      color: #64748b !important;
+    }
+
+    /* Pay-to-Unlock Escrow Feature Card */
+    body.light-theme .paywall-feature-card {
+      background: linear-gradient(135deg, rgba(238, 242, 255, 0.85) 0%, rgba(245, 243, 255, 0.85) 50%, rgba(240, 253, 250, 0.85) 100%) !important;
+      border: 1px solid rgba(99, 102, 241, 0.25) !important;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.05) !important;
+    }
+    body.light-theme .paywall-title {
+      color: #1e1b4b !important;
+    }
+    body.light-theme .paywall-subtitle {
+      color: #475569 !important;
+    }
+    body.light-theme #paywallPriceContainer {
+      border-color: rgba(99, 102, 241, 0.15) !important;
+    }
+    body.light-theme #paywallPriceContainer span {
+      color: #334155 !important;
+    }
+    body.light-theme #paywallPriceInput {
+      background-color: #ffffff !important;
+      border: 1px solid rgba(99, 102, 241, 0.3) !important;
+      color: #059669 !important;
+    }
+
+    /* Inputs & Form Controls */
     body.light-theme input,
     body.light-theme textarea,
     body.light-theme select {
-      background-color: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
+      background-color: rgba(255, 255, 255, 0.92) !important;
+      border: 1px solid rgba(203, 213, 225, 0.9) !important;
       color: #0f172a !important;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    }
+    body.light-theme input:focus,
+    body.light-theme textarea:focus,
+    body.light-theme select:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
     }
     body.light-theme input::placeholder,
     body.light-theme textarea::placeholder {
-      color: #64748b !important;
+      color: #94a3b8 !important;
     }
     body.light-theme select option {
       background-color: #ffffff !important;
       color: #0f172a !important;
     }
 
+    /* Feature Badges & Quick Action Buttons */
     body.light-theme .feature-badge {
       background: rgba(255, 255, 255, 0.85) !important;
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(15, 23, 42, 0.08) !important;
-      box-shadow: 0 10px 25px -8px rgba(30, 41, 59, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 10px 25px -8px rgba(99, 102, 241, 0.10), 0 2px 6px rgba(0,0,0,0.02) !important;
       color: #0f172a !important;
     }
     body.light-theme .feature-badge span { color: #0f172a !important; }
 
     body.light-theme .quick-btn {
-      background: rgba(255, 255, 255, 0.9) !important;
-      border: 1px solid rgba(15, 23, 42, 0.1) !important;
-      color: #0f172a !important;
+      background: rgba(255, 255, 255, 0.88) !important;
+      border: 1px solid rgba(99, 102, 241, 0.18) !important;
+      color: #1e293b !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
     }
-    body.light-theme .quick-btn:hover { background: #ffffff !important; color: #4338ca !important; }
+    body.light-theme .quick-btn:hover { 
+      background: #ffffff !important; 
+      border-color: #6366f1 !important; 
+      color: #4338ca !important; 
+    }
 
     body.light-theme .glass-chip {
       background: rgba(255, 255, 255, 0.9) !important;
-      border: 1px solid rgba(15, 23, 42, 0.10) !important;
+      border: 1px solid rgba(255, 255, 255, 0.95) !important;
       box-shadow: 0 20px 40px -10px rgba(30, 41, 59, 0.10);
       color: #0f172a !important;
     }
     body.light-theme .glass-chip p { color: #0f172a !important; }
+
+    /* Floating Artifact Light Theme Overrides */
+    body.light-theme .editorial-card {
+      background: rgba(255, 255, 255, 0.92) !important;
+      border: 1px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 20px 45px -12px rgba(30, 41, 59, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .editorial-card-title {
+      color: #0f172a !important;
+    }
+    body.light-theme .editorial-tag-raw {
+      background: rgba(255, 237, 213, 0.92) !important;
+      border: 1px solid rgba(251, 146, 60, 0.6) !important;
+      color: #c2410c !important;
+    }
+    body.light-theme .editorial-tag-psd {
+      background: rgba(224, 242, 254, 0.92) !important;
+      border: 1px solid rgba(56, 189, 248, 0.55) !important;
+      color: #0369a1 !important;
+    }
+    body.light-theme .editorial-tag-fig {
+      background: rgba(243, 232, 255, 0.92) !important;
+      border: 1px solid rgba(192, 132, 252, 0.55) !important;
+      color: #7e22ce !important;
+    }
+    body.light-theme .editorial-folder {
+      background: rgba(255, 255, 255, 0.94) !important;
+      border: 1px solid rgba(59, 130, 246, 0.35) !important;
+      box-shadow: 0 20px 40px -10px rgba(30, 41, 59, 0.10) !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .editorial-folder span {
+      color: #0f172a !important;
+    }
 
     body.light-theme .mockup-inner {
       background: rgba(241, 245, 249, 0.92) !important;
@@ -330,18 +422,9 @@
     body.light-theme table tr { border-color: rgba(203, 213, 225, 0.6) !important; }
     body.light-theme ul li span { color: #0f172a !important; }
 
-    body.light-theme #worldLangSelect,
-    body.light-theme #themeToggleBtn,
-    body.light-theme header .header-pill,
-    body.light-theme #userEmailBadge {
-      background: rgba(255, 255, 255, 0.9) !important;
-      border-color: rgba(148, 163, 184, 0.35) !important;
-      color: #0f172a !important;
-    }
-
     body.light-theme footer {
-      background-color: rgba(241, 245, 249, 0.9) !important;
-      border-color: rgba(203, 213, 225, 0.8) !important;
+      background-color: rgba(255, 255, 255, 0.75) !important;
+      border-color: rgba(99, 102, 241, 0.12) !important;
       color: #334155 !important;
     }
 
@@ -369,7 +452,7 @@
   <div class="site-mountain-backdrop"></div>
   <div id="google_translate_element" style="display:none"></div>
 
-  <!-- WeTransfer-Inspired Curated Studio Artifacts (Arranged with Zero Overlaps) -->
+  <!-- WeTransfer-Inspired Curated Studio Artifacts Layer -->
   <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden lg:block">
     
     <!-- 1. Top-Left Margin: Curated Ceramic Sculpture Still -->
@@ -417,7 +500,7 @@
       </div>
     </div>
 
-    <!-- 5. Center-Bottom Void: Iconic Cobalt Blue Folder (Placed completely free of transfer card) -->
+    <!-- 5. Center-Bottom Void: Iconic Cobalt Blue Folder (Clear of Transfer Card) -->
     <div class="absolute bottom-12 left-[48%] -translate-x-1/2 float-editorial-3 opacity-95">
       <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl editorial-folder backdrop-blur-xl shadow-2xl">
         <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-md">
@@ -427,7 +510,7 @@
       </div>
     </div>
 
-    <!-- 6. Bottom-Left Margin: 24-bit Lossless Audio Stem (Placed under hero action buttons, never over text) -->
+    <!-- 6. Bottom-Left Margin: 24-bit Lossless Audio Stem -->
     <div class="absolute bottom-12 left-6 xl:left-12 float-editorial-2 opacity-90">
       <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl editorial-card shadow-xl">
         <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">
@@ -568,12 +651,12 @@
   </div>
 
   <!-- Transparent Header -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
       <!-- Brand Logo -->
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
+        <div class="brand-logo-box w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -718,7 +801,7 @@
         <!-- VIEW A: STANDARD TRANSFER VIEW -->
         <div id="transferStandardView">
           <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
-            <div class="flex items-center bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
+            <div class="mode-tab-track flex items-center bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
               <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer">
                 Get link
               </button>
@@ -734,7 +817,7 @@
           </div>
 
           <div class="grid grid-cols-2 gap-3.5 mb-5">
-            <button onclick="handleFileSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/10 border-2 border-dashed border-white/15 hover:border-indigo-400 transition duration-200 group cursor-pointer">
+            <button onclick="handleFileSelectClick()" class="drop-zone-btn flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/10 border-2 border-dashed border-white/15 hover:border-indigo-400 transition duration-200 group cursor-pointer">
               <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
               </div>
@@ -742,7 +825,7 @@
               <span class="text-[11px] opacity-65 mt-0.5 font-medium">Documents, video, audio</span>
             </button>
 
-            <button onclick="handleFolderSelectClick()" class="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition duration-200 group cursor-pointer">
+            <button onclick="handleFolderSelectClick()" class="drop-zone-btn flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition duration-200 group cursor-pointer">
               <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
               </div>
@@ -825,15 +908,15 @@
             </div>
 
             <!-- STAR FEATURE: PAY-TO-UNLOCK ESCROW CARD -->
-            <div class="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-black/40 border border-indigo-500/30 space-y-2.5 transition">
+            <div class="paywall-feature-card p-3.5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-black/40 border border-indigo-500/30 space-y-2.5 transition">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                   <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs font-bold">
                     $
                   </div>
                   <div>
-                    <span class="text-xs font-black text-white block">Pay-to-Unlock Escrow</span>
-                    <span class="text-[10px] text-slate-400 block leading-tight">Require payment before buyers can unlock & stream files.</span>
+                    <span class="paywall-title text-xs font-black text-white block">Pay-to-Unlock Escrow</span>
+                    <span class="paywall-subtitle text-[10px] text-slate-400 block leading-tight">Require payment before buyers can unlock & stream files.</span>
                   </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
