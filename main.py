@@ -36,7 +36,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.9.0",
+    version="2.9.1",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -630,9 +630,30 @@ async def sign_page(request: Request):
     return render_template("sign.html", request)
 
 @app.get("/secure-view/{share_id}", response_class=HTMLResponse)
-async def secure_viewer_page(request: Request, share_id: str, token: str = Query(...)):
+async def secure_viewer_page(
+    request: Request, 
+    share_id: str, 
+    token: str = Query(...), 
+    session_id: Optional[str] = Query(None)
+):
     conn = get_db()
     cursor = conn.cursor()
+
+    # Immediate Synchronous Check: Verifies payment with Stripe directly on redirect.
+    # Prevents race conditions and works even if webhook delivery is delayed.
+    if session_id and stripe.api_key:
+        try:
+            stripe_session = stripe.checkout.Session.retrieve(session_id)
+            if stripe_session.payment_status == "paid" and stripe_session.metadata.get("access_token") == token:
+                cursor.execute("""
+                    UPDATE paywall_purchases 
+                    SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP 
+                    WHERE access_token = %s
+                """, (token,))
+                conn.commit()
+        except Exception as e:
+            print(f"[STRIPE SYNC VERIFY NOTICE]: {e}", flush=True)
+
     cursor.execute("""
         SELECT p.buyer_email, p.payment_status, s.filename 
         FROM paywall_purchases p
@@ -1875,7 +1896,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
                 'transfer_data': {'destination': share['stripe_account_id']},
             },
             mode='payment',
-            success_url=f"https://zephyr-drive.onrender.com/secure-view/{payload.share_id}?token={access_token}",
+            success_url=f"https://zephyr-drive.onrender.com/secure-view/{payload.share_id}?token={access_token}&session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}",
             metadata={"access_token": access_token}
         )
@@ -2130,7 +2151,7 @@ async def dodo_webhook(request: Request):
                 SET tier = 'free', 
                     storage_quota_bytes = 5368709120,
                     plan_price = 0.00,
-                    grace_period_end_at = %s
+                    grace_period_end_at = %s 
                 WHERE user_id = %s
             """, (grace_end, user_id))
         elif user_email:
@@ -2139,7 +2160,7 @@ async def dodo_webhook(request: Request):
                 SET tier = 'free', 
                     storage_quota_bytes = 5368709120,
                     plan_price = 0.00,
-                    grace_period_end_at = %s
+                    grace_period_end_at = %s 
                 WHERE LOWER(email) = LOWER(%s)
             """, (grace_end, user_email.strip()))
         conn.commit()
@@ -2196,7 +2217,7 @@ async def lemon_webhook(request: Request):
             """, (sub_end, user_email.strip(),))
         conn.commit()
 
-    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
+    elif event_name in ["subscription.cancelled", "subscription.expired", "subscription.paused"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
