@@ -36,7 +36,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.9.1",
+    version="2.9.2",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -206,10 +206,16 @@ def init_db_schema():
                 access_token VARCHAR(64) UNIQUE NOT NULL,
                 amount_paid NUMERIC(10, 2) NOT NULL,
                 payment_status VARCHAR(30) DEFAULT 'unpaid',
+                buyer_password_hash TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 unlocked_at TIMESTAMP
             );
         """)
+
+        try:
+            cursor.execute("ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password_hash TEXT;")
+        except Exception:
+            pass
 
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_paywall_lookup 
@@ -302,8 +308,14 @@ class SupportChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
 
-class StripeDisconnectPayload(BaseModel):
-    user_id: str
+class SetPaywallPasswordRequest(BaseModel):
+    access_token: str
+    password: str
+
+class LoginPaywallRequest(BaseModel):
+    share_id: str
+    email: str
+    password: str
 
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
@@ -639,8 +651,6 @@ async def secure_viewer_page(
     conn = get_db()
     cursor = conn.cursor()
 
-    # Immediate Synchronous Check: Verifies payment with Stripe directly on redirect.
-    # Prevents race conditions and works even if webhook delivery is delayed.
     if session_id and stripe.api_key:
         try:
             stripe_session = stripe.checkout.Session.retrieve(session_id)
@@ -746,11 +756,9 @@ async def stripe_manage(request: Request, user_id: Optional[str] = Form(None)):
     account_id = user["stripe_account_id"]
 
     try:
-        # Create a single-use login link to Stripe's hosted Express dashboard
         login_link = stripe.Account.create_login_link(account_id)
         target_url = login_link.url
     except stripe.error.InvalidRequestError:
-        # Fallback: If onboarding was not yet finished, generate an onboarding link to complete details
         account_link = stripe.AccountLink.create(
             account=account_id,
             refresh_url="https://zephyr-drive.onrender.com/dashboard",
@@ -1914,7 +1922,7 @@ async def verify_buyer_access(share_id: str = Query(...), access_token: str = Qu
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT buyer_email, payment_status 
+        SELECT buyer_email, payment_status, buyer_password_hash 
         FROM paywall_purchases 
         WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
     """, (share_id, access_token))
@@ -1924,7 +1932,46 @@ async def verify_buyer_access(share_id: str = Query(...), access_token: str = Qu
     if not purchase:
         raise HTTPException(status_code=403, detail="Payment required to access this file.")
 
-    return {"unlocked": True, "buyer_email": purchase["buyer_email"]}
+    return {
+        "unlocked": True, 
+        "buyer_email": purchase["buyer_email"],
+        "has_password": bool(purchase["buyer_password_hash"])
+    }
+
+@app.post("/api/paywall/set-password")
+async def set_paywall_password(req: SetPaywallPasswordRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
+    cursor.execute("""
+        UPDATE paywall_purchases 
+        SET buyer_password_hash = %s 
+        WHERE access_token = %s AND payment_status = 'paid'
+    """, (pwd_hash, req.access_token))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
+
+@app.post("/api/paywall/login")
+async def paywall_login(req: LoginPaywallRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
+    cursor.execute("""
+        SELECT access_token, buyer_password_hash 
+        FROM paywall_purchases 
+        WHERE share_id = %s AND LOWER(buyer_email) = LOWER(%s) AND payment_status = 'paid'
+    """, (req.share_id, req.email.strip()))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=403, detail="No paid purchase found for this email address.")
+    
+    if row["buyer_password_hash"] and row["buyer_password_hash"] != pwd_hash:
+        raise HTTPException(status_code=401, detail="Incorrect password for this purchase.")
+    
+    return {"status": "success", "access_token": row["access_token"]}
 
 @app.get("/api/paywall/stream/{share_id}")
 async def stream_paywall_media(share_id: str, token: str = Query(...)):
@@ -2217,7 +2264,7 @@ async def lemon_webhook(request: Request):
             """, (sub_end, user_email.strip(),))
         conn.commit()
 
-    elif event_name in ["subscription.cancelled", "subscription.expired", "subscription.paused"]:
+    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
