@@ -16,7 +16,7 @@
   
   <style>
     /* ========================================================================= */
-    /* THEME SYSTEM & EDITORIAL CANVAS                                           */
+    /* THEME SYSTEM & EDITORIAL BACKGROUND CANVAS                                */
     /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -45,7 +45,7 @@
       transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
-    /* Dark Mode Glass Panels */
+    /* Dark Mode Obsidian Panels */
     .obsidian-panel {
       background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
       backdrop-filter: blur(40px);
@@ -64,7 +64,7 @@
       transition: all 0.3s ease;
     }
 
-    /* Floating Studio Artifact Cards */
+    /* Floating Studio Artifact Cards (Adaptive) */
     .editorial-card {
       background: rgba(14, 20, 36, 0.88);
       backdrop-filter: blur(25px);
@@ -167,14 +167,14 @@
     }
 
     /* ========================================================================= */
-    /* DUAL-TONE SILK DAYLIGHT THEME WITH TRANSLUCENT PORCELAIN-GLASS PANELS     */
+    /* DUAL-TONE LIGHT THEME (TRANSLUCENT SILK FROSTED GLASS COMPONENTS)        */
     /* ========================================================================= */
     body.light-theme {
       background-color: #f5f7fd;
       color: #0f172a;
     }
 
-    /* The Dual-Color Silk Gradient Canvas */
+    /* Light Theme Dual-Color Silk Backdrop */
     body.light-theme .site-mountain-backdrop {
       background-color: #f5f7fd;
       background-image: 
@@ -185,9 +185,9 @@
         linear-gradient(155deg, #fdfbf7 0%, #eef3f9 100%);
     }
 
-    /* Upper Header: Translucent Blended Glass */
+    /* Upper Header: Translucent Frosted Silk Glass */
     body.light-theme header {
-      background: rgba(255, 255, 255, 0.45) !important;
+      background: rgba(255, 255, 255, 0.42) !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -195,9 +195,9 @@
     }
 
     body.light-theme .brand-logo-box {
-      background: rgba(255, 255, 255, 0.7) !important;
-      border: 1px solid rgba(255, 255, 255, 0.9) !important;
-      box-shadow: 0 4px 12px rgba(100, 116, 139, 0.08) !important;
+      background: rgba(255, 255, 255, 0.65) !important;
+      border: 1px solid rgba(255, 255, 255, 0.85) !important;
+      box-shadow: 0 4px 12px rgba(100, 116, 139, 0.07) !important;
     }
 
     body.light-theme header a,
@@ -209,7 +209,7 @@
     body.light-theme #themeToggleBtn,
     body.light-theme header .header-pill,
     body.light-theme #userEmailBadge {
-      background: rgba(255, 255, 255, 0.55) !important;
+      background: rgba(255, 255, 255, 0.52) !important;
       border: 1px solid rgba(255, 255, 255, 0.75) !important;
       color: #1e293b !important;
       box-shadow: 0 2px 8px rgba(100, 116, 139, 0.05) !important;
@@ -239,7 +239,7 @@
 
     /* Main Transfer Box & Modal Panels (Translucent Silk Glass) */
     body.light-theme .obsidian-panel {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.52) 100%) !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.64) 0%, rgba(255, 255, 255, 0.48) 100%) !important;
       backdrop-filter: blur(35px);
       -webkit-backdrop-filter: blur(35px);
       border: 1px solid rgba(255, 255, 255, 0.85) !important;
@@ -279,7 +279,7 @@
 
     /* Drop Zone Upload Buttons */
     body.light-theme .drop-zone-btn {
-      background: rgba(255, 255, 255, 0.4) !important;
+      background: rgba(255, 255, 255, 0.38) !important;
       border: 2px dashed rgba(199, 210, 254, 0.75) !important;
       color: #0f172a !important;
     }
@@ -296,7 +296,7 @@
 
     /* Pay-to-Unlock Escrow Feature Card */
     body.light-theme .paywall-feature-card {
-      background: linear-gradient(135deg, rgba(238, 242, 255, 0.55) 0%, rgba(245, 243, 255, 0.45) 50%, rgba(240, 253, 250, 0.55) 100%) !important;
+      background: linear-gradient(135deg, rgba(238, 242, 255, 0.52) 0%, rgba(245, 243, 255, 0.42) 50%, rgba(240, 253, 250, 0.52) 100%) !important;
       border: 1px solid rgba(165, 180, 252, 0.45) !important;
       box-shadow: 0 4px 15px rgba(99, 102, 241, 0.04) !important;
     }
@@ -313,7 +313,7 @@
       color: #334155 !important;
     }
     body.light-theme #paywallPriceInput {
-      background-color: rgba(255, 255, 255, 0.8) !important;
+      background-color: rgba(255, 255, 255, 0.75) !important;
       border: 1px solid rgba(99, 102, 241, 0.3) !important;
       color: #059669 !important;
     }
@@ -322,7 +322,7 @@
     body.light-theme input,
     body.light-theme textarea,
     body.light-theme select {
-      background-color: rgba(255, 255, 255, 0.6) !important;
+      background-color: rgba(255, 255, 255, 0.58) !important;
       border: 1px solid rgba(203, 213, 225, 0.7) !important;
       color: #0f172a !important;
       box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
@@ -345,7 +345,7 @@
 
     /* Feature Badges & Quick Action Buttons */
     body.light-theme .feature-badge {
-      background: rgba(255, 255, 255, 0.55) !important;
+      background: rgba(255, 255, 255, 0.52) !important;
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.8) !important;
       box-shadow: 0 10px 25px -8px rgba(100, 116, 139, 0.08) !important;
@@ -354,7 +354,7 @@
     body.light-theme .feature-badge span { color: #0f172a !important; }
 
     body.light-theme .quick-btn {
-      background: rgba(255, 255, 255, 0.55) !important;
+      background: rgba(255, 255, 255, 0.52) !important;
       border: 1px solid rgba(255, 255, 255, 0.8) !important;
       color: #1e293b !important;
       box-shadow: 0 2px 8px rgba(100, 116, 139, 0.05) !important;
@@ -366,7 +366,7 @@
     }
 
     body.light-theme .glass-chip {
-      background: rgba(255, 255, 255, 0.6) !important;
+      background: rgba(255, 255, 255, 0.58) !important;
       border: 1px solid rgba(255, 255, 255, 0.85) !important;
       box-shadow: 0 20px 40px -10px rgba(100, 116, 139, 0.08);
       color: #0f172a !important;
@@ -375,10 +375,10 @@
 
     /* Floating Studio Artifact Cards (Light Mode) */
     body.light-theme .editorial-card {
-      background: rgba(255, 255, 255, 0.65) !important;
+      background: rgba(255, 255, 255, 0.62) !important;
       border: 1px solid rgba(255, 255, 255, 0.85) !important;
       box-shadow: 0 20px 40px -10px rgba(100, 116, 139, 0.10) !important;
-      color: #0f172a;
+      color: #0f172a !important;
     }
     body.light-theme .editorial-card-title {
       color: #0f172a !important;
@@ -409,12 +409,12 @@
     }
 
     body.light-theme .mockup-inner {
-      background: rgba(241, 245, 249, 0.65) !important;
+      background: rgba(241, 245, 249, 0.62) !important;
       border-color: rgba(203, 213, 225, 0.7) !important;
       color: #0f172a !important;
     }
     body.light-theme .mockup-item {
-      background: rgba(255, 255, 255, 0.7) !important;
+      background: rgba(255, 255, 255, 0.65) !important;
       border-color: rgba(203, 213, 225, 0.7) !important;
       color: #0f172a !important;
     }
@@ -455,10 +455,10 @@
   <div class="site-mountain-backdrop"></div>
   <div id="google_translate_element" style="display:none"></div>
 
-  <!-- WeTransfer-Inspired Curated Studio Artifacts Layer -->
+  <!-- WeTransfer-Inspired Curated Studio Artifacts Layer (Expanded Collection, Zero Overlap) -->
   <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden xl:block">
     
-    <!-- 1. Top-Left Margin: Curated Ceramic Sculpture Still -->
+    <!-- 1. Top-Left Margin: Ceramic Sculpture Still -->
     <div class="absolute top-24 left-8 2xl:left-14 float-editorial-1 opacity-90 hover:opacity-100 transition duration-300">
       <div class="relative editorial-card p-2 rounded-2xl flex items-center gap-3">
         <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=260&q=95" 
@@ -474,7 +474,19 @@
       </div>
     </div>
 
-    <!-- 2. Upper-Right Margin: Pastel RAW & PSD Badges -->
+    <!-- 2. Top-Center Gap: Modern Studio Interior Card (Positioned safely above transfer panel) -->
+    <div class="absolute top-20 left-[48%] -translate-x-1/2 float-editorial-2 opacity-90">
+      <div class="relative editorial-card p-2 rounded-3xl">
+        <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=340&q=95" 
+             alt="Studio Interior" 
+             class="w-32 h-24 object-cover rounded-2xl">
+        <span class="absolute bottom-3.5 left-3.5 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[8px] font-mono text-amber-300 font-bold border border-amber-300/30">
+          .jpg
+        </span>
+      </div>
+    </div>
+
+    <!-- 3. Upper-Right Margin: Pastel RAW & PSD Badges -->
     <div class="absolute top-24 right-8 2xl:right-16 float-editorial-2 opacity-85 flex items-center gap-2">
       <div class="px-4 py-3 rounded-2xl editorial-tag-raw shadow-xl text-center">
         <span class="text-xs font-mono font-black tracking-wider block">.raw</span>
@@ -484,15 +496,51 @@
       </div>
     </div>
 
-    <!-- 3. Mid-Right Margin: Soft Violet Vector Pill -->
-    <div class="absolute top-64 right-8 2xl:right-14 float-editorial-3 opacity-85">
+    <!-- 4. Upper-Right Secondary Flank: Architectural Detail Card -->
+    <div class="absolute top-44 right-20 2xl:right-28 float-editorial-1 opacity-80">
+      <div class="relative editorial-card p-2 rounded-2xl flex items-center gap-2.5">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200&h=160&q=95" 
+             alt="Architecture Frame" 
+             class="w-10 h-10 rounded-xl object-cover border border-white/10">
+        <div class="pr-2">
+          <p class="text-[10px] font-bold leading-tight editorial-card-title">Lookbook_SS26.tif</p>
+          <span class="text-[9px] font-mono text-indigo-400">16-bit Master</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Mid-Right Margin: Soft Violet Vector Pill -->
+    <div class="absolute top-68 right-6 2xl:right-12 float-editorial-3 opacity-85">
       <div class="px-4 py-3 rounded-2xl editorial-tag-fig shadow-xl text-center">
         <span class="text-xs font-mono font-black tracking-wider block">.fig</span>
       </div>
     </div>
 
-    <!-- 4. Bottom-Right Margin: 4K Film Reel -->
-    <div class="absolute bottom-12 right-8 2xl:right-16 float-editorial-1 opacity-90">
+    <!-- 6. Center-Bottom Void: Iconic Cobalt Blue Folder (Clear of Transfer Card) -->
+    <div class="absolute bottom-12 left-[48%] -translate-x-1/2 float-editorial-3 opacity-95">
+      <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl editorial-folder backdrop-blur-xl shadow-2xl">
+        <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-md">
+          📁
+        </div>
+        <span class="text-[11px] font-mono font-bold">Zephyr_Archive_v01</span>
+      </div>
+    </div>
+
+    <!-- 7. Bottom-Left Margin: 24-bit Lossless Audio Stem -->
+    <div class="absolute bottom-12 left-6 xl:left-12 float-editorial-2 opacity-90">
+      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl editorial-card shadow-xl">
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">
+          🎵
+        </div>
+        <div>
+          <p class="text-[10px] font-mono font-bold leading-tight editorial-card-title">Master_Mix_96k.wav</p>
+          <span class="text-[9px] font-mono text-emerald-500 font-semibold">Lossless 24-bit</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Bottom-Right Margin: 4K Film Reel -->
+    <div class="absolute bottom-12 right-6 xl:right-14 float-editorial-1 opacity-90">
       <div class="relative editorial-card p-2 rounded-3xl">
         <div class="relative w-36 h-24 rounded-2xl overflow-hidden border border-white/10">
           <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=360&q=95" 
@@ -1024,7 +1072,7 @@
             </div>
 
             <div class="pt-1">
-              <button type="button" onclick="handleFileSelectClick()" class="w-full py-8 flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition cursor-pointer group">
+              <button type="button" onclick="handleFileSelectClick()" class="drop-zone-btn w-full py-8 flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition cursor-pointer group">
                 <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                 </div>
