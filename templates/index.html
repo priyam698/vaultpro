@@ -26,7 +26,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Multi-layered luxury studio lighting canvas */
+    /* Dark Mode Ambient Studio Canvas */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
@@ -42,7 +42,7 @@
         linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
-      transition: background-image 0.4s ease;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
     /* Dark Mode Glass Panels */
@@ -61,6 +61,43 @@
       -webkit-backdrop-filter: blur(25px);
       border: 1px solid rgba(255, 255, 255, 0.14);
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    /* Floating Adaptive Studio Artifact Cards */
+    .editorial-card {
+      background: rgba(13, 18, 33, 0.88);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+      color: #ffffff;
+      transition: all 0.3s ease;
+    }
+    .editorial-card-title { color: #ffffff; transition: color 0.3s ease; }
+
+    .editorial-tag-raw {
+      background: rgba(255, 159, 125, 0.2);
+      border: 1px solid rgba(255, 159, 125, 0.4);
+      color: #ffcaa6;
+      transition: all 0.3s ease;
+    }
+    .editorial-tag-psd {
+      background: rgba(14, 165, 233, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #7dd3fc;
+      transition: all 0.3s ease;
+    }
+    .editorial-tag-fig {
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(192, 132, 252, 0.35);
+      color: #d8b4fe;
+      transition: all 0.3s ease;
+    }
+    .editorial-folder {
+      background: rgba(14, 27, 56, 0.9);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #f1f5f9;
       transition: all 0.3s ease;
     }
 
@@ -130,25 +167,28 @@
     }
 
     /* ========================================================================= */
-    /* BALANCED DAYLIGHT THEME                                                   */
+    /* BALANCED DAYLIGHT THEME (EDITORIAL STUDIO LIGHT CANVAS)                   */
     /* ========================================================================= */
     body.light-theme {
-      background-color: #cbd5e1;
+      background-color: #f8fafc;
       color: #090d16;
     }
 
     body.light-theme .site-mountain-backdrop {
+      background-color: #f8fafc;
       background-image: 
-        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
-        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+        radial-gradient(ellipse at 15% 15%, rgba(251, 146, 60, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 90%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+        radial-gradient(ellipse at 78% 68%, rgba(236, 72, 153, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
     }
 
     body.light-theme header {
       background: transparent !important;
-      border-color: transparent !important;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      border-color: rgba(15, 23, 42, 0.08) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     body.light-theme header a,
@@ -169,17 +209,17 @@
     }
 
     body.light-theme .hero-desc {
-      color: #0f172a !important;
-      font-weight: 600;
+      color: #334155 !important;
+      font-weight: 500;
       text-shadow: none !important;
     }
 
     body.light-theme .obsidian-panel {
-      background: rgba(248, 250, 252, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.75);
-      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.10), 0 0 1px 1px rgba(255, 255, 255, 0.8);
       color: #0f172a;
     }
 
@@ -196,13 +236,48 @@
       color: #334155 !important;
     }
 
+    /* Floating Artifact Light Theme Overrides */
+    body.light-theme .editorial-card {
+      background: rgba(255, 255, 255, 0.90);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      box-shadow: 0 25px 50px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.9);
+      color: #0f172a;
+    }
+    body.light-theme .editorial-card-title {
+      color: #0f172a !important;
+    }
+    body.light-theme .editorial-tag-raw {
+      background: rgba(255, 220, 205, 0.85);
+      border: 1px solid rgba(255, 159, 125, 0.6);
+      color: #c2410c;
+    }
+    body.light-theme .editorial-tag-psd {
+      background: rgba(224, 242, 254, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #0369a1;
+    }
+    body.light-theme .editorial-tag-fig {
+      background: rgba(243, 232, 255, 0.9);
+      border: 1px solid rgba(192, 132, 252, 0.5);
+      color: #7e22ce;
+    }
+    body.light-theme .editorial-folder {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
+      color: #0f172a;
+    }
+    body.light-theme .editorial-folder span {
+      color: #0f172a !important;
+    }
+
     body.light-theme input,
     body.light-theme textarea,
     body.light-theme select {
       background-color: #ffffff !important;
-      border: 1px solid #94a3b8 !important;
+      border: 1px solid #cbd5e1 !important;
       color: #0f172a !important;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
     body.light-theme input::placeholder,
     body.light-theme textarea::placeholder {
@@ -214,23 +289,25 @@
     }
 
     body.light-theme .feature-badge {
-      background: rgba(248, 250, 252, 0.82) !important;
+      background: rgba(255, 255, 255, 0.85) !important;
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.75) !important;
+      border: 1px solid rgba(15, 23, 42, 0.08) !important;
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
       color: #0f172a !important;
     }
     body.light-theme .feature-badge span { color: #0f172a !important; }
 
     body.light-theme .quick-btn {
-      background: rgba(248, 250, 252, 0.85) !important;
-      border: 1px solid rgba(255, 255, 255, 0.7) !important;
+      background: rgba(255, 255, 255, 0.9) !important;
+      border: 1px solid rgba(15, 23, 42, 0.1) !important;
       color: #0f172a !important;
     }
     body.light-theme .quick-btn:hover { background: #ffffff !important; color: #4338ca !important; }
 
     body.light-theme .glass-chip {
-      background: rgba(248, 250, 252, 0.88) !important;
-      border: 1px solid rgba(255, 255, 255, 0.75) !important;
+      background: rgba(255, 255, 255, 0.88) !important;
+      border: 1px solid rgba(15, 23, 42, 0.10) !important;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.10);
       color: #0f172a !important;
     }
     body.light-theme .glass-chip p { color: #0f172a !important; }
@@ -256,8 +333,8 @@
     body.light-theme #themeToggleBtn,
     body.light-theme header .header-pill,
     body.light-theme #userEmailBadge {
-      background: rgba(248, 250, 252, 0.9) !important;
-      border-color: rgba(148, 163, 184, 0.5) !important;
+      background: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(148, 163, 184, 0.35) !important;
       color: #0f172a !important;
     }
 
@@ -291,28 +368,28 @@
   <div class="site-mountain-backdrop"></div>
   <div id="google_translate_element" style="display:none"></div>
 
-  <!-- WeTransfer-Inspired Curated Studio & Creative Artifacts Layer -->
+  <!-- WeTransfer-Inspired Curated Studio & Creative Artifacts Layer (Adapts cleanly to both Day & Dark modes) -->
   <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden lg:block">
     
-    <!-- 1. Top-Left Floating Art Card: Curated Architectural Still -->
+    <!-- 1. Top-Left Floating Art Card: Curated Sculpture Still -->
     <div class="absolute top-24 left-6 xl:left-14 float-editorial-1 opacity-90 hover:opacity-100 transition duration-300">
-      <div class="relative bg-[#0d1424]/90 p-2 rounded-2xl border border-white/15 shadow-2xl flex items-center gap-3">
+      <div class="relative editorial-card p-2 rounded-2xl flex items-center gap-3">
         <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=260&q=95" 
              alt="Ceramic Still" 
              class="w-12 h-12 rounded-xl object-cover border border-white/10">
         <div class="pr-2">
-          <p class="text-[11px] font-bold text-white leading-tight">Sculpture_Still_8K.dng</p>
+          <p class="text-[11px] font-bold leading-tight editorial-card-title">Sculpture_Still_8K.dng</p>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            <span class="text-[9px] font-mono text-amber-300">14.2 GB • RAW</span>
+            <span class="text-[9px] font-mono text-amber-500 font-semibold">14.2 GB • RAW</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 2. Top-Center Floating Asset: Modern Minimalist Interior Photo Card -->
+    <!-- 2. Top-Center Floating Asset: Minimalist Studio Interior Still -->
     <div class="absolute top-20 left-[48%] -translate-x-1/2 float-editorial-2 opacity-90">
-      <div class="relative bg-[#0d1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]">
+      <div class="relative editorial-card p-2 rounded-3xl">
         <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=340&q=95" 
              alt="Studio Interior" 
              class="w-32 h-24 object-cover rounded-2xl">
@@ -322,49 +399,49 @@
       </div>
     </div>
 
-    <!-- 3. Upper-Right Margin: Pastel Peach RAW Tile + Sky Blue Tag -->
+    <!-- 3. Upper-Right Margin: Pastel RAW & PSD Badges -->
     <div class="absolute top-24 right-8 xl:right-16 float-editorial-2 opacity-85 flex items-center gap-2">
-      <div class="px-4 py-3 rounded-2xl bg-[#ff9f7d]/20 border border-[#ff9f7d]/40 backdrop-blur-md shadow-xl text-center">
-        <span class="text-xs font-mono font-black text-[#ffcaa6] tracking-wider block">.raw</span>
+      <div class="px-4 py-3 rounded-2xl editorial-tag-raw shadow-xl text-center">
+        <span class="text-xs font-mono font-black tracking-wider block">.raw</span>
       </div>
-      <div class="px-3.5 py-2.5 rounded-xl bg-sky-500/20 border border-sky-400/35 backdrop-blur-md shadow-lg text-center">
-        <span class="text-[11px] font-mono font-black text-sky-300 block">.psd</span>
+      <div class="px-3.5 py-2.5 rounded-xl editorial-tag-psd shadow-lg text-center">
+        <span class="text-[11px] font-mono font-black block">.psd</span>
       </div>
     </div>
 
     <!-- 4. Mid-Right Margin: Soft Violet Vector Pill -->
     <div class="absolute top-64 right-6 xl:right-12 float-editorial-3 opacity-85">
-      <div class="px-4 py-3 rounded-2xl bg-purple-500/20 border border-purple-400/35 backdrop-blur-md shadow-xl text-center">
-        <span class="text-xs font-mono font-black text-purple-300 tracking-wider block">.fig</span>
+      <div class="px-4 py-3 rounded-2xl editorial-tag-fig shadow-xl text-center">
+        <span class="text-xs font-mono font-black tracking-wider block">.fig</span>
       </div>
     </div>
 
-    <!-- 5. Center-Bottom Void (Between Columns): Iconic Cobalt Blue Folder -->
+    <!-- 5. Center-Bottom Void: Iconic Cobalt Blue Folder -->
     <div class="absolute bottom-20 left-[44%] -translate-x-1/2 float-editorial-3 opacity-95">
-      <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#0e1b38]/90 border border-blue-500/40 backdrop-blur-xl shadow-2xl">
+      <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl editorial-folder backdrop-blur-xl shadow-2xl">
         <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-md">
           📁
         </div>
-        <span class="text-[11px] font-mono font-bold text-slate-100">Zephyr_Archive_v01</span>
+        <span class="text-[11px] font-mono font-bold">Zephyr_Archive_v01</span>
       </div>
     </div>
 
     <!-- 6. Bottom-Left Margin: 24-bit Lossless Audio Stem -->
     <div class="absolute bottom-28 left-6 xl:left-14 float-editorial-2 opacity-90">
-      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#0c1222]/85 border border-white/12 backdrop-blur-xl shadow-xl">
-        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
+      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl editorial-card shadow-xl">
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">
           🎵
         </div>
         <div>
-          <p class="text-[10px] font-mono font-bold text-slate-200 leading-tight">Master_Mix_96k.wav</p>
-          <span class="text-[9px] font-mono text-emerald-400">Lossless 24-bit</span>
+          <p class="text-[10px] font-mono font-bold leading-tight editorial-card-title">Master_Mix_96k.wav</p>
+          <span class="text-[9px] font-mono text-emerald-500 font-semibold">Lossless 24-bit</span>
         </div>
       </div>
     </div>
 
-    <!-- 7. Bottom-Right Margin: 4K Film Reel with Comment Chip -->
+    <!-- 7. Bottom-Right Margin: 4K Film Reel -->
     <div class="absolute bottom-12 right-6 xl:right-14 float-editorial-1 opacity-90">
-      <div class="relative bg-[#0e1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)]">
+      <div class="relative editorial-card p-2 rounded-3xl">
         <div class="relative w-36 h-24 rounded-2xl overflow-hidden border border-white/10">
           <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=360&q=95" 
                alt="Cinematic Sunset Reel" 
