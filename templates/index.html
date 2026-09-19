@@ -35,19 +35,19 @@
       height: 100vh;
       background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 15% 15%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 90%, rgba(14, 165, 233, 0.09) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
         linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
       transition: background-image 0.4s ease;
     }
 
-    /* WeTransfer-Inspired Obsidian Panels */
+    /* Dark Mode Glass Panels */
     .obsidian-panel {
-      background: linear-gradient(180deg, rgba(16, 22, 38, 0.88) 0%, rgba(9, 12, 22, 0.96) 100%);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -75,14 +75,14 @@
     }
     @keyframes floatEditorialC {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-8px) rotate(-1deg); }
+      50% { transform: translateY(-9px) rotate(-1deg); }
     }
 
     .float-editorial-1 { animation: floatEditorialA 8.5s ease-in-out infinite; }
-    .float-editorial-2 { animation: floatEditorialB 10s ease-in-out infinite; }
-    .float-editorial-3 { animation: floatEditorialC 9s ease-in-out infinite; }
+    .float-editorial-2 { animation: floatEditorialB 10.5s ease-in-out infinite; }
+    .float-editorial-3 { animation: floatEditorialC 9.5s ease-in-out infinite; }
 
-    /* Form Fields */
+    /* Form Inputs */
     input, textarea, select {
       background-color: rgba(15, 23, 42, 0.75) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -109,7 +109,7 @@
       color: #f8fafc;
     }
 
-    /* Hero Headline */
+    /* Hero Typography */
     .hero-headline {
       color: #ffffff;
       text-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
@@ -291,27 +291,66 @@
   <div class="site-mountain-backdrop"></div>
   <div id="google_translate_element" style="display:none"></div>
 
-  <!-- WeTransfer-Inspired Studio & Photo Elements (Arranged around Negative Spaces Without Overlaps) -->
+  <!-- WeTransfer-Inspired Curated Studio & Creative Artifacts Layer -->
   <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden hidden lg:block">
     
-    <!-- 1. Top-Left Margin: Curated Editorial Sculpture Still -->
-    <div class="absolute top-28 left-6 xl:left-12 float-editorial-1 opacity-90 hover:opacity-100 transition duration-300">
-      <div class="relative bg-[#0d1424]/90 p-2.5 rounded-3xl border border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] flex items-center gap-3">
-        <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=95" 
-             alt="Studio Ceramic Still" 
-             class="w-14 h-14 object-cover rounded-2xl border border-white/10">
+    <!-- 1. Top-Left Floating Art Card: Curated Architectural Still -->
+    <div class="absolute top-24 left-6 xl:left-14 float-editorial-1 opacity-90 hover:opacity-100 transition duration-300">
+      <div class="relative bg-[#0d1424]/90 p-2 rounded-2xl border border-white/15 shadow-2xl flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=260&q=95" 
+             alt="Ceramic Still" 
+             class="w-12 h-12 rounded-xl object-cover border border-white/10">
         <div class="pr-2">
           <p class="text-[11px] font-bold text-white leading-tight">Sculpture_Still_8K.dng</p>
-          <div class="flex items-center gap-1.5 mt-1">
+          <div class="flex items-center gap-1.5 mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            <span class="text-[9px] font-mono text-amber-300 font-semibold">14.2 GB • RAW</span>
+            <span class="text-[9px] font-mono text-amber-300">14.2 GB • RAW</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 2. Mid-Left (Under Hero Actions): Audio Waveform Stem -->
-    <div class="absolute bottom-28 left-8 xl:left-14 float-editorial-2 opacity-85">
+    <!-- 2. Top-Center Floating Asset: Modern Minimalist Interior Photo Card -->
+    <div class="absolute top-20 left-[48%] -translate-x-1/2 float-editorial-2 opacity-90">
+      <div class="relative bg-[#0d1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]">
+        <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=340&q=95" 
+             alt="Studio Interior" 
+             class="w-32 h-24 object-cover rounded-2xl">
+        <span class="absolute bottom-3.5 left-3.5 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[8px] font-mono text-amber-300 font-bold border border-amber-300/30">
+          .jpg
+        </span>
+      </div>
+    </div>
+
+    <!-- 3. Upper-Right Margin: Pastel Peach RAW Tile + Sky Blue Tag -->
+    <div class="absolute top-24 right-8 xl:right-16 float-editorial-2 opacity-85 flex items-center gap-2">
+      <div class="px-4 py-3 rounded-2xl bg-[#ff9f7d]/20 border border-[#ff9f7d]/40 backdrop-blur-md shadow-xl text-center">
+        <span class="text-xs font-mono font-black text-[#ffcaa6] tracking-wider block">.raw</span>
+      </div>
+      <div class="px-3.5 py-2.5 rounded-xl bg-sky-500/20 border border-sky-400/35 backdrop-blur-md shadow-lg text-center">
+        <span class="text-[11px] font-mono font-black text-sky-300 block">.psd</span>
+      </div>
+    </div>
+
+    <!-- 4. Mid-Right Margin: Soft Violet Vector Pill -->
+    <div class="absolute top-64 right-6 xl:right-12 float-editorial-3 opacity-85">
+      <div class="px-4 py-3 rounded-2xl bg-purple-500/20 border border-purple-400/35 backdrop-blur-md shadow-xl text-center">
+        <span class="text-xs font-mono font-black text-purple-300 tracking-wider block">.fig</span>
+      </div>
+    </div>
+
+    <!-- 5. Center-Bottom Void (Between Columns): Iconic Cobalt Blue Folder -->
+    <div class="absolute bottom-20 left-[44%] -translate-x-1/2 float-editorial-3 opacity-95">
+      <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#0e1b38]/90 border border-blue-500/40 backdrop-blur-xl shadow-2xl">
+        <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-md">
+          📁
+        </div>
+        <span class="text-[11px] font-mono font-bold text-slate-100">Zephyr_Archive_v01</span>
+      </div>
+    </div>
+
+    <!-- 6. Bottom-Left Margin: 24-bit Lossless Audio Stem -->
+    <div class="absolute bottom-28 left-6 xl:left-14 float-editorial-2 opacity-90">
       <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#0c1222]/85 border border-white/12 backdrop-blur-xl shadow-xl">
         <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
           🎵
@@ -323,45 +362,19 @@
       </div>
     </div>
 
-    <!-- 3. Bottom-Left Margin: Minimalist Studio Folder -->
-    <div class="absolute bottom-12 left-8 xl:left-14 float-editorial-3 opacity-90">
-      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#0b1020]/90 border border-indigo-500/30 backdrop-blur-xl shadow-2xl">
-        <div class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
-          📁
-        </div>
-        <span class="text-[10px] font-mono font-bold text-slate-200">Zephyr_Archive_v01</span>
-      </div>
-    </div>
-
-    <!-- 4. Upper-Right Margin: Pastel Peach RAW Tag -->
-    <div class="absolute top-28 right-8 xl:right-14 float-editorial-2 opacity-85">
-      <div class="px-5 py-3.5 rounded-2xl bg-[#ff9f7d]/20 border border-[#ff9f7d]/35 backdrop-blur-md shadow-xl text-center">
-        <span class="text-xs font-mono font-black text-[#ffcaa6] tracking-wider block">.raw</span>
-      </div>
-    </div>
-
-    <!-- 5. Mid-Right Margin: Soft Violet Vector Pill -->
-    <div class="absolute top-72 right-8 xl:right-14 float-editorial-3 opacity-80">
-      <div class="px-4 py-3 rounded-2xl bg-purple-500/15 border border-purple-400/30 backdrop-blur-md shadow-xl text-center">
-        <span class="text-xs font-mono font-black text-purple-300 tracking-wider block">.fig</span>
-      </div>
-    </div>
-
-    <!-- 6. Bottom-Right Margin: 4K Film Reel -->
-    <div class="absolute bottom-14 right-8 xl:right-16 float-editorial-1 opacity-90">
-      <div class="relative bg-[#0e1424]/90 p-2.5 rounded-3xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)] flex items-center gap-3">
-        <div class="relative w-14 h-14 rounded-2xl overflow-hidden border border-white/10 shrink-0">
-          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=260&q=95" 
+    <!-- 7. Bottom-Right Margin: 4K Film Reel with Comment Chip -->
+    <div class="absolute bottom-12 right-6 xl:right-14 float-editorial-1 opacity-90">
+      <div class="relative bg-[#0e1424]/90 p-2 rounded-3xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)]">
+        <div class="relative w-36 h-24 rounded-2xl overflow-hidden border border-white/10">
+          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=360&q=95" 
                alt="Cinematic Sunset Reel" 
                class="w-full h-full object-cover">
-          <span class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white">▶</span>
-        </div>
-        <div class="pr-2">
-          <p class="text-[11px] font-bold text-white leading-tight">Glacier_Flight_ProRes.mov</p>
-          <div class="flex items-center gap-1.5 mt-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[9px] font-mono text-emerald-300 font-semibold">4K ProRes 422 HQ</span>
+          <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[8px] font-mono text-white flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 4K
           </div>
+          <span class="absolute bottom-2.5 left-2.5 px-1.5 py-0.5 rounded-md bg-cyan-500/25 backdrop-blur-md text-[8px] font-mono text-cyan-300 font-bold border border-cyan-400/30">
+            .mov
+          </span>
         </div>
       </div>
     </div>
