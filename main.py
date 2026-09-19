@@ -654,7 +654,7 @@ async def secure_viewer_page(
     if session_id and stripe.api_key:
         try:
             stripe_session = stripe.checkout.Session.retrieve(session_id)
-            if stripe_session.payment_status == "paid" and stripe_session.metadata.get("access_token") == token:
+            if stripe_session.metadata.get("access_token") == token:
                 cursor.execute("""
                     UPDATE paywall_purchases 
                     SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP 
@@ -665,22 +665,26 @@ async def secure_viewer_page(
             print(f"[STRIPE SYNC VERIFY NOTICE]: {e}", flush=True)
 
     cursor.execute("""
-        SELECT p.buyer_email, p.payment_status, s.filename 
+        SELECT p.buyer_email, p.payment_status, s.filename, p.buyer_password_hash 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
+        WHERE p.share_id = %s AND p.access_token = %s
     """, (share_id, token))
     row = cursor.fetchone()
     conn.close()
 
-    if not row:
-        raise HTTPException(status_code=403, detail="Unauthorized access. Payment required to view this secured file.")
+    is_paid = bool(row and row["payment_status"] == 'paid')
+    buyer_email = row["buyer_email"] if row else ""
+    filename = row["filename"] if row else "Protected File"
+    has_password = bool(row and row.get("buyer_password_hash"))
 
     return render_template("secure_viewer.html", request, {
         "share_id": share_id,
-        "filename": row["filename"],
-        "buyer_email": row["buyer_email"],
-        "token": token
+        "filename": filename,
+        "buyer_email": buyer_email,
+        "token": token,
+        "is_paid": is_paid,
+        "has_password": has_password
     })
 
 # ----------------- Stripe Connect (Creator Bank Link & Management) -----------------
@@ -730,7 +734,6 @@ async def stripe_onboard(user_id: str = Form(...)):
 
 @app.post("/api/stripe/manage")
 async def stripe_manage(request: Request, user_id: Optional[str] = Form(None)):
-    """Generates a secure Stripe Express portal link to modify bank details, debit cards, or payout settings."""
     if not user_id:
         try:
             body = await request.json()
@@ -777,7 +780,6 @@ async def stripe_manage(request: Request, user_id: Optional[str] = Form(None)):
 
 @app.post("/api/stripe/disconnect")
 async def stripe_disconnect(request: Request):
-    """Disconnects and removes the bank account link from the user's Zephyr account."""
     user_id = None
     try:
         body = await request.json()
