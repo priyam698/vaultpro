@@ -2,55 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Zephyr Protected Stream</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zephyr Protected Stream | Zero-Knowledge Viewer</title>
+
+  <!-- Supersonic Monogram Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
     /* Block Print Previews */
     @media print {
       body { display: none !important; }
     }
-    
+
     body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
-      background: #05070e;
-      color: #fff;
+      background-color: #06070b;
+      color: #f8fafc;
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
-    /* Privacy Curtain: Active during screenshot or focus loss */
+    /* Dark Mode Ambient Backdrop */
+    .site-mountain-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #06070b;
+      background-image: 
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
+    }
+
+    /* 2-Color Light Theme (Sky Cyan + Periwinkle Indigo) */
+    body.light-theme {
+      background-color: #dbe4f0;
+      color: #0f172a;
+    }
+
+    body.light-theme .site-mountain-backdrop {
+      background-color: #dbe4f0;
+      background-image: 
+        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
+        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
+    }
+
+    /* Top HUD Floating Pill */
+    .hud-chip {
+      background: rgba(16, 22, 38, 0.82);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    body.light-theme .hud-chip {
+      background: rgba(241, 245, 249, 0.90) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #0f172a !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    /* Privacy Curtain: Active during screenshot attempt or window blur */
     #privacyCurtain {
       display: none;
       position: fixed;
       inset: 0;
-      background: #000;
+      background: rgba(4, 7, 16, 0.96);
+      backdrop-filter: blur(45px);
+      -webkit-backdrop-filter: blur(45px);
       z-index: 99999;
       justify-content: center;
       align-items: center;
-      font-family: sans-serif;
-      font-size: 14px;
-      color: #ef4444;
-      font-weight: bold;
+      padding: 1.5rem;
+    }
+
+    body.light-theme #privacyCurtain {
+      background: rgba(224, 231, 240, 0.97);
     }
   </style>
 </head>
-<body>
+<body class="w-screen h-screen relative flex items-center justify-center">
 
+  <!-- Ambient Backdrop -->
+  <div class="site-mountain-backdrop"></div>
+
+  <!-- Privacy Curtain Modal -->
   <div id="privacyCurtain">
-    🔒 Display shielded due to screenshot tool or window focus change.
+    <div class="hud-chip max-w-md w-full rounded-3xl p-6 sm:p-8 text-center space-y-4 border border-rose-500/40 shadow-2xl">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-500">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-base font-black tracking-tight text-rose-500">Protected Stream Shielded</h3>
+        <p class="text-xs opacity-75 mt-1 leading-relaxed">
+          Display was obscured due to a window focus shift, screen-capture utility, or print shortcut.
+        </p>
+      </div>
+      <span class="inline-block text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+        Click inside this window to resume playback
+      </span>
+    </div>
   </div>
 
-  <div class="relative w-screen h-screen flex items-center justify-center">
-    <canvas id="protectedCanvas" class="max-w-full max-h-full"></canvas>
-  </div>
+  <!-- Floating Stream Top HUD Bar -->
+  <header class="fixed top-5 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-4xl flex items-center justify-between hud-chip px-4 py-2.5 rounded-2xl">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-1 flex items-center justify-center shadow-md shrink-0">
+        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+      </div>
+      <div class="leading-tight">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-black tracking-tight">Zephyr Secure Stream</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <span class="text-[10px] font-mono opacity-60 truncate block max-w-[200px] sm:max-w-xs">
+          Licensed to: {{ buyer_email }}
+        </span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Theme" class="w-8 h-8 rounded-xl border border-white/10 flex items-center justify-center text-xs text-amber-400 hover:bg-white/5 transition cursor-pointer">
+        <span id="themeIcon">☀️</span>
+      </button>
+      <button onclick="window.history.length > 1 ? window.history.back() : window.close()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md cursor-pointer">
+        Exit
+      </button>
+    </div>
+  </header>
+
+  <!-- Protected Media Canvas Display Frame -->
+  <main class="relative z-20 w-full h-full flex items-center justify-center p-6 pt-20">
+    <div class="relative max-w-full max-h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center bg-black/40">
+      <canvas id="protectedCanvas" class="max-w-full max-h-[85vh] object-contain block"></canvas>
+    </div>
+  </main>
 
   <script>
+    // Theme Engine Synchronization
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
+    initTheme();
+
+    // Stream & Canvas Controller
     const buyerEmail = "{{ buyer_email }}";
     const canvas = document.getElementById("protectedCanvas");
     const ctx = canvas.getContext("2d");
     const curtain = document.getElementById("privacyCurtain");
 
-    // 1. Shield display when window loses focus (Alt+Tab, Snipping Tool, Notification overlays)
+    // 1. Shield display when window loses focus (Alt+Tab, Snipping Tool, Notifications)
     window.addEventListener("blur", () => {
       curtain.style.display = "flex";
     });
@@ -61,13 +200,15 @@
     // 2. Intercept PrintScreen and clear clipboard
     window.addEventListener("keyup", (e) => {
       if (e.key === "PrintScreen" || e.keyCode === 44) {
-        navigator.clipboard.writeText("");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText("");
+        }
         curtain.style.display = "flex";
-        setTimeout(() => curtain.style.display = "none", 1200);
+        setTimeout(() => { curtain.style.display = "none"; }, 1400);
       }
     });
 
-    // 3. Block Right-Click and Save Shortcuts
+    // 3. Block Right-Click and Save/Inspect Shortcuts
     window.addEventListener("contextmenu", (e) => e.preventDefault());
     window.addEventListener("keydown", (e) => {
       if (
@@ -79,15 +220,15 @@
       }
     });
 
-    // 4. Render media to canvas with dynamic floating forensic watermark
+    // 4. Render media to canvas with high-contrast dual-pass dynamic watermark
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = "{{ stream_url }}";
 
     let watermarkX = 40;
     let watermarkY = 60;
-    let dx = 1.2;
-    let dy = 1.0;
+    let dx = 1.3;
+    let dy = 1.1;
 
     img.onload = () => {
       canvas.width = img.width;
@@ -96,19 +237,29 @@
     };
 
     function animate() {
-      // Draw actual media frame
+      // Clear and draw media frame
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
 
-      // Render moving forensic watermark (burns identity into unauthorized phone recordings)
-      ctx.font = "bold 20px monospace";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-      ctx.fillText(`LICENSED TO: ${buyerEmail} | IP: LOGGED`, watermarkX, watermarkY);
+      // Watermark Text Configuration
+      const watermarkText = `LICENSED TO: ${buyerEmail} • IP LOGGED`;
+      ctx.font = "bold 16px 'Plus Jakarta Sans', monospace";
 
+      // Dual-pass rendering (dark outline + bright text) ensures readability on pure black or white backgrounds
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+      ctx.lineWidth = 3.5;
+      ctx.strokeText(watermarkText, watermarkX, watermarkY);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.fillText(watermarkText, watermarkX, watermarkY);
+
+      // Boundary reflection calculations
       watermarkX += dx;
       watermarkY += dy;
 
-      if (watermarkX < 20 || watermarkX > canvas.width - 450) dx = -dx;
-      if (watermarkY < 40 || watermarkY > canvas.height - 30) dy = -dy;
+      const textWidth = ctx.measureText(watermarkText).width;
+      if (watermarkX < 20 || watermarkX > canvas.width - textWidth - 20) dx = -dx;
+      if (watermarkY < 30 || watermarkY > canvas.height - 20) dy = -dy;
 
       requestAnimationFrame(animate);
     }

@@ -6,7 +6,7 @@
   <title>Zephyr Sign | Multi-Envelope E-Signature Studio & Dashboard</title>
   
   <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <!-- Tailwind CSS Engine -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,21 +20,165 @@
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@700&family=Great+Vibes&family=Pacifico&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
+    /* ========================================================================= */
+    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE                                   */
+    /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #030408;
+      background-color: #06070b;
       color: #f8fafc;
       overflow-x: hidden;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
+    /* Dark Mode Ambient Studio Canvas */
+    .site-mountain-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #06070b;
+      background-image: 
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
+    }
+
+    /* Dark Mode Panels */
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 20, 32, 0.88) 0%, rgba(9, 11, 20, 0.98) 100%);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    /* ========================================================================= */
+    /* 2-COLOR LIGHT THEME (SKY CYAN + PERIWINKLE INDIGO)                        */
+    /* ========================================================================= */
+    body.light-theme {
+      background-color: #dbe4f0;
+      color: #0f172a;
+    }
+
+    body.light-theme .site-mountain-backdrop {
+      background-color: #dbe4f0;
+      background-image: 
+        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
+        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
+    }
+
+    body.light-theme header {
+      background: rgba(225, 233, 245, 0.90) !important;
+      border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    body.light-theme header a,
+    body.light-theme header span {
+      color: #0f172a !important;
+    }
+
+    body.light-theme #themeToggleBtn {
+      background: rgba(241, 245, 249, 0.92) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #4338ca !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    body.light-theme .obsidian-card {
+      background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
       backdrop-filter: blur(35px);
       -webkit-backdrop-filter: blur(35px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.95);
+      border: 1px solid rgba(190, 202, 219, 0.85) !important;
+      box-shadow: 
+        0 25px 65px -15px rgba(15, 23, 42, 0.14),
+        0 8px 24px -8px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+      color: #0f172a !important;
     }
 
+    body.light-theme .obsidian-card h1,
+    body.light-theme .obsidian-card h2,
+    body.light-theme .obsidian-card h3,
+    body.light-theme .obsidian-card h4 {
+      color: #0f172a !important;
+    }
+
+    body.light-theme .obsidian-card p,
+    body.light-theme .obsidian-card span,
+    body.light-theme .obsidian-card label {
+      color: #334155 !important;
+    }
+
+    body.light-theme #senderSidebar {
+      background: rgba(228, 235, 245, 0.90) !important;
+      border-color: rgba(195, 206, 222, 0.8) !important;
+    }
+
+    body.light-theme #senderSidebar h4,
+    body.light-theme #senderSidebar label {
+      color: #0f172a !important;
+    }
+
+    body.light-theme #senderSidebar p,
+    body.light-theme #senderSidebar span {
+      color: #475569 !important;
+    }
+
+    body.light-theme .palette-btn {
+      background: rgba(241, 245, 249, 0.9) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .palette-btn:hover {
+      border-color: #6366f1 !important;
+      background: #ffffff !important;
+    }
+
+    body.light-theme input,
+    body.light-theme select {
+      background-color: rgba(248, 250, 253, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.9) !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme input:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
+    }
+
+    body.light-theme #navTabsContainer {
+      background: rgba(210, 219, 232, 0.85) !important;
+      border-color: rgba(185, 198, 215, 0.8) !important;
+    }
+
+    body.light-theme #zoomControls {
+      background: rgba(241, 245, 249, 0.92) !important;
+      border-color: rgba(195, 206, 222, 0.85) !important;
+      color: #334155 !important;
+    }
+
+    body.light-theme #zoomControls button:hover {
+      color: #0f172a !important;
+    }
+
+    body.light-theme table tr td { color: #0f172a !important; }
+    body.light-theme table tr th { color: #0f172a !important; background-color: rgba(215, 224, 236, 0.8) !important; }
+    body.light-theme table tr { border-color: rgba(195, 206, 222, 0.7) !important; }
+
+    /* Cursive typography styles */
     .cursive-font-0 { font-family: 'Caveat', cursive; }
     .cursive-font-1 { font-family: 'Dancing Script', cursive; }
     .cursive-font-2 { font-family: 'Great Vibes', cursive; }
@@ -65,7 +209,7 @@
       @page { size: auto; margin: 0mm !important; }
       header, aside, #zoomControls, #floatingAssignBtn, #uploadPromptContainer, 
       #signerModal, #sendLinkModal, #recipientBanner, #submittedSuccessModal, #esignQuotaModal,
-      #viewManage, button, .no-print {
+      #viewManage, button, .no-print, .site-mountain-backdrop {
         display: none !important;
       }
       body, html {
@@ -103,6 +247,9 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
+
+  <!-- Full-Window Ambient Studio Backdrop -->
+  <div class="site-mountain-backdrop"></div>
 
   <!-- ========================================================================= -->
   <!-- RECIPIENT VIRTUAL SIGNING BANNER (Visible when opened via invite link)     -->
@@ -336,7 +483,7 @@
   <!-- ========================================================================= -->
   <!-- TOP APP BAR                                                               -->
   <!-- ========================================================================= -->
-  <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print">
+  <header class="border-b border-white/[0.08] bg-[#030408]/70 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between no-print transition-all duration-300">
     <div class="flex items-center gap-4 sm:gap-6">
       <a href="/" class="flex items-center gap-2.5 text-slate-400 hover:text-white transition group">
         <span class="text-xs font-semibold text-slate-400 group-hover:text-white">✕</span>
@@ -389,6 +536,10 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+        <span id="themeIcon">☀️</span>
+      </button>
+
       <button id="downloadImageBtn" onclick="exportCompositePNG()" class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer disabled:opacity-40" disabled>
         Download Clean Image
       </button>
@@ -404,7 +555,7 @@
   <div id="viewPrepare" class="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto overflow-hidden">
     
     <!-- SENDER SIDEBAR -->
-    <aside id="senderSidebar" class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto custom-scroll no-print">
+    <aside id="senderSidebar" class="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#050711]/80 p-6 space-y-6 shrink-0 overflow-y-auto custom-scroll no-print transition-all duration-300">
       <div>
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Signer Details</h4>
         <p id="signersSummary" class="text-xs text-slate-400 leading-relaxed">
@@ -433,20 +584,20 @@
       <div class="space-y-2 pt-2 border-t border-white/10">
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Field Palette</h4>
         
-        <button onclick="openSignerModalAtCenter()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
+        <button onclick="openSignerModalAtCenter()" class="palette-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
           <div class="flex items-center gap-2.5">
             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
             <span>Signature Field</span>
           </div>
-          <span class="text-[10px] text-indigo-400 font-mono">+ Add</span>
+          <span class="text-[10px] text-indigo-400 font-mono font-bold">+ Add</span>
         </button>
 
-        <button onclick="placeDateField()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
+        <button onclick="placeDateField()" class="palette-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-indigo-950/30 border border-white/10 hover:border-indigo-500/40 text-xs font-semibold text-slate-200 transition text-left cursor-pointer">
           <div class="flex items-center gap-2.5">
             <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             <span>Date Signed</span>
           </div>
-          <span class="text-[10px] text-cyan-400 font-mono">+ Date</span>
+          <span class="text-[10px] text-cyan-400 font-mono font-bold">+ Date</span>
         </button>
       </div>
 
@@ -504,7 +655,7 @@
       </div>
 
       <!-- Zoom Bar -->
-      <div id="zoomControls" class="fixed bottom-6 right-8 bg-[#090d1a] border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-3 text-xs text-slate-400 shadow-xl z-20 no-print">
+      <div id="zoomControls" class="fixed bottom-6 right-8 bg-[#090d1a] border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-3 text-xs text-slate-400 shadow-xl z-20 no-print transition-all duration-300">
         <button onclick="adjustZoom(-0.1)" class="hover:text-white font-bold cursor-pointer">−</button>
         <span id="zoomLabel" class="font-mono text-[11px]">100%</span>
         <button onclick="adjustZoom(0.1)" class="hover:text-white font-bold cursor-pointer">+</button>
@@ -513,7 +664,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- TAB 2: MULTI-ENVELOPE MANAGEMENT DASHBOARD                               -->
+  <!-- TAB 2: MULTI-ENVELOPE MANAGEMENT DASHBOARD                                -->
   <!-- ========================================================================= -->
   <div id="viewManage" class="flex-1 w-full max-w-7xl mx-auto p-6 hidden overflow-y-auto custom-scroll">
     <div class="flex justify-between items-center mb-6">
@@ -557,6 +708,27 @@
   <!-- STUDIO RUNTIME JAVASCRIPT                                                 -->
   <!-- ========================================================================= -->
   <script>
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
+    initTheme();
+
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     let currentDocument = null;

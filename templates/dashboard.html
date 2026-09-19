@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage & Studio Branding</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,38 +13,43 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
+    /* ========================================================================= */
+    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE                                   */
+    /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #04060e;
+      background-color: #06070b;
       color: #f8fafc;
       overflow-x: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
+    /* Dark Mode Ambient Studio Canvas */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
+      background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
-        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
-      transition: background-image 0.4s ease;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
+    /* Dark Mode Panels */
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
-      backdrop-filter: blur(35px);
-      -webkit-backdrop-filter: blur(35px);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       transition: all 0.3s ease;
     }
 
@@ -53,58 +58,132 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
 
+    /* ========================================================================= */
+    /* 2-COLOR LIGHT THEME (SKY CYAN + PERIWINKLE INDIGO)                        */
+    /* ========================================================================= */
     body.light-theme {
-      background-color: #cbd5e1;
-      color: #090d16;
+      background-color: #dbe4f0;
+      color: #0f172a;
     }
 
     body.light-theme .site-mountain-backdrop {
+      background-color: #dbe4f0;
       background-image: 
-        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
-        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
+        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
     }
 
     body.light-theme header {
-      background: transparent !important;
-      border-color: transparent !important;
-      backdrop-filter: blur(8px);
+      background: rgba(225, 233, 245, 0.90) !important;
+      border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    body.light-theme .brand-logo-box {
+      background: rgba(241, 245, 249, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
     }
 
     body.light-theme header a,
-    body.light-theme header span,
-    body.light-theme header button {
-      color: #090d16 !important;
+    body.light-theme header span {
+      color: #0f172a !important;
+    }
+
+    body.light-theme #themeToggleBtn,
+    body.light-theme header .header-pill {
+      background: rgba(241, 245, 249, 0.92) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #0f172a !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    body.light-theme #themeToggleBtn {
+      color: #4338ca !important;
     }
 
     body.light-theme .obsidian-card {
-      background: rgba(248, 250, 252, 0.85) !important;
-      border-color: rgba(255, 255, 255, 0.7) !important;
+      background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(190, 202, 219, 0.85) !important;
+      box-shadow: 
+        0 25px 65px -15px rgba(15, 23, 42, 0.14),
+        0 8px 24px -8px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
       color: #0f172a !important;
-      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
     }
 
     body.light-theme .obsidian-card h2,
     body.light-theme .obsidian-card h3,
+    body.light-theme .obsidian-card h4,
     body.light-theme .obsidian-card .card-heading {
       color: #0f172a !important;
     }
 
+    body.light-theme .obsidian-card p,
+    body.light-theme .obsidian-card span,
+    body.light-theme .obsidian-card label {
+      color: #334155 !important;
+    }
+
     body.light-theme input,
     body.light-theme textarea {
-      background-color: rgba(255, 255, 255, 0.95) !important;
-      border-color: rgba(148, 163, 184, 0.6) !important;
+      background-color: rgba(248, 250, 253, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.9) !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme input:focus,
+    body.light-theme textarea:focus {
+      background-color: #ffffff !important;
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
+    }
+
+    body.light-theme input::placeholder,
+    body.light-theme textarea::placeholder {
+      color: #64748b !important;
+    }
+
+    body.light-theme #dropZoneContainer {
+      background: rgba(248, 250, 253, 0.92) !important;
+      border: 2px dashed rgba(185, 198, 215, 0.9) !important;
+    }
+
+    body.light-theme #dropZoneContainer:hover {
+      background: #ffffff !important;
+      border-color: #6366f1 !important;
+    }
+
+    body.light-theme .plan-select-card {
+      background: rgba(241, 245, 249, 0.9) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
       color: #0f172a !important;
     }
 
+    body.light-theme .plan-select-card:hover {
+      border-color: #6366f1 !important;
+      background: #ffffff !important;
+    }
+
+    body.light-theme #quoteSummaryBox {
+      background: rgba(220, 228, 238, 0.85) !important;
+      border: 1px solid rgba(190, 202, 219, 0.8) !important;
+    }
+
     body.light-theme table tr td { color: #0f172a !important; }
-    body.light-theme table tr th { color: #1e293b !important; }
-    body.light-theme table tr { border-color: rgba(203, 213, 225, 0.6) !important; }
+    body.light-theme table tr th { color: #0f172a !important; background-color: rgba(215, 224, 236, 0.8) !important; }
+    body.light-theme table tr { border-color: rgba(195, 206, 222, 0.7) !important; }
 
     body.light-theme footer {
-      background-color: rgba(241, 245, 249, 0.85) !important;
-      border-color: rgba(203, 213, 225, 0.7) !important;
-      color: #334155 !important;
+      background-color: rgba(220, 228, 238, 0.92) !important;
+      border-color: rgba(195, 206, 222, 0.8) !important;
+      color: #475569 !important;
     }
   </style>
 </head>
@@ -148,7 +227,7 @@
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <button onclick="selectUpgradeTarget('micro')" id="planCard-micro" class="p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-cyan-400 text-left transition flex flex-col justify-between">
+        <button onclick="selectUpgradeTarget('micro')" id="planCard-micro" class="plan-select-card p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-cyan-400 text-left transition flex flex-col justify-between">
           <div>
             <span class="text-[10px] font-black uppercase tracking-wider text-cyan-400">Micro</span>
             <div class="text-sm font-black mt-1">15 GB</div>
@@ -156,7 +235,7 @@
           <span class="text-[10px] opacity-70 mt-2 block">$1.80/mo</span>
         </button>
 
-        <button onclick="selectUpgradeTarget('lite')" id="planCard-lite" class="p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-indigo-400 text-left transition flex flex-col justify-between">
+        <button onclick="selectUpgradeTarget('lite')" id="planCard-lite" class="plan-select-card p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-indigo-400 text-left transition flex flex-col justify-between">
           <div>
             <span class="text-[10px] font-black uppercase tracking-wider text-indigo-400">Lite</span>
             <div class="text-sm font-black mt-1">30 GB</div>
@@ -164,7 +243,7 @@
           <span class="text-[10px] opacity-70 mt-2 block">$2.50/mo</span>
         </button>
 
-        <button onclick="selectUpgradeTarget('plus')" id="planCard-plus" class="p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-purple-400 text-left transition flex flex-col justify-between">
+        <button onclick="selectUpgradeTarget('plus')" id="planCard-plus" class="plan-select-card p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-purple-400 text-left transition flex flex-col justify-between">
           <div>
             <span class="text-[10px] font-black uppercase tracking-wider text-purple-400">Plus</span>
             <div class="text-sm font-black mt-1">80 GB</div>
@@ -172,7 +251,7 @@
           <span class="text-[10px] opacity-70 mt-2 block">$4.50/mo</span>
         </button>
 
-        <button onclick="selectUpgradeTarget('pro')" id="planCard-pro" class="p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-500/10 text-left transition flex flex-col justify-between relative overflow-hidden">
+        <button onclick="selectUpgradeTarget('pro')" id="planCard-pro" class="plan-select-card p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-500/10 text-left transition flex flex-col justify-between relative overflow-hidden">
           <span class="absolute top-0 right-0 bg-indigo-500 text-[8px] font-black px-1.5 py-0.2 rounded-bl">PRO</span>
           <div>
             <span class="text-[10px] font-black uppercase tracking-wider text-indigo-300">Pro</span>
@@ -376,10 +455,10 @@
     </div>
   </div>
 
-  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
+        <div class="brand-logo-box w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="driveRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -406,7 +485,7 @@
         </div>
         
         <a href="/" class="group flex items-center gap-2">
-          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
+          <span class="font-black text-xl tracking-tight">
             Zephyr
           </span>
           <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-semibold border border-indigo-500/30">Drive</span>
@@ -417,12 +496,12 @@
       </div>
 
       <div class="flex items-center gap-2.5 sm:gap-4">
-        <button onclick="openBrandingModal()" class="text-xs font-bold hover:opacity-80 transition flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 cursor-pointer">
+        <button onclick="openBrandingModal()" class="header-pill text-xs font-bold hover:opacity-80 transition flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 cursor-pointer">
           <span class="text-purple-400">🎨</span>
           <span class="hidden sm:inline">Branding</span>
         </button>
         <a href="/" class="text-xs font-bold hover:opacity-80 transition hidden md:inline-block">Transfer Pipeline</a>
-        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
         <button onclick="signOut()" class="text-xs bg-white/[0.08] hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 px-3.5 py-2 rounded-xl font-bold border border-white/15 transition cursor-pointer">
@@ -512,8 +591,8 @@
       </div>
 
       <div id="dropZoneContainer" 
-            class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-slate-400/30 hover:border-indigo-400/70 transition group"
-            onclick="document.getElementById('driveFileInput').click()">
+           class="lg:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-center items-center text-center cursor-pointer border border-dashed border-slate-400/30 hover:border-indigo-400/70 transition group"
+           onclick="document.getElementById('driveFileInput').click()">
         <input type="file" id="driveFileInput" multiple class="hidden">
         
         <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition">
@@ -532,7 +611,7 @@
           <p class="text-xs opacity-70">Stored with zero-knowledge encryption across Cloudflare R2 edge nodes</p>
         </div>
         <input type="text" id="searchBox" oninput="filterFiles()" placeholder="Search files..." 
-                class="bg-slate-900/40 border border-slate-400/30 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-400 transition w-full sm:w-64">
+               class="bg-slate-900/40 border border-slate-400/30 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-indigo-400 transition w-full sm:w-64">
       </div>
 
       <div class="overflow-x-auto">

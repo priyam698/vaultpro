@@ -4,83 +4,120 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms & Conditions | Zephyr</title>
-  
+
   <!-- Supersonic Monogram Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
-  
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
+    /* ========================================================================= */
+    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE                                   */
+    /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #04060e;
+      background-color: #06070b;
       color: #f8fafc;
       overflow-x: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
+    /* Dark Mode Ambient Studio Canvas */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
+      background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
-        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
-      transition: background-image 0.4s ease;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
+    /* Dark Mode Obsidian Panel */
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
-      backdrop-filter: blur(35px);
-      -webkit-backdrop-filter: blur(35px);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       transition: all 0.3s ease;
     }
 
+    /* ========================================================================= */
+    /* 2-COLOR LIGHT THEME (SKY CYAN + PERIWINKLE INDIGO)                        */
+    /* ========================================================================= */
     body.light-theme {
-      background-color: #cbd5e1;
-      color: #090d16;
+      background-color: #dbe4f0;
+      color: #0f172a;
     }
 
     body.light-theme .site-mountain-backdrop {
+      background-color: #dbe4f0;
       background-image: 
-        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
-        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
+        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
     }
 
+    /* Header Styling in Light Mode */
     body.light-theme header {
-      background: transparent !important;
-      border-color: transparent !important;
-      backdrop-filter: blur(8px);
+      background: rgba(225, 233, 245, 0.90) !important;
+      border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    body.light-theme .brand-logo-box {
+      background: rgba(241, 245, 249, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
     }
 
     body.light-theme header a,
     body.light-theme header span {
-      color: #090d16 !important;
+      color: #0f172a !important;
     }
 
-    body.light-theme .obsidian-card {
-      background: rgba(248, 250, 252, 0.84) !important;
-      border-color: rgba(255, 255, 255, 0.7) !important;
+    body.light-theme #themeToggleBtn,
+    body.light-theme .header-pill {
+      background: rgba(241, 245, 249, 0.92) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
       color: #0f172a !important;
-      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+      backdrop-filter: blur(12px);
+    }
+    body.light-theme #themeToggleBtn {
+      color: #4338ca !important;
+    }
+
+    /* Card Styling in Light Mode */
+    body.light-theme .obsidian-card {
+      background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(190, 202, 219, 0.85) !important;
+      box-shadow: 
+        0 25px 65px -15px rgba(15, 23, 42, 0.14),
+        0 8px 24px -8px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+      color: #0f172a !important;
     }
 
     body.light-theme .obsidian-card h1,
-    body.light-theme .obsidian-card h2 {
+    body.light-theme .obsidian-card h2,
+    body.light-theme .obsidian-card h3 {
       color: #0f172a !important;
     }
 
@@ -89,23 +126,30 @@
       color: #334155 !important;
     }
 
+    body.light-theme .operational-badge {
+      background: rgba(99, 102, 241, 0.12) !important;
+      border: 1px solid rgba(99, 102, 241, 0.25) !important;
+      color: #4338ca !important;
+    }
+
     body.light-theme footer {
-      background-color: rgba(241, 245, 249, 0.85) !important;
-      border-color: rgba(203, 213, 225, 0.7) !important;
-      color: #334155 !important;
+      background-color: rgba(220, 228, 238, 0.92) !important;
+      border-color: rgba(195, 206, 222, 0.8) !important;
+      color: #475569 !important;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
+  <!-- Full-Window Ambient Studio Backdrop -->
   <div class="site-mountain-backdrop"></div>
 
   <!-- Navbar -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
+        <div class="brand-logo-box w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
             <defs>
               <linearGradient id="termsRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -119,7 +163,7 @@
               </linearGradient>
               <linearGradient id="termsGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
               </linearGradient>
             </defs>
             <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#termsRibbonCyan)"/>
@@ -130,16 +174,18 @@
           </svg>
         </div>
         
-        <span class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
+        <span class="font-black text-2xl tracking-tight">
           Zephyr
         </span>
       </a>
 
-      <div class="flex items-center gap-4">
-        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+      <div class="flex items-center gap-3">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <a href="/" class="text-xs font-bold hover:underline transition">← Back to App</a>
+        <a href="/" class="header-pill text-xs font-bold px-3.5 py-2 rounded-xl border transition flex items-center gap-1">
+          ← Back to App
+        </a>
       </div>
     </div>
   </header>
@@ -148,40 +194,45 @@
   <main class="relative z-20 max-w-4xl mx-auto px-6 py-12 flex-1">
     <div class="obsidian-card rounded-3xl p-8 sm:p-12 space-y-8">
       <div>
-        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Operational Policy</span>
-        <h1 class="text-3xl sm:text-4xl font-extrabold mt-3">Terms and Conditions</h1>
+        <span class="operational-badge text-xs font-black uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+          Operational Policy
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-black mt-4 tracking-tight">Terms and Conditions</h1>
         <p class="text-xs opacity-60 mt-1">Last Updated: September 2026</p>
       </div>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold">1. Service Scope: Transfer Pipeline vs. Zephyr Drive</h2>
-        <p class="text-xs leading-relaxed opacity-80">
+        <h2 class="text-base font-black">1. Service Scope: Transfer Pipeline vs. Zephyr Drive</h2>
+        <p class="text-xs leading-relaxed opacity-85">
           Zephyr operates two distinct storage models:
         </p>
-        <ul class="list-disc list-inside text-xs space-y-1.5 pl-2 opacity-80">
+        <ul class="list-disc list-inside text-xs space-y-2 pl-2 opacity-85">
           <li><strong>Ephemeral Transfer Pipeline:</strong> Disposable, time-limited file handoffs subject to auto-expiration (1h–72h) or instant "Burn-on-Read" shredding.</li>
           <li><strong>Zephyr Drive:</strong> Encrypted cloud storage preserved indefinitely in the user's private vault until intentionally deleted.</li>
         </ul>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold">2. Storage Allocations & Quotas</h2>
-        <p class="text-xs leading-relaxed opacity-80">
+        <h2 class="text-base font-black">2. Storage Allocations & Quotas</h2>
+        <p class="text-xs leading-relaxed opacity-85">
           Each account is bound to designated storage ceilings:
         </p>
-        <ul class="list-disc list-inside text-xs space-y-1.5 pl-2 opacity-80">
-          <li><strong>Free Tier:</strong> Includes <strong>5.00 GB</strong> of permanent Zephyr Drive storage and up to 2.00 GB per single ephemeral transfer.</li>
-          <li><strong>Zephyr Pro ($4/mo):</strong> Expands capacity to <strong>200.00 GB</strong> of permanent Zephyr Drive storage and up to 50.00 GB per single transfer.</li>
+        <ul class="list-disc list-inside text-xs space-y-2 pl-2 opacity-85">
+          <li><strong>Free Starter:</strong> Includes <strong>5.00 GB</strong> of permanent Zephyr Drive storage and up to 2.00 GB per single ephemeral transfer.</li>
+          <li><strong>Zephyr Micro:</strong> Provides <strong>15.00 GB</strong> of permanent Drive storage and up to 5.00 GB per single transfer.</li>
+          <li><strong>Zephyr Lite:</strong> Provides <strong>30.00 GB</strong> of permanent Drive storage and up to 10.00 GB per single transfer.</li>
+          <li><strong>Zephyr Plus:</strong> Provides <strong>80.00 GB</strong> of permanent Drive storage and up to 25.00 GB per single transfer.</li>
+          <li><strong>Zephyr Pro:</strong> Expands capacity to <strong>200.00 GB</strong> of permanent Zephyr Drive storage and up to 50.00 GB per single transfer.</li>
         </ul>
-        <p class="text-xs leading-relaxed mt-2 opacity-80">
+        <p class="text-xs leading-relaxed mt-2 opacity-85">
           Attempts to exceed assigned quotas will be rejected at the API boundary until storage is freed or an upgraded subscription is activated.
         </p>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold">3. Acceptable Use Policy</h2>
-        <p class="text-xs leading-relaxed opacity-80">You agree not to store or distribute through Zephyr or Zephyr Drive:</p>
-        <ul class="list-disc list-inside text-xs space-y-1.5 pl-2 opacity-80">
+        <h2 class="text-base font-black">3. Acceptable Use Policy</h2>
+        <p class="text-xs leading-relaxed opacity-85">You agree not to store or distribute through Zephyr or Zephyr Drive:</p>
+        <ul class="list-disc list-inside text-xs space-y-2 pl-2 opacity-85">
           <li>Unauthorized copyrighted media, pirated cinema, or software cracking archives (DMCA violations).</li>
           <li>Malware, exploits, viruses, ransomware, or malicious bot payloads.</li>
           <li>Content that violates international laws or privacy regulations.</li>
@@ -190,22 +241,22 @@
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold">4. Deletion & Data Retention Disclaimers</h2>
-        <p class="text-xs leading-relaxed opacity-80">
+        <h2 class="text-base font-black">4. Deletion & Data Retention Disclaimers</h2>
+        <p class="text-xs leading-relaxed opacity-85">
           When a user initiates the "Delete" action on Zephyr Drive, the file object is immediately and irreversibly shredded from Cloudflare R2 edge servers. Zephyr does not retain secondary backup copies of deleted files. Users are solely responsible for maintaining local copies of critical documents.
         </p>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-base font-bold">5. Subscriptions & Billing</h2>
-        <p class="text-xs leading-relaxed opacity-80">
-          Zephyr Pro is billed monthly at <strong>$4.00 USD</strong>. Users may cancel renewals anytime via dashboard settings. If a Pro account downgrades to Free while holding in excess of 5 GB of data, upload privileges are paused until total storage is brought within the 5 GB free threshold.
+        <h2 class="text-base font-black">5. Subscriptions & Billing</h2>
+        <p class="text-xs leading-relaxed opacity-85">
+          Zephyr offers tiered subscriptions billed monthly: Micro ($1.80/mo), Lite ($2.50/mo), Plus ($4.50/mo), and Pro ($7.00/mo). Mid-cycle upgrades are seamlessly prorated based on remaining cycle days plus a $0.50 processing fee. If a paid account lapses, a 20-day read-only grace buffer applies before vault pruning down to active tier quotas.
         </p>
       </section>
     </div>
   </main>
 
-  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-6 text-center text-xs opacity-75">
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-8 text-center text-xs opacity-75">
     © 2026 Zephyr Systems. All rights reserved.
   </footer>
 

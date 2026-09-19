@@ -12,86 +12,163 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
+    /* ========================================================================= */
+    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE                                   */
+    /* ========================================================================= */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #04060e;
+      background-color: #06070b;
       color: #f8fafc;
       overflow-x: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
 
+    /* Dark Mode Ambient Studio Canvas */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
+      background-color: #06070b;
       background-image: 
-        radial-gradient(ellipse at 50% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(4, 6, 14, 0.8) 0%, rgba(4, 6, 14, 0.65) 45%, rgba(3, 5, 12, 0.9) 100%),
-        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=85');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
       pointer-events: none;
       z-index: 0;
-      transition: background-image 0.4s ease;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
+    /* Dark Mode Obsidian Panel */
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(14, 20, 42, 0.84) 0%, rgba(7, 10, 24, 0.95) 100%);
-      backdrop-filter: blur(35px);
-      -webkit-backdrop-filter: blur(35px);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       transition: all 0.3s ease;
     }
 
+    /* ========================================================================= */
+    /* 2-COLOR LIGHT THEME (SKY CYAN + PERIWINKLE INDIGO)                        */
+    /* ========================================================================= */
     body.light-theme {
-      background-color: #cbd5e1;
-      color: #090d16;
+      background-color: #dbe4f0;
+      color: #0f172a;
     }
 
     body.light-theme .site-mountain-backdrop {
+      background-color: #dbe4f0;
       background-image: 
-        radial-gradient(ellipse at 50% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(203, 213, 225, 0.38) 0%, rgba(180, 195, 215, 0.3) 45%, rgba(203, 213, 225, 0.58) 100%),
-        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=85');
+        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
+        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
     }
 
+    /* Header Styling in Light Mode */
     body.light-theme header {
-      background: transparent !important;
-      border-color: transparent !important;
-      backdrop-filter: blur(8px);
+      background: rgba(225, 233, 245, 0.90) !important;
+      border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    body.light-theme .brand-logo-box {
+      background: rgba(241, 245, 249, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
     }
 
     body.light-theme header a,
     body.light-theme header span {
-      color: #090d16 !important;
+      color: #0f172a !important;
     }
 
+    body.light-theme #themeToggleBtn {
+      background: rgba(241, 245, 249, 0.92) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #4338ca !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+      backdrop-filter: blur(12px);
+    }
+
+    body.light-theme .delivery-badge {
+      background: rgba(99, 102, 241, 0.12) !important;
+      border: 1px solid rgba(99, 102, 241, 0.25) !important;
+      color: #4338ca !important;
+    }
+
+    /* Card Styling in Light Mode */
     body.light-theme .obsidian-card {
-      background: rgba(248, 250, 252, 0.84) !important;
-      border-color: rgba(255, 255, 255, 0.7) !important;
+      background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 1px solid rgba(190, 202, 219, 0.85) !important;
+      box-shadow: 
+        0 25px 65px -15px rgba(15, 23, 42, 0.14),
+        0 8px 24px -8px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
       color: #0f172a !important;
-      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.4);
     }
 
     body.light-theme .obsidian-card h1,
-    body.light-theme .obsidian-card h2 {
+    body.light-theme .obsidian-card h2,
+    body.light-theme .obsidian-card h3 {
       color: #0f172a !important;
+    }
+
+    body.light-theme .obsidian-card p,
+    body.light-theme .obsidian-card span,
+    body.light-theme .obsidian-card label {
+      color: #334155 !important;
+    }
+
+    body.light-theme #iconBox {
+      background: rgba(99, 102, 241, 0.15) !important;
+      border-color: rgba(99, 102, 241, 0.3) !important;
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    body.light-theme .paywall-banner {
+      background: linear-gradient(135deg, rgba(238, 242, 250, 0.95) 0%, rgba(228, 234, 245, 0.95) 100%) !important;
+      border: 1px solid rgba(190, 202, 219, 0.85) !important;
     }
 
     body.light-theme input {
-      background-color: rgba(255, 255, 255, 0.9) !important;
-      border-color: rgba(148, 163, 184, 0.6) !important;
+      background-color: rgba(248, 250, 253, 0.95) !important;
+      border: 1px solid rgba(195, 206, 222, 0.9) !important;
       color: #0f172a !important;
+      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme input:focus {
+      background-color: #ffffff !important;
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
+    }
+
+    body.light-theme input::placeholder {
+      color: #64748b !important;
+    }
+
+    body.light-theme .direct-dl-btn {
+      background: rgba(241, 245, 249, 0.92) !important;
+      border: 1px solid rgba(195, 206, 222, 0.85) !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .direct-dl-btn:hover {
+      background: #ffffff !important;
+      border-color: #6366f1 !important;
     }
 
     body.light-theme footer {
-      background-color: rgba(241, 245, 249, 0.85) !important;
-      border-color: rgba(203, 213, 225, 0.7) !important;
-      color: #334155 !important;
+      background-color: rgba(220, 228, 238, 0.92) !important;
+      border-color: rgba(195, 206, 222, 0.8) !important;
+      color: #475569 !important;
     }
   </style>
 </head>
@@ -110,10 +187,10 @@
     {{ branding | tojson if branding else 'null' }}
   </script>
 
-  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0">
+  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div id="brandLogoContainer" class="w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10">
+        <div id="brandLogoContainer" class="brand-logo-box w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
           <img id="brandLogoCustom" src="" alt="Studio Logo" class="hidden w-full h-full object-contain">
           <svg id="defaultLogoSvg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
@@ -140,16 +217,16 @@
           </svg>
         </div>
         
-        <span id="brandTitleDisplay" class="font-extrabold text-2xl tracking-tight bg-gradient-to-tr from-[#38bdf8] via-[#a855f7] to-[#8a38ca] bg-clip-text text-transparent">
+        <span id="brandTitleDisplay" class="font-black text-2xl tracking-tight">
           Zephyr
         </span>
       </a>
 
       <div class="flex items-center gap-3">
-        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-semibold backdrop-blur-md">
+        <div class="delivery-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-semibold backdrop-blur-md">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
           Direct Cloudflare Delivery
         </div>
@@ -161,7 +238,7 @@
     
     <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative">
       
-      <div id="iconBox" class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20 text-2xl">
+      <div id="iconBox" class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20 text-2xl transition-all">
         {% if is_paywalled %}💰{% else %}📦{% endif %}
       </div>
 
@@ -175,7 +252,7 @@
       {% if is_paywalled %}
       <!-- PAY-TO-UNLOCK ESCROW SECTION -->
       <div id="paywallContainer" class="mt-6 space-y-4 text-left">
-        <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900/60 border border-emerald-500/30 space-y-1.5">
+        <div class="paywall-banner p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900/60 border border-emerald-500/30 space-y-1.5 transition-all">
           <div class="flex justify-between items-center">
             <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -217,7 +294,7 @@
           </a>
 
           <button onclick="handleDownloadWithToken()" 
-                  class="w-full py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+                  class="direct-dl-btn w-full py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl text-xs font-bold transition cursor-pointer">
             Direct File Download
           </button>
         </div>
