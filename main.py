@@ -36,7 +36,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.7.0",
+    version="2.8.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -218,7 +218,7 @@ def init_db_schema():
 
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Schema verified, Stripe Connect and escrow synchronized.", flush=True)
+        print("[DB STARTUP]: Schema verified, studio background engine and Stripe synchronized.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -666,7 +666,6 @@ async def stripe_onboard(user_id: str = Form(...)):
 
     account_id = user.get("stripe_account_id")
 
-    # Create a Stripe Express account if they don't have one
     if not account_id:
         try:
             account = stripe.Account.create(
@@ -683,7 +682,6 @@ async def stripe_onboard(user_id: str = Form(...)):
     
     conn.close()
 
-    # Generate the link for the creator to add their bank details
     try:
         account_link = stripe.AccountLink.create(
             account=account_id,
@@ -1741,7 +1739,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
 
     buyer = payload.buyer_email.lower().strip()
 
-    # Check if this buyer already bought this file
     cursor.execute("""
         SELECT access_token FROM paywall_purchases 
         WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
@@ -1767,7 +1764,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
     conn.commit()
     conn.close()
 
-    # Calculate 12% Platform Fee
     price_cents = int(price_usd * 100)
     platform_fee_cents = int(price_cents * 0.12)
 
@@ -1799,7 +1795,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Stripe Checkout Error: {str(e)}")
-
 
 @app.get("/api/paywall/verify-access")
 async def verify_buyer_access(share_id: str = Query(...), access_token: str = Query(...)):
@@ -1860,7 +1855,6 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=404, detail="Share link not found or expired.")
 
-    # Enforce Individual Multi-Buyer Escrow Lock
     if row.get("is_paywalled"):
         token = payload.access_token if payload else None
         if not token:
@@ -1928,7 +1922,7 @@ async def get_user_profile(user_id: str):
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
 
-# ----------------- Stripe Webhook (Escrow Fulfillment) -----------------
+# ----------------- Stripe Webhook -----------------
 @app.post("/api/webhook/stripe")
 async def stripe_webhook(request: Request):
     payload = await request.body()
@@ -1938,9 +1932,9 @@ async def stripe_webhook(request: Request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, STRIPE_WEBHOOK_SECRET
         )
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     if event['type'] == 'checkout.session.completed':
@@ -1961,7 +1955,7 @@ async def stripe_webhook(request: Request):
 
     return {"status": "success"}
 
-# ----------------- Dodo Payments Webhook (SaaS Subscriptions Only) -----------------
+# ----------------- Dodo Payments Webhook -----------------
 @app.post("/api/webhook/dodo")
 async def dodo_webhook(request: Request):
     try:
@@ -2000,8 +1994,6 @@ async def dodo_webhook(request: Request):
     target_quota = tier_info["quota"]
     target_price = tier_info["price"]
 
-    print(f"[DODO WEBHOOK] Event: {event_type} | Email: {user_email} | User ID: {user_id} | Tier: {requested_tier}", flush=True)
-
     if not user_id and user_email:
         try:
             cursor.execute("SELECT id FROM auth.users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
@@ -2036,7 +2028,6 @@ async def dodo_webhook(request: Request):
                 WHERE LOWER(email) = LOWER(%s)
             """, (requested_tier, target_quota, target_price, sub_end, user_email.strip()))
         conn.commit()
-        print(f"[TIER ACTIVATED]: Provisioned {tier_info['name']} ({target_quota / (1024**3):.0f} GB) for {user_email or user_id}", flush=True)
 
     elif event_type in ["subscription.cancelled", "subscription.expired", "subscription.failed"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
@@ -2059,7 +2050,6 @@ async def dodo_webhook(request: Request):
                 WHERE LOWER(email) = LOWER(%s)
             """, (grace_end, user_email.strip()))
         conn.commit()
-        print(f"[GRACE PERIOD ACTIVATED]: 20-day countdown started for {user_email or user_id}", flush=True)
 
     conn.close()
     return {"status": "success", "event": event_type}
