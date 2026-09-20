@@ -972,20 +972,36 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn = get_db()
     cursor = conn.cursor()
 
+    # If session_id is provided, verify with Stripe and force mark as paid immediately
+    if payload.session_id and stripe.api_key:
+        try:
+            stripe_session = stripe.checkout.Session.retrieve(payload.session_id)
+            if stripe_session.payment_status in ['paid', 'complete']:
+                cursor.execute("""
+                    UPDATE paywall_purchases 
+                    SET payment_status = 'paid', 
+                        unlocked_at = COALESCE(unlocked_at, CURRENT_TIMESTAMP),
+                        buyer_email = COALESCE(NULLIF(%s, ''), buyer_email)
+                    WHERE stripe_session_id = %s OR access_token = %s OR share_id = %s
+                """, (clean_email, payload.session_id, payload.token, payload.share_id))
+                conn.commit()
+        except Exception as e:
+            print(f"[CONFIRM SESSION RETRIEVE NOTICE]: {e}", flush=True)
+
+    # Fallback lookup: find latest purchase for this share (even if status was pending)
     cursor.execute("""
         SELECT p.*, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s 
-          AND (p.stripe_session_id = %s OR p.access_token = %s OR LOWER(p.buyer_email) = %s)
-          AND p.payment_status = 'paid'
+          AND (p.stripe_session_id = %s OR p.access_token = %s OR LOWER(p.buyer_email) = %s OR p.payment_status = 'pending')
         ORDER BY p.id DESC LIMIT 1
     """, (payload.share_id, payload.session_id, payload.token, clean_email))
     purchase = cursor.fetchone()
 
     if not purchase:
         conn.close()
-        raise HTTPException(status_code=403, detail="No verified payment record found.")
+        raise HTTPException(status_code=403, detail="No payment record found for this link.")
 
     pwd = purchase.get("buyer_password") or purchase.get("permanent_password")
     if not pwd:
@@ -995,7 +1011,8 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
 
     cursor.execute("""
         UPDATE paywall_purchases 
-        SET buyer_email = %s, 
+        SET payment_status = 'paid',
+            buyer_email = %s, 
             buyer_password = %s,
             permanent_password = %s,
             buyer_password_hash = %s
@@ -1009,7 +1026,6 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
         print(f"[BREVO WARNING]: Email failed to send to {clean_email}, password is {pwd}", flush=True)
 
     return {"status": "success", "email": clean_email}
-
 # ----------------- Unlock With Permanent Password -----------------
 @app.post("/api/paywall/unlock-password")
 @app.post("/api/paywall/unlock-with-password")
