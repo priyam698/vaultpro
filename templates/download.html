@@ -68,7 +68,6 @@
         linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
     }
 
-    /* Header Styling in Light Mode */
     body.light-theme header {
       background: rgba(225, 233, 245, 0.90) !important;
       border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
@@ -102,7 +101,6 @@
       color: #4338ca !important;
     }
 
-    /* Card Styling in Light Mode */
     body.light-theme .obsidian-card {
       background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
       backdrop-filter: blur(35px);
@@ -252,6 +250,21 @@
       {% if is_paywalled %}
       <!-- PAY-TO-UNLOCK ESCROW SECTION -->
       <div id="paywallContainer" class="mt-6 space-y-4 text-left">
+        
+        <!-- FLASH NOTIFICATION: Displayed when redirected back from Stripe -->
+        <div id="paymentSuccessNotice" class="hidden p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-slate-900/80 border border-emerald-500/40 text-left space-y-2 shadow-xl">
+          <div class="flex items-center gap-2 text-emerald-400 font-black text-xs uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            ✓ Payment Verified! Check Your Gmail
+          </div>
+          <p class="text-xs text-slate-200 leading-relaxed">
+            We have emailed your permanent unlock password to <strong id="paidEmailDisplay" class="text-emerald-300 font-mono"></strong>. Enter the password below to unlock and download this file.
+          </p>
+          <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline">
+            Open Gmail Inbox &rarr;
+          </a>
+        </div>
+
         <div class="paywall-banner p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900/60 border border-emerald-500/30 space-y-1.5 transition-all">
           <div class="flex justify-between items-center">
             <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400 flex items-center gap-1.5">
@@ -261,26 +274,45 @@
             <span class="text-lg font-black font-mono text-emerald-400">${{ "%.2f"|format(unlock_price) }}</span>
           </div>
           <p class="text-[11px] opacity-75 leading-relaxed">
-            Payment required. Each group member unlocks their own personal access token and watermarked stream.
+            Payment required. Once purchased, a permanent access password is sent to your email so you never have to pay twice.
           </p>
         </div>
 
         <div id="buyerInputSection" class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold opacity-80 mb-1">Your Email (for personal receipt & license)</label>
-            <input id="buyerEmailInput" type="email" placeholder="recipient@company.com" 
+            <label class="block text-xs font-semibold opacity-80 mb-1">Your Email Address</label>
+            <input id="buyerEmailInput" type="email" placeholder="recipient@company.com" oninput="handleEmailTyping()" onblur="checkBuyerEmail()"
                    class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-emerald-400 rounded-xl px-4 py-3 text-xs focus:outline-none transition">
+          </div>
+
+          <!-- Password Field: Automatically revealed when email has ALREADY paid -->
+          <div id="buyerPasswordField" class="hidden space-y-1.5">
+            <div class="flex justify-between items-center">
+              <label class="block text-xs font-semibold text-emerald-400">Enter Permanent Password (from Gmail)</label>
+              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold">Resend code</button>
+            </div>
+            <input id="buyerPasswordInput" type="password" placeholder="e.g. ZP-7492A1" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()"
+                   class="w-full bg-slate-900/40 border border-emerald-400/50 rounded-xl px-4 py-3 text-xs focus:outline-none transition font-mono tracking-widest text-emerald-300 font-bold">
+            <p class="text-[10px] opacity-70">Check your Gmail inbox or Spam folder for the code sent by Zephyr.</p>
           </div>
 
           <div id="paywallErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
 
+          <!-- State A: Initial Checkout Button -->
           <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
                   class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 via-teal-600 hover:via-teal-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
             Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
           </button>
+
+          <!-- State B: Unlock With Password Button -->
+          <button id="paywallUnlockBtn" onclick="handleUnlockWithPassword()" 
+                  class="hidden w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+            Unlock & Download File
+          </button>
         </div>
 
-        <div id="unlockedActionsSection" class="hidden space-y-2.5">
+        <!-- State C: File Unlocked Area -->
+        <div id="unlockedActionsSection" class="hidden space-y-2.5 pt-2">
           <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300 flex items-center justify-between">
             <span class="font-bold flex items-center gap-2">
               <span>✓</span> Personal License Active
@@ -288,15 +320,15 @@
             <span id="verifiedBuyerBadge" class="font-mono text-[11px] opacity-80"></span>
           </div>
 
+          <a id="directDownloadLink" href="#" 
+             class="block text-center w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-600/30 transition cursor-pointer">
+            ⬇ Direct File Download
+          </a>
+
           <a id="secureViewerLink" href="#" 
              class="block text-center w-full py-3.5 bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-500 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/30 transition">
             🔒 Open Protected Viewer (Anti-Screenshot)
           </a>
-
-          <button onclick="handleDownloadWithToken()" 
-                  class="direct-dl-btn w-full py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl text-xs font-bold transition cursor-pointer">
-            Direct File Download
-          </button>
         </div>
       </div>
 
@@ -361,11 +393,13 @@
 
     initTheme();
 
-    // Clean DOM-based data retrieval (eliminates VS Code JS linter syntax errors)
     const serverConfig = document.getElementById("serverConfig");
     const shareId = serverConfig.dataset.shareId;
     const isPaywalled = serverConfig.dataset.paywalled === "true";
     const hasPassword = serverConfig.dataset.password === "true";
+    const urlParams = new URLSearchParams(window.location.search);
+
+    let typingTimer = null;
 
     let brandingData = null;
     try {
@@ -374,7 +408,6 @@
       brandingData = null;
     }
 
-    // Studio Custom Branding Injection
     if (brandingData) {
       if (brandingData.brand_title) {
         const titleEl = document.getElementById("brandTitleDisplay");
@@ -401,43 +434,151 @@
       }
     }
 
-    // Auto-verify if the buyer already possesses an access token
-    const urlParams = new URLSearchParams(window.location.search);
-    let activeToken = urlParams.get("token") || localStorage.getItem("pwtk_" + shareId);
+    window.addEventListener("DOMContentLoaded", async () => {
+      const isPaidParam = urlParams.get("paid") === "true";
+      const emailParam = urlParams.get("email");
+      const sessionId = urlParams.get("session_id");
 
-    if (isPaywalled && activeToken) {
-      verifyExistingToken(activeToken);
+      // 1. If redirected back from successful Stripe checkout
+      if (isPaidParam && emailParam) {
+        const emailInput = document.getElementById("buyerEmailInput");
+        if (emailInput) emailInput.value = emailParam;
+
+        const paidNotice = document.getElementById("paymentSuccessNotice");
+        const paidDisplay = document.getElementById("paidEmailDisplay");
+        if (paidNotice && paidDisplay) {
+          paidDisplay.innerText = emailParam;
+          paidNotice.classList.remove("hidden");
+        }
+
+        switchToPasswordMode(emailParam);
+
+        if (sessionId) {
+          try {
+            await fetch(`/api/paywall/verify-session?share_id=${shareId}&session_id=${sessionId}`, { method: "POST" });
+          } catch(e) {}
+        }
+        return;
+      }
+
+      // 2. Pre-fill remembered email
+      const savedEmail = localStorage.getItem("buyer_email_" + shareId);
+      if (savedEmail) {
+        const emailInput = document.getElementById("buyerEmailInput");
+        if (emailInput) {
+          emailInput.value = savedEmail;
+          checkBuyerEmail();
+        }
+      }
+    });
+
+    function handleEmailTyping() {
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(checkBuyerEmail, 350);
     }
 
-    async function verifyExistingToken(token) {
+    async function checkBuyerEmail() {
+      const emailInput = document.getElementById("buyerEmailInput");
+      if (!emailInput) return;
+      const email = emailInput.value.trim().toLowerCase();
+      if (!email || !email.includes("@")) return;
+
       try {
-        const res = await fetch("/api/paywall/verify-access?share_id=" + shareId + "&access_token=" + token);
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById("buyerInputSection").classList.add("hidden");
-          const unlockedSection = document.getElementById("unlockedActionsSection");
-          unlockedSection.classList.remove("hidden");
-          
-          document.getElementById("verifiedBuyerBadge").innerText = data.buyer_email;
-          document.getElementById("secureViewerLink").href = "/secure-view/" + shareId + "?token=" + token;
-          localStorage.setItem("pwtk_" + shareId, token);
-          activeToken = token;
+        const res = await fetch(`/api/paywall/check-email?share_id=${shareId}&email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+
+        if (data.has_paid) {
+          switchToPasswordMode(email);
+        } else {
+          switchToPaymentMode();
         }
-      } catch (e) {}
+      } catch(e) {}
+    }
+
+    function switchToPasswordMode(email) {
+      const pwdField = document.getElementById("buyerPasswordField");
+      const checkoutBtn = document.getElementById("paywallCheckoutBtn");
+      const unlockBtn = document.getElementById("paywallUnlockBtn");
+
+      if (pwdField) pwdField.classList.remove("hidden");
+      if (checkoutBtn) checkoutBtn.classList.add("hidden");
+      if (unlockBtn) unlockBtn.classList.remove("hidden");
+      localStorage.setItem("buyer_email_" + shareId, email);
+    }
+
+    function switchToPaymentMode() {
+      const pwdField = document.getElementById("buyerPasswordField");
+      const checkoutBtn = document.getElementById("paywallCheckoutBtn");
+      const unlockBtn = document.getElementById("paywallUnlockBtn");
+
+      if (pwdField) pwdField.classList.add("hidden");
+      if (checkoutBtn) checkoutBtn.classList.remove("hidden");
+      if (unlockBtn) unlockBtn.classList.add("hidden");
+    }
+
+    async function handleUnlockWithPassword() {
+      const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
+      const password = document.getElementById("buyerPasswordInput").value.trim();
+      const errBox = document.getElementById("paywallErrorMsg");
+      const btn = document.getElementById("paywallUnlockBtn");
+
+      errBox.classList.add("hidden");
+
+      if (!password) {
+        errBox.innerText = "Please enter the permanent password sent to your Gmail.";
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Verifying Password...";
+
+      try {
+        const res = await fetch("/api/paywall/unlock-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ share_id: shareId, email: email, password: password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Incorrect password.");
+
+        revealUnlockedUI(email, data.download_url, data.viewer_url, data.access_token);
+      } catch(err) {
+        errBox.innerText = err.message;
+        errBox.classList.remove("hidden");
+        btn.disabled = false;
+        btn.innerText = "Unlock & Download File";
+      }
+    }
+
+    async function resendPassword() {
+      const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
+      if (!email) return;
+
+      try {
+        const res = await fetch("/api/paywall/resend-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ share_id: shareId, email: email })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to resend.");
+        alert("✓ A fresh access password has been sent to your Gmail inbox!");
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
     }
 
     async function handlePaywallCheckout() {
-      const emailInput = document.getElementById("buyerEmailInput");
-      const email = emailInput.value.trim().toLowerCase();
+      const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
       const errBox = document.getElementById("paywallErrorMsg");
       const btn = document.getElementById("paywallCheckoutBtn");
 
       errBox.classList.add("hidden");
 
       if (!email || !email.includes("@")) {
-        errBox.innerText = "Please enter a valid email address to receive your personal unlock key.";
+        errBox.innerText = "Please enter a valid email address.";
         errBox.classList.remove("hidden");
-        emailInput.focus();
         return;
       }
 
@@ -448,28 +589,21 @@
         const res = await fetch("/api/paywall/initiate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            share_id: shareId,
-            buyer_email: email
-          })
+          body: JSON.stringify({ share_id: shareId, buyer_email: email })
         });
-
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Failed to initialize payment session.");
+        if (!res.ok) throw new Error(data.detail || "Failed to initiate payment.");
 
         if (data.status === "already_unlocked") {
-          localStorage.setItem("pwtk_" + shareId, data.access_token);
-          window.location.href = data.viewer_url || ("/secure-view/" + shareId + "?token=" + data.access_token);
+          switchToPasswordMode(email);
           return;
         }
 
         if (data.checkout_url) {
-          localStorage.setItem("pwtk_" + shareId, data.access_token);
+          localStorage.setItem("buyer_email_" + shareId, email);
           window.location.href = data.checkout_url;
-        } else {
-          throw new Error("Checkout link could not be generated.");
         }
-      } catch (err) {
+      } catch(err) {
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
         btn.disabled = false;
@@ -477,76 +611,29 @@
       }
     }
 
-    async function handleDownloadWithToken() {
-      executeDownloadRequest(null, activeToken);
+    function revealUnlockedUI(email, downloadUrl, viewerUrl, token) {
+      document.getElementById("buyerInputSection").classList.add("hidden");
+      const successNotice = document.getElementById("paymentSuccessNotice");
+      if (successNotice) successNotice.classList.add("hidden");
+
+      document.getElementById("unlockedActionsSection").classList.remove("hidden");
+      document.getElementById("verifiedBuyerBadge").innerText = email;
+
+      const dlLink = document.getElementById("directDownloadLink");
+      dlLink.href = downloadUrl;
+      dlLink.download = "{{ filename }}";
+
+      const vLink = document.getElementById("secureViewerLink");
+      vLink.href = viewerUrl || (`/secure-view/${shareId}?token=` + token);
+
+      localStorage.setItem("pwtk_" + shareId, token);
+      localStorage.setItem("buyer_email_" + shareId, email);
+
+      window.location.href = downloadUrl;
     }
 
-    async function handleStandardDownload() {
-      const pwdInput = document.getElementById("passwordInput");
-      const password = pwdInput ? pwdInput.value.trim() : null;
-      executeDownloadRequest(password, null);
-    }
-
-    async function executeDownloadRequest(password, token) {
-      password = password || null;
-      token = token || null;
-
-      const btn = document.getElementById("downloadBtn") || document.getElementById("paywallCheckoutBtn");
-      const errBox = document.getElementById("errorMsg") || document.getElementById("paywallErrorMsg");
-      const pwdSection = document.getElementById("passwordSection");
-      const pwdInput = document.getElementById("passwordInput");
-
-      errBox.classList.add("hidden");
-      if (btn) {
-        btn.disabled = true;
-        btn.innerText = "Verifying & Generating Link...";
-      }
-
-      try {
-        const res = await fetch("/api/download/" + shareId, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: password, access_token: token })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          if (res.status === 401 || (data.detail && data.detail.toLowerCase().includes("passcode"))) {
-            if (pwdSection) pwdSection.classList.remove("hidden");
-            if (pwdInput) pwdInput.focus();
-          }
-          throw new Error(data.detail || "Download authorization failed.");
-        }
-
-        const a = document.createElement("a");
-        a.href = data.download_url;
-        a.download = "{{ filename }}";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        const countSpan = document.getElementById("downloadCount");
-        if (countSpan) {
-          countSpan.innerText = parseInt(countSpan.innerText || 0) + 1;
-        }
-
-        if (btn) {
-          btn.innerText = "✓ Download Started";
-          setTimeout(() => {
-            btn.disabled = false;
-            btn.innerText = "Download Again";
-          }, 3000);
-        }
-
-      } catch (err) {
-        errBox.innerText = err.message;
-        errBox.classList.remove("hidden");
-        if (btn) {
-          btn.disabled = false;
-          btn.innerText = "Download File";
-        }
-      }
+    function handleStandardDownload() {
+      window.location.href = `/api/download/${shareId}`;
     }
   </script>
 </body>
