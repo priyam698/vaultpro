@@ -147,8 +147,8 @@
       <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Theme" class="w-8 h-8 rounded-xl border border-white/10 flex items-center justify-center text-xs text-amber-400 hover:bg-white/5 transition cursor-pointer">
         <span id="themeIcon">☀️</span>
       </button>
-      <button onclick="window.history.length > 1 ? window.history.back() : window.close()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md cursor-pointer">
-        Exit
+      <button onclick="window.location.href='/share/{{ share_id }}'" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md cursor-pointer">
+        Exit Viewer
       </button>
     </div>
   </header>
@@ -161,7 +161,6 @@
   </main>
 
   <script>
-    // Theme Engine Synchronization
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
@@ -183,13 +182,14 @@
 
     initTheme();
 
-    // Stream & Canvas Controller
     const buyerEmail = "{{ buyer_email }}";
+    const shareId = "{{ share_id }}";
+    const token = "{{ token }}";
     const canvas = document.getElementById("protectedCanvas");
     const ctx = canvas.getContext("2d");
     const curtain = document.getElementById("privacyCurtain");
 
-    // 1. Shield display when window loses focus (Alt+Tab, Snipping Tool, Notifications)
+    // 1. Shield display when window loses focus
     window.addEventListener("blur", () => {
       curtain.style.display = "flex";
     });
@@ -197,7 +197,7 @@
       curtain.style.display = "none";
     });
 
-    // 2. Intercept PrintScreen and clear clipboard
+    // 2. Intercept PrintScreen
     window.addEventListener("keyup", (e) => {
       if (e.key === "PrintScreen" || e.keyCode === 44) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -208,7 +208,7 @@
       }
     });
 
-    // 3. Block Right-Click and Save/Inspect Shortcuts
+    // 3. Block Right-Click and Shortcuts
     window.addEventListener("contextmenu", (e) => e.preventDefault());
     window.addEventListener("keydown", (e) => {
       if (
@@ -220,10 +220,10 @@
       }
     });
 
-    // 4. Render media to canvas with high-contrast dual-pass dynamic watermark
+    // 4. Render media to canvas with dynamic watermark
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.src = "{{ stream_url }}";
+    img.src = `/api/paywall/stream/${shareId}?token=${token}`;
 
     let watermarkX = 40;
     let watermarkY = 60;
@@ -237,15 +237,12 @@
     };
 
     function animate() {
-      // Clear and draw media frame
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
 
-      // Watermark Text Configuration
       const watermarkText = `LICENSED TO: ${buyerEmail} • IP LOGGED`;
       ctx.font = "bold 16px 'Plus Jakarta Sans', monospace";
 
-      // Dual-pass rendering (dark outline + bright text) ensures readability on pure black or white backgrounds
       ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
       ctx.lineWidth = 3.5;
       ctx.strokeText(watermarkText, watermarkX, watermarkY);
@@ -253,7 +250,6 @@
       ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
       ctx.fillText(watermarkText, watermarkX, watermarkY);
 
-      // Boundary reflection calculations
       watermarkX += dx;
       watermarkY += dy;
 
