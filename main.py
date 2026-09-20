@@ -36,7 +36,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.9.2",
+    version="2.9.5",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -90,6 +90,66 @@ PLAN_CONFIG = {
     "plus":  {"name": "Zephyr Plus",  "price": 4.50, "quota": 80 * 1024**3,  "single_mb": 25000, "esign_daily": 50},
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
+
+# ----------------- Brevo Permanent Password Generator & Sender -----------------
+def generate_permanent_password() -> str:
+    nums = random.randint(1000, 9999)
+    chars = secrets.token_hex(2).upper()
+    return f"ZP-{nums}{chars}"
+
+def send_buyer_password_email(buyer_email: str, filename: str, password: str, share_id: str) -> bool:
+    brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
+    system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
+
+    if not brevo_api_key or not buyer_email:
+        return False
+
+    access_url = f"https://zephyr-drive.onrender.com/share/{share_id}"
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 540px; margin: auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 18px; background-color: #f8fafc;">
+        <h2 style="color: #10b981; margin-top: 0;">✓ Payment Verified & File Unlocked</h2>
+        <p style="font-size: 14px; color: #1e293b; line-height: 1.6;">
+            Your payment for <strong>{filename}</strong> has been confirmed. Below is your permanent access password.
+        </p>
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 11px; text-transform: uppercase; font-weight: bold; color: #64748b; letter-spacing: 1px; margin-bottom: 6px;">Your Permanent Access Password</p>
+            <div style="font-size: 28px; font-weight: 800; font-family: monospace; letter-spacing: 4px; color: #4338ca; background: #e0e7ff; padding: 12px 24px; border-radius: 10px; display: inline-block;">
+                {password}
+            </div>
+        </div>
+        <p style="font-size: 13px; color: #475569; line-height: 1.5;">
+            <strong>Never Pay Again:</strong> Whenever you or your team need this file, simply enter your email (<code>{buyer_email}</code>) and this permanent password.
+        </p>
+        <div style="text-align: center; margin: 26px 0;">
+            <a href="{access_url}" style="background-color: #4f46e5; color: #ffffff; padding: 13px 28px; font-weight: bold; text-decoration: none; border-radius: 12px; display: inline-block; font-size: 13px;">
+                Open & Download File
+            </a>
+        </div>
+        <p style="font-size: 11px; color: #94a3b8; text-align: center;">
+            File Link: <a href="{access_url}" style="color: #4f46e5;">{access_url}</a>
+        </p>
+    </div>
+    """
+    payload = {
+        "sender": {"name": "Zephyr Escrow", "email": system_sender},
+        "to": [{"email": buyer_email}],
+        "subject": f"Your Permanent Password to Access: {filename}",
+        "htmlContent": html_content
+    }
+
+    try:
+        http_req = urllib.request.Request(
+            "https://api.brevo.com/v3/smtp/email",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"api-key": brevo_api_key, "Content-Type": "application/json", "Accept": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(http_req, timeout=12) as resp:
+            print(f"[BREVO EMAIL SUCCESS] Sent permanent password to {buyer_email}", flush=True)
+            return True
+    except Exception as e:
+        print(f"[BREVO EMAIL ERROR] {e}", flush=True)
+        return False
 
 @app.on_event("startup")
 def init_db_schema():
@@ -206,6 +266,7 @@ def init_db_schema():
                 access_token VARCHAR(64) UNIQUE NOT NULL,
                 amount_paid NUMERIC(10, 2) NOT NULL,
                 payment_status VARCHAR(30) DEFAULT 'unpaid',
+                buyer_password VARCHAR(64),
                 buyer_password_hash TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 unlocked_at TIMESTAMP
@@ -213,6 +274,7 @@ def init_db_schema():
         """)
 
         try:
+            cursor.execute("ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password VARCHAR(64);")
             cursor.execute("ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password_hash TEXT;")
         except Exception:
             pass
@@ -224,7 +286,7 @@ def init_db_schema():
 
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Schema verified, studio background engine and Stripe synchronized.", flush=True)
+        print("[DB STARTUP]: Schema verified and Stripe synchronizer initialized.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -252,6 +314,7 @@ DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 
 otp_storage = {}
 
+# Pydantic Schemas
 class SendOtpRequest(BaseModel):
     email: str
 
@@ -281,6 +344,15 @@ class InitiatePaywallRequest(BaseModel):
     share_id: str
     buyer_email: str
 
+class UnlockWithPasswordRequest(BaseModel):
+    share_id: str
+    email: str
+    password: str
+
+class ResendPasswordRequest(BaseModel):
+    share_id: str
+    email: str
+
 class CreateShareRequest(BaseModel):
     filename: str
     filesize_mb: float
@@ -308,15 +380,7 @@ class SupportChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
 
-class SetPaywallPasswordRequest(BaseModel):
-    access_token: str
-    password: str
-
-class LoginPaywallRequest(BaseModel):
-    share_id: str
-    email: str
-    password: str
-
+# ----------------- OTP Verification Endpoints -----------------
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
     target_email = req.email.lower().strip()
@@ -496,123 +560,7 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
     return {"status": "dispatched", "recipient": req.recipient_email}
 
-ZEPHYR_SYSTEM_KNOWLEDGE = """
-You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
-Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
-
-Rules:
-1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable.
-2. If the user asks for human support, needs developer escalation, or encounters a bug, direct them to Priyam Rana at priyamrana069@gmail.com.
-
-Platform Knowledge & Pricing Tiers:
-- Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network with zero egress costs.
-- Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
-- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage, 2 GB single transfers, and 7 E-Sign documents per day.
-- Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage, 5 GB single transfers, and 15 E-Sign documents per day.
-- Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
-- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
-- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
-- Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
-- Pay-to-Unlock Escrow: Creators can attach invoice prices to shared files. Buyers securely pay via Stripe. The platform automatically takes a 12% fee and directly transfers 88% to the creator's connected bank account.
-- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the active plan limit are pruned starting from the oldest uploaded files.
-- Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
-"""
-
-@app.post("/api/support/chat")
-async def support_chat(req: SupportChatRequest):
-    user_msg = req.message.strip()
-    if not user_msg:
-        raise HTTPException(status_code=400, detail="Empty query.")
-
-    grok_key = (os.getenv("GROK_API_KEY", "") or os.getenv("XAI_API_KEY", "")).strip()
-    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
-    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
-
-    if grok_key:
-        try:
-            url = "https://api.x.ai/v1/chat/completions"
-            payload = {
-                "model": "grok-beta",
-                "messages": [
-                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
-                    {"role": "user", "content": user_msg}
-                ],
-                "temperature": 0.3
-            }
-            http_req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Authorization": f"Bearer {grok_key}", "Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(http_req, timeout=12) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {"reply": data["choices"][0]["message"]["content"]}
-        except Exception as e:
-            print(f"[COPILOT GROK ERROR]: {e}", flush=True)
-
-    if gemini_key:
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
-            payload = {
-                "system_instruction": {"parts": [{"text": ZEPHYR_SYSTEM_KNOWLEDGE}]},
-                "contents": [{"role": "user", "parts": [{"text": user_msg}]}]
-            }
-            http_req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(http_req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {"reply": data["candidates"][0]["content"]["parts"][0]["text"]}
-        except Exception as e:
-            print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
-
-    if openai_key:
-        try:
-            url = "https://api.openai.com/v1/chat/completions"
-            payload = {
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
-                    {"role": "user", "content": user_msg}
-                ],
-                "max_tokens": 250
-            }
-            http_req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(http_req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {"reply": data["choices"][0]["message"]["content"]}
-        except Exception as e:
-            print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
-
-    q = user_msg.lower()
-    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
-        reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
-    elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
-        reply = "Zephyr Pay-to-Unlock allows creators to monetize deliveries. When sent to a group, each recipient purchases their own individual access token. Media is served inside a protected viewer with moving forensic watermarks and focus-loss anti-screenshot shielding."
-    elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
-        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding."
-    elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
-        reply = "Studio Branding is available exclusively on our Plus ($4.50/mo) and Pro ($7.00/mo) tiers. It lets you customize public transfer backgrounds, showcase your studio logo, and set custom accent colors."
-    elif any(k in q for k in ["esign", "e-sign", "signature", "limit", "daily"]):
-        reply = "Daily E-Sign document creation limits: Free Starter (7/day), Micro (15/day), Lite (30/day), Plus (50/day), and Pro (Unlimited). Limits reset every night at midnight."
-    elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
-        reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding your current plan limit will be automatically deleted starting from the oldest files."
-    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
-        reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the second your recipient finishes downloading it. After that, the link is destroyed permanently."
-    else:
-        reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
-
-    return {"reply": reply}
-
+# ----------------- Main Static Routes -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():
     return Response(content=SUPERSONIC_FAVICON_SVG, media_type="image/svg+xml")
@@ -641,6 +589,269 @@ async def privacy_page(request: Request):
 async def sign_page(request: Request):
     return render_template("sign.html", request)
 
+# ----------------- Pay-to-Unlock Escrow Engine -----------------
+@app.get("/api/paywall/check-email")
+async def check_paywall_email(share_id: str = Query(...), email: str = Query(...)):
+    """Checks if an email has already paid. Avoids duplicate payments."""
+    clean_email = email.strip().lower()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT access_token, payment_status, buyer_password 
+        FROM paywall_purchases 
+        WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
+    """, (share_id, clean_email))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return {
+            "has_paid": True,
+            "email": clean_email,
+            "has_password": bool(row.get("buyer_password"))
+        }
+    return {"has_paid": False, "email": clean_email}
+
+@app.post("/api/paywall/initiate")
+async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
+    if not stripe.api_key:
+        raise HTTPException(status_code=500, detail="Stripe is not configured on the server.")
+
+    buyer = payload.buyer_email.lower().strip()
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT s.*, u.stripe_account_id 
+        FROM shares s 
+        LEFT JOIN users u ON s.paywall_creator_id = u.user_id 
+        WHERE s.id = %s AND s.is_paywalled = TRUE
+    """, (payload.share_id,))
+    share = cursor.fetchone()
+
+    if not share:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Paywalled transfer session not found.")
+
+    if not share.get("stripe_account_id"):
+        conn.close()
+        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
+
+    # Prevent duplicate payments if user already has an active license
+    cursor.execute("""
+        SELECT access_token FROM paywall_purchases 
+        WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
+    """, (payload.share_id, buyer))
+    existing = cursor.fetchone()
+
+    if existing:
+        conn.close()
+        return {
+            "status": "already_unlocked",
+            "message": "This email already has full access. Enter your password to download."
+        }
+
+    access_token = f"pwtk_{secrets.token_hex(20)}"
+    price_usd = float(share.get("unlock_price") or 0.00)
+
+    cursor.execute("""
+        INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status)
+        VALUES (%s, %s, %s, %s, 'pending')
+    """, (payload.share_id, buyer, access_token, price_usd))
+    conn.commit()
+    conn.close()
+
+    price_cents = int(price_usd * 100)
+    platform_fee_cents = int(price_cents * 0.12)  # 12% Platform cut
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            customer_email=buyer,
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
+                    'unit_amount': price_cents,
+                },
+                'quantity': 1,
+            }],
+            payment_intent_data={
+                'application_fee_amount': platform_fee_cents,
+                'transfer_data': {'destination': share['stripe_account_id']},
+            },
+            mode='payment',
+            success_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}?paid=true&email={buyer}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}",
+            metadata={"access_token": access_token, "buyer_email": buyer, "share_id": payload.share_id}
+        )
+
+        return {
+            "status": "checkout_ready",
+            "checkout_url": session.url,
+            "access_token": access_token
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stripe error: {str(e)}")
+
+@app.post("/api/paywall/unlock-password")
+async def unlock_with_password(req: UnlockWithPasswordRequest):
+    """Authenticates email + permanent password, gives direct download URL and viewer access."""
+    clean_email = req.email.strip().lower()
+    clean_pwd = req.password.strip()
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.access_token, p.buyer_password, p.buyer_password_hash, s.filename, s.s3_key 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
+    """, (req.share_id, clean_email))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=403, detail="No active purchase found for this email address.")
+
+    pwd_hash = hashlib.sha256(clean_pwd.encode()).hexdigest()
+    matched = False
+    if row.get("buyer_password") and row["buyer_password"].upper() == clean_pwd.upper():
+        matched = True
+    elif row.get("buyer_password_hash") and row["buyer_password_hash"] == pwd_hash:
+        matched = True
+
+    if not matched:
+        raise HTTPException(status_code=401, detail="Incorrect password. Please check the code sent to your email.")
+
+    download_url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": R2_BUCKET_NAME,
+            "Key": row["s3_key"],
+            "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'
+        },
+        ExpiresIn=86400
+    )
+
+    return {
+        "status": "unlocked",
+        "access_token": row["access_token"],
+        "download_url": download_url,
+        "viewer_url": f"/secure-view/{req.share_id}?token={row['access_token']}"
+    }
+
+@app.post("/api/paywall/resend-password")
+async def resend_paywall_password(req: ResendPasswordRequest):
+    clean_email = req.email.strip().lower()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.id, p.buyer_password, s.filename 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
+    """, (req.share_id, clean_email))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="No completed payment found for this email.")
+
+    pwd = row.get("buyer_password")
+    if not pwd:
+        pwd = generate_permanent_password()
+        cursor.execute("UPDATE paywall_purchases SET buyer_password = %s, buyer_password_hash = %s WHERE id = %s",
+                       (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
+        conn.commit()
+
+    conn.close()
+
+    sent = send_buyer_password_email(clean_email, row["filename"], pwd, req.share_id)
+    if not sent:
+        raise HTTPException(status_code=500, detail="Could not send email via Brevo.")
+
+    return {"status": "success", "message": f"Password has been sent to {clean_email}."}
+
+@app.post("/api/paywall/verify-session")
+async def verify_stripe_checkout_session(session_id: str = Query(...), share_id: str = Query(...)):
+    if not stripe.api_key:
+        raise HTTPException(status_code=500, detail="Stripe is not configured.")
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        token = session.metadata.get("access_token")
+        buyer_email = session.customer_email or session.metadata.get("buyer_email")
+
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.id, p.buyer_password, s.filename, s.s3_key 
+            FROM paywall_purchases p
+            JOIN shares s ON s.id = p.share_id
+            WHERE p.access_token = %s
+        """, (token,))
+        row = cursor.fetchone()
+
+        if row:
+            pwd = row.get("buyer_password")
+            if not pwd:
+                pwd = generate_permanent_password()
+                cursor.execute("""
+                    UPDATE paywall_purchases 
+                    SET payment_status = 'paid', 
+                        unlocked_at = CURRENT_TIMESTAMP,
+                        buyer_password = %s,
+                        buyer_password_hash = %s
+                    WHERE id = %s
+                """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
+                conn.commit()
+
+                # Dispatch Brevo Notification Email
+                send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
+
+            download_url = s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'},
+                ExpiresIn=86400
+            )
+
+            conn.close()
+            return {
+                "status": "paid",
+                "token": token,
+                "buyer_email": buyer_email,
+                "download_url": download_url,
+                "viewer_url": f"/secure-view/{share_id}?token={token}"
+            }
+
+        conn.close()
+        raise HTTPException(status_code=404, detail="Purchase record not found.")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/paywall/verify-access")
+async def verify_buyer_access(share_id: str = Query(...), access_token: str = Query(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT buyer_email, payment_status, buyer_password 
+        FROM paywall_purchases 
+        WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
+    """, (share_id, access_token))
+    purchase = cursor.fetchone()
+    conn.close()
+
+    if not purchase:
+        raise HTTPException(status_code=403, detail="Payment required to access this file.")
+
+    return {
+        "unlocked": True, 
+        "buyer_email": purchase["buyer_email"],
+        "has_password": bool(purchase.get("buyer_password"))
+    }
+
+# ----------------- Secure Protected Viewer -----------------
 @app.get("/secure-view/{share_id}", response_class=HTMLResponse)
 async def secure_viewer_page(
     request: Request, 
@@ -665,7 +876,7 @@ async def secure_viewer_page(
             print(f"[STRIPE SYNC VERIFY NOTICE]: {e}", flush=True)
 
     cursor.execute("""
-        SELECT p.buyer_email, p.payment_status, s.filename, p.buyer_password_hash 
+        SELECT p.buyer_email, p.payment_status, s.filename, p.buyer_password 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s AND p.access_token = %s
@@ -676,18 +887,209 @@ async def secure_viewer_page(
     is_paid = bool(row and row["payment_status"] == 'paid')
     buyer_email = row["buyer_email"] if row else ""
     filename = row["filename"] if row else "Protected File"
-    has_password = bool(row and row.get("buyer_password_hash"))
 
     return render_template("secure_viewer.html", request, {
         "share_id": share_id,
         "filename": filename,
         "buyer_email": buyer_email,
         "token": token,
-        "is_paid": is_paid,
-        "has_password": has_password
+        "is_paid": is_paid
     })
 
-# ----------------- Stripe Connect (Creator Bank Link & Management) -----------------
+@app.get("/api/paywall/stream/{share_id}")
+async def stream_paywall_media(share_id: str, token: str = Query(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.buyer_email, s.s3_key, s.filename 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
+    """, (share_id, token))
+    item = cursor.fetchone()
+    conn.close()
+
+    if not item:
+        raise HTTPException(status_code=403, detail="Protected content stream access denied.")
+
+    try:
+        obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
+        content_type = obj.get("ContentType", "application/octet-stream")
+        return StreamingResponse(
+            obj["Body"].iter_chunks(),
+            media_type=content_type,
+            headers={
+                "Cache-Control": "no-store, no-cache, must-revalidate, private",
+                "Content-Disposition": f'inline; filename="{item["filename"]}"'
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Streaming pipe error: {str(e)}")
+
+# ----------------- Ephemeral Transfers & Downloads -----------------
+@app.get("/share/{share_id}", response_class=HTMLResponse)
+async def share_page(request: Request, share_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
+
+    max_downloads = row.get("max_downloads", 0) or 0
+    if max_downloads > 0 and row["downloads"] >= max_downloads:
+        conn.close()
+        raise HTTPException(status_code=410, detail="This link reached its maximum download limit and was shredded.")
+
+    if row["expiry_hours"] != 0:
+        expires_at = row["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if datetime.utcnow().astimezone() > expires_at:
+            conn.close()
+            raise HTTPException(status_code=410, detail="This vault link has expired.")
+
+    branding = None
+    if row.get("user_id"):
+        cursor.execute("""
+            SELECT tier, brand_title, brand_slug, brand_logo_url, brand_bg_url, brand_accent_color 
+            FROM users WHERE user_id = %s
+        """, (row["user_id"],))
+        u_brand = cursor.fetchone()
+        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
+            branding = dict(u_brand)
+
+    conn.close()
+
+    return render_template("download.html", request, {
+        "share_id": share_id,
+        "filename": row["filename"],
+        "filesize": row["filesize_mb"],
+        "downloads": row["downloads"],
+        "has_password": bool(row["password_hash"]),
+        "is_paywalled": bool(row.get("is_paywalled", False)),
+        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
+        "branding": branding
+    })
+
+@app.post("/share/{share_id}/download")
+@app.post("/api/download/{share_id}")
+async def process_download(share_id: str, payload: Optional[DownloadPayload] = None):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Share link not found or expired.")
+
+    if row.get("is_paywalled"):
+        token = payload.access_token if payload else None
+        if not token:
+            conn.close()
+            raise HTTPException(status_code=402, detail="Payment required. Each recipient must unlock their personal access token.")
+
+        cursor.execute("""
+            SELECT id FROM paywall_purchases 
+            WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
+        """, (share_id, token))
+        verified = cursor.fetchone()
+        if not verified:
+            conn.close()
+            raise HTTPException(status_code=403, detail="Invalid or unpaid access token.")
+
+    max_downloads = row.get("max_downloads", 0) or 0
+    if max_downloads > 0 and row["downloads"] >= max_downloads:
+        conn.close()
+        raise HTTPException(status_code=410, detail="Link reached its maximum download count.")
+
+    if row["password_hash"]:
+        user_pass = payload.password if payload else None
+        if not user_pass or hashlib.sha256(user_pass.encode()).hexdigest() != row["password_hash"]:
+            conn.close()
+            raise HTTPException(status_code=401, detail="Incorrect passcode.")
+
+    url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'},
+        ExpiresIn=3600
+    )
+    new_count = row["downloads"] + 1
+    cursor.execute("UPDATE shares SET downloads = %s WHERE id = %s", (new_count, share_id))
+    conn.commit()
+
+    if max_downloads > 0 and new_count >= max_downloads:
+        try:
+            s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
+        except Exception:
+            pass
+
+    conn.close()
+    return {"download_url": url}
+
+@app.post("/api/create-share")
+async def create_share(payload: CreateShareRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    user_tier = "free"
+    if payload.user_id:
+        cursor.execute("SELECT tier FROM users WHERE user_id = %s", (payload.user_id,))
+        user_row = cursor.fetchone()
+        if user_row and user_row.get("tier"):
+            user_tier = user_row["tier"].lower()
+
+    max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
+    if payload.filesize_mb > max_mb:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"File exceeds the {max_mb} MB limit for your {user_tier.upper()} tier.")
+
+    created_at = datetime.utcnow()
+    expires_at = created_at + timedelta(days=36500) if payload.expiry_hours == 0 else created_at + timedelta(hours=payload.expiry_hours)
+    share_id = uuid.uuid4().hex[:8]
+    s3_key = f"transfers/{share_id}/{payload.filename}"
+    password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
+
+    cursor.execute("""
+        INSERT INTO shares (
+            id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
+            max_downloads, created_at, expires_at, downloads, user_id, 
+            is_paywalled, unlock_price, paywall_creator_id
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s)
+    """, (
+        share_id, payload.filename, payload.filesize_mb, s3_key, password_hash, 
+        payload.expiry_hours, payload.max_downloads, created_at, expires_at, 
+        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id
+    ))
+    conn.commit()
+    conn.close()
+
+    return {"share_id": share_id, "expires_at": expires_at.isoformat()}
+
+@app.post("/api/upload-file/{share_id}")
+async def upload_file_direct(share_id: str, request: Request):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Vault record not found.")
+
+    file_bytes = await request.body()
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=row["s3_key"],
+        Body=file_bytes,
+        ContentType=request.headers.get("content-type", "application/octet-stream")
+    )
+    return {"status": "success", "share_id": share_id}
+
+# ----------------- Stripe Bank Account Onboarding & Management -----------------
 @app.post("/api/stripe/onboard")
 async def stripe_onboard(user_id: str = Form(...)):
     if not stripe.api_key:
@@ -816,6 +1218,54 @@ async def stripe_disconnect(request: Request):
 
     return {"status": "success", "message": "Bank account disconnected successfully."}
 
+# ----------------- Stripe Webhook -----------------
+@app.post("/api/webhook/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get('STRIPE_SIGNATURE')
+    
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid webhook")
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        paywall_token = session.get('metadata', {}).get('access_token')
+        buyer_email = session.get('customer_email') or session.get('metadata', {}).get('buyer_email')
+        share_id = session.get('metadata', {}).get('share_id')
+
+        if paywall_token:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.id, p.buyer_password, s.filename 
+                FROM paywall_purchases p
+                JOIN shares s ON s.id = p.share_id
+                WHERE p.access_token = %s
+            """, (paywall_token,))
+            row = cursor.fetchone()
+
+            if row:
+                pwd = row.get("buyer_password")
+                if not pwd:
+                    pwd = generate_permanent_password()
+                    cursor.execute("""
+                        UPDATE paywall_purchases 
+                        SET payment_status = 'paid', 
+                            unlocked_at = CURRENT_TIMESTAMP,
+                            buyer_password = %s,
+                            buyer_password_hash = %s
+                        WHERE id = %s
+                    """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
+                    conn.commit()
+
+                    if buyer_email and share_id:
+                        send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
+            conn.close()
+
+    return {"status": "success"}
+
 # ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
 async def get_branding(user_id: str):
@@ -895,7 +1345,7 @@ async def upload_branding_asset(
 ):
     asset_type = asset_type.lower().strip()
     if asset_type not in ["logo", "background"]:
-        raise HTTPException(status_code=400, detail="Invalid asset_type. Must be 'logo' or 'background'.")
+        raise HTTPException(status_code=400, detail="Invalid asset_type.")
 
     conn = get_db()
     cursor = conn.cursor()
@@ -1687,380 +2137,6 @@ async def prune_expired_vaults(secret: str = ""):
     conn.close()
     return {"status": "success", "processed_users": len(over_limit_users), "files_pruned": pruned_count}
 
-# ----------------- Ephemeral Transfers & Paywall Escrow -----------------
-@app.get("/share/{share_id}", response_class=HTMLResponse)
-async def share_page(request: Request, share_id: str):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
-    row = cursor.fetchone()
-
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
-
-    max_downloads = row.get("max_downloads", 0) or 0
-    if max_downloads > 0 and row["downloads"] >= max_downloads:
-        conn.close()
-        raise HTTPException(status_code=410, detail="This link reached its maximum download limit and was shredded.")
-
-    if row["expiry_hours"] != 0:
-        expires_at = row["expires_at"]
-        if isinstance(expires_at, str):
-            expires_at = datetime.fromisoformat(expires_at)
-        if datetime.utcnow().astimezone() > expires_at:
-            conn.close()
-            raise HTTPException(status_code=410, detail="This vault link has expired.")
-
-    branding = None
-    if row.get("user_id"):
-        cursor.execute("""
-            SELECT tier, brand_title, brand_slug, brand_logo_url, brand_bg_url, brand_accent_color 
-            FROM users WHERE user_id = %s
-        """, (row["user_id"],))
-        u_brand = cursor.fetchone()
-        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
-            branding = dict(u_brand)
-
-    conn.close()
-
-    return render_template("download.html", request, {
-        "share_id": share_id,
-        "filename": row["filename"],
-        "filesize": row["filesize_mb"],
-        "downloads": row["downloads"],
-        "has_password": bool(row["password_hash"]),
-        "is_paywalled": bool(row.get("is_paywalled", False)),
-        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
-        "branding": branding
-    })
-
-@app.get("/api/share-details/{share_id}")
-async def get_share_details(share_id: str):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
-    row = cursor.fetchone()
-
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="File share expired or purged.")
-
-    if row["expiry_hours"] != 0:
-        expires_at = row["expires_at"]
-        if isinstance(expires_at, str):
-            expires_at = datetime.fromisoformat(expires_at)
-        if datetime.utcnow().astimezone() > expires_at:
-            conn.close()
-            raise HTTPException(status_code=410, detail="Transfer link has expired.")
-
-    branding = None
-    if row.get("user_id"):
-        cursor.execute("""
-            SELECT tier, brand_title, brand_logo_url, brand_bg_url, brand_accent_color 
-            FROM users WHERE user_id = %s
-        """, (row["user_id"],))
-        u_brand = cursor.fetchone()
-        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
-            branding = dict(u_brand)
-
-    conn.close()
-
-    return {
-        "share_id": row["id"],
-        "filename": row["filename"],
-        "filesize_mb": float(row["filesize_mb"]),
-        "has_password": bool(row["password_hash"]),
-        "is_paywalled": bool(row.get("is_paywalled", False)),
-        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
-        "sender_branding": branding
-    }
-
-@app.post("/api/create-share")
-async def create_share(payload: CreateShareRequest):
-    conn = get_db()
-    cursor = conn.cursor()
-    user_tier = "free"
-    if payload.user_id:
-        cursor.execute("SELECT tier FROM users WHERE user_id = %s", (payload.user_id,))
-        user_row = cursor.fetchone()
-        if user_row and user_row.get("tier"):
-            user_tier = user_row["tier"].lower()
-
-    max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
-    if payload.filesize_mb > max_mb:
-        conn.close()
-        raise HTTPException(status_code=400, detail=f"File exceeds the {max_mb} MB limit for your {user_tier.upper()} tier.")
-
-    created_at = datetime.utcnow()
-    expires_at = created_at + timedelta(days=36500) if payload.expiry_hours == 0 else created_at + timedelta(hours=payload.expiry_hours)
-    share_id = uuid.uuid4().hex[:8]
-    s3_key = f"transfers/{share_id}/{payload.filename}"
-    password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
-
-    cursor.execute("""
-        INSERT INTO shares (
-            id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
-            max_downloads, created_at, expires_at, downloads, user_id, 
-            is_paywalled, unlock_price, paywall_creator_id
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s)
-    """, (
-        share_id, payload.filename, payload.filesize_mb, s3_key, password_hash, 
-        payload.expiry_hours, payload.max_downloads, created_at, expires_at, 
-        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id
-    ))
-    conn.commit()
-    conn.close()
-
-    return {"share_id": share_id, "expires_at": expires_at.isoformat()}
-
-@app.post("/api/upload-file/{share_id}")
-async def upload_file_direct(share_id: str, request: Request):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
-    row = cursor.fetchone()
-    conn.close()
-
-    if not row:
-        raise HTTPException(status_code=404, detail="Vault record not found.")
-
-    file_bytes = await request.body()
-    s3_client.put_object(
-        Bucket=R2_BUCKET_NAME,
-        Key=row["s3_key"],
-        Body=file_bytes,
-        ContentType=request.headers.get("content-type", "application/octet-stream")
-    )
-    return {"status": "success", "share_id": share_id}
-
-# ----------------- Stripe Connect (Paywall Escrow Checkout) -----------------
-@app.post("/api/paywall/initiate")
-async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
-    if not stripe.api_key:
-        raise HTTPException(status_code=500, detail="Stripe integration is not configured on the server.")
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT s.*, u.stripe_account_id 
-        FROM shares s 
-        LEFT JOIN users u ON s.paywall_creator_id = u.user_id 
-        WHERE s.id = %s AND s.is_paywalled = TRUE
-    """, (payload.share_id,))
-    share = cursor.fetchone()
-    
-    if not share:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Paywalled transfer session not found or inactive.")
-
-    if not share.get("stripe_account_id"):
-        conn.close()
-        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments. Escrow disabled.")
-
-    buyer = payload.buyer_email.lower().strip()
-
-    cursor.execute("""
-        SELECT access_token FROM paywall_purchases 
-        WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
-    """, (payload.share_id, buyer))
-    existing = cursor.fetchone()
-
-    if existing:
-        conn.close()
-        return {
-            "status": "already_unlocked",
-            "access_token": existing["access_token"],
-            "viewer_url": f"/secure-view/{payload.share_id}?token={existing['access_token']}"
-        }
-
-    access_token = f"pwtk_{secrets.token_hex(20)}"
-    price_usd = float(share.get("unlock_price") or 0.00)
-    
-    cursor.execute("""
-        INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status)
-        VALUES (%s, %s, %s, %s, 'pending')
-        RETURNING id
-    """, (payload.share_id, buyer, access_token, price_usd))
-    conn.commit()
-    conn.close()
-
-    price_cents = int(price_usd * 100)
-    platform_fee_cents = int(price_cents * 0.12)
-
-    try:
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
-                    'unit_amount': price_cents,
-                },
-                'quantity': 1,
-            }],
-            payment_intent_data={
-                'application_fee_amount': platform_fee_cents,
-                'transfer_data': {'destination': share['stripe_account_id']},
-            },
-            mode='payment',
-            success_url=f"https://zephyr-drive.onrender.com/secure-view/{payload.share_id}?token={access_token}&session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}",
-            metadata={"access_token": access_token}
-        )
-
-        return {
-            "status": "checkout_ready",
-            "checkout_url": session.url,
-            "access_token": access_token
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Stripe Checkout Error: {str(e)}")
-
-@app.get("/api/paywall/verify-access")
-async def verify_buyer_access(share_id: str = Query(...), access_token: str = Query(...)):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT buyer_email, payment_status, buyer_password_hash 
-        FROM paywall_purchases 
-        WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
-    """, (share_id, access_token))
-    purchase = cursor.fetchone()
-    conn.close()
-
-    if not purchase:
-        raise HTTPException(status_code=403, detail="Payment required to access this file.")
-
-    return {
-        "unlocked": True, 
-        "buyer_email": purchase["buyer_email"],
-        "has_password": bool(purchase["buyer_password_hash"])
-    }
-
-@app.post("/api/paywall/set-password")
-async def set_paywall_password(req: SetPaywallPasswordRequest):
-    conn = get_db()
-    cursor = conn.cursor()
-    pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
-    cursor.execute("""
-        UPDATE paywall_purchases 
-        SET buyer_password_hash = %s 
-        WHERE access_token = %s AND payment_status = 'paid'
-    """, (pwd_hash, req.access_token))
-    conn.commit()
-    conn.close()
-    return {"status": "success"}
-
-@app.post("/api/paywall/login")
-async def paywall_login(req: LoginPaywallRequest):
-    conn = get_db()
-    cursor = conn.cursor()
-    pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
-    cursor.execute("""
-        SELECT access_token, buyer_password_hash 
-        FROM paywall_purchases 
-        WHERE share_id = %s AND LOWER(buyer_email) = LOWER(%s) AND payment_status = 'paid'
-    """, (req.share_id, req.email.strip()))
-    row = cursor.fetchone()
-    conn.close()
-
-    if not row:
-        raise HTTPException(status_code=403, detail="No paid purchase found for this email address.")
-    
-    if row["buyer_password_hash"] and row["buyer_password_hash"] != pwd_hash:
-        raise HTTPException(status_code=401, detail="Incorrect password for this purchase.")
-    
-    return {"status": "success", "access_token": row["access_token"]}
-
-@app.get("/api/paywall/stream/{share_id}")
-async def stream_paywall_media(share_id: str, token: str = Query(...)):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT p.buyer_email, s.s3_key, s.filename 
-        FROM paywall_purchases p
-        JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
-    """, (share_id, token))
-    item = cursor.fetchone()
-    conn.close()
-
-    if not item:
-        raise HTTPException(status_code=403, detail="Protected content stream access denied.")
-
-    try:
-        obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
-        content_type = obj.get("ContentType", "application/octet-stream")
-        return StreamingResponse(
-            obj["Body"].iter_chunks(),
-            media_type=content_type,
-            headers={
-                "Cache-Control": "no-store, no-cache, must-revalidate, private",
-                "Content-Disposition": f'inline; filename="{item["filename"]}"'
-            }
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Streaming pipe error: {str(e)}")
-
-@app.post("/share/{share_id}/download")
-@app.post("/api/download/{share_id}")
-async def process_download(share_id: str, payload: Optional[DownloadPayload] = None):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
-    row = cursor.fetchone()
-
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Share link not found or expired.")
-
-    if row.get("is_paywalled"):
-        token = payload.access_token if payload else None
-        if not token:
-            conn.close()
-            raise HTTPException(status_code=402, detail="Payment required. Each recipient must unlock their personal access token.")
-
-        cursor.execute("""
-            SELECT id FROM paywall_purchases 
-            WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
-        """, (share_id, token))
-        verified = cursor.fetchone()
-        if not verified:
-            conn.close()
-            raise HTTPException(status_code=403, detail="Invalid or unpaid access token.")
-
-    max_downloads = row.get("max_downloads", 0) or 0
-    if max_downloads > 0 and row["downloads"] >= max_downloads:
-        conn.close()
-        raise HTTPException(status_code=410, detail="Link reached its maximum download count.")
-
-    if row["password_hash"]:
-        user_pass = payload.password if payload else None
-        if not user_pass or hashlib.sha256(user_pass.encode()).hexdigest() != row["password_hash"]:
-            conn.close()
-            raise HTTPException(status_code=401, detail="Incorrect passcode.")
-
-    url = s3_client.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'},
-        ExpiresIn=3600
-    )
-    new_count = row["downloads"] + 1
-    cursor.execute("UPDATE shares SET downloads = %s WHERE id = %s", (new_count, share_id))
-    conn.commit()
-
-    if max_downloads > 0 and new_count >= max_downloads:
-        try:
-            s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
-        except Exception:
-            pass
-
-    conn.close()
-    return {"download_url": url}
-
 @app.get("/api/user-profile")
 async def get_user_profile(user_id: str):
     conn = get_db()
@@ -2084,39 +2160,6 @@ async def get_user_profile(user_id: str):
         "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
-
-# ----------------- Stripe Webhook -----------------
-@app.post("/api/webhook/stripe")
-async def stripe_webhook(request: Request):
-    payload = await request.body()
-    sig_header = request.headers.get('STRIPE_SIGNATURE')
-    
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError:
-        raise HTTPException(status_code=400, detail="Invalid signature")
-
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        paywall_token = session.get('metadata', {}).get('access_token')
-        
-        if paywall_token:
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE paywall_purchases 
-                SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP 
-                WHERE access_token = %s
-            """, (paywall_token,))
-            conn.commit()
-            conn.close()
-            print(f"[STRIPE PAYWALL UNLOCKED] Granted access to token: {paywall_token}", flush=True)
-
-    return {"status": "success"}
 
 # ----------------- Dodo Payments Webhook -----------------
 @app.post("/api/webhook/dodo")
