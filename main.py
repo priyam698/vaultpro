@@ -37,7 +37,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="3.2.0",
+    version="3.3.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -103,10 +103,10 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
     if not brevo_api_key:
-        print(f"[BREVO EMAIL ERROR]: BREVO_API_KEY is not configured in environment.", flush=True)
+        print(f"[BREVO EMAIL ERROR]: BREVO_API_KEY missing from environment.", flush=True)
         return False
-    if not buyer_email:
-        print(f"[BREVO EMAIL ERROR]: Target buyer email is empty. Cannot dispatch.", flush=True)
+    if not buyer_email or "@" not in buyer_email:
+        print(f"[BREVO EMAIL ERROR]: Invalid target buyer email: '{buyer_email}'", flush=True)
         return False
 
     access_url = f"https://zephyr-drive.onrender.com/share/{share_id}"
@@ -136,7 +136,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
                 </div>
                 <div style="background: #0f172a; border-left: 4px solid #6366f1; padding: 14px 18px; border-radius: 0 10px 10px 0; margin-bottom: 28px;">
                     <p style="margin: 0; font-size: 13px; color: #9ca3af; line-height: 1.5;">
-                        <strong style="color: #f3f4f6;">Never pay again:</strong> This password is tied permanently to <code style="color: #a5b4fc; background: #1e1b4b; padding: 2px 6px; border-radius: 4px;">{buyer_email}</code>. Whenever you visit the transfer link in the future, simply enter this code to download.
+                        <strong style="color: #f3f4f6;">Never pay again:</strong> This password is permanently tied to <code style="color: #a5b4fc; background: #1e1b4b; padding: 2px 6px; border-radius: 4px;">{buyer_email}</code>. Enter this code whenever you need the file.
                     </p>
                 </div>
                 <div style="text-align: center; margin-bottom: 10px;">
@@ -168,15 +168,14 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
         headers={
             "api-key": brevo_api_key,
             "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "ZephyrVault/3.2"
+            "Accept": "application/json"
         },
         method="POST"
     )
 
     try:
         with urllib.request.urlopen(http_req, timeout=15) as resp:
-            print(f"[BREVO EMAIL SUCCESS] Dispatched password to {buyer_email} (HTTP Status {resp.status})", flush=True)
+            print(f"[BREVO EMAIL SUCCESS] Sent permanent password to {buyer_email} (Status {resp.status})", flush=True)
             return True
     except urllib.error.HTTPError as he:
         err_msg = he.read().decode("utf-8", errors="ignore")
@@ -605,7 +604,7 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
     return {"status": "dispatched", "recipient": req.recipient_email}
 
-# ----------------- Zephyr Copilot Support Chat Engine -----------------
+# ----------------- Zephyr Copilot Engine -----------------
 ZEPHYR_SYSTEM_KNOWLEDGE = """
 You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
 Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
@@ -901,13 +900,18 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
         "viewer_url": f"/secure-view/{req.share_id}?token={row['access_token']}"
     }
 
+# ----------------- FIXED: Resend Password Logic -----------------
 @app.post("/api/paywall/resend-password")
 async def resend_paywall_password(req: ResendPasswordRequest):
+    """
+    Finds the latest purchase record for this email and share, guarantees password generation,
+    sets payment_status to 'paid', and dispatches the Brevo email.
+    """
     clean_email = req.email.strip().lower()
     conn = get_db()
     cursor = conn.cursor()
     
-    # Matches both paid and pending checkouts to avoid race-condition lockout
+    # Matches the latest transaction regardless of whether it is 'paid' or 'pending'
     cursor.execute("""
         SELECT p.id, p.buyer_password, s.filename 
         FROM paywall_purchases p
@@ -925,7 +929,7 @@ async def resend_paywall_password(req: ResendPasswordRequest):
     if not pwd:
         pwd = generate_permanent_password()
 
-    # Automatically set payment_status to 'paid' and commit generated password
+    # Automatically ensure status is 'paid' and password hash is saved
     cursor.execute("""
         UPDATE paywall_purchases 
         SET payment_status = 'paid', 
@@ -939,77 +943,88 @@ async def resend_paywall_password(req: ResendPasswordRequest):
 
     sent = send_buyer_password_email(clean_email, row["filename"], pwd, req.share_id)
     if not sent:
-        raise HTTPException(status_code=500, detail="Could not send email via Brevo. Check sender authorization.")
+        raise HTTPException(status_code=500, detail="Could not send email via Brevo. Check server logs.")
 
     return {"status": "success", "message": f"Password has been dispatched to {clean_email}."}
 
+# ----------------- FIXED: Stripe Checkout Session Verification -----------------
 @app.post("/api/paywall/verify-session")
 async def verify_stripe_checkout_session(
     session_id: str = Query(...), 
     share_id: str = Query(...),
-    email: Optional[str] = Query(None)
+    email: Optional[str] = Query(None),
+    token: Optional[str] = Query(None)
 ):
+    """
+    Retrieves the Stripe checkout session, extracts the email, generates and stores the permanent
+    password, sets payment_status = 'paid', and reliably dispatches the password email.
+    """
     if not stripe.api_key:
         raise HTTPException(status_code=500, detail="Stripe is not configured.")
 
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-        token = session.metadata.get("access_token") if session.metadata else None
+        access_token = token or (session.metadata.get("access_token") if getattr(session, "metadata", None) else None)
 
-        # Robust extraction across Stripe objects, metadata, and frontend URL parameters
-        customer_details = getattr(session, "customer_details", None)
-        buyer_email = ""
-        if customer_details and getattr(customer_details, "email", None):
-            buyer_email = customer_details.email
-        elif getattr(session, "customer_email", None):
-            buyer_email = session.customer_email
-        elif session.metadata and session.metadata.get("buyer_email"):
-            buyer_email = session.metadata.get("buyer_email")
-        elif email:
-            buyer_email = email
+        # Dictionary-safe email resolution
+        buyer_email = (email or "").strip().lower()
 
-        buyer_email = (buyer_email or "").strip().lower()
+        if not buyer_email and hasattr(session, "customer_details") and session.customer_details:
+            cd = session.customer_details
+            buyer_email = (cd.get("email") if isinstance(cd, dict) or hasattr(cd, "get") else getattr(cd, "email", None)) or ""
+
+        if not buyer_email and hasattr(session, "customer_email") and session.customer_email:
+            buyer_email = session.customer_email or ""
+
+        if not buyer_email and getattr(session, "metadata", None):
+            buyer_email = session.metadata.get("buyer_email") or ""
+
+        buyer_email = buyer_email.strip().lower()
 
         conn = get_db()
         cursor = conn.cursor()
+        
+        # Locate record by access_token OR share_id + email
         cursor.execute("""
-            SELECT p.id, p.buyer_password, s.filename, s.s3_key 
+            SELECT p.id, p.buyer_email, p.buyer_password, s.filename, s.s3_key 
             FROM paywall_purchases p
             JOIN shares s ON s.id = p.share_id
-            WHERE p.access_token = %s OR (p.share_id = %s AND LOWER(p.buyer_email) = %s)
+            WHERE (p.access_token = %s AND %s IS NOT NULL)
+               OR (p.share_id = %s AND LOWER(p.buyer_email) = %s AND %s != '')
             ORDER BY p.id DESC LIMIT 1
-        """, (token, share_id, buyer_email))
+        """, (access_token, access_token, share_id, buyer_email, buyer_email))
         row = cursor.fetchone()
 
-        if row:
-            pwd = row.get("buyer_password")
-            if not pwd:
-                pwd = generate_permanent_password()
-                cursor.execute("""
-                    UPDATE paywall_purchases 
-                    SET payment_status = 'paid', 
-                        unlocked_at = CURRENT_TIMESTAMP,
-                        buyer_password = %s,
-                        buyer_password_hash = %s
-                    WHERE id = %s
-                """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
-                conn.commit()
-
-                # Trigger Brevo transactional email
-                send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
-            else:
-                cursor.execute("UPDATE paywall_purchases SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP WHERE id = %s", (row["id"],))
-                conn.commit()
-
+        if not row:
             conn.close()
-            return {
-                "status": "paid",
-                "buyer_email": buyer_email,
-                "token": token or ""
-            }
+            raise HTTPException(status_code=404, detail="Purchase record not found for this checkout.")
 
+        target_email = buyer_email or (row.get("buyer_email") or "").strip().lower()
+        pwd = row.get("buyer_password")
+        if not pwd:
+            pwd = generate_permanent_password()
+
+        cursor.execute("""
+            UPDATE paywall_purchases 
+            SET payment_status = 'paid', 
+                unlocked_at = CURRENT_TIMESTAMP,
+                buyer_password = %s,
+                buyer_password_hash = %s
+            WHERE id = %s
+        """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
+        conn.commit()
         conn.close()
-        raise HTTPException(status_code=404, detail="Purchase record not found.")
+
+        # Always dispatch Brevo email upon verification
+        if target_email:
+            send_buyer_password_email(target_email, row["filename"], pwd, share_id)
+
+        return {
+            "status": "paid",
+            "buyer_email": target_email,
+            "token": access_token or ""
+        }
+
     except Exception as e:
         print(f"[VERIFY SESSION ERROR]: {e}", flush=True)
         raise HTTPException(status_code=400, detail=str(e))
@@ -1520,8 +1535,8 @@ async def stripe_webhook(request: Request):
                     """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
                     conn.commit()
 
-                    if buyer_email and share_id:
-                        send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
+                if buyer_email and share_id:
+                    send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
             conn.close()
 
     return {"status": "success"}
@@ -2561,7 +2576,7 @@ async def lemon_webhook(request: Request):
             """, (sub_end, user_email.strip(),))
         conn.commit()
 
-    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
+    elif event_name in ["subscription.cancelled", "subscription.expired", "subscription.paused"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
