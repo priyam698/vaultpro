@@ -37,7 +37,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.9.9",
+    version="3.0.2",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -92,7 +92,7 @@ PLAN_CONFIG = {
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
-# ----------------- Brevo Permanent Password Generator & Sender -----------------
+# ----------------- Brevo Permanent Password Engine -----------------
 def generate_permanent_password() -> str:
     nums = random.randint(1000, 9999)
     chars = secrets.token_hex(2).upper()
@@ -102,35 +102,57 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
-    if not brevo_api_key or not buyer_email:
-        print(f"[BREVO EMAIL NOTICE]: Missing API key or buyer email. Cannot dispatch email.", flush=True)
+    if not brevo_api_key:
+        print(f"[BREVO EMAIL ERROR]: BREVO_API_KEY is not configured in environment.", flush=True)
+        return False
+    if not buyer_email:
+        print(f"[BREVO EMAIL ERROR]: Target buyer email is empty. Cannot dispatch.", flush=True)
         return False
 
     access_url = f"https://zephyr-drive.onrender.com/share/{share_id}"
     html_content = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 540px; margin: auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 18px; background-color: #f8fafc;">
-        <h2 style="color: #10b981; margin-top: 0;">✓ Payment Verified & File Unlocked</h2>
-        <p style="font-size: 14px; color: #1e293b; line-height: 1.6;">
-            Your payment for <strong>{filename}</strong> has been confirmed. Below is your permanent access password.
-        </p>
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; margin: 20px 0; text-align: center;">
-            <p style="font-size: 11px; text-transform: uppercase; font-weight: bold; color: #64748b; letter-spacing: 1px; margin-bottom: 6px;">Your Permanent Access Password</p>
-            <div style="font-size: 28px; font-weight: 800; font-family: monospace; letter-spacing: 4px; color: #4338ca; background: #e0e7ff; padding: 12px 24px; border-radius: 10px; display: inline-block;">
-                {password}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <div style="max-width: 560px; margin: 30px auto; background: #111827; border: 1px solid #1f2937; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            <div style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); padding: 30px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Payment Confirmed</h1>
+                <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 14px;">Your access license for {filename} is ready.</p>
+            </div>
+            <div style="padding: 35px 30px; color: #f3f4f6;">
+                <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #d1d5db;">
+                    Hello,<br><br>
+                    Your purchase has been verified. To unlock and download your secure transfer, enter your email and this permanent password:
+                </p>
+                <div style="background: #1f2937; border: 1px solid #374151; border-radius: 14px; padding: 22px; margin: 25px 0; text-align: center;">
+                    <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #9ca3af; letter-spacing: 1.5px; display: block; margin-bottom: 8px;">Your Permanent Access Password</span>
+                    <span style="font-size: 30px; font-weight: 800; font-family: 'Courier New', Courier, monospace; letter-spacing: 5px; color: #38bdf8; background: #0f172a; padding: 10px 24px; border-radius: 10px; display: inline-block; border: 1px solid #1e293b;">
+                        {password}
+                    </span>
+                </div>
+                <div style="background: #0f172a; border-left: 4px solid #6366f1; padding: 14px 18px; border-radius: 0 10px 10px 0; margin-bottom: 28px;">
+                    <p style="margin: 0; font-size: 13px; color: #9ca3af; line-height: 1.5;">
+                        <strong style="color: #f3f4f6;">Never pay again:</strong> This password is tied permanently to <code style="color: #a5b4fc; background: #1e1b4b; padding: 2px 6px; border-radius: 4px;">{buyer_email}</code>. Whenever you visit the transfer link in the future, simply enter this code to download.
+                    </p>
+                </div>
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <a href="{access_url}" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; padding: 14px 34px; font-weight: 700; text-decoration: none; border-radius: 12px; display: inline-block; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);">
+                        Unlock & Download File
+                    </a>
+                </div>
+            </div>
+            <div style="background: #0d121f; border-top: 1px solid #1f2937; padding: 18px 30px; text-align: center;">
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                    Zephyr Zero-Knowledge Escrow &bull; File Link: <a href="{access_url}" style="color: #818cf8; text-decoration: none;">{access_url}</a>
+                </p>
             </div>
         </div>
-        <p style="font-size: 13px; color: #475569; line-height: 1.5;">
-            <strong>Never Pay Again:</strong> Whenever you need this file, simply enter your email (<code>{buyer_email}</code>) and this permanent password.
-        </p>
-        <div style="text-align: center; margin: 26px 0;">
-            <a href="{access_url}" style="background-color: #4f46e5; color: #ffffff; padding: 13px 28px; font-weight: bold; text-decoration: none; border-radius: 12px; display: inline-block; font-size: 13px;">
-                Open File Transfer
-            </a>
-        </div>
-        <p style="font-size: 11px; color: #94a3b8; text-align: center;">
-            Transfer Link: <a href="{access_url}" style="color: #4f46e5;">{access_url}</a>
-        </p>
-    </div>
+    </body>
+    </html>
     """
     payload = {
         "sender": {"name": "Zephyr Escrow", "email": system_sender},
@@ -139,24 +161,32 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
         "htmlContent": html_content
     }
 
+    req_data = json.dumps(payload).encode("utf-8")
+    http_req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=req_data,
+        headers={
+            "api-key": brevo_api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "ZephyrVault/3.0"
+        },
+        method="POST"
+    )
+
     try:
-        http_req = urllib.request.Request(
-            "https://api.brevo.com/v3/smtp/email",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"api-key": brevo_api_key, "Content-Type": "application/json", "Accept": "application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(http_req, timeout=12) as resp:
-            print(f"[BREVO EMAIL SUCCESS] Sent permanent password to {buyer_email} (Status {resp.status})", flush=True)
+        with urllib.request.urlopen(http_req, timeout=15) as resp:
+            print(f"[BREVO EMAIL SUCCESS] Dispatched password to {buyer_email} (HTTP Status {resp.status})", flush=True)
             return True
     except urllib.error.HTTPError as he:
-        error_body = he.read().decode("utf-8", errors="ignore")
-        print(f"[BREVO EMAIL HTTP ERROR {he.code}]: {error_body}", flush=True)
+        err_msg = he.read().decode("utf-8", errors="ignore")
+        print(f"[BREVO EMAIL HTTP ERROR {he.code}]: {err_msg}", flush=True)
         return False
     except Exception as e:
-        print(f"[BREVO EMAIL ERROR]: {e}", flush=True)
+        print(f"[BREVO EMAIL ERROR]: {str(e)}", flush=True)
         return False
 
+# ----------------- DB Initialization & Migration -----------------
 @app.on_event("startup")
 def init_db_schema():
     if not DATABASE_URL:
@@ -186,6 +216,25 @@ def init_db_schema():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
+
+        migrations = [
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_price NUMERIC(5,2) DEFAULT 0.00;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_title VARCHAR(120);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_slug VARCHAR(60);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo_url TEXT;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_bg_url TEXT;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_accent_color VARCHAR(10) DEFAULT '#6366f1';",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+        ]
+
+        for m in migrations:
+            try:
+                cursor.execute(m)
+            except Exception as ex:
+                print(f"[MIGRATION WARNING]: {ex}", flush=True)
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS signature_requests (
@@ -277,6 +326,7 @@ def init_db_schema():
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
+# ----------------- Cloudflare R2 Client -----------------
 R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip()
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
@@ -300,7 +350,7 @@ DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 
 otp_storage = {}
 
-# Pydantic Request Models
+# ----------------- Pydantic Request Models -----------------
 class SendOtpRequest(BaseModel):
     email: str
 
@@ -366,7 +416,7 @@ class SupportChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
 
-# ----------------- OTP Verification -----------------
+# ----------------- OTP Verification Endpoints -----------------
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
     target_email = req.email.lower().strip()
@@ -546,6 +596,7 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
     return {"status": "dispatched", "recipient": req.recipient_email}
 
+# ----------------- Zephyr Copilot Engine -----------------
 ZEPHYR_SYSTEM_KNOWLEDGE = """
 You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
 Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
@@ -932,7 +983,6 @@ async def verify_stripe_checkout_session(
                 conn.commit()
 
             conn.close()
-            # Returns confirmation state ONLY without returning password or direct download
             return {
                 "status": "paid",
                 "buyer_email": buyer_email,
@@ -1075,6 +1125,47 @@ async def share_page(request: Request, share_id: str):
         "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
         "branding": branding
     })
+
+@app.get("/api/share-details/{share_id}")
+async def get_share_details(share_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="File share expired or purged.")
+
+    if row["expiry_hours"] != 0:
+        expires_at = row["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if datetime.utcnow().astimezone() > expires_at:
+            conn.close()
+            raise HTTPException(status_code=410, detail="Transfer link has expired.")
+
+    branding = None
+    if row.get("user_id"):
+        cursor.execute("""
+            SELECT tier, brand_title, brand_logo_url, brand_bg_url, brand_accent_color 
+            FROM users WHERE user_id = %s
+        """, (row["user_id"],))
+        u_brand = cursor.fetchone()
+        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
+            branding = dict(u_brand)
+
+    conn.close()
+
+    return {
+        "share_id": row["id"],
+        "filename": row["filename"],
+        "filesize_mb": float(row["filesize_mb"]),
+        "has_password": bool(row["password_hash"]),
+        "is_paywalled": bool(row.get("is_paywalled", False)),
+        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
+        "sender_branding": branding
+    }
 
 @app.post("/share/{share_id}/download")
 @app.post("/api/download/{share_id}")
@@ -2410,7 +2501,7 @@ async def lemon_webhook(request: Request):
             """, (sub_end, user_email.strip(),))
         conn.commit()
 
-    elif event_name in ["subscription.cancelled", "subscription.expired", "subscription.paused"]:
+    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""

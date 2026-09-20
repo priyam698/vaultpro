@@ -258,7 +258,7 @@
             ✓ Payment Verified! Check Your Gmail
           </div>
           <p class="text-xs text-slate-200 leading-relaxed">
-            We have emailed your permanent unlock password to <strong id="paidEmailDisplay" class="text-emerald-300 font-mono"></strong>. Enter the password below to unlock and download this file.
+            We have emailed your permanent unlock password to <strong id="paidEmailDisplay" class="text-emerald-300 font-mono"></strong>. Please check your Gmail Inbox and Spam folder, then enter the password below to unlock and download this file.
           </p>
           <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline">
             Open Gmail Inbox &rarr;
@@ -451,12 +451,18 @@
           paidNotice.classList.remove("hidden");
         }
 
+        // Show password field, keep it blank, require user to get password from Gmail
         switchToPasswordMode(emailParam);
 
+        // Notify server with session_id AND explicit email parameter to guarantee Brevo email trigger
         if (sessionId) {
           try {
-            await fetch(`/api/paywall/verify-session?share_id=${shareId}&session_id=${sessionId}`, { method: "POST" });
-          } catch(e) {}
+            await fetch(`/api/paywall/verify-session?share_id=${shareId}&session_id=${sessionId}&email=${encodeURIComponent(emailParam)}`, { 
+              method: "POST" 
+            });
+          } catch(e) {
+            console.error("Session verification error:", e);
+          }
         }
         return;
       }
@@ -542,6 +548,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Incorrect password.");
 
+        // File is unlocked only after valid password entry
         revealUnlockedUI(email, data.download_url, data.viewer_url, data.access_token);
       } catch(err) {
         errBox.innerText = err.message;
@@ -563,7 +570,7 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Failed to resend.");
-        alert("✓ A fresh access password has been sent to your Gmail inbox!");
+        alert("✓ Permanent password re-dispatched! Please check your Gmail Inbox and Spam folder.");
       } catch (err) {
         alert("Error: " + err.message);
       }
