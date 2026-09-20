@@ -634,6 +634,11 @@
         <div id="reqResultBox" class="hidden pt-3 border-t border-white/10 space-y-3">
           <div>
             <label class="block text-[11px] font-bold text-emerald-600 mb-1">✓ Share this link with your client:</label>
+            <!-- Vanishing Link Warning Alert -->
+            <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium leading-relaxed">
+              <span class="text-xs shrink-0">⚠️</span>
+              <span><strong>Copy this link now!</strong> Save or copy this deposit link before closing this modal.</span>
+            </div>
             <div class="flex items-center gap-2">
               <input id="reqLinkInput" type="text" readonly class="flex-1 rounded-xl px-3 py-2 text-xs font-mono font-semibold">
               <button onclick="copyReqLink()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer">Copy</button>
