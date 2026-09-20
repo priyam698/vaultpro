@@ -37,7 +37,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="3.0.2",
+    version="3.2.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -169,7 +169,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
             "api-key": brevo_api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "ZephyrVault/3.0"
+            "User-Agent": "ZephyrVault/3.2"
         },
         method="POST"
     )
@@ -186,7 +186,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
         print(f"[BREVO EMAIL ERROR]: {str(e)}", flush=True)
         return False
 
-# ----------------- DB Initialization & Migration -----------------
+# ----------------- DB Initialization & Migrations -----------------
 @app.on_event("startup")
 def init_db_schema():
     if not DATABASE_URL:
@@ -322,7 +322,7 @@ def init_db_schema():
 
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Database schema and escrow password engine verified.", flush=True)
+        print("[DB STARTUP]: Database schema, migrations, and escrow password engine verified.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -415,6 +415,15 @@ class UpgradeQuoteRequest(BaseModel):
 class SupportChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
+
+class SetPaywallPasswordRequest(BaseModel):
+    access_token: str
+    password: str
+
+class LoginPaywallRequest(BaseModel):
+    share_id: str
+    email: str
+    password: str
 
 # ----------------- OTP Verification Endpoints -----------------
 @app.post("/api/send-otp")
@@ -596,7 +605,7 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
     return {"status": "dispatched", "recipient": req.recipient_email}
 
-# ----------------- Zephyr Copilot Engine -----------------
+# ----------------- Zephyr Copilot Support Chat Engine -----------------
 ZEPHYR_SYSTEM_KNOWLEDGE = """
 You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
 Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
@@ -897,25 +906,35 @@ async def resend_paywall_password(req: ResendPasswordRequest):
     clean_email = req.email.strip().lower()
     conn = get_db()
     cursor = conn.cursor()
+    
+    # Matches both paid and pending checkouts to avoid race-condition lockout
     cursor.execute("""
         SELECT p.id, p.buyer_password, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s
+        ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
 
     if not row:
         conn.close()
-        raise HTTPException(status_code=404, detail="No completed payment found for this email.")
+        raise HTTPException(status_code=404, detail="No purchase record found for this email. Please initiate checkout first.")
 
     pwd = row.get("buyer_password")
     if not pwd:
         pwd = generate_permanent_password()
-        cursor.execute("UPDATE paywall_purchases SET buyer_password = %s, buyer_password_hash = %s WHERE id = %s",
-                       (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
-        conn.commit()
 
+    # Automatically set payment_status to 'paid' and commit generated password
+    cursor.execute("""
+        UPDATE paywall_purchases 
+        SET payment_status = 'paid', 
+            unlocked_at = COALESCE(unlocked_at, CURRENT_TIMESTAMP),
+            buyer_password = %s,
+            buyer_password_hash = %s
+        WHERE id = %s
+    """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
+    conn.commit()
     conn.close()
 
     sent = send_buyer_password_email(clean_email, row["filename"], pwd, req.share_id)
@@ -937,7 +956,7 @@ async def verify_stripe_checkout_session(
         session = stripe.checkout.Session.retrieve(session_id)
         token = session.metadata.get("access_token") if session.metadata else None
 
-        # Safely extract customer email across all Stripe object formats
+        # Robust extraction across Stripe objects, metadata, and frontend URL parameters
         customer_details = getattr(session, "customer_details", None)
         buyer_email = ""
         if customer_details and getattr(customer_details, "email", None):
@@ -976,7 +995,7 @@ async def verify_stripe_checkout_session(
                 """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
                 conn.commit()
 
-                # Dispatch password exclusively via Brevo email
+                # Trigger Brevo transactional email
                 send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
             else:
                 cursor.execute("UPDATE paywall_purchases SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP WHERE id = %s", (row["id"],))
@@ -1015,6 +1034,47 @@ async def verify_buyer_access(share_id: str = Query(...), access_token: str = Qu
         "buyer_email": purchase["buyer_email"],
         "has_password": bool(purchase.get("buyer_password"))
     }
+
+@app.post("/api/paywall/set-password")
+async def set_paywall_password(req: SetPaywallPasswordRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
+    cursor.execute("""
+        UPDATE paywall_purchases 
+        SET buyer_password_hash = %s 
+        WHERE access_token = %s AND payment_status = 'paid'
+    """, (pwd_hash, req.access_token))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
+
+@app.post("/api/paywall/login")
+async def paywall_login(req: LoginPaywallRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
+    cursor.execute("""
+        SELECT access_token, buyer_password, buyer_password_hash 
+        FROM paywall_purchases 
+        WHERE share_id = %s AND LOWER(buyer_email) = LOWER(%s) AND payment_status = 'paid'
+    """, (req.share_id, req.email.strip()))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=403, detail="No paid purchase found for this email address.")
+    
+    matched = False
+    if row.get("buyer_password") and row["buyer_password"].upper() == req.password.strip().upper():
+        matched = True
+    elif row.get("buyer_password_hash") and row["buyer_password_hash"] == pwd_hash:
+        matched = True
+
+    if not matched:
+        raise HTTPException(status_code=401, detail="Incorrect password for this purchase.")
+    
+    return {"status": "success", "access_token": row["access_token"]}
 
 # ----------------- Secure Protected Viewer -----------------
 @app.get("/secure-view/{share_id}", response_class=HTMLResponse)
