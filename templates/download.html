@@ -153,16 +153,6 @@
       color: #64748b !important;
     }
 
-    body.light-theme .direct-dl-btn {
-      background: rgba(241, 245, 249, 0.92) !important;
-      border: 1px solid rgba(195, 206, 222, 0.85) !important;
-      color: #0f172a !important;
-    }
-    body.light-theme .direct-dl-btn:hover {
-      background: #ffffff !important;
-      border-color: #6366f1 !important;
-    }
-
     body.light-theme footer {
       background-color: rgba(220, 228, 238, 0.92) !important;
       border-color: rgba(195, 206, 222, 0.8) !important;
@@ -232,9 +222,9 @@
     </div>
   </header>
 
-  <main class="relative z-20 max-w-xl mx-auto px-6 py-14 flex-1 flex flex-col items-center justify-center text-center w-full">
+  <main class="relative z-20 max-w-xl mx-auto px-6 py-10 flex-1 flex flex-col items-center justify-center text-center w-full">
     
-    <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative">
+    <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative shadow-2xl">
       
       <div id="iconBox" class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20 text-2xl transition-all">
         {% if is_paywalled %}💰{% else %}📦{% endif %}
@@ -251,20 +241,41 @@
       <!-- PAY-TO-UNLOCK ESCROW SECTION -->
       <div id="paywallContainer" class="mt-6 space-y-4 text-left">
         
-        <!-- FLASH NOTIFICATION: Displayed when redirected back from Stripe -->
-        <div id="paymentSuccessNotice" class="hidden p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-slate-900/80 border border-emerald-500/40 text-left space-y-2 shadow-xl">
-          <div class="flex items-center gap-2 text-emerald-400 font-black text-xs uppercase tracking-wider">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            ✓ Payment Verified! Check Your Gmail
+        <!-- STEP 1 (NEW): POST-PAYMENT CONFIRM/EDIT EMAIL BOX -->
+        <div id="confirmEmailBox" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-lg">
+          <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Payment Verified! Confirm Delivery Gmail
           </div>
-          <p class="text-xs text-slate-200 leading-relaxed">
-            We have emailed your permanent unlock password to <strong id="paidEmailDisplay" class="text-emerald-300 font-mono"></strong>. Please check your Gmail Inbox and Spam folder, then enter the password below to unlock and download this file.
+          <p class="text-xs opacity-80 leading-relaxed">
+            Please confirm or edit the email address where your <strong>permanent lifetime unlock password</strong> will be dispatched:
           </p>
-          <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline">
+          <div>
+            <label class="block text-[11px] font-bold opacity-75 mb-1">Target Delivery Email</label>
+            <input type="email" id="confirmEmailInput" placeholder="yourname@gmail.com"
+                   class="w-full bg-slate-900/40 border border-indigo-400/40 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none transition">
+          </div>
+          <button id="confirmEmailBtn" onclick="submitEmailConfirmationAndSendPass()"
+                  class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-md shadow-indigo-600/30 transition cursor-pointer">
+            Confirm Email & Send Password
+          </button>
+        </div>
+
+        <!-- STEP 2: GREEN NOTIFICATION BANNER (Displayed once password is sent) -->
+        <div id="paymentVerifiedBanner" class="hidden p-4 sm:p-5 rounded-2xl bg-[#06241b] border border-emerald-500/40 text-left space-y-1.5 shadow-xl">
+          <div class="flex items-center gap-2 text-emerald-400 font-black text-xs tracking-wider">
+            <span>✓</span>
+            <span>PAYMENT VERIFIED! CHECK YOUR GMAIL</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            We have emailed your permanent unlock password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono"></strong>. Please check your Gmail Inbox and Spam folder, then enter the password below to unlock this file.
+          </p>
+          <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-300 hover:text-indigo-200 font-bold underline mt-1">
             Open Gmail Inbox &rarr;
           </a>
         </div>
 
+        <!-- Escrow Pricing Bar -->
         <div class="paywall-banner p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900/60 border border-emerald-500/30 space-y-1.5 transition-all">
           <div class="flex justify-between items-center">
             <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400 flex items-center gap-1.5">
@@ -278,6 +289,7 @@
           </p>
         </div>
 
+        <!-- Inputs Group -->
         <div id="buyerInputSection" class="space-y-3">
           <div>
             <label class="block text-xs font-semibold opacity-80 mb-1">Your Email Address</label>
@@ -285,26 +297,26 @@
                    class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-emerald-400 rounded-xl px-4 py-3 text-xs focus:outline-none transition">
           </div>
 
-          <!-- Password Field: Automatically revealed when email has ALREADY paid -->
+          <!-- Permanent Password Field (Visible for paid accounts / on return) -->
           <div id="buyerPasswordField" class="hidden space-y-1.5">
             <div class="flex justify-between items-center">
               <label class="block text-xs font-semibold text-emerald-400">Enter Permanent Password (from Gmail)</label>
-              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold">Resend code</button>
+              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend code</button>
             </div>
-            <input id="buyerPasswordInput" type="password" placeholder="e.g. ZP-7492A1" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()"
-                   class="w-full bg-slate-900/40 border border-emerald-400/50 rounded-xl px-4 py-3 text-xs focus:outline-none transition font-mono tracking-widest text-emerald-300 font-bold">
+            <input id="buyerPasswordInput" type="text" placeholder="e.g. ZP-7492A1" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()"
+                   class="w-full bg-slate-900/40 border border-emerald-400/50 rounded-xl px-4 py-3 text-xs focus:outline-none transition font-mono uppercase tracking-widest text-emerald-300 font-bold">
             <p class="text-[10px] opacity-70">Check your Gmail inbox or Spam folder for the code sent by Zephyr.</p>
           </div>
 
           <div id="paywallErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
 
-          <!-- State A: Initial Checkout Button -->
+          <!-- State A: Initial Checkout Button (Unpaid) -->
           <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
                   class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 via-teal-600 hover:via-teal-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
             Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
           </button>
 
-          <!-- State B: Unlock With Password Button -->
+          <!-- State B: Unlock With Password Button (Paid) -->
           <button id="paywallUnlockBtn" onclick="handleUnlockWithPassword()" 
                   class="hidden w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
             Unlock & Download File
@@ -315,7 +327,7 @@
         <div id="unlockedActionsSection" class="hidden space-y-2.5 pt-2">
           <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300 flex items-center justify-between">
             <span class="font-bold flex items-center gap-2">
-              <span>✓</span> Personal License Active
+              <span>✓</span> Lifetime Personal Access Active
             </span>
             <span id="verifiedBuyerBadge" class="font-mono text-[11px] opacity-80"></span>
           </div>
@@ -400,6 +412,8 @@
     const urlParams = new URLSearchParams(window.location.search);
 
     let typingTimer = null;
+    let currentSessionId = urlParams.get("session_id");
+    let currentToken = urlParams.get("token");
 
     let brandingData = null;
     try {
@@ -437,37 +451,47 @@
     window.addEventListener("DOMContentLoaded", async () => {
       const isPaidParam = urlParams.get("paid") === "true";
       const emailParam = urlParams.get("email");
-      const sessionId = urlParams.get("session_id");
 
-      // 1. If redirected back from successful Stripe checkout
-      if (isPaidParam && emailParam) {
-        const emailInput = document.getElementById("buyerEmailInput");
-        if (emailInput) emailInput.value = emailParam;
+      // 1. If returning from Stripe Checkout
+      if (isPaidParam) {
+        let candidateEmail = (emailParam || "").trim();
 
-        const paidNotice = document.getElementById("paymentSuccessNotice");
-        const paidDisplay = document.getElementById("paidEmailDisplay");
-        if (paidNotice && paidDisplay) {
-          paidDisplay.innerText = emailParam;
-          paidNotice.classList.remove("hidden");
-        }
+        // Verify session status on backend
+        try {
+          const verifyRes = await fetch("/api/paywall/verify-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              share_id: shareId, 
+              session_id: currentSessionId, 
+              token: currentToken, 
+              email: candidateEmail 
+            })
+          });
+          const vData = await verifyRes.json();
+          if (vData.verified) {
+            candidateEmail = vData.email || candidateEmail;
 
-        // Show password field, keep it blank, require user to get password from Gmail
-        switchToPasswordMode(emailParam);
-
-        // Notify server with session_id AND explicit email parameter to guarantee Brevo email trigger
-        if (sessionId) {
-          try {
-            await fetch(`/api/paywall/verify-session?share_id=${shareId}&session_id=${sessionId}&email=${encodeURIComponent(emailParam)}`, { 
-              method: "POST" 
-            });
-          } catch(e) {
-            console.error("Session verification error:", e);
+            // If password has not yet been dispatched, prompt to confirm or edit email
+            if (!vData.has_password) {
+              showConfirmEmailDialog(candidateEmail);
+              return;
+            } else {
+              // Password already dispatched, show green banner and password field
+              switchToPasswordMode(candidateEmail);
+              return;
+            }
           }
+        } catch (e) {
+          console.error("Session verification notice:", e);
         }
+
+        // Fallback if network was slow: show confirm email dialog
+        showConfirmEmailDialog(candidateEmail);
         return;
       }
 
-      // 2. Pre-fill remembered email
+      // 2. Pre-fill remembered email and verify lifetime status
       const savedEmail = localStorage.getItem("buyer_email_" + shareId);
       if (savedEmail) {
         const emailInput = document.getElementById("buyerEmailInput");
@@ -478,11 +502,65 @@
       }
     });
 
+    // Confirmation Dialog Controller
+    function showConfirmEmailDialog(email) {
+      const confirmBox = document.getElementById("confirmEmailBox");
+      const confirmInput = document.getElementById("confirmEmailInput");
+      const checkoutBtn = document.getElementById("paywallCheckoutBtn");
+
+      if (confirmBox && confirmInput) {
+        confirmInput.value = email || "";
+        confirmBox.classList.remove("hidden");
+        if (checkoutBtn) checkoutBtn.classList.add("hidden");
+        confirmInput.focus();
+      }
+    }
+
+    // Step: User confirms/edits Gmail and clicks "Confirm Email & Send Password"
+    async function submitEmailConfirmationAndSendPass() {
+      const input = document.getElementById("confirmEmailInput");
+      const email = input ? input.value.trim().toLowerCase() : "";
+      const btn = document.getElementById("confirmEmailBtn");
+
+      if (!email || !email.includes("@")) {
+        alert("Please enter a valid Gmail address.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Dispatching Password via Brevo...";
+
+      try {
+        const res = await fetch("/api/paywall/confirm-and-send-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            share_id: shareId,
+            session_id: currentSessionId,
+            token: currentToken,
+            email: email
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to send password.");
+
+        // Hide confirmation box and transition to password entry with green banner
+        document.getElementById("confirmEmailBox").classList.add("hidden");
+        switchToPasswordMode(email);
+      } catch (err) {
+        alert("Error: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "Confirm Email & Send Password";
+      }
+    }
+
     function handleEmailTyping() {
       clearTimeout(typingTimer);
       typingTimer = setTimeout(checkBuyerEmail, 350);
     }
 
+    // Auto-check if buyer email already has lifetime access
     async function checkBuyerEmail() {
       const emailInput = document.getElementById("buyerEmailInput");
       if (!emailInput) return;
@@ -501,27 +579,41 @@
       } catch(e) {}
     }
 
+    // Transition to Password Input Mode (Never prompts for payment again)
     function switchToPasswordMode(email) {
       const pwdField = document.getElementById("buyerPasswordField");
       const checkoutBtn = document.getElementById("paywallCheckoutBtn");
       const unlockBtn = document.getElementById("paywallUnlockBtn");
+      const emailInput = document.getElementById("buyerEmailInput");
+      const greenBanner = document.getElementById("paymentVerifiedBanner");
+      const emailDisplay = document.getElementById("verifiedEmailDisplay");
 
+      if (emailInput) emailInput.value = email;
+      if (emailDisplay) emailDisplay.innerText = email;
+      if (greenBanner) greenBanner.classList.remove("hidden");
       if (pwdField) pwdField.classList.remove("hidden");
       if (checkoutBtn) checkoutBtn.classList.add("hidden");
       if (unlockBtn) unlockBtn.classList.remove("hidden");
+
       localStorage.setItem("buyer_email_" + shareId, email);
+
+      const passInput = document.getElementById("buyerPasswordInput");
+      if (passInput) passInput.focus();
     }
 
     function switchToPaymentMode() {
       const pwdField = document.getElementById("buyerPasswordField");
       const checkoutBtn = document.getElementById("paywallCheckoutBtn");
       const unlockBtn = document.getElementById("paywallUnlockBtn");
+      const greenBanner = document.getElementById("paymentVerifiedBanner");
 
+      if (greenBanner) greenBanner.classList.add("hidden");
       if (pwdField) pwdField.classList.add("hidden");
       if (checkoutBtn) checkoutBtn.classList.remove("hidden");
       if (unlockBtn) unlockBtn.classList.add("hidden");
     }
 
+    // Submit Password to Unlock and Download
     async function handleUnlockWithPassword() {
       const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
       const password = document.getElementById("buyerPasswordInput").value.trim();
@@ -530,6 +622,11 @@
 
       errBox.classList.add("hidden");
 
+      if (!email) {
+        errBox.innerText = "Please enter your Gmail address.";
+        errBox.classList.remove("hidden");
+        return;
+      }
       if (!password) {
         errBox.innerText = "Please enter the permanent password sent to your Gmail.";
         errBox.classList.remove("hidden");
@@ -548,7 +645,6 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Incorrect password.");
 
-        // File is unlocked only after valid password entry
         revealUnlockedUI(email, data.download_url, data.viewer_url, data.access_token);
       } catch(err) {
         errBox.innerText = err.message;
@@ -558,9 +654,13 @@
       }
     }
 
+    // Resend Password to Gmail via Brevo
     async function resendPassword() {
       const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
-      if (!email) return;
+      if (!email) {
+        alert("Please enter your Gmail address first.");
+        return;
+      }
 
       try {
         const res = await fetch("/api/paywall/resend-password", {
@@ -570,12 +670,13 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Failed to resend.");
-        alert("✓ Permanent password re-dispatched! Please check your Gmail Inbox and Spam folder.");
+        alert("✓ Permanent password dispatched to " + email + "! Please check your Gmail inbox and Spam folder.");
       } catch (err) {
         alert("Error: " + err.message);
       }
     }
 
+    // Initial Stripe Checkout
     async function handlePaywallCheckout() {
       const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
       const errBox = document.getElementById("paywallErrorMsg");
@@ -584,7 +685,7 @@
       errBox.classList.add("hidden");
 
       if (!email || !email.includes("@")) {
-        errBox.innerText = "Please enter a valid email address.";
+        errBox.innerText = "Please enter a valid Gmail address to continue.";
         errBox.classList.remove("hidden");
         return;
       }
@@ -599,9 +700,8 @@
           body: JSON.stringify({ share_id: shareId, buyer_email: email })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Failed to initiate payment.");
 
-        if (data.status === "already_unlocked") {
+        if (data.status === "already_paid" || data.status === "already_unlocked") {
           switchToPasswordMode(email);
           return;
         }
@@ -609,19 +709,21 @@
         if (data.checkout_url) {
           localStorage.setItem("buyer_email_" + shareId, email);
           window.location.href = data.checkout_url;
+        } else {
+          throw new Error("Could not initialize Stripe Checkout.");
         }
       } catch(err) {
         errBox.innerText = err.message;
         errBox.classList.remove("hidden");
         btn.disabled = false;
-        btn.innerText = "Retry Checkout";
+        btn.innerText = `Pay $${Number(unlockPrice).toFixed(2)} & Unlock Personal Access`;
       }
     }
 
     function revealUnlockedUI(email, downloadUrl, viewerUrl, token) {
       document.getElementById("buyerInputSection").classList.add("hidden");
-      const successNotice = document.getElementById("paymentSuccessNotice");
-      if (successNotice) successNotice.classList.add("hidden");
+      const greenBanner = document.getElementById("paymentVerifiedBanner");
+      if (greenBanner) greenBanner.classList.add("hidden");
 
       document.getElementById("unlockedActionsSection").classList.remove("hidden");
       document.getElementById("verifiedBuyerBadge").innerText = email;
@@ -636,6 +738,7 @@
       localStorage.setItem("pwtk_" + shareId, token);
       localStorage.setItem("buyer_email_" + shareId, email);
 
+      // Auto trigger file download
       window.location.href = downloadUrl;
     }
 

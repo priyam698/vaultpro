@@ -37,7 +37,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="3.3.0",
+    version="3.4.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -103,7 +103,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
     if not brevo_api_key:
-        print(f"[BREVO EMAIL ERROR]: BREVO_API_KEY missing from environment.", flush=True)
+        print("[BREVO EMAIL ERROR]: BREVO_API_KEY missing from environment.", flush=True)
         return False
     if not buyer_email or "@" not in buyer_email:
         print(f"[BREVO EMAIL ERROR]: Invalid target buyer email: '{buyer_email}'", flush=True)
@@ -303,16 +303,24 @@ def init_db_schema():
                 payment_status VARCHAR(30) DEFAULT 'unpaid',
                 buyer_password VARCHAR(64),
                 buyer_password_hash TEXT,
+                permanent_password VARCHAR(64),
+                stripe_session_id VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 unlocked_at TIMESTAMP
             );
         """)
 
-        try:
-            cursor.execute("ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password VARCHAR(64);")
-            cursor.execute("ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password_hash TEXT;")
-        except Exception:
-            pass
+        paywall_migrations = [
+            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password VARCHAR(64);",
+            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password_hash TEXT;",
+            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS permanent_password VARCHAR(64);",
+            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);"
+        ]
+        for pm in paywall_migrations:
+            try:
+                cursor.execute(pm)
+            except Exception:
+                pass
 
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_paywall_lookup 
@@ -378,6 +386,17 @@ class BrandingUpdatePayload(BaseModel):
 class InitiatePaywallRequest(BaseModel):
     share_id: str
     buyer_email: str
+
+class VerifySessionRequest(BaseModel):
+    share_id: str
+    session_id: Optional[str] = None
+    token: Optional[str] = None
+
+class ConfirmEmailSendPassRequest(BaseModel):
+    share_id: str
+    session_id: Optional[str] = None
+    token: Optional[str] = None
+    email: str
 
 class UnlockWithPasswordRequest(BaseModel):
     share_id: str
@@ -622,11 +641,10 @@ Platform Knowledge & Pricing Tiers:
 - Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
 - Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
 - Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
-- Pay-to-Unlock Escrow: Creators can attach invoice prices to shared files. Buyers securely pay via Stripe. The platform automatically takes a 12% fee and directly transfers 88% to the creator's connected bank account.
-- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the active plan limit are pruned starting from the oldest uploaded files.
+- Pay-to-Unlock Escrow: Creators can attach invoice prices to shared files. Buyers securely pay via Stripe.
+- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
-
 @app.post("/api/support/chat")
 async def support_chat(req: SupportChatRequest):
     user_msg = req.message.strip()
@@ -753,12 +771,13 @@ async def sign_page(request: Request):
 
 # ----------------- Pay-to-Unlock Escrow API -----------------
 @app.get("/api/paywall/check-email")
+@app.get("/api/paywall/check-buyer")
 async def check_paywall_email(share_id: str = Query(...), email: str = Query(...)):
     clean_email = email.strip().lower()
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT access_token, payment_status, buyer_password 
+        SELECT access_token, payment_status, buyer_password, permanent_password 
         FROM paywall_purchases 
         WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
     """, (share_id, clean_email))
@@ -766,15 +785,16 @@ async def check_paywall_email(share_id: str = Query(...), email: str = Query(...
     conn.close()
 
     if row:
+        pwd = row.get("buyer_password") or row.get("permanent_password")
         return {
             "has_paid": True,
             "email": clean_email,
-            "has_password": bool(row.get("buyer_password"))
+            "has_password": bool(pwd)
         }
-    return {"has_paid": False, "email": clean_email}
+    return {"has_paid": False, "email": clean_email, "has_password": False}
 
 @app.post("/api/paywall/initiate")
-async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
+async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Request):
     if not stripe.api_key:
         raise HTTPException(status_code=500, detail="Stripe is not configured on the server.")
 
@@ -798,8 +818,10 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
         conn.close()
         raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
 
+    # Check if this buyer has already bought this file permanently
     cursor.execute("""
-        SELECT access_token FROM paywall_purchases 
+        SELECT access_token, buyer_password, permanent_password 
+        FROM paywall_purchases 
         WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
     """, (payload.share_id, buyer))
     existing = cursor.fetchone()
@@ -807,22 +829,18 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
     if existing:
         conn.close()
         return {
-            "status": "already_unlocked",
-            "message": "This email already has full access. Enter your permanent password to unlock."
+            "status": "already_paid",
+            "message": "You have already purchased lifetime access for this file! Enter your permanent password to unlock."
         }
 
     access_token = f"pwtk_{secrets.token_hex(20)}"
     price_usd = float(share.get("unlock_price") or 0.00)
-
-    cursor.execute("""
-        INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status)
-        VALUES (%s, %s, %s, %s, 'pending')
-    """, (payload.share_id, buyer, access_token, price_usd))
-    conn.commit()
-    conn.close()
-
     price_cents = int(price_usd * 100)
     platform_fee_cents = int(price_cents * 0.12)
+
+    base_url = str(request.base_url).rstrip("/")
+    success_url = f"{base_url}/share/{payload.share_id}?paid=true&email={urllib.parse.quote(buyer)}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{base_url}/share/{payload.share_id}"
 
     try:
         session = stripe.checkout.Session.create(
@@ -841,10 +859,17 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
                 'transfer_data': {'destination': share['stripe_account_id']},
             },
             mode='payment',
-            success_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}?paid=true&email={buyer}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"https://zephyr-drive.onrender.com/share/{payload.share_id}",
+            success_url=success_url,
+            cancel_url=cancel_url,
             metadata={"access_token": access_token, "buyer_email": buyer, "share_id": payload.share_id}
         )
+
+        cursor.execute("""
+            INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status, stripe_session_id)
+            VALUES (%s, %s, %s, %s, 'pending', %s)
+        """, (payload.share_id, buyer, access_token, price_usd, session.id))
+        conn.commit()
+        conn.close()
 
         return {
             "status": "checkout_ready",
@@ -852,9 +877,142 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
             "access_token": access_token
         }
     except Exception as e:
+        conn.close()
         raise HTTPException(status_code=500, detail=f"Stripe Checkout error: {str(e)}")
 
+# ----------------- Stripe Checkout Session Verification -----------------
+@app.post("/api/paywall/verify-session")
+async def verify_stripe_checkout_session(
+    request: Request,
+    session_id: Optional[str] = Query(None), 
+    share_id: Optional[str] = Query(None),
+    email: Optional[str] = Query(None),
+    token: Optional[str] = Query(None)
+):
+    # Support both JSON payload and Query Parameters
+    req_session_id = session_id
+    req_share_id = share_id
+    req_email = email
+    req_token = token
+
+    try:
+        body = await request.json()
+        if isinstance(body, dict):
+            req_session_id = body.get("session_id") or req_session_id
+            req_share_id = body.get("share_id") or req_share_id
+            req_token = body.get("token") or req_token
+            req_email = body.get("email") or req_email
+    except Exception:
+        pass
+
+    if not req_share_id:
+        raise HTTPException(status_code=400, detail="share_id is required.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # If Stripe session ID provided, directly check Stripe payment status to bypass webhook lag
+    if req_session_id and stripe.api_key:
+        try:
+            stripe_session = stripe.checkout.Session.retrieve(req_session_id)
+            if stripe_session.payment_status in ['paid', 'complete']:
+                cd = stripe_session.get("customer_details") or {}
+                cust_email = (
+                    cd.get("email") 
+                    or stripe_session.get("customer_email") 
+                    or (stripe_session.get("metadata", {}) or {}).get("buyer_email") 
+                    or ""
+                ).strip().lower()
+
+                cursor.execute("""
+                    UPDATE paywall_purchases 
+                    SET payment_status = 'paid', 
+                        unlocked_at = COALESCE(unlocked_at, CURRENT_TIMESTAMP),
+                        buyer_email = COALESCE(NULLIF(%s, ''), buyer_email)
+                    WHERE stripe_session_id = %s OR access_token = %s
+                """, (cust_email, req_session_id, req_token))
+                conn.commit()
+        except Exception as e:
+            print(f"[SESSION RETRIEVE NOTICE]: {e}", flush=True)
+
+    cursor.execute("""
+        SELECT p.id, p.buyer_email, p.buyer_password, p.permanent_password, p.payment_status, p.access_token, s.filename 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s 
+          AND (p.stripe_session_id = %s OR p.access_token = %s OR (LOWER(p.buyer_email) = %s AND %s != ''))
+          AND p.payment_status = 'paid'
+        ORDER BY p.id DESC LIMIT 1
+    """, (req_share_id, req_session_id, req_token, (req_email or "").strip().lower(), (req_email or "").strip().lower()))
+    record = cursor.fetchone()
+    conn.close()
+
+    if not record:
+        raise HTTPException(status_code=400, detail="Payment verification pending or failed.")
+
+    active_pwd = record.get("buyer_password") or record.get("permanent_password")
+    buyer_email = record["buyer_email"]
+
+    return {
+        "verified": True,
+        "status": "paid",
+        "email": buyer_email,
+        "buyer_email": buyer_email,
+        "token": record.get("access_token", ""),
+        "has_password": bool(active_pwd)
+    }
+
+# ----------------- Confirm Email & Send Password Flow -----------------
+@app.post("/api/paywall/confirm-and-send-password")
+async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, request: Request):
+    clean_email = payload.email.lower().strip()
+    if not clean_email or "@" not in clean_email:
+        raise HTTPException(status_code=400, detail="Please enter a valid Gmail address.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT p.*, s.filename 
+        FROM paywall_purchases p
+        JOIN shares s ON s.id = p.share_id
+        WHERE p.share_id = %s 
+          AND (p.stripe_session_id = %s OR p.access_token = %s OR LOWER(p.buyer_email) = %s)
+          AND p.payment_status = 'paid'
+        ORDER BY p.id DESC LIMIT 1
+    """, (payload.share_id, payload.session_id, payload.token, clean_email))
+    purchase = cursor.fetchone()
+
+    if not purchase:
+        conn.close()
+        raise HTTPException(status_code=403, detail="No verified payment record found.")
+
+    pwd = purchase.get("buyer_password") or purchase.get("permanent_password")
+    if not pwd:
+        pwd = generate_permanent_password()
+
+    pwd_hash = hashlib.sha256(pwd.encode()).hexdigest()
+
+    cursor.execute("""
+        UPDATE paywall_purchases 
+        SET buyer_email = %s, 
+            buyer_password = %s,
+            permanent_password = %s,
+            buyer_password_hash = %s
+        WHERE id = %s
+    """, (clean_email, pwd, pwd, pwd_hash, purchase["id"]))
+    conn.commit()
+    conn.close()
+
+    sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
+    if not sent:
+        print(f"[BREVO WARNING]: Email failed to send to {clean_email}, password is {pwd}", flush=True)
+
+    return {"status": "success", "email": clean_email}
+
+# ----------------- Unlock With Permanent Password -----------------
 @app.post("/api/paywall/unlock-password")
+@app.post("/api/paywall/unlock-with-password")
 async def unlock_with_password(req: UnlockWithPasswordRequest):
     clean_email = req.email.strip().lower()
     clean_pwd = req.password.strip()
@@ -862,26 +1020,30 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT p.access_token, p.buyer_password, p.buyer_password_hash, s.filename, s.s3_key 
+        SELECT p.access_token, p.buyer_password, p.permanent_password, p.buyer_password_hash, s.filename, s.s3_key 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
+        ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
-    conn.close()
 
     if not row:
+        conn.close()
         raise HTTPException(status_code=403, detail="No active purchase found for this email address.")
 
     pwd_hash = hashlib.sha256(clean_pwd.encode()).hexdigest()
     matched = False
-    if row.get("buyer_password") and row["buyer_password"].upper() == clean_pwd.upper():
+    
+    stored_plain = (row.get("buyer_password") or row.get("permanent_password") or "").strip()
+    if stored_plain and stored_plain.upper() == clean_pwd.upper():
         matched = True
     elif row.get("buyer_password_hash") and row["buyer_password_hash"] == pwd_hash:
         matched = True
 
     if not matched:
-        raise HTTPException(status_code=401, detail="Incorrect password. Please check the code sent to your Gmail inbox.")
+        conn.close()
+        raise HTTPException(status_code=401, detail="Incorrect password. Please check the code sent to your Gmail inbox or click 'Resend code'.")
 
     download_url = s3_client.generate_presigned_url(
         "get_object",
@@ -893,52 +1055,49 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
         ExpiresIn=86400
     )
 
+    cursor.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = %s", (req.share_id,))
+    conn.commit()
+    conn.close()
+
     return {
         "status": "unlocked",
         "access_token": row["access_token"],
         "download_url": download_url,
+        "filename": row["filename"],
         "viewer_url": f"/secure-view/{req.share_id}?token={row['access_token']}"
     }
 
-# ----------------- FIXED: Resend Password Logic -----------------
+# ----------------- Resend Permanent Password -----------------
 @app.post("/api/paywall/resend-password")
 async def resend_paywall_password(req: ResendPasswordRequest):
-    """
-    Finds the latest purchase record for this email and share, guarantees password generation,
-    sets payment_status to 'paid', and dispatches the Brevo email.
-    """
     clean_email = req.email.strip().lower()
     conn = get_db()
     cursor = conn.cursor()
     
-    # Matches the latest transaction regardless of whether it is 'paid' or 'pending'
     cursor.execute("""
-        SELECT p.id, p.buyer_password, s.filename 
+        SELECT p.id, p.buyer_password, p.permanent_password, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
         ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
 
     if not row:
         conn.close()
-        raise HTTPException(status_code=404, detail="No purchase record found for this email. Please initiate checkout first.")
+        raise HTTPException(status_code=404, detail="No completed purchase record found for this email.")
 
-    pwd = row.get("buyer_password")
+    pwd = row.get("buyer_password") or row.get("permanent_password")
     if not pwd:
         pwd = generate_permanent_password()
-
-    # Automatically ensure status is 'paid' and password hash is saved
-    cursor.execute("""
-        UPDATE paywall_purchases 
-        SET payment_status = 'paid', 
-            unlocked_at = COALESCE(unlocked_at, CURRENT_TIMESTAMP),
-            buyer_password = %s,
-            buyer_password_hash = %s
-        WHERE id = %s
-    """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
-    conn.commit()
+        cursor.execute("""
+            UPDATE paywall_purchases 
+            SET buyer_password = %s, 
+                permanent_password = %s,
+                buyer_password_hash = %s
+            WHERE id = %s
+        """, (pwd, pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
+        conn.commit()
     conn.close()
 
     sent = send_buyer_password_email(clean_email, row["filename"], pwd, req.share_id)
@@ -947,94 +1106,12 @@ async def resend_paywall_password(req: ResendPasswordRequest):
 
     return {"status": "success", "message": f"Password has been dispatched to {clean_email}."}
 
-# ----------------- FIXED: Stripe Checkout Session Verification -----------------
-@app.post("/api/paywall/verify-session")
-async def verify_stripe_checkout_session(
-    session_id: str = Query(...), 
-    share_id: str = Query(...),
-    email: Optional[str] = Query(None),
-    token: Optional[str] = Query(None)
-):
-    """
-    Retrieves the Stripe checkout session, extracts the email, generates and stores the permanent
-    password, sets payment_status = 'paid', and reliably dispatches the password email.
-    """
-    if not stripe.api_key:
-        raise HTTPException(status_code=500, detail="Stripe is not configured.")
-
-    try:
-        session = stripe.checkout.Session.retrieve(session_id)
-        access_token = token or (session.metadata.get("access_token") if getattr(session, "metadata", None) else None)
-
-        # Dictionary-safe email resolution
-        buyer_email = (email or "").strip().lower()
-
-        if not buyer_email and hasattr(session, "customer_details") and session.customer_details:
-            cd = session.customer_details
-            buyer_email = (cd.get("email") if isinstance(cd, dict) or hasattr(cd, "get") else getattr(cd, "email", None)) or ""
-
-        if not buyer_email and hasattr(session, "customer_email") and session.customer_email:
-            buyer_email = session.customer_email or ""
-
-        if not buyer_email and getattr(session, "metadata", None):
-            buyer_email = session.metadata.get("buyer_email") or ""
-
-        buyer_email = buyer_email.strip().lower()
-
-        conn = get_db()
-        cursor = conn.cursor()
-        
-        # Locate record by access_token OR share_id + email
-        cursor.execute("""
-            SELECT p.id, p.buyer_email, p.buyer_password, s.filename, s.s3_key 
-            FROM paywall_purchases p
-            JOIN shares s ON s.id = p.share_id
-            WHERE (p.access_token = %s AND %s IS NOT NULL)
-               OR (p.share_id = %s AND LOWER(p.buyer_email) = %s AND %s != '')
-            ORDER BY p.id DESC LIMIT 1
-        """, (access_token, access_token, share_id, buyer_email, buyer_email))
-        row = cursor.fetchone()
-
-        if not row:
-            conn.close()
-            raise HTTPException(status_code=404, detail="Purchase record not found for this checkout.")
-
-        target_email = buyer_email or (row.get("buyer_email") or "").strip().lower()
-        pwd = row.get("buyer_password")
-        if not pwd:
-            pwd = generate_permanent_password()
-
-        cursor.execute("""
-            UPDATE paywall_purchases 
-            SET payment_status = 'paid', 
-                unlocked_at = CURRENT_TIMESTAMP,
-                buyer_password = %s,
-                buyer_password_hash = %s
-            WHERE id = %s
-        """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
-        conn.commit()
-        conn.close()
-
-        # Always dispatch Brevo email upon verification
-        if target_email:
-            send_buyer_password_email(target_email, row["filename"], pwd, share_id)
-
-        return {
-            "status": "paid",
-            "buyer_email": target_email,
-            "token": access_token or ""
-        }
-
-    except Exception as e:
-        print(f"[VERIFY SESSION ERROR]: {e}", flush=True)
-        raise HTTPException(status_code=400, detail=str(e))
-
 @app.get("/api/paywall/verify-access")
 async def verify_buyer_access(share_id: str = Query(...), access_token: str = Query(...)):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT buyer_email, payment_status, buyer_password 
+        SELECT buyer_email, payment_status, buyer_password, permanent_password 
         FROM paywall_purchases 
         WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
     """, (share_id, access_token))
@@ -1044,10 +1121,11 @@ async def verify_buyer_access(share_id: str = Query(...), access_token: str = Qu
     if not purchase:
         raise HTTPException(status_code=403, detail="Payment required to access this file.")
 
+    pwd = purchase.get("buyer_password") or purchase.get("permanent_password")
     return {
         "unlocked": True, 
         "buyer_email": purchase["buyer_email"],
-        "has_password": bool(purchase.get("buyer_password"))
+        "has_password": bool(pwd)
     }
 
 @app.post("/api/paywall/set-password")
@@ -1057,9 +1135,11 @@ async def set_paywall_password(req: SetPaywallPasswordRequest):
     pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
     cursor.execute("""
         UPDATE paywall_purchases 
-        SET buyer_password_hash = %s 
+        SET buyer_password_hash = %s,
+            buyer_password = %s,
+            permanent_password = %s
         WHERE access_token = %s AND payment_status = 'paid'
-    """, (pwd_hash, req.access_token))
+    """, (pwd_hash, req.password.strip(), req.password.strip(), req.access_token))
     conn.commit()
     conn.close()
     return {"status": "success"}
@@ -1070,7 +1150,7 @@ async def paywall_login(req: LoginPaywallRequest):
     cursor = conn.cursor()
     pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
     cursor.execute("""
-        SELECT access_token, buyer_password, buyer_password_hash 
+        SELECT access_token, buyer_password, permanent_password, buyer_password_hash 
         FROM paywall_purchases 
         WHERE share_id = %s AND LOWER(buyer_email) = LOWER(%s) AND payment_status = 'paid'
     """, (req.share_id, req.email.strip()))
@@ -1081,7 +1161,8 @@ async def paywall_login(req: LoginPaywallRequest):
         raise HTTPException(status_code=403, detail="No paid purchase found for this email address.")
     
     matched = False
-    if row.get("buyer_password") and row["buyer_password"].upper() == req.password.strip().upper():
+    stored_plain = (row.get("buyer_password") or row.get("permanent_password") or "").strip()
+    if stored_plain and stored_plain.upper() == req.password.strip().upper():
         matched = True
     elif row.get("buyer_password_hash") and row["buyer_password_hash"] == pwd_hash:
         matched = True
@@ -1116,7 +1197,7 @@ async def secure_viewer_page(
             print(f"[STRIPE VERIFY NOTICE]: {e}", flush=True)
 
     cursor.execute("""
-        SELECT p.buyer_email, p.payment_status, s.filename, p.buyer_password 
+        SELECT p.buyer_email, p.payment_status, s.filename, p.buyer_password, p.permanent_password 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s AND p.access_token = %s
@@ -1485,61 +1566,6 @@ async def stripe_disconnect(request: Request):
     conn.close()
 
     return {"status": "success", "message": "Bank account disconnected successfully."}
-
-# ----------------- Stripe Webhook -----------------
-@app.post("/api/webhook/stripe")
-async def stripe_webhook(request: Request):
-    payload = await request.body()
-    sig_header = request.headers.get('STRIPE_SIGNATURE')
-    
-    try:
-        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid webhook")
-
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        paywall_token = session.get('metadata', {}).get('access_token')
-
-        customer_details = session.get('customer_details') or {}
-        buyer_email = (
-            customer_details.get('email')
-            or session.get('customer_email')
-            or session.get('metadata', {}).get('buyer_email')
-            or ""
-        ).strip().lower()
-        share_id = session.get('metadata', {}).get('share_id')
-
-        if paywall_token:
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT p.id, p.buyer_password, s.filename 
-                FROM paywall_purchases p
-                JOIN shares s ON s.id = p.share_id
-                WHERE p.access_token = %s
-            """, (paywall_token,))
-            row = cursor.fetchone()
-
-            if row:
-                pwd = row.get("buyer_password")
-                if not pwd:
-                    pwd = generate_permanent_password()
-                    cursor.execute("""
-                        UPDATE paywall_purchases 
-                        SET payment_status = 'paid', 
-                            unlocked_at = CURRENT_TIMESTAMP,
-                            buyer_password = %s,
-                            buyer_password_hash = %s
-                        WHERE id = %s
-                    """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
-                    conn.commit()
-
-                if buyer_email and share_id:
-                    send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
-            conn.close()
-
-    return {"status": "success"}
 
 # ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
@@ -2425,7 +2451,14 @@ async def get_user_profile(user_id: str):
         "tier": row.get("tier", "free"),
         "email": row.get("email"),
         "user_id": row.get("user_id"),
+        "brand_title": row.get("brand_title"),
+        "brand_slug": row.get("brand_slug"),
+        "brand_logo_url": row.get("brand_logo_url"),
+        "brand_bg_url": row.get("brand_bg_url"),
+        "brand_accent_color": row.get("brand_accent_color") or "#6366f1",
         "stripe_connected": bool(row.get("stripe_account_id")),
+        "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
+        "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
 
 # ----------------- Dodo Payments Webhook -----------------
@@ -2576,7 +2609,7 @@ async def lemon_webhook(request: Request):
             """, (sub_end, user_email.strip(),))
         conn.commit()
 
-    elif event_name in ["subscription.cancelled", "subscription.expired", "subscription.paused"]:
+    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
