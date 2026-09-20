@@ -241,7 +241,7 @@
       <!-- PAY-TO-UNLOCK ESCROW SECTION -->
       <div id="paywallContainer" class="mt-6 space-y-4 text-left">
         
-        <!-- STEP 1 (NEW): POST-PAYMENT CONFIRM/EDIT EMAIL BOX -->
+        <!-- STEP 1: POST-PAYMENT CONFIRM/EDIT EMAIL BOX -->
         <div id="confirmEmailBox" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-lg">
           <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -323,7 +323,7 @@
           </button>
         </div>
 
-        <!-- State C: File Unlocked Area -->
+        <!-- State C: File Unlocked Area (Auto-download button removed) -->
         <div id="unlockedActionsSection" class="hidden space-y-2.5 pt-2">
           <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300 flex items-center justify-between">
             <span class="font-bold flex items-center gap-2">
@@ -331,11 +331,6 @@
             </span>
             <span id="verifiedBuyerBadge" class="font-mono text-[11px] opacity-80"></span>
           </div>
-
-          <a id="directDownloadLink" href="#" 
-             class="block text-center w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-600/30 transition cursor-pointer">
-            ⬇ Direct File Download
-          </a>
 
           <a id="secureViewerLink" href="#" 
              class="block text-center w-full py-3.5 bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-500 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/30 transition">
@@ -645,6 +640,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Incorrect password.");
 
+        // File is unlocked only after valid password entry (no auto download)
         revealUnlockedUI(email, data.download_url, data.viewer_url, data.access_token);
       } catch(err) {
         errBox.innerText = err.message;
@@ -670,7 +666,7 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Failed to resend.");
-        alert("✓ Permanent password dispatched to " + email + "! Please check your Gmail inbox and Spam folder.");
+        alert("✓ Permanent password re-dispatched! Please check your Gmail inbox and Spam folder.");
       } catch (err) {
         alert("Error: " + err.message);
       }
@@ -714,9 +710,9 @@
         }
       } catch(err) {
         errBox.innerText = err.message;
-        errBox.classList.remove("hidden");
+        errBox.classList.add("hidden");
         btn.disabled = false;
-        btn.innerText = `Pay $${Number(unlockPrice).toFixed(2)} & Unlock Personal Access`;
+        btn.innerText = "Pay ${{ '%.2f'|format(unlock_price) }} & Unlock Personal Access";
       }
     }
 
@@ -728,18 +724,13 @@
       document.getElementById("unlockedActionsSection").classList.remove("hidden");
       document.getElementById("verifiedBuyerBadge").innerText = email;
 
-      const dlLink = document.getElementById("directDownloadLink");
-      dlLink.href = downloadUrl;
-      dlLink.download = "{{ filename }}";
-
       const vLink = document.getElementById("secureViewerLink");
       vLink.href = viewerUrl || (`/secure-view/${shareId}?token=` + token);
 
       localStorage.setItem("pwtk_" + shareId, token);
       localStorage.setItem("buyer_email_" + shareId, email);
 
-      // Auto trigger file download
-      window.location.href = downloadUrl;
+      // Auto download removed: window.location.href = downloadUrl;
     }
 
     function handleStandardDownload() {
