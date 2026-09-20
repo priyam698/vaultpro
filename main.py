@@ -10,6 +10,7 @@ import hmac
 import json
 import urllib.request
 import urllib.parse
+import urllib.error
 import traceback
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
@@ -36,7 +37,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="2.9.8",
+    version="2.9.9",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -91,7 +92,7 @@ PLAN_CONFIG = {
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
-# ----------------- Brevo Permanent Password Delivery -----------------
+# ----------------- Brevo Permanent Password Generator & Sender -----------------
 def generate_permanent_password() -> str:
     nums = random.randint(1000, 9999)
     chars = secrets.token_hex(2).upper()
@@ -102,6 +103,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
     if not brevo_api_key or not buyer_email:
+        print(f"[BREVO EMAIL NOTICE]: Missing API key or buyer email. Cannot dispatch email.", flush=True)
         return False
 
     access_url = f"https://zephyr-drive.onrender.com/share/{share_id}"
@@ -118,15 +120,15 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
             </div>
         </div>
         <p style="font-size: 13px; color: #475569; line-height: 1.5;">
-            <strong>Never Pay Again:</strong> Whenever you need this file again, simply enter your email (<code>{buyer_email}</code>) and this permanent password.
+            <strong>Never Pay Again:</strong> Whenever you need this file, simply enter your email (<code>{buyer_email}</code>) and this permanent password.
         </p>
         <div style="text-align: center; margin: 26px 0;">
             <a href="{access_url}" style="background-color: #4f46e5; color: #ffffff; padding: 13px 28px; font-weight: bold; text-decoration: none; border-radius: 12px; display: inline-block; font-size: 13px;">
-                Open & Download File
+                Open File Transfer
             </a>
         </div>
         <p style="font-size: 11px; color: #94a3b8; text-align: center;">
-            File Link: <a href="{access_url}" style="color: #4f46e5;">{access_url}</a>
+            Transfer Link: <a href="{access_url}" style="color: #4f46e5;">{access_url}</a>
         </p>
     </div>
     """
@@ -145,8 +147,12 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
             method="POST"
         )
         with urllib.request.urlopen(http_req, timeout=12) as resp:
-            print(f"[BREVO EMAIL SUCCESS] Dispatched password to {buyer_email}", flush=True)
+            print(f"[BREVO EMAIL SUCCESS] Sent permanent password to {buyer_email} (Status {resp.status})", flush=True)
             return True
+    except urllib.error.HTTPError as he:
+        error_body = he.read().decode("utf-8", errors="ignore")
+        print(f"[BREVO EMAIL HTTP ERROR {he.code}]: {error_body}", flush=True)
+        return False
     except Exception as e:
         print(f"[BREVO EMAIL ERROR]: {e}", flush=True)
         return False
@@ -227,6 +233,17 @@ def init_db_schema():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
+
+        share_migrations = [
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS is_paywalled BOOLEAN DEFAULT FALSE;",
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS unlock_price NUMERIC(10, 2) DEFAULT 0.00;",
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS paywall_creator_id VARCHAR(120);"
+        ]
+        for sm in share_migrations:
+            try:
+                cursor.execute(sm)
+            except Exception:
+                pass
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS paywall_purchases (
@@ -529,6 +546,123 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
     return {"status": "dispatched", "recipient": req.recipient_email}
 
+ZEPHYR_SYSTEM_KNOWLEDGE = """
+You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
+Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
+
+Rules:
+1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable.
+2. If the user asks for human support, needs developer escalation, or encounters a bug, direct them to Priyam Rana at priyamrana069@gmail.com.
+
+Platform Knowledge & Pricing Tiers:
+- Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network with zero egress costs.
+- Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
+- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage, 2 GB single transfers, and 7 E-Sign documents per day.
+- Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage, 5 GB single transfers, and 15 E-Sign documents per day.
+- Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
+- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
+- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
+- Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
+- Pay-to-Unlock Escrow: Creators can attach invoice prices to shared files. Buyers securely pay via Stripe. The platform automatically takes a 12% fee and directly transfers 88% to the creator's connected bank account.
+- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period. After 20 days, files exceeding the active plan limit are pruned starting from the oldest uploaded files.
+- Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
+"""
+
+@app.post("/api/support/chat")
+async def support_chat(req: SupportChatRequest):
+    user_msg = req.message.strip()
+    if not user_msg:
+        raise HTTPException(status_code=400, detail="Empty query.")
+
+    grok_key = (os.getenv("GROK_API_KEY", "") or os.getenv("XAI_API_KEY", "")).strip()
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+
+    if grok_key:
+        try:
+            url = "https://api.x.ai/v1/chat/completions"
+            payload = {
+                "model": "grok-beta",
+                "messages": [
+                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
+                    {"role": "user", "content": user_msg}
+                ],
+                "temperature": 0.3
+            }
+            http_req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Authorization": f"Bearer {grok_key}", "Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=12) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return {"reply": data["choices"][0]["message"]["content"]}
+        except Exception as e:
+            print(f"[COPILOT GROK ERROR]: {e}", flush=True)
+
+    if gemini_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            payload = {
+                "system_instruction": {"parts": [{"text": ZEPHYR_SYSTEM_KNOWLEDGE}]},
+                "contents": [{"role": "user", "parts": [{"text": user_msg}]}]
+            }
+            http_req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return {"reply": data["candidates"][0]["content"]["parts"][0]["text"]}
+        except Exception as e:
+            print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
+
+    if openai_key:
+        try:
+            url = "https://api.openai.com/v1/chat/completions"
+            payload = {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
+                    {"role": "user", "content": user_msg}
+                ],
+                "max_tokens": 250
+            }
+            http_req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(http_req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return {"reply": data["choices"][0]["message"]["content"]}
+        except Exception as e:
+            print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
+
+    q = user_msg.lower()
+    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
+        reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
+    elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
+        reply = "Zephyr Pay-to-Unlock allows creators to monetize deliveries. When sent to a group, each recipient purchases their own individual access token. Media is served inside a protected viewer with moving forensic watermarks and focus-loss anti-screenshot shielding."
+    elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
+        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding."
+    elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
+        reply = "Studio Branding is available exclusively on our Plus ($4.50/mo) and Pro ($7.00/mo) tiers. It lets you customize public transfer backgrounds, showcase your studio logo, and set custom accent colors."
+    elif any(k in q for k in ["esign", "e-sign", "signature", "limit", "daily"]):
+        reply = "Daily E-Sign document creation limits: Free Starter (7/day), Micro (15/day), Lite (30/day), Plus (50/day), and Pro (Unlimited). Limits reset every night at midnight."
+    elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
+        reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding your current plan limit will be automatically deleted starting from the oldest files."
+    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
+        reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the second your recipient finishes downloading it. After that, the link is destroyed permanently."
+    else:
+        reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
+
+    return {"reply": reply}
+
 # ----------------- Main Static Routes -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():
@@ -605,7 +739,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
         conn.close()
         raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
 
-    # Check if this email already paid
     cursor.execute("""
         SELECT access_token FROM paywall_purchases 
         WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
@@ -616,7 +749,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
         conn.close()
         return {
             "status": "already_unlocked",
-            "message": "This email has already purchased access. Enter your permanent password to unlock."
+            "message": "This email already has full access. Enter your permanent password to unlock."
         }
 
     access_token = f"pwtk_{secrets.token_hex(20)}"
@@ -630,7 +763,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
     conn.close()
 
     price_cents = int(price_usd * 100)
-    platform_fee_cents = int(price_cents * 0.12)  # 12% Platform cut
+    platform_fee_cents = int(price_cents * 0.12)
 
     try:
         session = stripe.checkout.Session.create(
@@ -660,7 +793,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest):
             "access_token": access_token
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Stripe error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Stripe Checkout error: {str(e)}")
 
 @app.post("/api/paywall/unlock-password")
 async def unlock_with_password(req: UnlockWithPasswordRequest):
@@ -689,7 +822,7 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
         matched = True
 
     if not matched:
-        raise HTTPException(status_code=401, detail="Incorrect password. Please check the code sent to your Gmail.")
+        raise HTTPException(status_code=401, detail="Incorrect password. Please check the code sent to your Gmail inbox.")
 
     download_url = s3_client.generate_presigned_url(
         "get_object",
@@ -736,19 +869,36 @@ async def resend_paywall_password(req: ResendPasswordRequest):
 
     sent = send_buyer_password_email(clean_email, row["filename"], pwd, req.share_id)
     if not sent:
-        raise HTTPException(status_code=500, detail="Could not send email via Brevo.")
+        raise HTTPException(status_code=500, detail="Could not send email via Brevo. Check sender authorization.")
 
     return {"status": "success", "message": f"Password has been dispatched to {clean_email}."}
 
 @app.post("/api/paywall/verify-session")
-async def verify_stripe_checkout_session(session_id: str = Query(...), share_id: str = Query(...)):
+async def verify_stripe_checkout_session(
+    session_id: str = Query(...), 
+    share_id: str = Query(...),
+    email: Optional[str] = Query(None)
+):
     if not stripe.api_key:
         raise HTTPException(status_code=500, detail="Stripe is not configured.")
 
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-        token = session.metadata.get("access_token")
-        buyer_email = session.customer_email or session.metadata.get("buyer_email")
+        token = session.metadata.get("access_token") if session.metadata else None
+
+        # Safely extract customer email across all Stripe object formats
+        customer_details = getattr(session, "customer_details", None)
+        buyer_email = ""
+        if customer_details and getattr(customer_details, "email", None):
+            buyer_email = customer_details.email
+        elif getattr(session, "customer_email", None):
+            buyer_email = session.customer_email
+        elif session.metadata and session.metadata.get("buyer_email"):
+            buyer_email = session.metadata.get("buyer_email")
+        elif email:
+            buyer_email = email
+
+        buyer_email = (buyer_email or "").strip().lower()
 
         conn = get_db()
         cursor = conn.cursor()
@@ -756,9 +906,9 @@ async def verify_stripe_checkout_session(session_id: str = Query(...), share_id:
             SELECT p.id, p.buyer_password, s.filename, s.s3_key 
             FROM paywall_purchases p
             JOIN shares s ON s.id = p.share_id
-            WHERE p.access_token = %s OR (p.share_id = %s AND LOWER(p.buyer_email) = LOWER(%s))
+            WHERE p.access_token = %s OR (p.share_id = %s AND LOWER(p.buyer_email) = %s)
             ORDER BY p.id DESC LIMIT 1
-        """, (token, share_id, buyer_email.strip()))
+        """, (token, share_id, buyer_email))
         row = cursor.fetchone()
 
         if row:
@@ -775,30 +925,24 @@ async def verify_stripe_checkout_session(session_id: str = Query(...), share_id:
                 """, (pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
                 conn.commit()
 
-                # Dispatch Brevo email with the permanent password
+                # Dispatch password exclusively via Brevo email
                 send_buyer_password_email(buyer_email, row["filename"], pwd, share_id)
             else:
                 cursor.execute("UPDATE paywall_purchases SET payment_status = 'paid', unlocked_at = CURRENT_TIMESTAMP WHERE id = %s", (row["id"],))
                 conn.commit()
 
-            download_url = s3_client.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'},
-                ExpiresIn=86400
-            )
-
             conn.close()
+            # Returns confirmation state ONLY without returning password or direct download
             return {
                 "status": "paid",
-                "token": token or "",
                 "buyer_email": buyer_email,
-                "download_url": download_url,
-                "viewer_url": f"/secure-view/{share_id}?token={token}"
+                "token": token or ""
             }
 
         conn.close()
         raise HTTPException(status_code=404, detail="Purchase record not found.")
     except Exception as e:
+        print(f"[VERIFY SESSION ERROR]: {e}", flush=True)
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/api/paywall/verify-access")
@@ -1190,7 +1334,14 @@ async def stripe_webhook(request: Request):
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         paywall_token = session.get('metadata', {}).get('access_token')
-        buyer_email = session.get('customer_email') or session.get('metadata', {}).get('buyer_email')
+
+        customer_details = session.get('customer_details') or {}
+        buyer_email = (
+            customer_details.get('email')
+            or session.get('customer_email')
+            or session.get('metadata', {}).get('buyer_email')
+            or ""
+        ).strip().lower()
         share_id = session.get('metadata', {}).get('share_id')
 
         if paywall_token:
@@ -2259,7 +2410,7 @@ async def lemon_webhook(request: Request):
             """, (sub_end, user_email.strip(),))
         conn.commit()
 
-    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
+    elif event_name in ["subscription.cancelled", "subscription.expired", "subscription.paused"]:
         grace_end = datetime.utcnow() + timedelta(days=20)
         if user_id:
             cursor.execute("""
