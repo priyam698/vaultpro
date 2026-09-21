@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage & Studio Branding</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(#gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,7 +163,6 @@
       background: #ffffff !important;
     }
 
-    /* Fixed High-Contrast Light Theme Quote Box */
     body.light-theme #quoteSummaryBox {
       background: rgba(230, 238, 250, 0.96) !important;
       border: 1px solid rgba(180, 198, 222, 0.9) !important;
@@ -173,7 +172,7 @@
       color: #334155 !important;
     }
     body.light-theme #quoteTargetName {
-      color: #3730a3 !important;
+      color: #312e81 !important;
     }
     body.light-theme #quoteNewCapacity {
       color: #0369a1 !important;
@@ -228,7 +227,6 @@
     </div>
   </div>
 
-  <!-- UPGRADE / EXPANSION MODAL -->
   <div id="upgradePlanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-7 relative border border-indigo-500/40 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -274,11 +272,9 @@
         </button>
       </div>
 
-      <!-- High-Contrast Detail Summary Box -->
       <div id="quoteSummaryBox" class="p-4 rounded-2xl bg-black/50 border border-white/10 space-y-2.5 text-xs text-slate-300">
         <div class="flex justify-between items-center">
           <span class="quote-label font-medium opacity-80">Target Plan:</span>
-          <!-- Contrast-fixed: visible in both themes -->
           <strong id="quoteTargetName" class="text-indigo-400 font-extrabold text-xs tracking-wide">Zephyr Pro (+200 GB)</strong>
         </div>
         <div class="flex justify-between items-center">
@@ -680,11 +676,12 @@
   </footer>
 
   <script>
+    // Exact verified live product IDs from your Dodo dashboard
     const DODO_PRODUCT_IDS = {
       micro: "pdt_0NnaihWSsabCnJhTUZspz",
-      lite: "pdt_0Nnaj4zAkRMRoDf8pylkT",
-      plus: "pdt_0NnajLUyCZX2ARDgk003r",
-      pro: "pdt_0NrnVvaQ9xDPDhpjrniuR3A"
+      lite:  "pdt_0Nnaj4zAkRMRoDf8pyikT",
+      plus:  "pdt_0NnajLUyCZX2ARDgk003r",
+      pro:   "pdt_0NnVvaQ9xDPDhpjmiuR3A"
     };
 
     const PLAN_SPECS = {
@@ -694,7 +691,7 @@
       pro:   { name: "Zephyr Pro",   price: 7.00, quotaBytes: 200 * 1024**3, gb: 200 }
     };
 
-    const MAX_VAULT_BYTES = 600 * 1024 * 1024 * 1024; // 600 GB Maximum Ceiling
+    const MAX_VAULT_BYTES = 600 * 1024 * 1024 * 1024; // Strict 600 GB Maximum Ceiling
 
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -1122,7 +1119,7 @@
       document.getElementById("upgradePlanModal").classList.add("hidden");
     }
 
-    // Zero-latency instant client-side update with 600 GB cap & $0.80 Pro fee
+    // Instant zero-lag touch handler with cumulative 600 GB ceiling and $0.80 Pro fee
     function selectUpgradeTarget(tier) {
       selectedUpgradeTarget = tier;
 
@@ -1154,10 +1151,8 @@
       }
 
       const hasActivePaidSub = currentAccountTier !== "free";
-      
-      // Upgrade fee: $0.80 for Zephyr Pro, $0.50 for others
       const midCycleFee = (tier === "pro") ? 0.80 : 0.50;
-      
+
       let chargeAmount = spec.price;
       let newTotalBytes = spec.quotaBytes;
 
@@ -1166,10 +1161,8 @@
         newTotalBytes = currentUserQuotaBytes + spec.quotaBytes;
       }
 
-      // Check if exceeds 600 GB max cap
       const exceedsMaxCap = newTotalBytes > MAX_VAULT_BYTES;
 
-      // Contrast-fixed text content
       if (targetNameEl) targetNameEl.innerText = `${spec.name} (+${spec.gb} GB)`;
       if (feeDisplayEl) feeDisplayEl.innerText = `+$${midCycleFee.toFixed(2)}`;
 
@@ -1192,7 +1185,6 @@
         totalDueEl.innerText = `$${chargeAmount.toFixed(2)}`;
       }
 
-      // Handle 600 GB limit button disabling
       if (confirmBtn) {
         if (exceedsMaxCap) {
           confirmBtn.disabled = true;
