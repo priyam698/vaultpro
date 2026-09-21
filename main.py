@@ -625,31 +625,47 @@ async def send_transfer_email(req: SendTransferEmailRequest, request: Request):
 
 # ----------------- Zephyr Copilot Engine -----------------
 ZEPHYR_SYSTEM_KNOWLEDGE = """
-You are Zephyr Copilot, the friendly and authoritative AI assistant for Zephyr Vault.
-Your job is to answer user questions in simple, easy-to-understand language while covering all technical specifics accurately.
+You are Zephyr Copilot, the friendly, authoritative AI assistant for Zephyr Systems.
+Your job is to answer user questions in clear, concise language while covering all technical and financial specifics accurately.
 
 Rules:
-1. Explain clearly like talking to a helpful peer. Keep answers direct, friendly, and easily actionable.
+1. Explain clearly like talking to a helpful peer. Keep answers direct, accurate, and easily actionable.
 2. If the user asks for human support, needs developer escalation, or encounters a bug, direct them to Priyam Rana at priyamrana069@gmail.com.
+
+Pay-to-Unlock Escrow Payouts & Fees:
+- For every paid unlock or file sold via Pay-to-Unlock Escrow, the user/creator receives an 88% payout.
+- Zephyr retains a 12% platform fee split.
+- Example: On a $100.00 deliverable, the creator receives $88.00 (88%), and Zephyr takes $12.00 (12%).
+- Payouts are transferred automatically via Stripe into the creator's connected bank account with 0% chargeback risk.
+- In group deliveries, each buyer purchases an isolated, individual access token. Media is served inside a protected viewer with moving forensic watermarks and focus-loss anti-screenshot shielding. Buyers receive a permanent lifetime access password in Gmail so they never have to pay twice.
 
 Platform Knowledge & Pricing Tiers:
 - Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network with zero egress costs.
-- Security & Encryption: End-to-end client-side AES-256 encryption. We never hold your passcodes or private keys on our servers.
+- Security & Encryption: End-to-end client-side AES-256 encryption. Passcodes and private keys are never stored on our servers.
 - Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage, 2 GB single transfers, and 7 E-Sign documents per day.
 - Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage, 5 GB single transfers, and 15 E-Sign documents per day.
 - Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
 - Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
 - Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
 - Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
-- Pay-to-Unlock Escrow: Creators can attach invoice prices to shared files. Buyers securely pay via Stripe.
 - 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
+
 @app.post("/api/support/chat")
 async def support_chat(req: SupportChatRequest):
     user_msg = req.message.strip()
     if not user_msg:
         raise HTTPException(status_code=400, detail="Empty query.")
+
+    q = user_msg.lower()
+
+    # Exact deterministic handler for payout and escrow revenue split queries
+    payout_keywords = ["how much", "payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "receive", "take-home"]
+    if any(k in q for k in payout_keywords) and any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money", "get"]):
+        return {
+            "reply": "For every payment received through Pay-to-Unlock Escrow, you receive an **88% user payout**, and Zephyr retains a **12% platform fee split**. Payouts are transferred directly to your connected bank account via Stripe with zero chargeback risk."
+        }
 
     grok_key = (os.getenv("GROK_API_KEY", "") or os.getenv("XAI_API_KEY", "")).strip()
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
@@ -720,11 +736,11 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
 
-    q = user_msg.lower()
+    # Smart Rule Fallback Engine
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
         reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
     elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
-        reply = "Zephyr Pay-to-Unlock allows creators to monetize deliveries. When sent to a group, each recipient purchases their own individual access token. Media is served inside a protected viewer with moving forensic watermarks and focus-loss anti-screenshot shielding."
+        reply = "Zephyr Pay-to-Unlock allows creators to monetize deliverables with an **88% user payout** and a **12% platform fee split**. In group shares, each recipient purchases their own isolated access token. Files stream inside an anti-screenshot protected viewer with moving watermarks and focus-loss curtains."
     elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
         reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding."
     elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
@@ -734,7 +750,7 @@ async def support_chat(req: SupportChatRequest):
     elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
         reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding your current plan limit will be automatically deleted starting from the oldest files."
     elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
-        reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the second your recipient finishes downloading it. After that, the link is destroyed permanently."
+        reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the exact millisecond your recipient finishes downloading it. After that, the link is destroyed permanently."
     else:
         reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
 
@@ -818,7 +834,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
         conn.close()
         raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
 
-    # Check if this buyer has already bought this file permanently
     cursor.execute("""
         SELECT access_token, buyer_password, permanent_password 
         FROM paywall_purchases 
@@ -889,7 +904,6 @@ async def verify_stripe_checkout_session(
     email: Optional[str] = Query(None),
     token: Optional[str] = Query(None)
 ):
-    # Support both JSON payload and Query Parameters
     req_session_id = session_id
     req_share_id = share_id
     req_email = email
@@ -911,7 +925,6 @@ async def verify_stripe_checkout_session(
     conn = get_db()
     cursor = conn.cursor()
 
-    # If Stripe session ID provided, directly check Stripe payment status to bypass webhook lag
     if req_session_id and stripe.api_key:
         try:
             stripe_session = stripe.checkout.Session.retrieve(req_session_id)
@@ -972,7 +985,6 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn = get_db()
     cursor = conn.cursor()
 
-    # If session_id is provided, verify with Stripe and force mark as paid immediately
     if payload.session_id and stripe.api_key:
         try:
             stripe_session = stripe.checkout.Session.retrieve(payload.session_id)
@@ -988,7 +1000,6 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
         except Exception as e:
             print(f"[CONFIRM SESSION RETRIEVE NOTICE]: {e}", flush=True)
 
-    # Fallback lookup: find latest purchase for this share (even if status was pending)
     cursor.execute("""
         SELECT p.*, s.filename 
         FROM paywall_purchases p
@@ -1026,6 +1037,7 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
         print(f"[BREVO WARNING]: Email failed to send to {clean_email}, password is {pwd}", flush=True)
 
     return {"status": "success", "email": clean_email}
+
 # ----------------- Unlock With Permanent Password -----------------
 @app.post("/api/paywall/unlock-password")
 @app.post("/api/paywall/unlock-with-password")
