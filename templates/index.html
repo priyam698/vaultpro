@@ -995,10 +995,11 @@
             </button>
           </div>
 
+          <!-- RESULT BOX WITH VANISHING LINK WARNING -->
           <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-3">
             <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
             
-            <!-- Vanishing Link Warning Alert Added Here -->
+            <!-- Vanishing Link Warning Alert -->
             <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium leading-relaxed">
               <span class="text-xs shrink-0">⚠️</span>
               <span><strong>Copy this link now!</strong> This transfer link will appear only once and cannot be recovered after you navigate away or close this page.</span>
@@ -1259,6 +1260,128 @@
 
       </div>
 
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 1.5: PAY-TO-UNLOCK ESCROW SHOWCASE (MATCHING IMAGE 20)           -->
+  <!-- ========================================================================= -->
+  <section id="escrow" class="relative z-20 py-20 border-b border-white/[0.08]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left: Interactive Escrow Card Mockup (Matching Image 20) -->
+        <div class="lg:col-span-6 flex justify-center">
+          <div class="w-full max-w-sm rounded-[36px] obsidian-panel p-4 sm:p-5 shadow-2xl space-y-3.5">
+            
+            <div class="flex items-center justify-between px-1 pt-1">
+              <span class="opacity-70 font-bold text-sm">←</span>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Locked Escrow
+                </span>
+                <span class="font-mono text-xs font-black text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-lg border border-emerald-500/30">
+                  $400.00
+                </span>
+              </div>
+            </div>
+
+            <!-- Hero Cinematic Deliverable Frame -->
+            <div class="rounded-2xl overflow-hidden h-44 relative shadow-md group">
+              <img src="https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=600&q=90" alt="Video Master Deliverable" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
+              
+              <div class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[9px] font-mono font-bold text-amber-300 flex items-center gap-1.5">
+                <span>🔒 Protected Stream</span>
+              </div>
+
+              <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-[10px]">
+                <span class="font-mono font-bold">14.2 GB • 8K ProRes</span>
+                <span class="px-2 py-0.5 rounded bg-indigo-600/90 font-bold">Encrypted</span>
+              </div>
+            </div>
+
+            <div class="px-1">
+              <p class="text-[10px] font-mono font-semibold opacity-70">21 September 2026 • 1 License Available</p>
+              <h4 class="text-base sm:text-lg font-black mt-0.5">Commercial Film Deliverables</h4>
+              
+              <div class="flex items-center gap-2 mt-3">
+                <button class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+                  <span>💳</span> Pay $400.00 to Unlock
+                </button>
+                <button class="px-3 py-2 bg-white/10 hover:bg-white/15 text-slate-200 rounded-xl text-xs font-bold border border-white/15 transition cursor-pointer">
+                  👁️ Preview
+                </button>
+              </div>
+            </div>
+
+            <!-- 3-Item Asset Grid -->
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <div class="h-20 rounded-xl overflow-hidden relative shadow-sm border border-white/10 bg-slate-900">
+                <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=300&q=90" alt="Reel Item" class="w-full h-full object-cover opacity-85">
+                <span class="absolute bottom-1 left-1 px-1 bg-black/70 backdrop-blur-md rounded text-[8px] font-mono text-white font-bold">1:42 ▶</span>
+              </div>
+              <div class="h-20 rounded-xl overflow-hidden relative shadow-sm border border-white/10 bg-slate-900 flex flex-col items-center justify-center p-1 text-center">
+                <span class="text-lg mb-0.5">🎵</span>
+                <span class="text-[9px] font-mono font-bold leading-tight text-emerald-400">Lossless 24-bit</span>
+              </div>
+              <div class="h-20 rounded-xl overflow-hidden relative shadow-sm border border-white/10 bg-slate-900 flex flex-col items-center justify-center p-1 text-center">
+                <span class="text-lg mb-0.5">📜</span>
+                <span class="text-[9px] font-mono font-bold leading-tight text-indigo-400">License.pdf</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: Showcase Details & CTAs -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-bold border border-emerald-500/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Pay-to-Unlock Escrow
+          </div>
+
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+            Monetize client deliverables securely
+          </h2>
+
+          <div class="space-y-6 pt-2">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl shrink-0 border border-emerald-500/30">
+                💵
+              </div>
+              <div>
+                <h4 class="text-sm font-black">Zero-Risk Direct Payouts</h4>
+                <p class="text-xs opacity-85 mt-1 leading-relaxed">
+                  Attach an invoice price to massive footage reels or project bundles. Buyers pay instantly through Stripe, and funds are automatically deposited into your connected bank account with 0% escrow chargeback risk.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-2xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30">
+                🛡️
+              </div>
+              <div>
+                <h4 class="text-sm font-black">Anti-Screenshot Shield & Lifetime Unlock</h4>
+                <p class="text-xs opacity-85 mt-1 leading-relaxed">
+                  Media streams inside our forensic protected viewer with moving watermarks and window-blur curtains. Once purchased, clients receive a permanent access password to their Gmail for lifetime unlocking without ever paying twice.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-3">
+            <a href="#transferStandardView" onclick="document.getElementById('paywallToggle').checked = true; togglePaywallInput();" class="px-6 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition cursor-pointer">
+              Create Escrow Transfer
+            </a>
+            <a href="#pricing" class="quick-btn px-6 py-3.5 rounded-full font-bold text-xs transition">
+              View Escrow Limits
+            </a>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
 
@@ -1591,7 +1714,7 @@
 
               <div class="absolute bottom-4 right-4 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15 text-[11px] text-white">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Legally Binding & Timestamped</span>
+                <span>End-to-end encrypted</span>
               </div>
             </div>
           </div>
@@ -2932,7 +3055,7 @@
       sendBtn.disabled = true;
 
       try {
-        const res = await-fetch("/api/support/chat", {
+        const res = await fetch("/api/support/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: msg })
@@ -2952,7 +3075,7 @@
       } catch (err) {
         document.getElementById(typingId)?.remove();
         container.innerHTML += `
-          <div class="flex items-center gap-2">
+          <div class="flex items-start gap-2">
             <div class="w-6 h-6 rounded-lg bg-rose-600/30 text-rose-400 flex items-center justify-center shrink-0 text-[10px] font-bold">!</div>
             <div class="bg-rose-500/10 border border-rose-500/20 rounded-2xl rounded-tl-sm p-3 max-w-[85%] text-rose-300 text-xs">
               Unable to connect to Copilot support service.
