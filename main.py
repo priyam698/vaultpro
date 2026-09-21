@@ -2056,9 +2056,9 @@ async def get_drive_quota(user_id: str):
         WHERE user_id = %s
     """, (user_id,))
     user = cursor.fetchone()
-    conn.close()
 
     if not user:
+        conn.close()
         return {
             "tier": "free",
             "used_bytes": 0,
@@ -2068,9 +2068,37 @@ async def get_drive_quota(user_id: str):
             "grace_period_end_at": None
         }
 
+    # Auto-synchronize subscription if active but marked as free
+    now = datetime.utcnow()
+    sub_end = user.get("subscription_end_at")
+    price = float(user.get("plan_price") or 0.0)
+
+    if sub_end:
+        if isinstance(sub_end, str):
+            sub_end = datetime.fromisoformat(sub_end)
+        
+        if sub_end > now and price > 0.0:
+            price_map = {7.00: "pro", 4.50: "plus", 2.50: "lite", 1.80: "micro"}
+            expected_tier = price_map.get(price, (user.get("tier") or "pro").lower())
+            expected_quota = PLAN_CONFIG.get(expected_tier, PLAN_CONFIG["pro"])["quota"]
+
+            current_tier = (user.get("tier") or "free").lower()
+            current_quota = user.get("storage_quota_bytes") or 0
+
+            if current_tier != expected_tier or current_quota < expected_quota:
+                cursor.execute("""
+                    UPDATE users 
+                    SET tier = %s, storage_quota_bytes = %s, grace_period_end_at = NULL 
+                    WHERE user_id = %s
+                """, (expected_tier, expected_quota, user_id))
+                conn.commit()
+                user["tier"] = expected_tier
+                user["storage_quota_bytes"] = expected_quota
+
     tier_key = (user.get("tier") or "free").lower()
     default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
     quota = user.get("storage_quota_bytes") or default_quota
+    conn.close()
 
     return {
         "tier": tier_key,
@@ -2472,9 +2500,28 @@ async def get_user_profile(user_id: str):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
     row = cursor.fetchone()
-    conn.close()
     if not row:
+        conn.close()
         return {"tier": "free", "user_id": user_id, "stripe_connected": False}
+
+    # Auto-synchronize subscription if active but marked as free
+    now = datetime.utcnow()
+    sub_end = row.get("subscription_end_at")
+    price = float(row.get("plan_price") or 0.0)
+    tier = (row.get("tier") or "free").lower()
+
+    if sub_end:
+        if isinstance(sub_end, str):
+            sub_end = datetime.fromisoformat(sub_end)
+        if sub_end > now and price > 0.0 and tier == "free":
+            price_map = {7.00: "pro", 4.50: "plus", 2.50: "lite", 1.80: "micro"}
+            tier = price_map.get(price, "pro")
+            quota = PLAN_CONFIG[tier]["quota"]
+            cursor.execute("UPDATE users SET tier = %s, storage_quota_bytes = %s, grace_period_end_at = NULL WHERE user_id = %s", (tier, quota, user_id))
+            conn.commit()
+            row["tier"] = tier
+
+    conn.close()
     return {
         "tier": row.get("tier", "free"),
         "email": row.get("email"),
