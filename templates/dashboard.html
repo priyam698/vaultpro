@@ -744,7 +744,6 @@
       brand_bg_url: null
     };
 
-    // Trigger Stripe Bank Onboarding
     function triggerStripeBankLink() {
       const hiddenInput = document.getElementById("stripeUserIdHidden");
       const form = document.getElementById("stripeOnboardForm");
@@ -756,7 +755,6 @@
       }
     }
 
-    // Trigger Stripe Express Management Portal (Modify / Change Bank Details)
     function manageStripeBank() {
       const hiddenInput = document.getElementById("stripeManageUserIdHidden");
       const form = document.getElementById("stripeManageForm");
@@ -768,7 +766,6 @@
       }
     }
 
-    // Disconnect Stripe Bank Account
     async function disconnectStripeBank() {
       if (!confirm("Are you sure you want to disconnect your bank account? Pay-to-Unlock earnings cannot be routed to your bank until a new account is connected.")) {
         return;
@@ -839,13 +836,11 @@
     }
 
     async function loadDriveData() {
-      // Check if redirected back from Stripe onboarding
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("stripe_connected") === "true") {
         alert("✓ Bank account successfully linked! You are now set up to receive 88% Pay-to-Unlock earnings directly to your bank.");
       }
 
-      // Check user profile for Stripe Connect status
       try {
         const profileRes = await fetch(`/api/user-profile?user_id=${currentUserId}`);
         if (profileRes.ok) {
@@ -858,7 +853,8 @@
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
         
-        currentAccountTier = (data.tier || "free").lower();
+        // Use JavaScript .toLowerCase() to avoid silent failure
+        currentAccountTier = (data.tier || "free").toLowerCase();
 
         document.getElementById("usedDisplay").innerText = formatBytes(data.used_bytes);
         document.getElementById("quotaDisplay").innerText = formatBytes(data.quota_bytes);
@@ -869,25 +865,74 @@
         const navTierBadge = document.getElementById("navTierBadge");
         const tierBadge = document.getElementById("tierBadge");
         const cycleInfo = document.getElementById("cycleInfo");
+        const upgradeBoxHint = document.getElementById("upgradeBoxHint");
+        const vaultUpgradeBtn = document.getElementById("vaultUpgradeBtn");
         const banner = document.getElementById("expiryAlertBanner");
         const bannerTitle = document.getElementById("expiryAlertTitle");
         const bannerMsg = document.getElementById("expiryAlertMsg");
 
+        const tierNames = {
+          free: "Free Starter",
+          micro: "Zephyr Micro",
+          lite: "Zephyr Lite",
+          plus: "Zephyr Plus",
+          pro: "Zephyr Pro"
+        };
+
+        const tierStyles = {
+          micro: {
+            badge: "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30",
+            nav: "bg-cyan-500/25 text-cyan-300 border border-cyan-400/40"
+          },
+          lite: {
+            badge: "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30",
+            nav: "bg-indigo-500/25 text-indigo-300 border border-indigo-400/40"
+          },
+          plus: {
+            badge: "bg-purple-500/20 text-purple-400 border border-purple-500/30",
+            nav: "bg-purple-500/25 text-purple-300 border border-purple-400/40"
+          },
+          pro: {
+            badge: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black",
+            nav: "bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 text-white font-black shadow-md border-0"
+          },
+          free: {
+            badge: "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30",
+            nav: "bg-white/10 text-white border border-white/20"
+          }
+        };
+
+        const activeStyle = tierStyles[currentAccountTier] || tierStyles.free;
+        const planDisplayName = tierNames[currentAccountTier] || currentAccountTier.toUpperCase();
+
         if (currentAccountTier !== "free") {
-          tierBadge.innerText = `${currentAccountTier.toUpperCase()} ${formatBytes(data.quota_bytes, 0)}`;
-          tierBadge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+          tierBadge.innerText = `${currentAccountTier.toUpperCase()} (${formatBytes(data.quota_bytes, 0)})`;
+          tierBadge.className = `text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded ${activeStyle.badge}`;
+          
           navTierBadge.innerText = `★ ${currentAccountTier.toUpperCase()}`;
-          navTierBadge.className = "items-center gap-1 text-[10px] tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm uppercase";
+          navTierBadge.className = `items-center gap-1 text-[10px] tracking-wider px-2.5 py-0.5 rounded-full uppercase ${activeStyle.nav}`;
           
           if (data.subscription_end_at) {
-            cycleInfo.innerText = `Renews on: ${data.subscription_end_at.split('T')[0] || data.subscription_end_at}`;
+            cycleInfo.innerText = `Plan: ${planDisplayName} • Renews on: ${data.subscription_end_at.split('T')[0] || data.subscription_end_at}`;
+          } else {
+            cycleInfo.innerText = `Plan: ${planDisplayName} (Active)`;
+          }
+
+          if (currentAccountTier === "pro") {
+            if (upgradeBoxHint) upgradeBoxHint.innerText = "You are on our highest tier (200 GB Vault).";
+            if (vaultUpgradeBtn) vaultUpgradeBtn.innerText = "Switch Plan";
+          } else {
+            if (upgradeBoxHint) upgradeBoxHint.innerText = "Upgrade to a higher vault tier with prorated billing.";
+            if (vaultUpgradeBtn) vaultUpgradeBtn.innerText = "Upgrade Plan";
           }
         } else {
           tierBadge.innerText = "Free Tier";
           tierBadge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
           navTierBadge.innerText = "FREE";
           navTierBadge.className = "items-center gap-1 text-[10px] tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/20 uppercase";
-          cycleInfo.innerText = "Plan: Free (5 GB max)";
+          cycleInfo.innerText = "Plan: Free Starter (5 GB max)";
+          if (upgradeBoxHint) upgradeBoxHint.innerText = "Expand vault to 15 GB, 30 GB, 80 GB or 200 GB?";
+          if (vaultUpgradeBtn) vaultUpgradeBtn.innerText = "Upgrade Plan";
         }
 
         if (data.grace_period_end_at) {
@@ -914,7 +959,9 @@
           banner.classList.add("hidden");
         }
 
-      } catch(e) {}
+      } catch(e) {
+        console.error("Failed to load quota:", e);
+      }
 
       try {
         const res = await fetch(`/api/drive/files?user_id=${currentUserId}`);
