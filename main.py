@@ -12,7 +12,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Any
 
 import boto3
@@ -91,6 +91,41 @@ PLAN_CONFIG = {
     "plus":  {"name": "Zephyr Plus",  "price": 4.50, "quota": 80 * 1024**3,  "single_mb": 25000, "esign_daily": 50},
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
+
+# ----------------- Timezone-Safe Subscription Helper -----------------
+def is_sub_active(sub_end) -> bool:
+    if not sub_end:
+        return False
+    if isinstance(sub_end, str):
+        try:
+            sub_end = datetime.fromisoformat(sub_end.replace("Z", "+00:00"))
+        except Exception:
+            return False
+    if getattr(sub_end, "tzinfo", None) is not None:
+        sub_end_naive = sub_end.astimezone(timezone.utc).replace(tzinfo=None)
+    else:
+        sub_end_naive = sub_end
+    return sub_end_naive > datetime.utcnow()
+
+def resolve_user_tier(user_dict: dict):
+    sub_end = user_dict.get("subscription_end_at")
+    price = float(user_dict.get("plan_price") or 0.0)
+    current_tier = (user_dict.get("tier") or "free").lower()
+
+    if is_sub_active(sub_end) or price > 0.0:
+        if price >= 6.0 or current_tier == "pro":
+            return "pro", PLAN_CONFIG["pro"]["quota"], 7.00
+        elif price >= 4.0 or current_tier == "plus":
+            return "plus", PLAN_CONFIG["plus"]["quota"], 4.50
+        elif price >= 2.0 or current_tier == "lite":
+            return "lite", PLAN_CONFIG["lite"]["quota"], 2.50
+        elif price >= 1.0 or current_tier == "micro":
+            return "micro", PLAN_CONFIG["micro"]["quota"], 1.80
+
+    tier_key = current_tier if current_tier in PLAN_CONFIG else "free"
+    default_quota = PLAN_CONFIG[tier_key]["quota"]
+    quota = user_dict.get("storage_quota_bytes") or default_quota
+    return tier_key, quota, price
 
 # ----------------- Brevo Permanent Password Engine -----------------
 def generate_permanent_password() -> str:
@@ -329,7 +364,7 @@ def init_db_schema():
 
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Database schema, migrations, and escrow password engine verified.", flush=True)
+        print("[DB STARTUP]: Database schema and migrations verified.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -386,11 +421,6 @@ class BrandingUpdatePayload(BaseModel):
 class InitiatePaywallRequest(BaseModel):
     share_id: str
     buyer_email: str
-
-class VerifySessionRequest(BaseModel):
-    share_id: str
-    session_id: Optional[str] = None
-    token: Optional[str] = None
 
 class ConfirmEmailSendPassRequest(BaseModel):
     share_id: str
@@ -660,7 +690,6 @@ async def support_chat(req: SupportChatRequest):
 
     q = user_msg.lower()
 
-    # Exact deterministic handler for payout and escrow revenue split queries
     payout_keywords = ["how much", "payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "receive", "take-home"]
     if any(k in q for k in payout_keywords) and any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money", "get"]):
         return {
@@ -736,7 +765,6 @@ async def support_chat(req: SupportChatRequest):
         except Exception as e:
             print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
 
-    # Smart Rule Fallback Engine
     if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
         reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
     elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
@@ -1413,10 +1441,10 @@ async def create_share(payload: CreateShareRequest):
     cursor = conn.cursor()
     user_tier = "free"
     if payload.user_id:
-        cursor.execute("SELECT tier FROM users WHERE user_id = %s", (payload.user_id,))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (payload.user_id,))
         user_row = cursor.fetchone()
-        if user_row and user_row.get("tier"):
-            user_tier = user_row["tier"].lower()
+        if user_row:
+            user_tier, _, _ = resolve_user_tier(user_row)
 
     max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
     if payload.filesize_mb > max_mb:
@@ -1621,7 +1649,7 @@ async def get_branding(user_id: str):
 async def update_branding(data: BrandingUpdatePayload):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT tier FROM users WHERE user_id = %s", (data.user_id,))
+    cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (data.user_id,))
     user = cursor.fetchone()
 
     if not user:
@@ -1629,7 +1657,7 @@ async def update_branding(data: BrandingUpdatePayload):
         conn.commit()
         user = cursor.fetchone()
     
-    tier = (user.get("tier") or "free").lower()
+    tier, _, _ = resolve_user_tier(user)
     if tier not in ["plus", "pro"]:
         conn.close()
         raise HTTPException(status_code=403, detail="Custom Studio Branding requires an active Plus or Pro subscription.")
@@ -1678,10 +1706,11 @@ async def upload_branding_asset(
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT tier FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
 
-    if not user or (user.get("tier") or "").lower() not in ["plus", "pro"]:
+    tier, _, _ = resolve_user_tier(user) if user else ("free", 0, 0)
+    if tier not in ["plus", "pro"]:
         conn.close()
         raise HTTPException(status_code=403, detail="Custom Studio Branding requires an active Plus or Pro subscription.")
 
@@ -1724,15 +1753,15 @@ async def get_sign_quota(user_id: Optional[str] = None, email: Optional[str] = N
     user_tier = "free"
     
     if user_id:
-        cursor.execute("SELECT tier FROM users WHERE user_id = %s", (user_id,))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
         u = cursor.fetchone()
-        if u and u.get("tier"):
-            user_tier = u["tier"].lower()
+        if u:
+            user_tier, _, _ = resolve_user_tier(u)
     elif email:
-        cursor.execute("SELECT tier FROM users WHERE LOWER(email) = LOWER(%s)", (email.strip(),))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE LOWER(email) = LOWER(%s)", (email.strip(),))
         u = cursor.fetchone()
-        if u and u.get("tier"):
-            user_tier = u["tier"].lower()
+        if u:
+            user_tier, _, _ = resolve_user_tier(u)
 
     tier_cfg = PLAN_CONFIG.get(user_tier, PLAN_CONFIG["free"])
     daily_limit = tier_cfg.get("esign_daily", 7)
@@ -1780,18 +1809,17 @@ async def upload_sign_doc(
     user_tier = "free"
 
     if user_id:
-        cursor.execute("SELECT email, tier FROM users WHERE user_id = %s", (user_id,))
+        cursor.execute("SELECT email, tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
         u = cursor.fetchone()
         if u:
             if u.get("email") and not resolved_creator:
                 resolved_creator = u["email"]
-            if u.get("tier"):
-                user_tier = u["tier"].lower()
+            user_tier, _, _ = resolve_user_tier(u)
     elif resolved_creator:
-        cursor.execute("SELECT tier FROM users WHERE LOWER(email) = LOWER(%s)", (resolved_creator,))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE LOWER(email) = LOWER(%s)", (resolved_creator,))
         u = cursor.fetchone()
-        if u and u.get("tier"):
-            user_tier = u["tier"].lower()
+        if u:
+            user_tier, _, _ = resolve_user_tier(u)
 
     tier_cfg = PLAN_CONFIG.get(user_tier, PLAN_CONFIG["free"])
     daily_limit = tier_cfg.get("esign_daily", 7)
@@ -2068,43 +2096,32 @@ async def get_drive_quota(user_id: str):
             "grace_period_end_at": None
         }
 
-    # Auto-synchronize subscription if active but marked as free
-    now = datetime.utcnow()
-    sub_end = user.get("subscription_end_at")
-    price = float(user.get("plan_price") or 0.0)
+    # Timezone-safe resolution and self-healing synchronization
+    resolved_tier, resolved_quota, plan_price = resolve_user_tier(user)
 
-    if sub_end:
-        if isinstance(sub_end, str):
-            sub_end = datetime.fromisoformat(sub_end)
-        
-        if sub_end > now and price > 0.0:
-            price_map = {7.00: "pro", 4.50: "plus", 2.50: "lite", 1.80: "micro"}
-            expected_tier = price_map.get(price, (user.get("tier") or "pro").lower())
-            expected_quota = PLAN_CONFIG.get(expected_tier, PLAN_CONFIG["pro"])["quota"]
+    current_tier = (user.get("tier") or "free").lower()
+    current_quota = user.get("storage_quota_bytes") or 0
 
-            current_tier = (user.get("tier") or "free").lower()
-            current_quota = user.get("storage_quota_bytes") or 0
+    if current_tier != resolved_tier or current_quota < resolved_quota:
+        try:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = %s, storage_quota_bytes = %s, grace_period_end_at = NULL 
+                WHERE user_id = %s
+            """, (resolved_tier, resolved_quota, user_id))
+            conn.commit()
+            user["tier"] = resolved_tier
+            user["storage_quota_bytes"] = resolved_quota
+        except Exception as ex:
+            print(f"[QUOTA SYNC ERROR]: {ex}", flush=True)
 
-            if current_tier != expected_tier or current_quota < expected_quota:
-                cursor.execute("""
-                    UPDATE users 
-                    SET tier = %s, storage_quota_bytes = %s, grace_period_end_at = NULL 
-                    WHERE user_id = %s
-                """, (expected_tier, expected_quota, user_id))
-                conn.commit()
-                user["tier"] = expected_tier
-                user["storage_quota_bytes"] = expected_quota
-
-    tier_key = (user.get("tier") or "free").lower()
-    default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
-    quota = user.get("storage_quota_bytes") or default_quota
     conn.close()
 
     return {
-        "tier": tier_key,
+        "tier": resolved_tier,
         "used_bytes": user.get("storage_used_bytes", 0) or 0,
-        "quota_bytes": quota,
-        "plan_price": float(user.get("plan_price") or 0.0),
+        "quota_bytes": resolved_quota,
+        "plan_price": plan_price,
         "subscription_end_at": str(user.get("subscription_end_at"))[:19] if user.get("subscription_end_at") else None,
         "grace_period_end_at": str(user.get("grace_period_end_at"))[:19] if user.get("grace_period_end_at") else None
     }
@@ -2143,7 +2160,7 @@ async def upload_drive_file(request: Request, filename: str, user_id: str):
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
 
     if not user:
@@ -2153,9 +2170,7 @@ async def upload_drive_file(request: Request, filename: str, user_id: str):
         quota = 5368709120
     else:
         used = user.get("storage_used_bytes") or 0
-        tier_key = (user.get("tier") or "free").lower()
-        default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
-        quota = user.get("storage_quota_bytes") or default_quota
+        _, quota, _ = resolve_user_tier(user)
 
     if (used + file_size) > quota:
         conn.close()
@@ -2201,7 +2216,7 @@ async def upload_client_deposit(
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes, email FROM users WHERE user_id = %s", (owner_id,))
+    cursor.execute("SELECT tier, storage_used_bytes, storage_quota_bytes, email, plan_price, subscription_end_at FROM users WHERE user_id = %s", (owner_id,))
     owner = cursor.fetchone()
 
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
@@ -2222,9 +2237,7 @@ async def upload_client_deposit(
         quota = 5368709120
     else:
         used = owner.get("storage_used_bytes") or 0
-        tier_key = (owner.get("tier") or "free").lower()
-        default_quota = PLAN_CONFIG.get(tier_key, {}).get("quota", 5368709120)
-        quota = owner.get("storage_quota_bytes") or default_quota
+        _, quota, _ = resolve_user_tier(owner)
         if not owner.get("email") and resolved_owner_email:
             cursor.execute("UPDATE users SET email = %s WHERE user_id = %s", (resolved_owner_email, owner_id))
             conn.commit()
@@ -2412,11 +2425,18 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
             "target_quota_bytes": target["quota"]
         }
 
-    now = datetime.utcnow()
     if isinstance(sub_end, str):
-        sub_end = datetime.fromisoformat(sub_end)
+        try:
+            sub_end = datetime.fromisoformat(sub_end.replace("Z", "+00:00"))
+        except Exception:
+            pass
 
-    days_remaining = max(0, (sub_end - now).days)
+    if getattr(sub_end, "tzinfo", None) is not None:
+        sub_end_naive = sub_end.astimezone(timezone.utc).replace(tzinfo=None)
+    else:
+        sub_end_naive = sub_end
+
+    days_remaining = max(0, (sub_end_naive - datetime.utcnow()).days)
     if days_remaining <= 0:
         return {
             "target_tier": target_tier_key,
@@ -2504,26 +2524,25 @@ async def get_user_profile(user_id: str):
         conn.close()
         return {"tier": "free", "user_id": user_id, "stripe_connected": False}
 
-    # Auto-synchronize subscription if active but marked as free
-    now = datetime.utcnow()
-    sub_end = row.get("subscription_end_at")
-    price = float(row.get("plan_price") or 0.0)
-    tier = (row.get("tier") or "free").lower()
+    resolved_tier, resolved_quota, _ = resolve_user_tier(row)
+    current_tier = (row.get("tier") or "free").lower()
+    current_quota = row.get("storage_quota_bytes") or 0
 
-    if sub_end:
-        if isinstance(sub_end, str):
-            sub_end = datetime.fromisoformat(sub_end)
-        if sub_end > now and price > 0.0 and tier == "free":
-            price_map = {7.00: "pro", 4.50: "plus", 2.50: "lite", 1.80: "micro"}
-            tier = price_map.get(price, "pro")
-            quota = PLAN_CONFIG[tier]["quota"]
-            cursor.execute("UPDATE users SET tier = %s, storage_quota_bytes = %s, grace_period_end_at = NULL WHERE user_id = %s", (tier, quota, user_id))
+    if current_tier != resolved_tier or current_quota < resolved_quota:
+        try:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = %s, storage_quota_bytes = %s, grace_period_end_at = NULL 
+                WHERE user_id = %s
+            """, (resolved_tier, resolved_quota, user_id))
             conn.commit()
-            row["tier"] = tier
+            row["tier"] = resolved_tier
+        except Exception as ex:
+            print(f"[PROFILE SYNC ERROR]: {ex}", flush=True)
 
     conn.close()
     return {
-        "tier": row.get("tier", "free"),
+        "tier": resolved_tier,
         "email": row.get("email"),
         "user_id": row.get("user_id"),
         "brand_title": row.get("brand_title"),
