@@ -28,6 +28,10 @@
 
     .font-mono-code {
       font-family: 'JetBrains Mono', monospace;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
     }
 
     /* Native, uncompressed rendering */
@@ -71,7 +75,7 @@
     </div>
   </div>
 
-  <!-- Header (Download Button Permanently Removed) -->
+  <!-- Header (Confidential View-Only) -->
   <header class="relative z-20 border-b border-white/[0.08] bg-black/40 backdrop-blur-md px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <a href="/" class="flex items-center gap-2">
@@ -125,7 +129,7 @@
       <!-- Media Stage Area -->
       <div id="mediaStage" class="relative w-full min-h-[420px] lg:min-h-[580px] flex items-center justify-center bg-black overflow-hidden p-2 sm:p-4">
         
-        <!-- Stationary Upper-Corner Watermark (No Screen Obstruction) -->
+        <!-- Stationary Upper-Corner Watermark -->
         <div class="absolute top-4 right-4 z-30 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 backdrop-blur-md shadow-lg select-none">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
           <span class="text-[10px] font-mono text-white/70 font-semibold tracking-wider">
@@ -181,13 +185,26 @@
           </audio>
         </div>
 
-        <!-- 4. CODE & JUPYTER NOTEBOOK VIEWER (PY, JS, TS, HTML, CSS, JSON, SQL, IPYNB, SH) -->
-        <div id="codeContainer" class="hidden w-full h-[65vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
-          <div class="px-4 py-2.5 bg-black/50 border-b border-white/10 flex items-center justify-between text-xs font-mono">
-            <span id="codeLangTag" class="text-indigo-400 font-bold">SOURCE CODE</span>
-            <span id="codeLinesCount" class="text-slate-400">Loading code...</span>
+        <!-- 4. CODE & NOTEBOOK VIEWER WITH COPY BUTTON -->
+        <div id="codeContainer" class="hidden w-full h-[68vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
+          <div class="px-4 py-2.5 bg-black/60 border-b border-white/10 flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+              <span id="codeLangTag" class="text-indigo-300 font-bold">SOURCE CODE</span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <span id="codeLinesCount" class="text-slate-400 hidden sm:inline">Loading lines...</span>
+              <button id="copyScriptBtn" 
+                      type="button" 
+                      onclick="copyScriptCode()" 
+                      class="px-3.5 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 hover:text-white border border-indigo-500/40 rounded-xl font-mono font-bold text-[11px] transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <span id="copyIcon">📋</span>
+                <span id="copyBtnText">Copy Code</span>
+              </button>
+            </div>
           </div>
-          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code"><code id="codeViewerBox" class="language-javascript">Fetching source code...</code></pre>
+          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code select-text"><code id="codeViewerBox" class="language-javascript">Fetching source code...</code></pre>
         </div>
 
         <!-- 5. PDF VIEWER (PDF) -->
@@ -254,6 +271,7 @@
     const tableExts = ['csv', 'tsv'];
 
     const ext = filename.split('.').pop() || '';
+    let rawSourceCode = "";
 
     function activatePlayer() {
       const iconBox = document.getElementById("formatIconBox");
@@ -309,19 +327,54 @@
               extracted += Array.isArray(c.source) ? c.source.join("") : (c.source || "");
               extracted += "\n";
             });
+            rawSourceCode = extracted;
             codeBox.textContent = extracted;
           } catch(e) {
+            rawSourceCode = text;
             codeBox.textContent = text;
           }
         } else {
+          rawSourceCode = text;
           codeBox.textContent = text;
         }
 
         langTag.innerText = `${ext.toUpperCase()} SCRIPT`;
-        linesCount.innerText = `${text.split('\n').length} lines`;
+        linesCount.innerText = `${rawSourceCode.split('\n').length} lines`;
         Prism.highlightElement(codeBox);
       } catch (e) {
         document.getElementById("codeViewerBox").textContent = "Error loading source code.";
+      }
+    }
+
+    async function copyScriptCode() {
+      if (!rawSourceCode) return;
+      const btnText = document.getElementById("copyBtnText");
+      const icon = document.getElementById("copyIcon");
+
+      try {
+        await navigator.clipboard.writeText(rawSourceCode);
+        if (btnText) btnText.innerText = "Copied!";
+        if (icon) icon.innerText = "✓";
+        setTimeout(() => {
+          if (btnText) btnText.innerText = "Copy Code";
+          if (icon) icon.innerText = "📋";
+        }, 2000);
+      } catch (err) {
+        const ta = document.createElement("textarea");
+        ta.value = rawSourceCode;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+
+        if (btnText) btnText.innerText = "Copied!";
+        if (icon) icon.innerText = "✓";
+        setTimeout(() => {
+          if (btnText) btnText.innerText = "Copy Code";
+          if (icon) icon.innerText = "📋";
+        }, 2000);
       }
     }
 
