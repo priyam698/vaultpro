@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Protected Stream | {{ filename }}</title>
+  <title>Zephyr Protected Deliverables | {{ filename }}</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
       user-select: text;
     }
 
-    /* Native, uncompressed rendering */
+    /* Native Uncompressed Quality Rendering */
     .media-high-quality {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: high-quality;
@@ -42,7 +42,7 @@
       backface-visibility: hidden;
     }
 
-    /* Soundwave bars animation for audio files */
+    /* Soundwave bars animation for audio streams */
     @keyframes waveBounce {
       0%, 100% { height: 8px; }
       50% { height: 38px; }
@@ -60,22 +60,20 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-[#060810]">
 
-  <!-- Anti-Screenshot & Screen Capture Concealment Curtain -->
   <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#05070d]/98 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
     <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-pulse">
       🛡️
     </div>
     <span class="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase mb-1">Zephyr Anti-Screenshot Guard</span>
-    <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Protected Deliverable Concealed</h3>
+    <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Protected Deliverables Concealed</h3>
     <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-      Media is concealed while this window is inactive or screen capture utilities are open. Click anywhere inside this window to resume viewing.
+      Deliverables are hidden while this window is inactive or screen capture utilities are open. Click anywhere inside this window to restore viewing.
     </p>
     <div class="mt-5 px-4 py-2 rounded-xl bg-white/10 border border-white/15 text-slate-300 text-xs font-semibold">
       Tap to Resume Viewing
     </div>
   </div>
 
-  <!-- Header (Confidential View-Only) -->
   <header class="relative z-20 border-b border-white/[0.08] bg-black/40 backdrop-blur-md px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <a href="/" class="flex items-center gap-2">
@@ -87,14 +85,13 @@
       <span class="opacity-30 text-sm">|</span>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-xs font-mono font-bold text-emerald-400">Confidential Licensed Access</span>
+        <span class="text-xs font-mono font-bold text-emerald-400">Licensed Purchase Confirmed</span>
       </div>
     </div>
 
-    <!-- Security & License Info -->
     <div class="flex items-center gap-3">
       <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
-        <span>Licensee:</span> <strong class="text-indigo-300">{{ buyer_email }}</strong>
+        <span>Buyer:</span> <strong class="text-indigo-300">{{ buyer_email }}</strong>
       </span>
       <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xl">
         View-Only Mode
@@ -102,20 +99,34 @@
     </div>
   </header>
 
-  <!-- Deliverable Stage -->
   <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 sm:p-8 max-w-7xl mx-auto w-full">
     
     <div class="relative w-full rounded-3xl bg-slate-900/60 border border-white/10 overflow-hidden shadow-2xl flex flex-col backdrop-blur-xl">
       
-      <!-- Card Bar Details -->
+      <div id="fileTabsBar" class="{% if not files or files_count <= 1 %}hidden{% endif %} p-3.5 bg-[#090d1a] border-b border-white/10 flex items-center gap-2 overflow-x-auto custom-scroll">
+        <span class="text-[10px] font-mono text-indigo-400 uppercase font-black px-2 shrink-0">Deliverables (<span id="filesCountBadge">{{ files_count or 1 }}</span>):</span>
+        <div id="fileTabsContainer" class="flex items-center gap-2">
+          {% for f in files %}
+          <button type="button" 
+                  onclick="switchActiveFile('{{ f.filename }}')" 
+                  class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer {% if f.filename == filename %}bg-indigo-600 text-white shadow-md shadow-indigo-600/30{% else %}bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10{% endif %}"
+                  data-filename="{{ f.filename }}">
+            <span class="tab-icon">📄</span>
+            <span class="truncate max-w-[160px]">{{ f.filename }}</span>
+            <span class="text-[10px] opacity-60">({{ f.filesize_mb }} MB)</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
       <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/30">
         <div class="flex items-center gap-3 overflow-hidden">
           <div id="formatIconBox" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg shrink-0">
             🎬
           </div>
           <div class="truncate">
-            <h1 class="text-sm font-black text-white truncate" title="{{ filename }}">{{ filename }}</h1>
-            <p class="text-[11px] text-slate-400 font-mono">End-to-End Encrypted • DRM Stream Protection</p>
+            <h1 id="activeFilenameDisplay" class="text-sm font-black text-white truncate" title="{{ filename }}">{{ filename }}</h1>
+            <p class="text-[11px] text-slate-400 font-mono">Uncompressed Native Quality • DRM Stream Shielded</p>
           </div>
         </div>
 
@@ -126,18 +137,15 @@
         </div>
       </div>
 
-      <!-- Media Stage Area -->
-      <div id="mediaStage" class="relative w-full min-h-[420px] lg:min-h-[580px] flex items-center justify-center bg-black overflow-hidden p-2 sm:p-4">
+      <div id="mediaStage" class="relative w-full min-h-[460px] lg:min-h-[600px] flex items-center justify-center bg-black overflow-hidden p-2 sm:p-4">
         
-        <!-- Stationary Upper-Corner Watermark -->
-        <div class="absolute top-4 right-4 z-30 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 backdrop-blur-md shadow-lg select-none">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-          <span class="text-[10px] font-mono text-white/70 font-semibold tracking-wider">
+        <div class="absolute top-4 right-4 z-30 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/75 border border-white/15 backdrop-blur-md shadow-lg select-none">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+          <span class="text-[10px] font-mono text-white/80 font-semibold tracking-wider">
             🔒 Licensed to {{ buyer_email }} • DRM Protected
           </span>
         </div>
 
-        <!-- 1. VIDEO PLAYER (MP4, MOV, 4K/8K, SCREEN RECORDINGS, WEBM) -->
         <div id="videoContainer" class="hidden w-full h-full flex flex-col items-center justify-center">
           <video id="nativeVideoPlayer" 
                  controls 
@@ -146,20 +154,18 @@
                  playsinline 
                  preload="metadata"
                  class="media-high-quality max-h-[75vh] w-full object-contain rounded-2xl shadow-2xl bg-black">
-            <source src="/api/paywall/stream/{{ share_id }}?token={{ token }}" type="video/mp4">
+            <source id="videoSource" src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}" type="video/mp4">
             Your browser does not support HTML5 video streaming.
           </video>
         </div>
 
-        <!-- 2. HIGH-RES IMAGE / GRAPHIC CANVAS (PNG, JPG, WEBP, GIF, RAW, SVG) -->
         <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center p-2">
           <img id="nativeImagePlayer" 
-               src="/api/paywall/stream/{{ share_id }}?token={{ token }}" 
+               src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}" 
                alt="{{ filename }}" 
                class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
         </div>
 
-        <!-- 3. AUDIO PLAYER (MP3, WAV, VOICE NOTES, FLAC, M4A) -->
         <div id="audioContainer" class="hidden w-full max-w-lg p-8 flex flex-col items-center justify-center text-center space-y-6">
           <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-2xl">
             <div class="w-full h-full bg-[#080d1e] rounded-[22px] flex items-center justify-center text-3xl">
@@ -167,8 +173,8 @@
             </div>
           </div>
           <div>
-            <h3 class="text-base font-black text-white">{{ filename }}</h3>
-            <p class="text-xs text-indigo-400 font-mono mt-1">Confidential Audio Stream</p>
+            <h3 id="audioTitle" class="text-base font-black text-white">{{ filename }}</h3>
+            <p class="text-xs text-indigo-400 font-mono mt-1">Lossless Audio Stream</p>
           </div>
 
           <div class="flex items-center justify-center gap-1.5 h-10 py-1">
@@ -177,15 +183,13 @@
             <span class="wave-bar w-1.5 bg-purple-400 rounded-full" style="animation-delay: 0.2s;"></span>
             <span class="wave-bar w-1.5 bg-indigo-400 rounded-full" style="animation-delay: 0.5s;"></span>
             <span class="wave-bar w-1.5 bg-cyan-300 rounded-full" style="animation-delay: 0.4s;"></span>
-            <span class="wave-bar w-1.5 bg-indigo-600 rounded-full" style="animation-delay: 0.6s;"></span>
           </div>
 
           <audio id="nativeAudioPlayer" controls class="w-full rounded-xl" controlsList="nodownload">
-            <source src="/api/paywall/stream/{{ share_id }}?token={{ token }}">
+            <source id="audioSource" src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}">
           </audio>
         </div>
 
-        <!-- 4. CODE & NOTEBOOK VIEWER WITH COPY BUTTON -->
         <div id="codeContainer" class="hidden w-full h-[68vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
           <div class="px-4 py-2.5 bg-black/60 border-b border-white/10 flex items-center justify-between text-xs font-mono">
             <div class="flex items-center gap-2">
@@ -198,7 +202,7 @@
               <button id="copyScriptBtn" 
                       type="button" 
                       onclick="copyScriptCode()" 
-                      class="px-3.5 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 hover:text-white border border-indigo-500/40 rounded-xl font-mono font-bold text-[11px] transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                      class="px-3.5 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 hover:text-white border border-indigo-500/40 rounded-xl font-mono font-bold text-[11px] transition flex items-center gap-1.5 cursor-pointer">
                 <span id="copyIcon">📋</span>
                 <span id="copyBtnText">Copy Code</span>
               </button>
@@ -207,12 +211,10 @@
           <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code select-text"><code id="codeViewerBox" class="language-javascript">Fetching source code...</code></pre>
         </div>
 
-        <!-- 5. PDF VIEWER (PDF) -->
         <div id="pdfContainer" class="hidden w-full h-[75vh] rounded-2xl overflow-hidden bg-slate-900 border border-white/10">
-          <iframe id="pdfIframe" src="/api/paywall/stream/{{ share_id }}?token={{ token }}#toolbar=0" class="w-full h-full rounded-2xl border-0"></iframe>
+          <iframe id="pdfIframe" src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}#toolbar=0" class="w-full h-full rounded-2xl border-0"></iframe>
         </div>
 
-        <!-- 6. DATA / CSV SPREADSHEET VIEWER (CSV, TSV) -->
         <div id="tableContainer" class="hidden w-full h-[65vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
           <div class="px-4 py-2.5 bg-black/50 border-b border-white/10 flex items-center justify-between text-xs">
             <span class="font-mono text-cyan-400 font-bold">Spreadsheet Data View</span>
@@ -223,7 +225,6 @@
           </div>
         </div>
 
-        <!-- 7. ARCHIVES & PACKAGE DELIVERABLES (VIEW-ONLY STATUS CARD) -->
         <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-4">
           <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto text-4xl shadow-xl">
             📦
@@ -232,8 +233,8 @@
             <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full">
               Confidential Package
             </span>
-            <h3 class="text-lg font-black text-white mt-2">{{ filename }}</h3>
-            <p class="text-xs text-slate-400 mt-1">This archive package is verified under zero-knowledge encryption and licensed to your email.</p>
+            <h3 id="genericTitle" class="text-lg font-black text-white mt-2">{{ filename }}</h3>
+            <p class="text-xs text-slate-400 mt-1">This deliverable is verified under zero-knowledge encryption and licensed to your email.</p>
           </div>
           <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono">
             Direct download disabled • Confidential inspection only
@@ -242,11 +243,10 @@
 
       </div>
 
-      <!-- Bottom Status Bar -->
       <div class="px-5 py-3 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-slate-400">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-          <span>Forensic Anti-Leak Protection Active</span>
+          <span>Forensic DRM Shield Active</span>
         </div>
         <span class="font-mono text-[11px]">Stream authorized for {{ buyer_email }}</span>
       </div>
@@ -259,10 +259,11 @@
     © 2026 Zephyr Systems • Zero-Knowledge Confidential Stream
   </footer>
 
-  <!-- File Detection & Security Handlers -->
   <script>
-    const filename = "{{ filename }}".toLowerCase();
-    const streamUrl = "/api/paywall/stream/{{ share_id }}?token={{ token }}";
+    let activeFile = "{{ filename }}";
+    const shareId = "{{ share_id }}";
+    const token = "{{ token }}";
+    let rawSourceCode = "";
 
     const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v', 'flv'];
     const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'wma'];
@@ -270,26 +271,60 @@
     const codeExts  = ['py', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'sql', 'sh', 'cpp', 'c', 'h', 'cs', 'java', 'go', 'rs', 'php', 'rb', 'yml', 'yaml', 'md', 'txt', 'log', 'ipynb'];
     const tableExts = ['csv', 'tsv'];
 
-    const ext = filename.split('.').pop() || '';
-    let rawSourceCode = "";
+    function getIconForFile(fname) {
+      const ext = fname.split('.').pop().toLowerCase() || '';
+      if (videoExts.includes(ext)) return '🎬';
+      if (imageExts.includes(ext)) return '🖼️';
+      if (audioExts.includes(ext)) return '🎵';
+      if (ext === 'pdf') return '📑';
+      if (tableExts.includes(ext)) return '📊';
+      if (codeExts.includes(ext)) return '💻';
+      return '📄';
+    }
 
-    function activatePlayer() {
+    function hideAllPlayers() {
+      ['videoContainer', 'imageContainer', 'audioContainer', 'codeContainer', 'pdfContainer', 'tableContainer', 'genericContainer'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("hidden");
+      });
+      const v = document.getElementById("nativeVideoPlayer");
+      const a = document.getElementById("nativeAudioPlayer");
+      if (v && !v.paused) v.pause();
+      if (a && !a.paused) a.pause();
+    }
+
+    function renderActiveDeliverable(fname) {
+      hideAllPlayers();
+      activeFile = fname;
+      document.getElementById("activeFilenameDisplay").innerText = fname;
+
+      const ext = fname.split('.').pop().toLowerCase() || '';
+      const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(fname)}`;
       const iconBox = document.getElementById("formatIconBox");
       const badge = document.getElementById("formatBadge");
 
       if (videoExts.includes(ext)) {
+        const v = document.getElementById("nativeVideoPlayer");
+        document.getElementById("videoSource").src = streamUrl;
+        v.load();
         document.getElementById("videoContainer").classList.remove("hidden");
         iconBox.innerText = "🎬";
-        badge.innerText = "HIGH RESOLUTION VIDEO STREAM";
+        badge.innerText = "8K / 4K VIDEO STREAM";
       } else if (imageExts.includes(ext)) {
+        document.getElementById("nativeImagePlayer").src = streamUrl;
         document.getElementById("imageContainer").classList.remove("hidden");
         iconBox.innerText = "🖼️";
         badge.innerText = "ORIGINAL IMAGE";
       } else if (audioExts.includes(ext)) {
+        const a = document.getElementById("nativeAudioPlayer");
+        document.getElementById("audioSource").src = streamUrl;
+        document.getElementById("audioTitle").innerText = fname;
+        a.load();
         document.getElementById("audioContainer").classList.remove("hidden");
         iconBox.innerText = "🎵";
         badge.innerText = "LOSSLESS AUDIO STREAM";
       } else if (ext === 'pdf') {
+        document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0`;
         document.getElementById("pdfContainer").classList.remove("hidden");
         iconBox.innerText = "📑";
         badge.innerText = "PDF DOCUMENT";
@@ -297,26 +332,37 @@
         document.getElementById("tableContainer").classList.remove("hidden");
         iconBox.innerText = "📊";
         badge.innerText = "DATA SPREADSHEET";
-        loadTableData();
+        loadTableData(streamUrl);
       } else if (codeExts.includes(ext)) {
         document.getElementById("codeContainer").classList.remove("hidden");
         iconBox.innerText = "💻";
-        badge.innerText = `${ext.toUpperCase()} CODE`;
-        loadCodeSource();
+        badge.innerText = `${ext.toUpperCase()} SCRIPT`;
+        loadCodeSource(streamUrl, ext);
       } else {
         document.getElementById("genericContainer").classList.remove("hidden");
+        document.getElementById("genericTitle").innerText = fname;
         iconBox.innerText = "📦";
-        badge.innerText = "CONFIDENTIAL ARCHIVE";
+        badge.innerText = "CONFIDENTIAL DELIVERABLE";
       }
     }
 
-    async function loadCodeSource() {
+    function switchActiveFile(fname) {
+      document.querySelectorAll(".file-tab-btn").forEach(b => {
+        if (b.dataset.filename === fname) {
+          b.className = "file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer bg-indigo-600 text-white shadow-md shadow-indigo-600/30";
+        } else {
+          b.className = "file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10";
+        }
+      });
+      renderActiveDeliverable(fname);
+    }
+
+    async function loadCodeSource(streamUrl, ext) {
       try {
         const res = await fetch(streamUrl);
         const text = await res.text();
         const codeBox = document.getElementById("codeViewerBox");
         const linesCount = document.getElementById("codeLinesCount");
-        const langTag = document.getElementById("codeLangTag");
 
         if (ext === 'ipynb') {
           try {
@@ -338,7 +384,6 @@
           codeBox.textContent = text;
         }
 
-        langTag.innerText = `${ext.toUpperCase()} SCRIPT`;
         linesCount.innerText = `${rawSourceCode.split('\n').length} lines`;
         Prism.highlightElement(codeBox);
       } catch (e) {
@@ -353,32 +398,24 @@
 
       try {
         await navigator.clipboard.writeText(rawSourceCode);
-        if (btnText) btnText.innerText = "Copied!";
-        if (icon) icon.innerText = "✓";
-        setTimeout(() => {
-          if (btnText) btnText.innerText = "Copy Code";
-          if (icon) icon.innerText = "📋";
-        }, 2000);
       } catch (err) {
         const ta = document.createElement("textarea");
         ta.value = rawSourceCode;
         ta.style.position = "fixed";
-        ta.style.opacity = "0";
         document.body.appendChild(ta);
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
-
-        if (btnText) btnText.innerText = "Copied!";
-        if (icon) icon.innerText = "✓";
-        setTimeout(() => {
-          if (btnText) btnText.innerText = "Copy Code";
-          if (icon) icon.innerText = "📋";
-        }, 2000);
       }
+      btnText.innerText = "Copied!";
+      icon.innerText = "✓";
+      setTimeout(() => {
+        btnText.innerText = "Copy Code";
+        icon.innerText = "📋";
+      }, 2000);
     }
 
-    async function loadTableData() {
+    async function loadTableData(streamUrl) {
       try {
         const res = await fetch(streamUrl);
         const csv = await res.text();
@@ -401,9 +438,38 @@
       } catch (e) {}
     }
 
-    activatePlayer();
+    // Auto-discover manifest from server if Jinja rendered only 1 or fallback
+    async function syncDeliverableManifest() {
+      try {
+        const res = await fetch(`/api/share-details/${shareId}`);
+        if (!res.ok) return;
+        const details = await res.json();
+        if (details.files && details.files.length > 1) {
+          const tabsBar = document.getElementById("fileTabsBar");
+          const container = document.getElementById("fileTabsContainer");
+          const countBadge = document.getElementById("filesCountBadge");
 
-    // Shield against screenshots and window loss
+          countBadge.innerText = details.files.length;
+          tabsBar.classList.remove("hidden");
+
+          container.innerHTML = details.files.map(f => `
+            <button type="button" 
+                    onclick="switchActiveFile('${f.filename}')" 
+                    class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer ${f.filename === activeFile ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'}"
+                    data-filename="${f.filename}">
+              <span>${getIconForFile(f.filename)}</span>
+              <span class="truncate max-w-[160px]">${f.filename}</span>
+              <span class="text-[10px] opacity-60">(${f.filesize_mb} MB)</span>
+            </button>
+          `).join('');
+        }
+      } catch(e) {}
+    }
+
+    renderActiveDeliverable(activeFile);
+    syncDeliverableManifest();
+
+    // Anti-Capture Security Handlers
     const shield = document.getElementById("antiCaptureShield");
     const video = document.getElementById("nativeVideoPlayer");
     const audio = document.getElementById("nativeAudioPlayer");
@@ -422,7 +488,6 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) engageShield();
     });
-
     window.addEventListener("focus", disengageShield);
     shield.addEventListener("click", disengageShield);
 
@@ -432,7 +497,7 @@
       if (e.key === "PrintScreen" || e.keyCode === 44) {
         engageShield();
         if (navigator.clipboard) {
-          navigator.clipboard.writeText("Protected by Zephyr Shield");
+          navigator.clipboard.writeText("Protected by Zephyr DRM");
         }
         setTimeout(disengageShield, 2500);
       }
