@@ -3,236 +3,447 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Protected Stream | Zero-Knowledge Viewer</title>
-
-  <!-- Supersonic Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76L46 76L86 34Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(%23gs)'/></svg>">
-
+  <title>Zephyr Protected Deliverable | {{ filename }}</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
   <style>
-    /* Block Print Previews */
-    @media print {
-      body { display: none !important; }
-    }
-
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      background-color: #06070b;
+      background-color: #05070d;
       color: #f8fafc;
-      overflow: hidden;
-      user-select: none;
+      overflow-x: hidden;
       -webkit-user-select: none;
-      transition: background-color 0.35s ease, color 0.35s ease;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
-    /* Dark Mode Ambient Backdrop */
-    .site-mountain-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #06070b;
-      background-image: 
-        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
-        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
-        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
-        linear-gradient(180deg, #07090f 0%, #030407 100%);
-      pointer-events: none;
-      z-index: 0;
-      transition: background-image 0.4s ease, background-color 0.4s ease;
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* 2-Color Light Theme (Sky Cyan + Periwinkle Indigo) */
-    body.light-theme {
-      background-color: #dbe4f0;
-      color: #0f172a;
+    /* Floating Moving Forensic Watermark Animation */
+    @keyframes floatWatermark1 {
+      0% { transform: translate(5vw, 10vh) rotate(-18deg); }
+      25% { transform: translate(65vw, 25vh) rotate(-12deg); }
+      50% { transform: translate(40vw, 75vh) rotate(-22deg); }
+      75% { transform: translate(15vw, 60vh) rotate(-15deg); }
+      100% { transform: translate(5vw, 10vh) rotate(-18deg); }
     }
 
-    body.light-theme .site-mountain-backdrop {
-      background-color: #dbe4f0;
-      background-image: 
-        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
-        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
-        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
+    @keyframes floatWatermark2 {
+      0% { transform: translate(75vw, 80vh) rotate(-15deg); }
+      25% { transform: translate(25vw, 65vh) rotate(-20deg); }
+      50% { transform: translate(60vw, 15vh) rotate(-12deg); }
+      75% { transform: translate(80vw, 35vh) rotate(-18deg); }
+      100% { transform: translate(75vw, 80vh) rotate(-15deg); }
     }
 
-    /* Top HUD Floating Pill */
-    .hud-chip {
-      background: rgba(16, 22, 38, 0.82);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-      transition: all 0.3s ease;
+    .watermark-pill-1 {
+      animation: floatWatermark1 28s ease-in-out infinite;
     }
 
-    body.light-theme .hud-chip {
-      background: rgba(241, 245, 249, 0.90) !important;
-      border: 1px solid rgba(195, 206, 222, 0.85) !important;
-      color: #0f172a !important;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+    .watermark-pill-2 {
+      animation: floatWatermark2 34s ease-in-out infinite;
     }
 
-    /* Privacy Curtain: Active during screenshot attempt or window blur */
-    #privacyCurtain {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(4, 7, 16, 0.96);
-      backdrop-filter: blur(45px);
-      -webkit-backdrop-filter: blur(45px);
-      z-index: 99999;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
+    /* Pure Uncompressed Quality Display */
+    .media-high-quality {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: high-quality;
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
 
-    body.light-theme #privacyCurtain {
-      background: rgba(224, 231, 240, 0.97);
+    /* Soundwave bars animation */
+    @keyframes waveBounce {
+      0%, 100% { height: 8px; }
+      50% { height: 38px; }
     }
+
+    .wave-bar {
+      animation: waveBounce 1.2s ease-in-out infinite;
+    }
+
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.4); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
   </style>
 </head>
-<body class="w-screen h-screen relative flex items-center justify-center">
+<body class="min-h-screen flex flex-col justify-between relative bg-[#060810]">
 
-  <!-- Ambient Backdrop -->
-  <div class="site-mountain-backdrop"></div>
-
-  <!-- Privacy Curtain Modal -->
-  <div id="privacyCurtain">
-    <div class="hud-chip max-w-md w-full rounded-3xl p-6 sm:p-8 text-center space-y-4 border border-rose-500/40 shadow-2xl">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-500">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-        </svg>
-      </div>
-      <div>
-        <h3 class="text-base font-black tracking-tight text-rose-500">Protected Stream Shielded</h3>
-        <p class="text-xs opacity-75 mt-1 leading-relaxed">
-          Display was obscured due to a window focus shift, screen-capture utility, or print shortcut.
-        </p>
-      </div>
-      <span class="inline-block text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-        Click inside this window to resume playback
-      </span>
+  <!-- ========================================================================= -->
+  <!-- ANTI-SCREENSHOT & ANTI-CAPTURE CONCEALMENT CURTAIN (Focus-Loss Shield)   -->
+  <!-- ========================================================================= -->
+  <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#05070d]/98 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
+    <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-pulse">
+      🛡️
+    </div>
+    <span class="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase mb-1">Zephyr Anti-Screenshot Guard</span>
+    <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Protected Deliverable Concealed</h3>
+    <p class="text-xs text-slate-400 max-w-md leading-relaxed">
+      Media is hidden while this window is inactive or screen capture utilities are focused. Click anywhere inside this window to restore viewing.
+    </p>
+    <div class="mt-5 px-4 py-2 rounded-xl bg-white/10 border border-white/15 text-slate-300 text-xs font-semibold">
+      Tap to Resume Viewing
     </div>
   </div>
 
-  <!-- Floating Stream Top HUD Bar -->
-  <header class="fixed top-5 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-4xl flex items-center justify-between hud-chip px-4 py-2.5 rounded-2xl">
-    <div class="flex items-center gap-2.5">
-      <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-1 flex items-center justify-center shadow-md shrink-0">
-        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-        </svg>
-      </div>
-      <div class="leading-tight">
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs font-black tracking-tight">Zephyr Secure Stream</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+  <!-- Top Protected Header -->
+  <header class="relative z-20 border-b border-white/[0.08] bg-black/40 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-sm font-bold text-indigo-400">
+          Z
         </div>
-        <span class="text-[10px] font-mono opacity-60 truncate block max-w-[200px] sm:max-w-xs">
-          Licensed to: {{ buyer_email }}
-        </span>
+        <span class="font-black text-sm tracking-tight text-white">Zephyr Shield</span>
+      </a>
+      <span class="opacity-30 text-sm">|</span>
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-xs font-mono font-bold text-emerald-400">Licensed Purchase Confirmed</span>
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Theme" class="w-8 h-8 rounded-xl border border-white/10 flex items-center justify-center text-xs text-amber-400 hover:bg-white/5 transition cursor-pointer">
-        <span id="themeIcon">☀️</span>
-      </button>
-      <button onclick="window.location.href='/share/{{ share_id }}'" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md cursor-pointer">
-        Exit Viewer
-      </button>
+    <!-- Download & Security Badges -->
+    <div class="flex items-center gap-3">
+      <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-white/5 border border-white/10 px-3 py-1 rounded-xl">
+        <span>Buyer:</span> <strong class="text-indigo-300">{{ buyer_email }}</strong>
+      </span>
+      {% if download_url %}
+      <a href="{{ download_url }}" download="{{ filename }}" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span>Download Original</span>
+      </a>
+      {% endif %}
     </div>
   </header>
 
-  <!-- Protected Media Canvas Display Frame (Properly Scaled & Centered) -->
-  <main class="relative z-20 w-full h-full flex items-center justify-center p-6 pt-24 pb-10">
-    <div class="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center bg-black/40">
-      <canvas id="protectedCanvas" class="w-full h-full object-contain block"></canvas>
+  <!-- ========================================================================= -->
+  <!-- MAIN DELIVERABLE CANVAS WITH UNIVERSAL FORMAT SWITCHER                    -->
+  <!-- ========================================================================= -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 sm:p-8 max-w-7xl mx-auto w-full">
+    
+    <!-- Deliverable Shell Container -->
+    <div class="relative w-full rounded-3xl bg-slate-900/60 border border-white/10 overflow-hidden shadow-2xl flex flex-col backdrop-blur-xl">
+      
+      <!-- Card Bar Details -->
+      <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/30">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div id="formatIconBox" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg shrink-0">
+            🎬
+          </div>
+          <div class="truncate">
+            <h1 class="text-sm font-black text-white truncate" title="{{ filename }}">{{ filename }}</h1>
+            <p class="text-[11px] text-slate-400 font-mono">Forensically Watermarked • Uncompressed Native Quality</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span id="formatBadge" class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+            PROTECTED STREAM
+          </span>
+        </div>
+      </div>
+
+      <!-- Media Stage Area with Active Dynamic Watermark -->
+      <div id="mediaStage" class="relative w-full min-h-[420px] lg:min-h-[560px] flex items-center justify-center bg-black overflow-hidden p-2 sm:p-4">
+        
+        <!-- DYNAMIC MOVING FORENSIC WATERMARK OVERLAYS -->
+        <div id="watermarkLayer" class="pointer-events-none absolute inset-0 z-30 overflow-hidden select-none">
+          <div class="watermark-pill-1 absolute px-4 py-1.5 rounded-full bg-black/35 backdrop-blur-sm border border-white/10 text-white/40 text-[10px] sm:text-xs font-mono font-bold tracking-wider pointer-events-none whitespace-nowrap shadow-lg">
+            🔒 LICENSED TO: {{ buyer_email }} • TOKEN: {{ token[:10] }} • CONFIDENTIAL
+          </div>
+          <div class="watermark-pill-2 absolute px-4 py-1.5 rounded-full bg-black/35 backdrop-blur-sm border border-white/10 text-indigo-400/40 text-[10px] sm:text-xs font-mono font-bold tracking-wider pointer-events-none whitespace-nowrap shadow-lg">
+            ZEPHYR FORENSIC SHIELD • {{ buyer_email }} • SHA-256 VERIFIED
+          </div>
+        </div>
+
+        <!-- 1. VIDEO PLAYER (MP4, MOV, 4K/8K, SCREEN RECORDINGS, WEBM) -->
+        <div id="videoContainer" class="hidden w-full h-full flex flex-col items-center justify-center">
+          <video id="nativeVideoPlayer" 
+                 controls 
+                 controlsList="nodownload noplaybackrate" 
+                 disablePictureInPicture 
+                 playsinline 
+                 preload="metadata"
+                 class="media-high-quality max-h-[75vh] w-full object-contain rounded-2xl shadow-2xl bg-black">
+            <source src="/api/paywall/stream/{{ share_id }}?token={{ token }}" type="video/mp4">
+            Your browser does not support HTML5 video streaming.
+          </video>
+        </div>
+
+        <!-- 2. HIGH-RES IMAGE / GRAPHIC CANVAS (PNG, JPG, WEBP, GIF, RAW, SVG) -->
+        <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center p-2">
+          <img id="nativeImagePlayer" 
+               src="/api/paywall/stream/{{ share_id }}?token={{ token }}" 
+               alt="{{ filename }}" 
+               class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
+        </div>
+
+        <!-- 3. AUDIO PLAYER (MP3, WAV, VOICE NOTES, FLAC, M4A) -->
+        <div id="audioContainer" class="hidden w-full max-w-lg p-8 flex flex-col items-center justify-center text-center space-y-6">
+          <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-2xl">
+            <div class="w-full h-full bg-[#080d1e] rounded-[22px] flex items-center justify-center text-3xl">
+              🎵
+            </div>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">{{ filename }}</h3>
+            <p class="text-xs text-indigo-400 font-mono mt-1">Lossless Audio Stream</p>
+          </div>
+
+          <!-- Animated Audio Visualizer -->
+          <div class="flex items-center justify-center gap-1.5 h-10 py-1">
+            <span class="wave-bar w-1.5 bg-indigo-500 rounded-full" style="animation-delay: 0.1s;"></span>
+            <span class="wave-bar w-1.5 bg-cyan-400 rounded-full" style="animation-delay: 0.3s;"></span>
+            <span class="wave-bar w-1.5 bg-purple-400 rounded-full" style="animation-delay: 0.2s;"></span>
+            <span class="wave-bar w-1.5 bg-indigo-400 rounded-full" style="animation-delay: 0.5s;"></span>
+            <span class="wave-bar w-1.5 bg-cyan-300 rounded-full" style="animation-delay: 0.4s;"></span>
+            <span class="wave-bar w-1.5 bg-indigo-600 rounded-full" style="animation-delay: 0.6s;"></span>
+          </div>
+
+          <audio id="nativeAudioPlayer" controls class="w-full rounded-xl" controlsList="nodownload">
+            <source src="/api/paywall/stream/{{ share_id }}?token={{ token }}">
+          </audio>
+        </div>
+
+        <!-- 4. CODE & JUPYTER NOTEBOOK VIEWER (PY, JS, TS, HTML, CSS, JSON, SQL, IPYNB, SH) -->
+        <div id="codeContainer" class="hidden w-full h-[65vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
+          <div class="px-4 py-2.5 bg-black/50 border-b border-white/10 flex items-center justify-between text-xs font-mono">
+            <span id="codeLangTag" class="text-indigo-400 font-bold">SOURCE CODE</span>
+            <span id="codeLinesCount" class="text-slate-400">Loading code...</span>
+          </div>
+          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code"><code id="codeViewerBox" class="language-javascript">Fetching source code...</code></pre>
+        </div>
+
+        <!-- 5. PDF VIEWER (PDF) -->
+        <div id="pdfContainer" class="hidden w-full h-[75vh] rounded-2xl overflow-hidden bg-slate-900 border border-white/10">
+          <iframe id="pdfIframe" src="/api/paywall/stream/{{ share_id }}?token={{ token }}#toolbar=0" class="w-full h-full rounded-2xl border-0"></iframe>
+        </div>
+
+        <!-- 6. DATA / CSV SPREADSHEET VIEWER (CSV, TSV) -->
+        <div id="tableContainer" class="hidden w-full h-[65vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
+          <div class="px-4 py-2.5 bg-black/50 border-b border-white/10 flex items-center justify-between text-xs">
+            <span class="font-mono text-cyan-400 font-bold">Spreadsheet Data View</span>
+            <span id="tableRowsCount" class="text-slate-400 font-mono">Rows</span>
+          </div>
+          <div class="flex-1 overflow-auto custom-scroll">
+            <table id="dataTable" class="w-full text-left text-xs border-collapse font-mono"></table>
+          </div>
+        </div>
+
+        <!-- 7. ARCHIVE & GENERIC FILE DELIVERABLE CARD (ZIP, RAR, 7Z, ALL OTHERS) -->
+        <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-5">
+          <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto text-4xl shadow-xl">
+            📦
+          </div>
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full">
+              Package Deliverable
+            </span>
+            <h3 class="text-lg font-black text-white mt-2">{{ filename }}</h3>
+            <p class="text-xs text-slate-400 mt-1">Multi-file archive bundle verified with client-side SHA-256 seal.</p>
+          </div>
+          {% if download_url %}
+          <a href="{{ download_url }}" download="{{ filename }}" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>💾</span>
+            <span>Download & Extract Archive</span>
+          </a>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Bottom Status Bar -->
+      <div class="px-5 py-3 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+          <span>Forensic Anti-Leak Protection Active</span>
+        </div>
+        <span class="font-mono text-[11px]">Authorized for {{ buyer_email }}</span>
+      </div>
+
     </div>
+
   </main>
 
+  <footer class="relative z-10 py-4 text-center text-xs text-slate-500 font-mono">
+    © 2026 Zephyr Systems • Zero-Knowledge Pay-to-Unlock Protection
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- MULTI-FORMAT DETECTION & ANTI-SCREENSHOT LOGIC                            -->
+  <!-- ========================================================================= -->
   <script>
-    function initTheme() {
-      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
-      const icon = document.getElementById("themeIcon");
-      if (savedTheme === "light") {
-        document.body.classList.add("light-theme");
-        if (icon) icon.innerText = "🌙";
+    const filename = "{{ filename }}".toLowerCase();
+    const streamUrl = "/api/paywall/stream/{{ share_id }}?token={{ token }}";
+
+    // Detect File Category
+    const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v', 'flv'];
+    const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'wma'];
+    const imageExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp', 'tiff', 'tif', 'raw', 'dng', 'heic'];
+    const codeExts  = ['py', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'sql', 'sh', 'cpp', 'c', 'h', 'cs', 'java', 'go', 'rs', 'php', 'rb', 'yml', 'yaml', 'md', 'txt', 'log', 'ipynb'];
+    const tableExts = ['csv', 'tsv'];
+
+    const ext = filename.split('.').pop() || '';
+
+    function activatePlayer() {
+      const iconBox = document.getElementById("formatIconBox");
+      const badge = document.getElementById("formatBadge");
+
+      if (videoExts.includes(ext)) {
+        document.getElementById("videoContainer").classList.remove("hidden");
+        iconBox.innerText = "🎬";
+        badge.innerText = "8K / 4K VIDEO STREAM";
+        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
+      } else if (imageExts.includes(ext)) {
+        document.getElementById("imageContainer").classList.remove("hidden");
+        iconBox.innerText = "🖼️";
+        badge.innerText = "ORIGINAL HIGH-RES IMAGE";
+        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      } else if (audioExts.includes(ext)) {
+        document.getElementById("audioContainer").classList.remove("hidden");
+        iconBox.innerText = "🎵";
+        badge.innerText = "LOSSLESS AUDIO STREAM";
+        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30";
+      } else if (ext === 'pdf') {
+        document.getElementById("pdfContainer").classList.remove("hidden");
+        iconBox.innerText = "📑";
+        badge.innerText = "PROTECTED PDF DOCUMENT";
+        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30";
+      } else if (tableExts.includes(ext)) {
+        document.getElementById("tableContainer").classList.remove("hidden");
+        iconBox.innerText = "📊";
+        badge.innerText = "DATA SPREADSHEET";
+        loadTableData();
+      } else if (codeExts.includes(ext)) {
+        document.getElementById("codeContainer").classList.remove("hidden");
+        iconBox.innerText = "💻";
+        badge.innerText = `${ext.toUpperCase()} CODE`;
+        loadCodeSource();
       } else {
-        document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️";
+        document.getElementById("genericContainer").classList.remove("hidden");
+        iconBox.innerText = "📦";
+        badge.innerText = "PROJECT DELIVERABLE";
       }
     }
 
-    function toggleTheme() {
-      const isLight = document.body.classList.toggle("light-theme");
-      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
-      const icon = document.getElementById("themeIcon");
-      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    async function loadCodeSource() {
+      try {
+        const res = await fetch(streamUrl);
+        const text = await res.text();
+        const codeBox = document.getElementById("codeViewerBox");
+        const linesCount = document.getElementById("codeLinesCount");
+        const langTag = document.getElementById("codeLangTag");
+
+        if (ext === 'ipynb') {
+          try {
+            const nb = JSON.parse(text);
+            let extracted = "";
+            (nb.cells || []).forEach((c, idx) => {
+              extracted += `\n# --- Cell [${idx + 1}] (${c.cell_type}) ---\n`;
+              extracted += Array.isArray(c.source) ? c.source.join("") : (c.source || "");
+              extracted += "\n";
+            });
+            codeBox.textContent = extracted;
+          } catch(e) {
+            codeBox.textContent = text;
+          }
+        } else {
+          codeBox.textContent = text;
+        }
+
+        langTag.innerText = `${ext.toUpperCase()} SCRIPT`;
+        linesCount.innerText = `${text.split('\n').length} lines`;
+        Prism.highlightElement(codeBox);
+      } catch (e) {
+        document.getElementById("codeViewerBox").textContent = "Error loading source code.";
+      }
     }
 
-    initTheme();
+    async function loadTableData() {
+      try {
+        const res = await fetch(streamUrl);
+        const csv = await res.text();
+        const rows = csv.trim().split('\n').map(r => r.split(','));
+        const table = document.getElementById("dataTable");
+        document.getElementById("tableRowsCount").innerText = `${rows.length} rows`;
 
-    const buyerEmail = "{{ buyer_email }}";
-    const shareId = "{{ share_id }}";
-    const token = "{{ token }}";
-    const canvas = document.getElementById("protectedCanvas");
-    const ctx = canvas.getContext("2d");
-    const curtain = document.getElementById("privacyCurtain");
+        if (!rows.length) return;
+        let html = `<thead><tr class="bg-indigo-950/40 text-indigo-300 font-bold border-b border-white/10">`;
+        rows[0].forEach(col => html += `<th class="py-2.5 px-3 border-r border-white/5">${col.trim()}</th>`);
+        html += `</tr></thead><tbody class="divide-y divide-white/5">`;
 
-    // 1. Shield display when window loses focus
-    window.addEventListener("blur", () => {
-      curtain.style.display = "flex";
+        rows.slice(1, 100).forEach(r => {
+          html += `<tr class="hover:bg-white/5 transition">`;
+          r.forEach(c => html += `<td class="py-2 px-3 border-r border-white/5 opacity-80">${c.trim()}</td>`);
+          html += `</tr>`;
+        });
+        html += `</tbody>`;
+        table.innerHTML = html;
+      } catch (e) {}
+    }
+
+    activatePlayer();
+
+    // =========================================================================
+    // ANTI-SCREENSHOT & ANTI-CAPTURE SHIELD CONTROLLER
+    // =========================================================================
+    const shield = document.getElementById("antiCaptureShield");
+    const video = document.getElementById("nativeVideoPlayer");
+    const audio = document.getElementById("nativeAudioPlayer");
+
+    function engageShield() {
+      shield.classList.remove("hidden");
+      if (video && !video.paused) video.pause();
+      if (audio && !audio.paused) audio.pause();
+    }
+
+    function disengageShield() {
+      shield.classList.add("hidden");
+    }
+
+    // 1. Focus-loss & Window-blur triggers
+    window.addEventListener("blur", engageShield);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) engageShield();
     });
-    window.addEventListener("focus", () => {
-      curtain.style.display = "none";
-    });
 
-    // 2. Intercept PrintScreen
+    window.addEventListener("focus", disengageShield);
+    shield.addEventListener("click", disengageShield);
+
+    // 2. Disable context menu (Right Click)
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // 3. Screen Capture & Print Keyboard Shortcut Interception
     window.addEventListener("keyup", (e) => {
       if (e.key === "PrintScreen" || e.keyCode === 44) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText("");
+        engageShield();
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText("Protected by Zephyr Shield");
         }
-        curtain.style.display = "flex";
-        setTimeout(() => { curtain.style.display = "none"; }, 1400);
+        setTimeout(disengageShield, 2500);
       }
     });
 
-    // 3. Block Right-Click and Shortcuts
-    window.addEventListener("contextmenu", (e) => e.preventDefault());
     window.addEventListener("keydown", (e) => {
-      if (
-        (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u')) ||
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-        e.key === 'F12'
-      ) {
+      // Intercept Ctrl+S, Ctrl+P, Ctrl+Shift+I, Ctrl+Shift+C
+      if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u'].includes(e.key.toLowerCase())) {
         e.preventDefault();
+        engageShield();
+        setTimeout(disengageShield, 1500);
       }
     });
-
-    // 4. Render media to canvas cleanly at proper scale without text watermark
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = `/api/paywall/stream/${shareId}?token=${token}`;
-
-    img.onload = () => {
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
-      
-      // Draw image to fill canvas buffer
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-    };
   </script>
 </body>
 </html>

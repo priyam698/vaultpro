@@ -8,6 +8,7 @@ import secrets
 import hashlib
 import hmac
 import json
+import mimetypes
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -33,7 +34,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78C28 72 60 72 82 76L76 80C58 76 28 76 14 81Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(#gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -92,6 +93,8 @@ PLAN_CONFIG = {
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
+MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
+
 # ----------------- Timezone-Safe Subscription Helper -----------------
 def is_sub_active(sub_end) -> bool:
     if not sub_end:
@@ -111,20 +114,27 @@ def resolve_user_tier(user_dict: dict):
     sub_end = user_dict.get("subscription_end_at")
     price = float(user_dict.get("plan_price") or 0.0)
     current_tier = (user_dict.get("tier") or "free").lower()
+    current_quota = user_dict.get("storage_quota_bytes")
 
     if is_sub_active(sub_end) or price > 0.0:
         if price >= 6.0 or current_tier == "pro":
-            return "pro", PLAN_CONFIG["pro"]["quota"], 7.00
+            resolved = "pro"
         elif price >= 4.0 or current_tier == "plus":
-            return "plus", PLAN_CONFIG["plus"]["quota"], 4.50
+            resolved = "plus"
         elif price >= 2.0 or current_tier == "lite":
-            return "lite", PLAN_CONFIG["lite"]["quota"], 2.50
+            resolved = "lite"
         elif price >= 1.0 or current_tier == "micro":
-            return "micro", PLAN_CONFIG["micro"]["quota"], 1.80
+            resolved = "micro"
+        else:
+            resolved = current_tier if current_tier in PLAN_CONFIG else "pro"
+
+        default_q = PLAN_CONFIG[resolved]["quota"]
+        quota = min(MAX_VAULT_BYTES, max(current_quota or default_q, default_q))
+        return resolved, quota, price
 
     tier_key = current_tier if current_tier in PLAN_CONFIG else "free"
     default_quota = PLAN_CONFIG[tier_key]["quota"]
-    quota = user_dict.get("storage_quota_bytes") or default_quota
+    quota = current_quota or default_quota
     return tier_key, quota, price
 
 # ----------------- Brevo Permanent Password Engine -----------------
@@ -161,7 +171,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
             <div style="padding: 35px 30px; color: #f3f4f6;">
                 <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #d1d5db;">
                     Hello,<br><br>
-                    Your purchase has been verified. To unlock and download your secure transfer, enter your email and this permanent password:
+                    Your purchase has been verified. To unlock and stream your deliverable, enter your email and permanent password:
                 </p>
                 <div style="background: #1f2937; border: 1px solid #374151; border-radius: 14px; padding: 22px; margin: 25px 0; text-align: center;">
                     <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #9ca3af; letter-spacing: 1.5px; display: block; margin-bottom: 8px;">Your Permanent Access Password</span>
@@ -171,12 +181,12 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
                 </div>
                 <div style="background: #0f172a; border-left: 4px solid #6366f1; padding: 14px 18px; border-radius: 0 10px 10px 0; margin-bottom: 28px;">
                     <p style="margin: 0; font-size: 13px; color: #9ca3af; line-height: 1.5;">
-                        <strong style="color: #f3f4f6;">Never pay again:</strong> This password is permanently tied to <code style="color: #a5b4fc; background: #1e1b4b; padding: 2px 6px; border-radius: 4px;">{buyer_email}</code>. Enter this code whenever you need the file.
+                        <strong style="color: #f3f4f6;">Never pay again:</strong> This password is permanently tied to <code style="color: #a5b4fc; background: #1e1b4b; padding: 2px 6px; border-radius: 4px;">{buyer_email}</code>.
                     </p>
                 </div>
                 <div style="text-align: center; margin-bottom: 10px;">
                     <a href="{access_url}" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; padding: 14px 34px; font-weight: 700; text-decoration: none; border-radius: 12px; display: inline-block; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);">
-                        Unlock & Download File
+                        Open Protected Deliverable
                     </a>
                 </div>
             </div>
@@ -677,6 +687,7 @@ Platform Knowledge & Pricing Tiers:
 - Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
 - Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
 - Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
+- Cumulative Storage: Upgrades stack on top of existing vaults up to a strict ceiling of 600 GB.
 - Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
 - 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period.
 - Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
@@ -770,7 +781,7 @@ async def support_chat(req: SupportChatRequest):
     elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
         reply = "Zephyr Pay-to-Unlock allows creators to monetize deliverables with an **88% user payout** and a **12% platform fee split**. In group shares, each recipient purchases their own isolated access token. Files stream inside an anti-screenshot protected viewer with moving watermarks and focus-loss curtains."
     elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
-        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding."
+        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding. Additional plans accumulate up to a 600 GB combined ceiling."
     elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
         reply = "Studio Branding is available exclusively on our Plus ($4.50/mo) and Pro ($7.00/mo) tiers. It lets you customize public transfer backgrounds, showcase your studio logo, and set custom accent colors."
     elif any(k in q for k in ["esign", "e-sign", "signature", "limit", "daily"]):
@@ -1253,7 +1264,7 @@ async def secure_viewer_page(
             print(f"[STRIPE VERIFY NOTICE]: {e}", flush=True)
 
     cursor.execute("""
-        SELECT p.buyer_email, p.payment_status, s.filename, p.buyer_password, p.permanent_password 
+        SELECT p.buyer_email, p.payment_status, s.filename, s.s3_key, s.filesize_mb, p.buyer_password, p.permanent_password 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s AND p.access_token = %s
@@ -1264,17 +1275,36 @@ async def secure_viewer_page(
     is_paid = bool(row and row["payment_status"] == 'paid')
     buyer_email = row["buyer_email"] if row else ""
     filename = row["filename"] if row else "Protected File"
+    filesize_mb = float(row["filesize_mb"]) if row and row.get("filesize_mb") else 0.0
+
+    download_url = ""
+    if is_paid and row and row.get("s3_key"):
+        try:
+            download_url = s3_client.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": R2_BUCKET_NAME,
+                    "Key": row["s3_key"],
+                    "ResponseContentDisposition": f'attachment; filename="{filename}"'
+                },
+                ExpiresIn=86400
+            )
+        except Exception:
+            download_url = ""
 
     return render_template("secure_viewer.html", request, {
         "share_id": share_id,
         "filename": filename,
+        "filesize_mb": filesize_mb,
         "buyer_email": buyer_email,
         "token": token,
-        "is_paid": is_paid
+        "is_paid": is_paid,
+        "download_url": download_url
     })
 
+# ----------------- High-Quality Media Streaming (HTTP 206 Range) -----------------
 @app.get("/api/paywall/stream/{share_id}")
-async def stream_paywall_media(share_id: str, token: str = Query(...)):
+async def stream_paywall_media(share_id: str, request: Request, token: str = Query(...)):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -1289,19 +1319,101 @@ async def stream_paywall_media(share_id: str, token: str = Query(...)):
     if not item:
         raise HTTPException(status_code=403, detail="Protected content stream access denied.")
 
+    ext = item["filename"].split(".")[-1].lower() if "." in item["filename"] else ""
+    mime_map = {
+        "mp4": "video/mp4",
+        "mov": "video/quicktime",
+        "webm": "video/webm",
+        "mkv": "video/x-matroska",
+        "avi": "video/x-msvideo",
+        "m4v": "video/mp4",
+        "mp3": "audio/mpeg",
+        "wav": "audio/wav",
+        "m4a": "audio/mp4",
+        "flac": "audio/flac",
+        "ogg": "audio/ogg",
+        "aac": "audio/aac",
+        "pdf": "application/pdf",
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "webp": "image/webp",
+        "gif": "image/gif",
+        "svg": "image/svg+xml",
+        "bmp": "image/bmp",
+        "txt": "text/plain; charset=utf-8",
+        "csv": "text/plain; charset=utf-8",
+        "tsv": "text/plain; charset=utf-8",
+        "json": "application/json",
+        "js": "text/javascript",
+        "py": "text/plain; charset=utf-8",
+        "ipynb": "application/json",
+        "html": "text/html; charset=utf-8",
+        "css": "text/css; charset=utf-8"
+    }
+
+    content_type = mime_map.get(ext)
+    if not content_type:
+        guessed, _ = mimetypes.guess_type(item["filename"])
+        content_type = guessed or "application/octet-stream"
+
+    # Support HTTP 206 Partial Content for 8K/4K Video & Audio buffering
+    range_header = request.headers.get("range")
     try:
-        obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
-        content_type = obj.get("ContentType", "application/octet-stream")
-        return StreamingResponse(
-            obj["Body"].iter_chunks(),
-            media_type=content_type,
-            headers={
-                "Cache-Control": "no-store, no-cache, must-revalidate, private",
-                "Content-Disposition": f'inline; filename="{item["filename"]}"'
-            }
-        )
+        head = s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
+        total_size = head["ContentLength"]
+
+        if range_header:
+            range_val = range_header.strip().lower().replace("bytes=", "")
+            parts = range_val.split("-")
+            start = int(parts[0]) if parts[0] else 0
+            end = int(parts[1]) if len(parts) > 1 and parts[1] else total_size - 1
+            if end >= total_size:
+                end = total_size - 1
+            content_length = end - start + 1
+
+            r2_range = f"bytes={start}-{end}"
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"], Range=r2_range)
+
+            return StreamingResponse(
+                obj["Body"].iter_chunks(chunk_size=1024 * 512),
+                status_code=206,
+                media_type=content_type,
+                headers={
+                    "Content-Range": f"bytes {start}-{end}/{total_size}",
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(content_length),
+                    "Cache-Control": "no-store, no-cache, must-revalidate, private",
+                    "Content-Disposition": f'inline; filename="{item["filename"]}"'
+                }
+            )
+        else:
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
+            return StreamingResponse(
+                obj["Body"].iter_chunks(chunk_size=1024 * 512),
+                media_type=content_type,
+                headers={
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(total_size),
+                    "Cache-Control": "no-store, no-cache, must-revalidate, private",
+                    "Content-Disposition": f'inline; filename="{item["filename"]}"'
+                }
+            )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Stream error: {str(e)}")
+        try:
+            url = s3_client.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": R2_BUCKET_NAME,
+                    "Key": item["s3_key"],
+                    "ResponseContentType": content_type,
+                    "ResponseContentDisposition": f'inline; filename="{item["filename"]}"'
+                },
+                ExpiresIn=7200
+            )
+            return RedirectResponse(url=url)
+        except Exception:
+            raise HTTPException(status_code=500, detail=f"Stream error: {str(e)}")
 
 # ----------------- Ephemeral Transfers & Downloads -----------------
 @app.get("/share/{share_id}", response_class=HTMLResponse)
@@ -1441,7 +1553,7 @@ async def create_share(payload: CreateShareRequest):
     cursor = conn.cursor()
     user_tier = "free"
     if payload.user_id:
-        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (payload.user_id,))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (payload.user_id,))
         user_row = cursor.fetchone()
         if user_row:
             user_tier, _, _ = resolve_user_tier(user_row)
@@ -1486,11 +1598,16 @@ async def upload_file_direct(share_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Vault record not found.")
 
     file_bytes = await request.body()
+    content_type = request.headers.get("content-type")
+    if not content_type or content_type == "application/octet-stream":
+        guessed, _ = mimetypes.guess_type(row["filename"])
+        content_type = guessed or "application/octet-stream"
+
     s3_client.put_object(
         Bucket=R2_BUCKET_NAME,
         Key=row["s3_key"],
         Body=file_bytes,
-        ContentType=request.headers.get("content-type", "application/octet-stream")
+        ContentType=content_type
     )
     return {"status": "success", "share_id": share_id}
 
@@ -1649,7 +1766,7 @@ async def get_branding(user_id: str):
 async def update_branding(data: BrandingUpdatePayload):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (data.user_id,))
+    cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (data.user_id,))
     user = cursor.fetchone()
 
     if not user:
@@ -1706,7 +1823,7 @@ async def upload_branding_asset(
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
 
     tier, _, _ = resolve_user_tier(user) if user else ("free", 0, 0)
@@ -1753,12 +1870,12 @@ async def get_sign_quota(user_id: Optional[str] = None, email: Optional[str] = N
     user_tier = "free"
     
     if user_id:
-        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
         u = cursor.fetchone()
         if u:
             user_tier, _, _ = resolve_user_tier(u)
     elif email:
-        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE LOWER(email) = LOWER(%s)", (email.strip(),))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE LOWER(email) = LOWER(%s)", (email.strip(),))
         u = cursor.fetchone()
         if u:
             user_tier, _, _ = resolve_user_tier(u)
@@ -1809,14 +1926,14 @@ async def upload_sign_doc(
     user_tier = "free"
 
     if user_id:
-        cursor.execute("SELECT email, tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (user_id,))
+        cursor.execute("SELECT email, tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (user_id,))
         u = cursor.fetchone()
         if u:
             if u.get("email") and not resolved_creator:
                 resolved_creator = u["email"]
             user_tier, _, _ = resolve_user_tier(u)
     elif resolved_creator:
-        cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE LOWER(email) = LOWER(%s)", (resolved_creator,))
+        cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE LOWER(email) = LOWER(%s)", (resolved_creator,))
         u = cursor.fetchone()
         if u:
             user_tier, _, _ = resolve_user_tier(u)
@@ -2096,9 +2213,7 @@ async def get_drive_quota(user_id: str):
             "grace_period_end_at": None
         }
 
-    # Timezone-safe resolution and self-healing synchronization
     resolved_tier, resolved_quota, plan_price = resolve_user_tier(user)
-
     current_tier = (user.get("tier") or "free").lower()
     current_quota = user.get("storage_quota_bytes") or 0
 
@@ -2398,12 +2513,12 @@ async def rename_drive_file(payload: RenameFileRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
 
-# ----------------- Mid-Cycle Prorated Upgrades -----------------
+# ----------------- Mid-Cycle Cumulative Upgrades (Max 600 GB) -----------------
 @app.post("/api/drive/upgrade-quote")
 async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT tier, plan_price, subscription_end_at FROM users WHERE user_id = %s", (payload.user_id,))
+    cursor.execute("SELECT tier, plan_price, storage_quota_bytes, subscription_end_at FROM users WHERE user_id = %s", (payload.user_id,))
     user = cursor.fetchone()
     conn.close()
 
@@ -2413,51 +2528,45 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
         raise HTTPException(status_code=400, detail="Invalid target plan.")
 
     current_price = float(user.get("plan_price") or 0.0) if user else 0.0
+    current_quota = int(user.get("storage_quota_bytes") or PLAN_CONFIG["free"]["quota"]) if user else PLAN_CONFIG["free"]["quota"]
     sub_end = user.get("subscription_end_at") if user else None
 
-    if not sub_end or current_price <= 0.0:
-        return {
-            "target_tier": target_tier_key,
-            "target_name": target["name"],
-            "charge_amount": target["price"],
-            "days_remaining": 0,
-            "surcharge": 0.00,
-            "target_quota_bytes": target["quota"]
-        }
+    has_active_sub = is_sub_active(sub_end) and current_price > 0.0
 
-    if isinstance(sub_end, str):
-        try:
-            sub_end = datetime.fromisoformat(sub_end.replace("Z", "+00:00"))
-        except Exception:
-            pass
+    days_remaining = 0
+    if has_active_sub and sub_end:
+        if isinstance(sub_end, str):
+            try:
+                sub_end = datetime.fromisoformat(sub_end.replace("Z", "+00:00"))
+            except Exception:
+                pass
+        sub_end_naive = sub_end.astimezone(timezone.utc).replace(tzinfo=None) if getattr(sub_end, "tzinfo", None) is not None else sub_end
+        days_remaining = max(0, (sub_end_naive - datetime.utcnow()).days)
 
-    if getattr(sub_end, "tzinfo", None) is not None:
-        sub_end_naive = sub_end.astimezone(timezone.utc).replace(tzinfo=None)
+    # Fee is $0.80 for Zephyr Pro, $0.50 for other tiers
+    surcharge = 0.80 if target_tier_key == "pro" else 0.50
+
+    if has_active_sub:
+        new_total_quota = current_quota + target["quota"]
+        if new_total_quota > MAX_VAULT_BYTES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Maximum storage limit reached. Net cumulative vault storage cannot exceed 600 GB (requested: {round(new_total_quota / (1024**3))} GB)."
+            )
+        final_amount = round(target["price"] + surcharge, 2)
     else:
-        sub_end_naive = sub_end
-
-    days_remaining = max(0, (sub_end_naive - datetime.utcnow()).days)
-    if days_remaining <= 0:
-        return {
-            "target_tier": target_tier_key,
-            "target_name": target["name"],
-            "charge_amount": target["price"],
-            "days_remaining": 0,
-            "surcharge": 0.00,
-            "target_quota_bytes": target["quota"]
-        }
-
-    price_diff = max(0.0, target["price"] - current_price)
-    prorated_base = (price_diff / 30.0) * days_remaining
-    final_amount = round(prorated_base + 0.50, 2)
+        final_amount = target["price"]
+        new_total_quota = target["quota"]
+        surcharge = 0.00
 
     return {
         "target_tier": target_tier_key,
         "target_name": target["name"],
         "charge_amount": final_amount,
         "days_remaining": days_remaining,
-        "surcharge": 0.50,
-        "target_quota_bytes": target["quota"]
+        "surcharge": surcharge,
+        "target_quota_bytes": new_total_quota,
+        "max_cap_bytes": MAX_VAULT_BYTES
     }
 
 # ----------------- 20-Day Grace Period Automated Cleaner -----------------
@@ -2605,18 +2714,36 @@ async def dodo_webhook(request: Request):
 
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
         sub_end = datetime.utcnow() + timedelta(days=30)
+        
+        # Check existing user state to accumulate capacity
+        existing_user = None
+        if user_id:
+            cursor.execute("SELECT tier, storage_quota_bytes, subscription_end_at, plan_price FROM users WHERE user_id = %s", (user_id,))
+            existing_user = cursor.fetchone()
+        elif user_email:
+            cursor.execute("SELECT tier, storage_quota_bytes, subscription_end_at, plan_price FROM users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
+            existing_user = cursor.fetchone()
+
+        if existing_user and is_sub_active(existing_user.get("subscription_end_at")):
+            curr_bytes = existing_user.get("storage_quota_bytes") or target_quota
+            new_quota = min(MAX_VAULT_BYTES, curr_bytes + target_quota)
+            resolved_tier = "pro" if "pro" in [(existing_user.get("tier") or "").lower(), requested_tier] else requested_tier
+        else:
+            new_quota = target_quota
+            resolved_tier = requested_tier
+
         if user_id:
             cursor.execute("""
                 INSERT INTO users (user_id, email, tier, storage_quota_bytes, plan_price, subscription_end_at, grace_period_end_at)
                 VALUES (%s, %s, %s, %s, %s, %s, NULL)
                 ON CONFLICT (user_id) DO UPDATE SET 
-                    tier = EXCLUDED.tier, 
-                    storage_quota_bytes = EXCLUDED.storage_quota_bytes,
-                    plan_price = EXCLUDED.plan_price,
-                    subscription_end_at = EXCLUDED.subscription_end_at,
+                    tier = %s, 
+                    storage_quota_bytes = %s,
+                    plan_price = %s,
+                    subscription_end_at = %s,
                     grace_period_end_at = NULL,
                     email = COALESCE(EXCLUDED.email, users.email)
-            """, (user_id, user_email, requested_tier, target_quota, target_price, sub_end))
+            """, (user_id, user_email, resolved_tier, new_quota, target_price, sub_end, resolved_tier, new_quota, target_price, sub_end))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
@@ -2626,7 +2753,7 @@ async def dodo_webhook(request: Request):
                     subscription_end_at = %s,
                     grace_period_end_at = NULL
                 WHERE LOWER(email) = LOWER(%s)
-            """, (requested_tier, target_quota, target_price, sub_end, user_email.strip()))
+            """, (resolved_tier, new_quota, target_price, sub_end, user_email.strip()))
         conn.commit()
 
     elif event_type in ["subscription.cancelled", "subscription.expired", "subscription.failed"]:
