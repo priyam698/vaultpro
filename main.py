@@ -38,7 +38,7 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
-    version="3.4.0",
+    version="3.5.0",
     swagger_favicon_url="/favicon.ico"
 )
 
@@ -171,7 +171,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
             <div style="padding: 35px 30px; color: #f3f4f6;">
                 <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #d1d5db;">
                     Hello,<br><br>
-                    Your purchase has been verified. To unlock and stream your deliverable, enter your email and permanent password:
+                    Your purchase has been verified. To unlock and view your confidential transfer deliverables, enter your email and permanent password:
                 </p>
                 <div style="background: #1f2937; border: 1px solid #374151; border-radius: 14px; padding: 22px; margin: 25px 0; text-align: center;">
                     <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #9ca3af; letter-spacing: 1.5px; display: block; margin-bottom: 8px;">Your Permanent Access Password</span>
@@ -186,13 +186,13 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
                 </div>
                 <div style="text-align: center; margin-bottom: 10px;">
                     <a href="{access_url}" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; padding: 14px 34px; font-weight: 700; text-decoration: none; border-radius: 12px; display: inline-block; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);">
-                        Open Protected Deliverable
+                        View Protected Deliverables
                     </a>
                 </div>
             </div>
             <div style="background: #0d121f; border-top: 1px solid #1f2937; padding: 18px 30px; text-align: center;">
                 <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                    Zephyr Zero-Knowledge Escrow &bull; File Link: <a href="{access_url}" style="color: #818cf8; text-decoration: none;">{access_url}</a>
+                    Zephyr Zero-Knowledge Escrow &bull; Link: <a href="{access_url}" style="color: #818cf8; text-decoration: none;">{access_url}</a>
                 </p>
             </div>
         </div>
@@ -327,6 +327,18 @@ def init_db_schema():
             );
         """)
 
+        # Multiple files table for bundling in Pay-to-Unlock Escrow
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS share_files (
+                id SERIAL PRIMARY KEY,
+                share_id VARCHAR(64) REFERENCES shares(id) ON DELETE CASCADE,
+                filename TEXT NOT NULL,
+                filesize_mb NUMERIC(10, 2) NOT NULL,
+                s3_key TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
         share_migrations = [
             "ALTER TABLE shares ADD COLUMN IF NOT EXISTS is_paywalled BOOLEAN DEFAULT FALSE;",
             "ALTER TABLE shares ADD COLUMN IF NOT EXISTS unlock_price NUMERIC(10, 2) DEFAULT 0.00;",
@@ -374,7 +386,7 @@ def init_db_schema():
 
         cursor.close()
         conn.close()
-        print("[DB STARTUP]: Database schema and migrations verified.", flush=True)
+        print("[DB STARTUP]: Multi-file escrow database schema verified.", flush=True)
     except Exception as e:
         print(f"[DB STARTUP ERROR]: {e}", flush=True)
 
@@ -403,6 +415,10 @@ DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 otp_storage = {}
 
 # ----------------- Pydantic Request Models -----------------
+class FileManifestItem(BaseModel):
+    filename: str
+    filesize_mb: float
+
 class SendOtpRequest(BaseModel):
     email: str
 
@@ -448,8 +464,9 @@ class ResendPasswordRequest(BaseModel):
     email: str
 
 class CreateShareRequest(BaseModel):
-    filename: str
-    filesize_mb: float
+    filename: Optional[str] = "Transfer"
+    filesize_mb: Optional[float] = 0.00
+    files: Optional[List[FileManifestItem]] = []
     password: Optional[str] = None
     expiry_hours: int = 24
     max_downloads: int = 0
@@ -848,6 +865,143 @@ async def check_paywall_email(share_id: str = Query(...), email: str = Query(...
         }
     return {"has_paid": False, "email": clean_email, "has_password": False}
 
+@app.post("/api/create-share")
+async def create_share(payload: CreateShareRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    user_tier = "free"
+    
+    if payload.user_id:
+        cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (payload.user_id,))
+        user_row = cursor.fetchone()
+        if user_row:
+            user_tier, _, _ = resolve_user_tier(user_row)
+
+    max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
+    
+    file_list = payload.files or []
+    if file_list:
+        total_batch_mb = sum(f.filesize_mb for f in file_list)
+        main_filename = f"{len(file_list)} items package" if len(file_list) > 1 else file_list[0].filename
+    else:
+        total_batch_mb = payload.filesize_mb or 0.0
+        main_filename = payload.filename or "Shared File"
+
+    if total_batch_mb > max_mb:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Files exceed the {max_mb} MB single-transfer limit for your {user_tier.upper()} plan.")
+
+    created_at = datetime.utcnow()
+    expires_at = created_at + timedelta(days=36500) if payload.expiry_hours == 0 else created_at + timedelta(hours=payload.expiry_hours)
+    share_id = uuid.uuid4().hex[:8]
+    primary_s3_key = f"transfers/{share_id}/{main_filename}"
+    password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
+
+    cursor.execute("""
+        INSERT INTO shares (
+            id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
+            max_downloads, created_at, expires_at, downloads, user_id, 
+            is_paywalled, unlock_price, paywall_creator_id
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s)
+    """, (
+        share_id, main_filename, total_batch_mb, primary_s3_key, password_hash, 
+        payload.expiry_hours, payload.max_downloads, created_at, expires_at, 
+        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id
+    ))
+
+    if file_list:
+        for f in file_list:
+            sub_s3_key = f"transfers/{share_id}/{f.filename}"
+            cursor.execute("""
+                INSERT INTO share_files (share_id, filename, filesize_mb, s3_key)
+                VALUES (%s, %s, %s, %s)
+            """, (share_id, f.filename, f.filesize_mb, sub_s3_key))
+    else:
+        cursor.execute("""
+            INSERT INTO share_files (share_id, filename, filesize_mb, s3_key)
+            VALUES (%s, %s, %s, %s)
+        """, (share_id, main_filename, total_batch_mb, primary_s3_key))
+
+    conn.commit()
+    conn.close()
+
+    return {"share_id": share_id, "expires_at": expires_at.isoformat()}
+
+@app.post("/api/upload-file/{share_id}")
+async def upload_file_direct(
+    share_id: str, 
+    request: Request, 
+    filename: Optional[str] = Query(None)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Vault transfer record not found.")
+
+    target_name = (filename or row["filename"]).strip()
+    target_s3_key = f"transfers/{share_id}/{target_name}"
+
+    file_bytes = await request.body()
+    content_type = request.headers.get("content-type")
+    if not content_type or content_type == "application/octet-stream":
+        guessed, _ = mimetypes.guess_type(target_name)
+        content_type = guessed or "application/octet-stream"
+
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=target_s3_key,
+        Body=file_bytes,
+        ContentType=content_type
+    )
+
+    cursor.execute("SELECT id FROM share_files WHERE share_id = %s AND filename = %s", (share_id, target_name))
+    exists = cursor.fetchone()
+    if not exists:
+        filesize_mb = round(len(file_bytes) / (1024 * 1024), 2)
+        cursor.execute("""
+            INSERT INTO share_files (share_id, filename, filesize_mb, s3_key)
+            VALUES (%s, %s, %s, %s)
+        """, (share_id, target_name, filesize_mb, target_s3_key))
+        conn.commit()
+
+    conn.close()
+    return {"status": "success", "share_id": share_id, "filename": target_name}
+
+@app.get("/api/share-details/{share_id}")
+async def get_share_details(share_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="File share expired or purged.")
+
+    cursor.execute("SELECT filename, filesize_mb FROM share_files WHERE share_id = %s ORDER BY id ASC", (share_id,))
+    file_rows = cursor.fetchall()
+    conn.close()
+
+    items = [
+        {"filename": r["filename"], "filesize_mb": float(r["filesize_mb"])} 
+        for r in file_rows
+    ] if file_rows else [{"filename": row["filename"], "filesize_mb": float(row["filesize_mb"])}]
+
+    return {
+        "share_id": row["id"],
+        "filename": row["filename"],
+        "filesize_mb": float(row["filesize_mb"]),
+        "has_password": bool(row["password_hash"]),
+        "is_paywalled": bool(row.get("is_paywalled", False)),
+        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
+        "files": items
+    }
+
 @app.post("/api/paywall/initiate")
 async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Request):
     if not stripe.api_key:
@@ -871,7 +1025,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
 
     if not share.get("stripe_account_id"):
         conn.close()
-        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
+        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payouts.")
 
     cursor.execute("""
         SELECT access_token, buyer_password, permanent_password 
@@ -884,7 +1038,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
         conn.close()
         return {
             "status": "already_paid",
-            "message": "You have already purchased lifetime access for this file! Enter your permanent password to unlock."
+            "message": "You have already purchased lifetime access for this deliverable! Enter your permanent password to unlock."
         }
 
     access_token = f"pwtk_{secrets.token_hex(20)}"
@@ -903,7 +1057,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
             line_items=[{
                 'price_data': {
                     'currency': 'usd',
-                    'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
+                    'product_data': {'name': f"Unlock Deliverables: {share['filename']}"},
                     'unit_amount': price_cents,
                 },
                 'quantity': 1,
@@ -1071,10 +1225,7 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn.commit()
     conn.close()
 
-    sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
-    if not sent:
-        print(f"[BREVO WARNING]: Email failed to send to {clean_email}, password is {pwd}", flush=True)
-
+    send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
     return {"status": "success", "email": clean_email}
 
 # ----------------- Unlock With Permanent Password -----------------
@@ -1087,7 +1238,7 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT p.access_token, p.buyer_password, p.permanent_password, p.buyer_password_hash, s.filename, s.s3_key 
+        SELECT p.access_token, p.buyer_password, p.permanent_password, p.buyer_password_hash, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
@@ -1110,27 +1261,12 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
 
     if not matched:
         conn.close()
-        raise HTTPException(status_code=401, detail="Incorrect password. Please check the code sent to your Gmail inbox or click 'Resend code'.")
+        raise HTTPException(status_code=401, detail="Incorrect password. Check your email or request a resend.")
 
-    download_url = s3_client.generate_presigned_url(
-        "get_object",
-        Params={
-            "Bucket": R2_BUCKET_NAME,
-            "Key": row["s3_key"],
-            "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'
-        },
-        ExpiresIn=86400
-    )
-
-    cursor.execute("UPDATE shares SET downloads = downloads + 1 WHERE id = %s", (req.share_id,))
-    conn.commit()
     conn.close()
-
     return {
         "status": "unlocked",
         "access_token": row["access_token"],
-        "download_url": download_url,
-        "filename": row["filename"],
         "viewer_url": f"/secure-view/{req.share_id}?token={row['access_token']}"
     }
 
@@ -1245,7 +1381,8 @@ async def secure_viewer_page(
     request: Request, 
     share_id: str, 
     token: str = Query(...), 
-    session_id: Optional[str] = Query(None)
+    session_id: Optional[str] = Query(None),
+    file: Optional[str] = Query(None)
 ):
     conn = get_db()
     cursor = conn.cursor()
@@ -1264,47 +1401,46 @@ async def secure_viewer_page(
             print(f"[STRIPE VERIFY NOTICE]: {e}", flush=True)
 
     cursor.execute("""
-        SELECT p.buyer_email, p.payment_status, s.filename, s.s3_key, s.filesize_mb, p.buyer_password, p.permanent_password 
+        SELECT p.buyer_email, p.payment_status, s.filename, s.filesize_mb 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s AND p.access_token = %s
     """, (share_id, token))
     row = cursor.fetchone()
+
+    if not row or row["payment_status"] != 'paid':
+        conn.close()
+        raise HTTPException(status_code=403, detail="Licensed access verification required.")
+
+    cursor.execute("SELECT filename, filesize_mb FROM share_files WHERE share_id = %s ORDER BY id ASC", (share_id,))
+    file_records = cursor.fetchall()
     conn.close()
 
-    is_paid = bool(row and row["payment_status"] == 'paid')
-    buyer_email = row["buyer_email"] if row else ""
-    filename = row["filename"] if row else "Protected File"
-    filesize_mb = float(row["filesize_mb"]) if row and row.get("filesize_mb") else 0.0
+    files = [
+        {"filename": f["filename"], "filesize_mb": float(f["filesize_mb"])}
+        for f in file_records
+    ] if file_records else [{"filename": row["filename"], "filesize_mb": float(row["filesize_mb"])}]
 
-    download_url = ""
-    if is_paid and row and row.get("s3_key"):
-        try:
-            download_url = s3_client.generate_presigned_url(
-                "get_object",
-                Params={
-                    "Bucket": R2_BUCKET_NAME,
-                    "Key": row["s3_key"],
-                    "ResponseContentDisposition": f'attachment; filename="{filename}"'
-                },
-                ExpiresIn=86400
-            )
-        except Exception:
-            download_url = ""
+    selected_file = file or files[0]["filename"]
 
+    # Downloads strictly removed for confidential escrow files
     return render_template("secure_viewer.html", request, {
         "share_id": share_id,
-        "filename": filename,
-        "filesize_mb": filesize_mb,
-        "buyer_email": buyer_email,
         "token": token,
-        "is_paid": is_paid,
-        "download_url": download_url
+        "buyer_email": row["buyer_email"],
+        "filename": selected_file,
+        "files": files,
+        "files_count": len(files)
     })
 
 # ----------------- High-Quality Media Streaming (HTTP 206 Range) -----------------
 @app.get("/api/paywall/stream/{share_id}")
-async def stream_paywall_media(share_id: str, request: Request, token: str = Query(...)):
+async def stream_paywall_media(
+    share_id: str, 
+    request: Request, 
+    token: str = Query(...), 
+    file: Optional[str] = Query(None)
+):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -1314,12 +1450,20 @@ async def stream_paywall_media(share_id: str, request: Request, token: str = Que
         WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
     """, (share_id, token))
     item = cursor.fetchone()
-    conn.close()
 
     if not item:
+        conn.close()
         raise HTTPException(status_code=403, detail="Protected content stream access denied.")
 
-    ext = item["filename"].split(".")[-1].lower() if "." in item["filename"] else ""
+    target_name = file if file else item["filename"]
+
+    cursor.execute("SELECT s3_key, filename FROM share_files WHERE share_id = %s AND filename = %s", (share_id, target_name))
+    sub = cursor.fetchone()
+    conn.close()
+
+    s3_key = sub["s3_key"] if sub else f"transfers/{share_id}/{target_name}"
+
+    ext = target_name.split(".")[-1].lower() if "." in target_name else ""
     mime_map = {
         "mp4": "video/mp4",
         "mov": "video/quicktime",
@@ -1354,13 +1498,13 @@ async def stream_paywall_media(share_id: str, request: Request, token: str = Que
 
     content_type = mime_map.get(ext)
     if not content_type:
-        guessed, _ = mimetypes.guess_type(item["filename"])
+        guessed, _ = mimetypes.guess_type(target_name)
         content_type = guessed or "application/octet-stream"
 
-    # Support HTTP 206 Partial Content for 8K/4K Video & Audio buffering
+    # Support HTTP 206 Range requests for continuous 8K/4K buffering & scrubbing
     range_header = request.headers.get("range")
     try:
-        head = s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
+        head = s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
         total_size = head["ContentLength"]
 
         if range_header:
@@ -1373,7 +1517,7 @@ async def stream_paywall_media(share_id: str, request: Request, token: str = Que
             content_length = end - start + 1
 
             r2_range = f"bytes={start}-{end}"
-            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"], Range=r2_range)
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key, Range=r2_range)
 
             return StreamingResponse(
                 obj["Body"].iter_chunks(chunk_size=1024 * 512),
@@ -1384,11 +1528,11 @@ async def stream_paywall_media(share_id: str, request: Request, token: str = Que
                     "Accept-Ranges": "bytes",
                     "Content-Length": str(content_length),
                     "Cache-Control": "no-store, no-cache, must-revalidate, private",
-                    "Content-Disposition": f'inline; filename="{item["filename"]}"'
+                    "Content-Disposition": f'inline; filename="{target_name}"'
                 }
             )
         else:
-            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=item["s3_key"])
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
             return StreamingResponse(
                 obj["Body"].iter_chunks(chunk_size=1024 * 512),
                 media_type=content_type,
@@ -1396,24 +1540,11 @@ async def stream_paywall_media(share_id: str, request: Request, token: str = Que
                     "Accept-Ranges": "bytes",
                     "Content-Length": str(total_size),
                     "Cache-Control": "no-store, no-cache, must-revalidate, private",
-                    "Content-Disposition": f'inline; filename="{item["filename"]}"'
+                    "Content-Disposition": f'inline; filename="{target_name}"'
                 }
             )
     except Exception as e:
-        try:
-            url = s3_client.generate_presigned_url(
-                "get_object",
-                Params={
-                    "Bucket": R2_BUCKET_NAME,
-                    "Key": item["s3_key"],
-                    "ResponseContentType": content_type,
-                    "ResponseContentDisposition": f'inline; filename="{item["filename"]}"'
-                },
-                ExpiresIn=7200
-            )
-            return RedirectResponse(url=url)
-        except Exception:
-            raise HTTPException(status_code=500, detail=f"Stream error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Stream error: {str(e)}")
 
 # ----------------- Ephemeral Transfers & Downloads -----------------
 @app.get("/share/{share_id}", response_class=HTMLResponse)
@@ -1427,6 +1558,9 @@ async def share_page(request: Request, share_id: str):
         conn.close()
         raise HTTPException(status_code=404, detail="Vault transfer link not found or expired.")
 
+    cursor.execute("SELECT filename, filesize_mb FROM share_files WHERE share_id = %s ORDER BY id ASC", (share_id,))
+    file_records = cursor.fetchall()
+
     branding = None
     if row.get("user_id"):
         cursor.execute("""
@@ -1438,6 +1572,7 @@ async def share_page(request: Request, share_id: str):
             branding = dict(u_brand)
 
     conn.close()
+    file_count = len(file_records) if file_records else 1
 
     return render_template("download.html", request, {
         "share_id": share_id,
@@ -1447,49 +1582,9 @@ async def share_page(request: Request, share_id: str):
         "has_password": bool(row["password_hash"]),
         "is_paywalled": bool(row.get("is_paywalled", False)),
         "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
-        "branding": branding
+        "branding": branding,
+        "file_count": file_count
     })
-
-@app.get("/api/share-details/{share_id}")
-async def get_share_details(share_id: str):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
-    row = cursor.fetchone()
-
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="File share expired or purged.")
-
-    if row["expiry_hours"] != 0:
-        expires_at = row["expires_at"]
-        if isinstance(expires_at, str):
-            expires_at = datetime.fromisoformat(expires_at)
-        if datetime.utcnow().astimezone() > expires_at:
-            conn.close()
-            raise HTTPException(status_code=410, detail="Transfer link has expired.")
-
-    branding = None
-    if row.get("user_id"):
-        cursor.execute("""
-            SELECT tier, brand_title, brand_logo_url, brand_bg_url, brand_accent_color 
-            FROM users WHERE user_id = %s
-        """, (row["user_id"],))
-        u_brand = cursor.fetchone()
-        if u_brand and (u_brand.get("tier") or "").lower() in ["plus", "pro"]:
-            branding = dict(u_brand)
-
-    conn.close()
-
-    return {
-        "share_id": row["id"],
-        "filename": row["filename"],
-        "filesize_mb": float(row["filesize_mb"]),
-        "has_password": bool(row["password_hash"]),
-        "is_paywalled": bool(row.get("is_paywalled", False)),
-        "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),
-        "sender_branding": branding
-    }
 
 @app.post("/share/{share_id}/download")
 @app.post("/api/download/{share_id}")
@@ -1546,70 +1641,6 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
 
     conn.close()
     return {"download_url": url}
-
-@app.post("/api/create-share")
-async def create_share(payload: CreateShareRequest):
-    conn = get_db()
-    cursor = conn.cursor()
-    user_tier = "free"
-    if payload.user_id:
-        cursor.execute("SELECT tier, plan_price, subscription_end_at, storage_quota_bytes FROM users WHERE user_id = %s", (payload.user_id,))
-        user_row = cursor.fetchone()
-        if user_row:
-            user_tier, _, _ = resolve_user_tier(user_row)
-
-    max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
-    if payload.filesize_mb > max_mb:
-        conn.close()
-        raise HTTPException(status_code=400, detail=f"File exceeds the {max_mb} MB limit for your {user_tier.upper()} tier.")
-
-    created_at = datetime.utcnow()
-    expires_at = created_at + timedelta(days=36500) if payload.expiry_hours == 0 else created_at + timedelta(hours=payload.expiry_hours)
-    share_id = uuid.uuid4().hex[:8]
-    s3_key = f"transfers/{share_id}/{payload.filename}"
-    password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
-
-    cursor.execute("""
-        INSERT INTO shares (
-            id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
-            max_downloads, created_at, expires_at, downloads, user_id, 
-            is_paywalled, unlock_price, paywall_creator_id
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s)
-    """, (
-        share_id, payload.filename, payload.filesize_mb, s3_key, password_hash, 
-        payload.expiry_hours, payload.max_downloads, created_at, expires_at, 
-        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id
-    ))
-    conn.commit()
-    conn.close()
-
-    return {"share_id": share_id, "expires_at": expires_at.isoformat()}
-
-@app.post("/api/upload-file/{share_id}")
-async def upload_file_direct(share_id: str, request: Request):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
-    row = cursor.fetchone()
-    conn.close()
-
-    if not row:
-        raise HTTPException(status_code=404, detail="Vault record not found.")
-
-    file_bytes = await request.body()
-    content_type = request.headers.get("content-type")
-    if not content_type or content_type == "application/octet-stream":
-        guessed, _ = mimetypes.guess_type(row["filename"])
-        content_type = guessed or "application/octet-stream"
-
-    s3_client.put_object(
-        Bucket=R2_BUCKET_NAME,
-        Key=row["s3_key"],
-        Body=file_bytes,
-        ContentType=content_type
-    )
-    return {"status": "success", "share_id": share_id}
 
 # ----------------- Stripe Bank Account Onboarding & Management -----------------
 @app.post("/api/stripe/onboard")
@@ -2543,7 +2574,6 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
         sub_end_naive = sub_end.astimezone(timezone.utc).replace(tzinfo=None) if getattr(sub_end, "tzinfo", None) is not None else sub_end
         days_remaining = max(0, (sub_end_naive - datetime.utcnow()).days)
 
-    # Fee is $0.80 for Zephyr Pro, $0.50 for other tiers
     surcharge = 0.80 if target_tier_key == "pro" else 0.50
 
     if has_active_sub:
@@ -2551,7 +2581,7 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
         if new_total_quota > MAX_VAULT_BYTES:
             raise HTTPException(
                 status_code=400,
-                detail=f"Maximum storage limit reached. Net cumulative vault storage cannot exceed 600 GB (requested: {round(new_total_quota / (1024**3))} GB)."
+                detail=f"Maximum storage limit reached. Net cumulative vault storage cannot exceed 600 GB."
             )
         final_amount = round(target["price"] + surcharge, 2)
     else:
@@ -2633,7 +2663,7 @@ async def get_user_profile(user_id: str):
         conn.close()
         return {"tier": "free", "user_id": user_id, "stripe_connected": False}
 
-    resolved_tier, resolved_quota, _ = resolve_user_tier(row)
+    resolved_tier, resolved_quota, plan_price = resolve_user_tier(row)
     current_tier = (row.get("tier") or "free").lower()
     current_quota = row.get("storage_quota_bytes") or 0
 
@@ -2738,20 +2768,20 @@ async def dodo_webhook(request: Request):
                 VALUES (%s, %s, %s, %s, %s, %s, NULL)
                 ON CONFLICT (user_id) DO UPDATE SET 
                     tier = %s, 
-                    storage_quota_bytes = %s,
-                    plan_price = %s,
-                    subscription_end_at = %s,
-                    grace_period_end_at = NULL,
+                    storage_quota_bytes = %s, 
+                    plan_price = %s, 
+                    subscription_end_at = %s, 
+                    grace_period_end_at = NULL, 
                     email = COALESCE(EXCLUDED.email, users.email)
             """, (user_id, user_email, resolved_tier, new_quota, target_price, sub_end, resolved_tier, new_quota, target_price, sub_end))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
                 SET tier = %s, 
-                    storage_quota_bytes = %s,
-                    plan_price = %s,
-                    subscription_end_at = %s,
-                    grace_period_end_at = NULL
+                    storage_quota_bytes = %s, 
+                    plan_price = %s, 
+                    subscription_end_at = %s, 
+                    grace_period_end_at = NULL 
                 WHERE LOWER(email) = LOWER(%s)
             """, (resolved_tier, new_quota, target_price, sub_end, user_email.strip()))
         conn.commit()
@@ -2762,8 +2792,8 @@ async def dodo_webhook(request: Request):
             cursor.execute("""
                 UPDATE users 
                 SET tier = 'free', 
-                    storage_quota_bytes = 5368709120,
-                    plan_price = 0.00,
+                    storage_quota_bytes = 5368709120, 
+                    plan_price = 0.00, 
                     grace_period_end_at = %s 
                 WHERE user_id = %s
             """, (grace_end, user_id))
@@ -2771,8 +2801,8 @@ async def dodo_webhook(request: Request):
             cursor.execute("""
                 UPDATE users 
                 SET tier = 'free', 
-                    storage_quota_bytes = 5368709120,
-                    plan_price = 0.00,
+                    storage_quota_bytes = 5368709120, 
+                    plan_price = 0.00, 
                     grace_period_end_at = %s 
                 WHERE LOWER(email) = LOWER(%s)
             """, (grace_end, user_email.strip()))
@@ -2817,15 +2847,15 @@ async def lemon_webhook(request: Request):
                 ON CONFLICT (user_id) DO UPDATE SET 
                     tier = 'pro', 
                     storage_quota_bytes = 214748364800, 
-                    plan_price = 7.00,
-                    subscription_end_at = EXCLUDED.subscription_end_at,
-                    grace_period_end_at = NULL,
+                    plan_price = 7.00, 
+                    subscription_end_at = EXCLUDED.subscription_end_at, 
+                    grace_period_end_at = NULL, 
                     email = COALESCE(EXCLUDED.email, users.email)
             """, (user_id, user_email, sub_end))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
-                SET tier = 'pro', storage_quota_bytes = 214748364800, plan_price = 7.00, subscription_end_at = %s, grace_period_end_at = NULL
+                SET tier = 'pro', storage_quota_bytes = 214748364800, plan_price = 7.00, subscription_end_at = %s, grace_period_end_at = NULL 
                 WHERE LOWER(email) = LOWER(%s)
             """, (sub_end, user_email.strip(),))
         conn.commit()
@@ -2843,7 +2873,7 @@ async def lemon_webhook(request: Request):
                 UPDATE users 
                 SET tier = 'free', storage_quota_bytes = 5368709120, plan_price = 0.00, grace_period_end_at = %s 
                 WHERE LOWER(email) = LOWER(%s)
-            """, (grace_end, user_email.strip(),))
+            """, (grace_end, user_email.strip()))
         conn.commit()
 
     conn.close()
