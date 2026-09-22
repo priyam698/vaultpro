@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Protected Deliverable | {{ filename }}</title>
+  <title>Zephyr Protected Stream | {{ filename }}</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,32 +30,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Floating Moving Forensic Watermark Animation */
-    @keyframes floatWatermark1 {
-      0% { transform: translate(5vw, 10vh) rotate(-18deg); }
-      25% { transform: translate(65vw, 25vh) rotate(-12deg); }
-      50% { transform: translate(40vw, 75vh) rotate(-22deg); }
-      75% { transform: translate(15vw, 60vh) rotate(-15deg); }
-      100% { transform: translate(5vw, 10vh) rotate(-18deg); }
-    }
-
-    @keyframes floatWatermark2 {
-      0% { transform: translate(75vw, 80vh) rotate(-15deg); }
-      25% { transform: translate(25vw, 65vh) rotate(-20deg); }
-      50% { transform: translate(60vw, 15vh) rotate(-12deg); }
-      75% { transform: translate(80vw, 35vh) rotate(-18deg); }
-      100% { transform: translate(75vw, 80vh) rotate(-15deg); }
-    }
-
-    .watermark-pill-1 {
-      animation: floatWatermark1 28s ease-in-out infinite;
-    }
-
-    .watermark-pill-2 {
-      animation: floatWatermark2 34s ease-in-out infinite;
-    }
-
-    /* Pure Uncompressed Quality Display */
+    /* Native, uncompressed rendering */
     .media-high-quality {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: high-quality;
@@ -63,7 +38,7 @@
       backface-visibility: hidden;
     }
 
-    /* Soundwave bars animation */
+    /* Soundwave bars animation for audio files */
     @keyframes waveBounce {
       0%, 100% { height: 8px; }
       50% { height: 38px; }
@@ -81,9 +56,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-[#060810]">
 
-  <!-- ========================================================================= -->
-  <!-- ANTI-SCREENSHOT & ANTI-CAPTURE CONCEALMENT CURTAIN (Focus-Loss Shield)   -->
-  <!-- ========================================================================= -->
+  <!-- Anti-Screenshot & Screen Capture Concealment Curtain -->
   <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#05070d]/98 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
     <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-pulse">
       🛡️
@@ -91,14 +64,14 @@
     <span class="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase mb-1">Zephyr Anti-Screenshot Guard</span>
     <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Protected Deliverable Concealed</h3>
     <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-      Media is hidden while this window is inactive or screen capture utilities are focused. Click anywhere inside this window to restore viewing.
+      Media is concealed while this window is inactive or screen capture utilities are open. Click anywhere inside this window to resume viewing.
     </p>
     <div class="mt-5 px-4 py-2 rounded-xl bg-white/10 border border-white/15 text-slate-300 text-xs font-semibold">
       Tap to Resume Viewing
     </div>
   </div>
 
-  <!-- Top Protected Header -->
+  <!-- Header (Download Button Permanently Removed) -->
   <header class="relative z-20 border-b border-white/[0.08] bg-black/40 backdrop-blur-md px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <a href="/" class="flex items-center gap-2">
@@ -110,30 +83,24 @@
       <span class="opacity-30 text-sm">|</span>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-xs font-mono font-bold text-emerald-400">Licensed Purchase Confirmed</span>
+        <span class="text-xs font-mono font-bold text-emerald-400">Confidential Licensed Access</span>
       </div>
     </div>
 
-    <!-- Download & Security Badges -->
+    <!-- Security & License Info -->
     <div class="flex items-center gap-3">
-      <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-white/5 border border-white/10 px-3 py-1 rounded-xl">
-        <span>Buyer:</span> <strong class="text-indigo-300">{{ buyer_email }}</strong>
+      <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
+        <span>Licensee:</span> <strong class="text-indigo-300">{{ buyer_email }}</strong>
       </span>
-      {% if download_url %}
-      <a href="{{ download_url }}" download="{{ filename }}" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        <span>Download Original</span>
-      </a>
-      {% endif %}
+      <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xl">
+        View-Only Mode
+      </span>
     </div>
   </header>
 
-  <!-- ========================================================================= -->
-  <!-- MAIN DELIVERABLE CANVAS WITH UNIVERSAL FORMAT SWITCHER                    -->
-  <!-- ========================================================================= -->
+  <!-- Deliverable Stage -->
   <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 sm:p-8 max-w-7xl mx-auto w-full">
     
-    <!-- Deliverable Shell Container -->
     <div class="relative w-full rounded-3xl bg-slate-900/60 border border-white/10 overflow-hidden shadow-2xl flex flex-col backdrop-blur-xl">
       
       <!-- Card Bar Details -->
@@ -144,7 +111,7 @@
           </div>
           <div class="truncate">
             <h1 class="text-sm font-black text-white truncate" title="{{ filename }}">{{ filename }}</h1>
-            <p class="text-[11px] text-slate-400 font-mono">Forensically Watermarked • Uncompressed Native Quality</p>
+            <p class="text-[11px] text-slate-400 font-mono">End-to-End Encrypted • DRM Stream Protection</p>
           </div>
         </div>
 
@@ -155,17 +122,15 @@
         </div>
       </div>
 
-      <!-- Media Stage Area with Active Dynamic Watermark -->
-      <div id="mediaStage" class="relative w-full min-h-[420px] lg:min-h-[560px] flex items-center justify-center bg-black overflow-hidden p-2 sm:p-4">
+      <!-- Media Stage Area -->
+      <div id="mediaStage" class="relative w-full min-h-[420px] lg:min-h-[580px] flex items-center justify-center bg-black overflow-hidden p-2 sm:p-4">
         
-        <!-- DYNAMIC MOVING FORENSIC WATERMARK OVERLAYS -->
-        <div id="watermarkLayer" class="pointer-events-none absolute inset-0 z-30 overflow-hidden select-none">
-          <div class="watermark-pill-1 absolute px-4 py-1.5 rounded-full bg-black/35 backdrop-blur-sm border border-white/10 text-white/40 text-[10px] sm:text-xs font-mono font-bold tracking-wider pointer-events-none whitespace-nowrap shadow-lg">
-            🔒 LICENSED TO: {{ buyer_email }} • TOKEN: {{ token[:10] }} • CONFIDENTIAL
-          </div>
-          <div class="watermark-pill-2 absolute px-4 py-1.5 rounded-full bg-black/35 backdrop-blur-sm border border-white/10 text-indigo-400/40 text-[10px] sm:text-xs font-mono font-bold tracking-wider pointer-events-none whitespace-nowrap shadow-lg">
-            ZEPHYR FORENSIC SHIELD • {{ buyer_email }} • SHA-256 VERIFIED
-          </div>
+        <!-- Stationary Upper-Corner Watermark (No Screen Obstruction) -->
+        <div class="absolute top-4 right-4 z-30 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 backdrop-blur-md shadow-lg select-none">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+          <span class="text-[10px] font-mono text-white/70 font-semibold tracking-wider">
+            🔒 Licensed to {{ buyer_email }} • DRM Protected
+          </span>
         </div>
 
         <!-- 1. VIDEO PLAYER (MP4, MOV, 4K/8K, SCREEN RECORDINGS, WEBM) -->
@@ -199,10 +164,9 @@
           </div>
           <div>
             <h3 class="text-base font-black text-white">{{ filename }}</h3>
-            <p class="text-xs text-indigo-400 font-mono mt-1">Lossless Audio Stream</p>
+            <p class="text-xs text-indigo-400 font-mono mt-1">Confidential Audio Stream</p>
           </div>
 
-          <!-- Animated Audio Visualizer -->
           <div class="flex items-center justify-center gap-1.5 h-10 py-1">
             <span class="wave-bar w-1.5 bg-indigo-500 rounded-full" style="animation-delay: 0.1s;"></span>
             <span class="wave-bar w-1.5 bg-cyan-400 rounded-full" style="animation-delay: 0.3s;"></span>
@@ -242,24 +206,21 @@
           </div>
         </div>
 
-        <!-- 7. ARCHIVE & GENERIC FILE DELIVERABLE CARD (ZIP, RAR, 7Z, ALL OTHERS) -->
-        <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-5">
+        <!-- 7. ARCHIVES & PACKAGE DELIVERABLES (VIEW-ONLY STATUS CARD) -->
+        <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-4">
           <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto text-4xl shadow-xl">
             📦
           </div>
           <div>
             <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full">
-              Package Deliverable
+              Confidential Package
             </span>
             <h3 class="text-lg font-black text-white mt-2">{{ filename }}</h3>
-            <p class="text-xs text-slate-400 mt-1">Multi-file archive bundle verified with client-side SHA-256 seal.</p>
+            <p class="text-xs text-slate-400 mt-1">This archive package is verified under zero-knowledge encryption and licensed to your email.</p>
           </div>
-          {% if download_url %}
-          <a href="{{ download_url }}" download="{{ filename }}" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>💾</span>
-            <span>Download & Extract Archive</span>
-          </a>
-          {% endif %}
+          <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono">
+            Direct download disabled • Confidential inspection only
+          </div>
         </div>
 
       </div>
@@ -270,7 +231,7 @@
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
           <span>Forensic Anti-Leak Protection Active</span>
         </div>
-        <span class="font-mono text-[11px]">Authorized for {{ buyer_email }}</span>
+        <span class="font-mono text-[11px]">Stream authorized for {{ buyer_email }}</span>
       </div>
 
     </div>
@@ -278,17 +239,14 @@
   </main>
 
   <footer class="relative z-10 py-4 text-center text-xs text-slate-500 font-mono">
-    © 2026 Zephyr Systems • Zero-Knowledge Pay-to-Unlock Protection
+    © 2026 Zephyr Systems • Zero-Knowledge Confidential Stream
   </footer>
 
-  <!-- ========================================================================= -->
-  <!-- MULTI-FORMAT DETECTION & ANTI-SCREENSHOT LOGIC                            -->
-  <!-- ========================================================================= -->
+  <!-- File Detection & Security Handlers -->
   <script>
     const filename = "{{ filename }}".toLowerCase();
     const streamUrl = "/api/paywall/stream/{{ share_id }}?token={{ token }}";
 
-    // Detect File Category
     const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v', 'flv'];
     const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'wma'];
     const imageExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp', 'tiff', 'tif', 'raw', 'dng', 'heic'];
@@ -304,23 +262,19 @@
       if (videoExts.includes(ext)) {
         document.getElementById("videoContainer").classList.remove("hidden");
         iconBox.innerText = "🎬";
-        badge.innerText = "8K / 4K VIDEO STREAM";
-        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
+        badge.innerText = "HIGH RESOLUTION VIDEO STREAM";
       } else if (imageExts.includes(ext)) {
         document.getElementById("imageContainer").classList.remove("hidden");
         iconBox.innerText = "🖼️";
-        badge.innerText = "ORIGINAL HIGH-RES IMAGE";
-        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.innerText = "ORIGINAL IMAGE";
       } else if (audioExts.includes(ext)) {
         document.getElementById("audioContainer").classList.remove("hidden");
         iconBox.innerText = "🎵";
         badge.innerText = "LOSSLESS AUDIO STREAM";
-        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30";
       } else if (ext === 'pdf') {
         document.getElementById("pdfContainer").classList.remove("hidden");
         iconBox.innerText = "📑";
-        badge.innerText = "PROTECTED PDF DOCUMENT";
-        badge.className = "text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        badge.innerText = "PDF DOCUMENT";
       } else if (tableExts.includes(ext)) {
         document.getElementById("tableContainer").classList.remove("hidden");
         iconBox.innerText = "📊";
@@ -334,7 +288,7 @@
       } else {
         document.getElementById("genericContainer").classList.remove("hidden");
         iconBox.innerText = "📦";
-        badge.innerText = "PROJECT DELIVERABLE";
+        badge.innerText = "CONFIDENTIAL ARCHIVE";
       }
     }
 
@@ -396,9 +350,7 @@
 
     activatePlayer();
 
-    // =========================================================================
-    // ANTI-SCREENSHOT & ANTI-CAPTURE SHIELD CONTROLLER
-    // =========================================================================
+    // Shield against screenshots and window loss
     const shield = document.getElementById("antiCaptureShield");
     const video = document.getElementById("nativeVideoPlayer");
     const audio = document.getElementById("nativeAudioPlayer");
@@ -413,7 +365,6 @@
       shield.classList.add("hidden");
     }
 
-    // 1. Focus-loss & Window-blur triggers
     window.addEventListener("blur", engageShield);
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) engageShield();
@@ -422,10 +373,8 @@
     window.addEventListener("focus", disengageShield);
     shield.addEventListener("click", disengageShield);
 
-    // 2. Disable context menu (Right Click)
     document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    // 3. Screen Capture & Print Keyboard Shortcut Interception
     window.addEventListener("keyup", (e) => {
       if (e.key === "PrintScreen" || e.keyCode === 44) {
         engageShield();
@@ -437,7 +386,6 @@
     });
 
     window.addEventListener("keydown", (e) => {
-      // Intercept Ctrl+S, Ctrl+P, Ctrl+Shift+I, Ctrl+Shift+C
       if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u'].includes(e.key.toLowerCase())) {
         e.preventDefault();
         engageShield();
