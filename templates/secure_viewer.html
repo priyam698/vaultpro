@@ -19,10 +19,19 @@
       background-color: #05070d;
       color: #f8fafc;
       overflow-x: hidden;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .font-mono-code {
       font-family: 'JetBrains Mono', monospace;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
     }
 
     /* Native Uncompressed Quality Rendering */
@@ -51,6 +60,25 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-[#060810]">
 
+  <!-- POST-PAYMENT FILE SELECTOR OVERLAY (Forces user to explicitly choose a file, blocking downloads) -->
+  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#05070d]/96 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
+    <div class="w-20 h-20 rounded-3xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-bounce">
+      📂
+    </div>
+    <span class="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase mb-1">Payment Verified Successfully</span>
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">Choose Which File You Want to Open</h2>
+    <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
+      This secure escrow package contains multiple deliverables. Select any file below to open and inspect it instantly inside your protected window. Direct downloads are permanently disabled.
+    </p>
+    
+    <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full max-h-[50vh] overflow-y-auto custom-scroll p-2 bg-slate-900/40 border border-white/10 rounded-2xl shadow-inner">
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-400 font-mono text-center col-span-2">
+        Loading package manifest...
+      </div>
+    </div>
+  </div>
+
+  <!-- Anti-Screenshot Guard -->
   <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#05070d]/98 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
     <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-pulse">
       🛡️
@@ -94,20 +122,10 @@
     
     <div class="relative w-full rounded-3xl bg-slate-900/60 border border-white/10 overflow-hidden shadow-2xl flex flex-col backdrop-blur-xl">
       
-      <div id="fileTabsBar" class="{% if not files or files_count <= 1 %}hidden{% endif %} p-3.5 bg-[#090d1a] border-b border-white/10 flex items-center gap-2 overflow-x-auto custom-scroll">
-        <span class="text-[10px] font-mono text-indigo-400 uppercase font-black px-2 shrink-0">Deliverables (<span id="filesCountBadge">{{ files_count or 1 }}</span>):</span>
-        <div id="fileTabsContainer" class="flex items-center gap-2">
-          {% for f in files %}
-          <button type="button" 
-                  onclick="switchActiveFile('{{ f.filename }}')" 
-                  class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer {% if f.filename == filename %}bg-indigo-600 text-white shadow-md shadow-indigo-600/30{% else %}bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10{% endif %}"
-                  data-filename="{{ f.filename }}">
-            <span class="tab-icon">📄</span>
-            <span class="truncate max-w-[160px]">{{ f.filename }}</span>
-            <span class="text-[10px] opacity-60">({{ f.filesize_mb }} MB)</span>
-          </button>
-          {% endfor %}
-        </div>
+      <!-- Top File Selector Tabs -->
+      <div id="fileTabsBar" class="hidden p-3.5 bg-[#090d1a] border-b border-white/10 flex items-center gap-2 overflow-x-auto custom-scroll">
+        <span class="text-[10px] font-mono text-indigo-400 uppercase font-black px-2 shrink-0">Deliverables (<span id="filesCountBadge">1</span>):</span>
+        <div id="fileTabsContainer" class="flex items-center gap-2"></div>
       </div>
 
       <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/30">
@@ -122,6 +140,9 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <button type="button" onclick="openFilePickerModal()" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5">
+            <span>📂</span> Choose File...
+          </button>
           <span id="formatBadge" class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
             PROTECTED STREAM
           </span>
@@ -137,96 +158,58 @@
           </span>
         </div>
 
+        <!-- Video Player -->
         <div id="videoContainer" class="hidden w-full h-full flex flex-col items-center justify-center">
-          <video id="nativeVideoPlayer" 
-                 controls 
-                 controlsList="nodownload noplaybackrate" 
-                 disablePictureInPicture 
-                 playsinline 
-                 preload="metadata"
-                 class="media-high-quality max-h-[75vh] w-full object-contain rounded-2xl shadow-2xl bg-black">
-            <source id="videoSource" src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}" type="video/mp4">
-            Your browser does not support HTML5 video streaming.
+          <video id="nativeVideoPlayer" controls controlsList="nodownload noplaybackrate" disablePictureInPicture playsinline preload="metadata" class="media-high-quality max-h-[75vh] w-full object-contain rounded-2xl shadow-2xl bg-black">
+            <source id="videoSource" src="" type="video/mp4">
           </video>
         </div>
 
+        <!-- Image Viewer -->
         <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center p-2">
-          <img id="nativeImagePlayer" 
-               src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}" 
-               alt="{{ filename }}" 
-               class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
+          <img id="nativeImagePlayer" src="" alt="Deliverable" class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
         </div>
 
+        <!-- Audio Player -->
         <div id="audioContainer" class="hidden w-full max-w-lg p-8 flex flex-col items-center justify-center text-center space-y-6">
-          <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-2xl">
-            <div class="w-full h-full bg-[#080d1e] rounded-[22px] flex items-center justify-center text-3xl">
-              🎵
-            </div>
-          </div>
-          <div>
-            <h3 id="audioTitle" class="text-base font-black text-white">{{ filename }}</h3>
-            <p class="text-xs text-indigo-400 font-mono mt-1">Lossless Audio Stream</p>
-          </div>
-
-          <div class="flex items-center justify-center gap-1.5 h-10 py-1">
-            <span class="wave-bar w-1.5 bg-indigo-500 rounded-full" style="animation-delay: 0.1s;"></span>
-            <span class="wave-bar w-1.5 bg-cyan-400 rounded-full" style="animation-delay: 0.3s;"></span>
-            <span class="wave-bar w-1.5 bg-purple-400 rounded-full" style="animation-delay: 0.2s;"></span>
-            <span class="wave-bar w-1.5 bg-indigo-400 rounded-full" style="animation-delay: 0.5s;"></span>
-            <span class="wave-bar w-1.5 bg-cyan-300 rounded-full" style="animation-delay: 0.4s;"></span>
-          </div>
-
+          <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-2xl flex items-center justify-center text-3xl">🎵</div>
+          <h3 id="audioTitle" class="text-base font-black text-white">Audio Stream</h3>
           <audio id="nativeAudioPlayer" controls class="w-full rounded-xl" controlsList="nodownload">
-            <source id="audioSource" src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}">
+            <source id="audioSource" src="">
           </audio>
         </div>
 
+        <!-- Code Viewer -->
         <div id="codeContainer" class="hidden w-full h-[68vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
           <div class="px-4 py-2.5 bg-black/60 border-b border-white/10 flex items-center justify-between text-xs font-mono">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-              <span id="codeLangTag" class="text-indigo-300 font-bold">SOURCE CODE</span>
-            </div>
-            
-            <div class="flex items-center gap-3">
-              <span id="codeLinesCount" class="text-slate-400 hidden sm:inline">Loading lines...</span>
-              <button id="copyScriptBtn" 
-                      type="button" 
-                      onclick="copyScriptCode()" 
-                      class="px-3.5 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 hover:text-white border border-indigo-500/40 rounded-xl font-mono font-bold text-[11px] transition flex items-center gap-1.5 cursor-pointer">
-                <span id="copyIcon">📋</span>
-                <span id="copyBtnText">Copy Code</span>
-              </button>
-            </div>
+            <span id="codeLangTag" class="text-indigo-300 font-bold">SOURCE CODE</span>
+            <button type="button" onclick="copyScriptCode()" class="px-3.5 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 rounded-xl font-mono font-bold text-[11px] cursor-pointer">
+              📋 Copy Code
+            </button>
           </div>
-          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code select-text"><code id="codeViewerBox" class="language-javascript">Fetching source code...</code></pre>
+          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code select-text"><code id="codeViewerBox" class="language-javascript">Loading code...</code></pre>
         </div>
 
+        <!-- PDF Viewer -->
         <div id="pdfContainer" class="hidden w-full h-[75vh] rounded-2xl overflow-hidden bg-slate-900 border border-white/10">
-          <iframe id="pdfIframe" src="/api/paywall/stream/{{ share_id }}?token={{ token }}&file={{ filename }}#toolbar=0" class="w-full h-full rounded-2xl border-0"></iframe>
+          <iframe id="pdfIframe" src="" class="w-full h-full rounded-2xl border-0"></iframe>
         </div>
 
+        <!-- Spreadsheet Viewer -->
         <div id="tableContainer" class="hidden w-full h-[65vh] flex flex-col bg-[#0b0f19] rounded-2xl overflow-hidden border border-white/10">
-          <div class="px-4 py-2.5 bg-black/50 border-b border-white/10 flex items-center justify-between text-xs">
-            <span class="font-mono text-cyan-400 font-bold">Spreadsheet Data View</span>
-            <span id="tableRowsCount" class="text-slate-400 font-mono">Rows</span>
+          <div class="px-4 py-2.5 bg-black/50 border-b border-white/10 flex items-center justify-between text-xs font-mono text-cyan-400">
+            <span>Spreadsheet View</span>
+            <span id="tableRowsCount">Rows</span>
           </div>
           <div class="flex-1 overflow-auto custom-scroll">
             <table id="dataTable" class="w-full text-left text-xs border-collapse font-mono"></table>
           </div>
         </div>
 
+        <!-- Generic / Archive Fallback -->
         <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-4">
-          <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto text-4xl shadow-xl">
-            📦
-          </div>
-          <div>
-            <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full">
-              Confidential Package
-            </span>
-            <h3 id="genericTitle" class="text-lg font-black text-white mt-2">{{ filename }}</h3>
-            <p class="text-xs text-slate-400 mt-1">This deliverable is verified under zero-knowledge encryption and licensed to your email.</p>
-          </div>
+          <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto text-4xl shadow-xl">📦</div>
+          <h3 id="genericTitle" class="text-lg font-black text-white mt-2">File</h3>
           <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono">
             Direct download disabled • Confidential inspection only
           </div>
@@ -237,13 +220,12 @@
       <div class="px-5 py-3 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-slate-400">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-          <span>Forensic DRM Shield Active</span>
+          <span>Zero-Download Confidential Inspection Mode</span>
         </div>
-        <span class="font-mono text-[11px]">Stream authorized for {{ buyer_email }}</span>
+        <span class="font-mono text-[11px]">Authorized for {{ buyer_email }}</span>
       </div>
 
     </div>
-
   </main>
 
   <footer class="relative z-10 py-4 text-center text-xs text-slate-500 font-mono">
@@ -251,10 +233,11 @@
   </footer>
 
   <script>
-    let activeFile = "{{ filename }}";
+    let activeFile = "";
     const shareId = "{{ share_id }}";
     const token = "{{ token }}";
     let rawSourceCode = "";
+    let packageFiles = [];
 
     const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v', 'flv'];
     const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'wma'];
@@ -262,7 +245,7 @@
     const codeExts  = ['py', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'sql', 'sh', 'cpp', 'c', 'h', 'cs', 'java', 'go', 'rs', 'php', 'rb', 'yml', 'yaml', 'md', 'txt', 'log', 'ipynb'];
     const tableExts = ['csv', 'tsv'];
 
-    function getIconForFile(fname) {
+    function getFileIcon(fname) {
       const ext = fname.split('.').pop().toLowerCase() || '';
       if (videoExts.includes(ext)) return '🎬';
       if (imageExts.includes(ext)) return '🖼️';
@@ -280,11 +263,12 @@
       });
       const v = document.getElementById("nativeVideoPlayer");
       const a = document.getElementById("nativeAudioPlayer");
-      if (v && !v.paused) v.pause();
-      if (a && !a.paused) a.pause();
+      if (v) { v.pause(); v.removeAttribute('src'); v.load(); }
+      if (a) { a.pause(); a.removeAttribute('src'); a.load(); }
     }
 
     function renderActiveDeliverable(fname) {
+      if (!fname) return;
       hideAllPlayers();
       activeFile = fname;
       document.getElementById("activeFilenameDisplay").innerText = fname;
@@ -299,41 +283,34 @@
         document.getElementById("videoSource").src = streamUrl;
         v.load();
         document.getElementById("videoContainer").classList.remove("hidden");
-        iconBox.innerText = "🎬";
-        badge.innerText = "8K / 4K VIDEO STREAM";
+        iconBox.innerText = "🎬"; badge.innerText = "32K / 8K / 4K VIDEO STREAM";
       } else if (imageExts.includes(ext)) {
         document.getElementById("nativeImagePlayer").src = streamUrl;
         document.getElementById("imageContainer").classList.remove("hidden");
-        iconBox.innerText = "🖼️";
-        badge.innerText = "ORIGINAL IMAGE";
+        iconBox.innerText = "🖼️"; badge.innerText = "ORIGINAL IMAGE";
       } else if (audioExts.includes(ext)) {
         const a = document.getElementById("nativeAudioPlayer");
         document.getElementById("audioSource").src = streamUrl;
         document.getElementById("audioTitle").innerText = fname;
         a.load();
         document.getElementById("audioContainer").classList.remove("hidden");
-        iconBox.innerText = "🎵";
-        badge.innerText = "LOSSLESS AUDIO STREAM";
+        iconBox.innerText = "🎵"; badge.innerText = "LOSSLESS AUDIO";
       } else if (ext === 'pdf') {
         document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0`;
         document.getElementById("pdfContainer").classList.remove("hidden");
-        iconBox.innerText = "📑";
-        badge.innerText = "PDF DOCUMENT";
+        iconBox.innerText = "📑"; badge.innerText = "PDF DOCUMENT";
       } else if (tableExts.includes(ext)) {
         document.getElementById("tableContainer").classList.remove("hidden");
-        iconBox.innerText = "📊";
-        badge.innerText = "DATA SPREADSHEET";
+        iconBox.innerText = "📊"; badge.innerText = "SPREADSHEET";
         loadTableData(streamUrl);
       } else if (codeExts.includes(ext)) {
         document.getElementById("codeContainer").classList.remove("hidden");
-        iconBox.innerText = "💻";
-        badge.innerText = `${ext.toUpperCase()} SCRIPT`;
+        iconBox.innerText = "💻"; badge.innerText = `${ext.toUpperCase()} SCRIPT`;
         loadCodeSource(streamUrl, ext);
       } else {
         document.getElementById("genericContainer").classList.remove("hidden");
         document.getElementById("genericTitle").innerText = fname;
-        iconBox.innerText = "📦";
-        badge.innerText = "CONFIDENTIAL DELIVERABLE";
+        iconBox.innerText = "📦"; badge.innerText = "CONFIDENTIAL";
       }
     }
 
@@ -348,35 +325,23 @@
       renderActiveDeliverable(fname);
     }
 
+    function selectFileAndOpen(fname) {
+      document.getElementById("postPaymentPickerModal").classList.add("hidden");
+      switchActiveFile(fname);
+    }
+
+    function openFilePickerModal() {
+      document.getElementById("postPaymentPickerModal").classList.remove("hidden");
+    }
+
     async function loadCodeSource(streamUrl, ext) {
       try {
         const res = await fetch(streamUrl);
         const text = await res.text();
-        const codeBox = document.getElementById("codeViewerBox");
-        const linesCount = document.getElementById("codeLinesCount");
-
-        if (ext === 'ipynb') {
-          try {
-            const nb = JSON.parse(text);
-            let extracted = "";
-            (nb.cells || []).forEach((c, idx) => {
-              extracted += `\n# --- Cell [${idx + 1}] (${c.cell_type}) ---\n`;
-              extracted += Array.isArray(c.source) ? c.source.join("") : (c.source || "");
-              extracted += "\n";
-            });
-            rawSourceCode = extracted;
-            codeBox.textContent = extracted;
-          } catch(e) {
-            rawSourceCode = text;
-            codeBox.textContent = text;
-          }
-        } else {
-          rawSourceCode = text;
-          codeBox.textContent = text;
-        }
-
-        linesCount.innerText = `${rawSourceCode.split('\n').length} lines`;
-        Prism.highlightElement(codeBox);
+        rawSourceCode = text;
+        document.getElementById("codeViewerBox").textContent = text;
+        document.getElementById("codeLinesCount").innerText = `${text.split('\n').length} lines`;
+        Prism.highlightElement(document.getElementById("codeViewerBox"));
       } catch (e) {
         document.getElementById("codeViewerBox").textContent = "Error loading source code.";
       }
@@ -384,26 +349,8 @@
 
     async function copyScriptCode() {
       if (!rawSourceCode) return;
-      const btnText = document.getElementById("copyBtnText");
-      const icon = document.getElementById("copyIcon");
-
-      try {
-        await navigator.clipboard.writeText(rawSourceCode);
-      } catch (err) {
-        const ta = document.createElement("textarea");
-        ta.value = rawSourceCode;
-        ta.style.position = "fixed";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      btnText.innerText = "Copied!";
-      icon.innerText = "✓";
-      setTimeout(() => {
-        btnText.innerText = "Copy Code";
-        icon.innerText = "📋";
-      }, 2000);
+      await navigator.clipboard.writeText(rawSourceCode);
+      alert("Source code copied to clipboard!");
     }
 
     async function loadTableData(streamUrl) {
@@ -411,46 +358,53 @@
         const res = await fetch(streamUrl);
         const csv = await res.text();
         const rows = csv.trim().split('\n').map(r => r.split(','));
-        const table = document.getElementById("dataTable");
         document.getElementById("tableRowsCount").innerText = `${rows.length} rows`;
-
-        if (!rows.length) return;
         let html = `<thead><tr class="bg-indigo-950/40 text-indigo-300 font-bold border-b border-white/10">`;
         rows[0].forEach(col => html += `<th class="py-2.5 px-3 border-r border-white/5">${col.trim()}</th>`);
         html += `</tr></thead><tbody class="divide-y divide-white/5">`;
-
         rows.slice(1, 100).forEach(r => {
           html += `<tr class="hover:bg-white/5 transition">`;
           r.forEach(c => html += `<td class="py-2 px-3 border-r border-white/5 opacity-80">${c.trim()}</td>`);
           html += `</tr>`;
         });
         html += `</tbody>`;
-        table.innerHTML = html;
+        document.getElementById("dataTable").innerHTML = html;
       } catch (e) {}
     }
 
-    // Auto-discover manifest from server if Jinja rendered fallback
-    async function syncDeliverableManifest() {
+    async function initViewerManifest() {
       try {
         const res = await fetch(`/api/share-details/${shareId}`);
         if (!res.ok) return;
         const details = await res.json();
-        if (details.files && details.files.length > 1) {
-          const tabsBar = document.getElementById("fileTabsBar");
-          const container = document.getElementById("fileTabsContainer");
-          const countBadge = document.getElementById("filesCountBadge");
+        
+        if (details.files && details.files.length > 0) {
+          packageFiles = details.files;
+          
+          // FORCIBLY SHOW THE MODAL TO PREVENT AUTO-DOWNLOAD / AUTO-VIEW
+          document.getElementById("postPaymentPickerModal").classList.remove("hidden");
 
-          if (countBadge) countBadge.innerText = details.files.length;
-          if (tabsBar) tabsBar.classList.remove("hidden");
+          // Populate the modal grid
+          const modalGrid = document.getElementById("modalFilesGrid");
+          modalGrid.innerHTML = packageFiles.map((f, idx) => `
+            <button type="button" onclick="selectFileAndOpen('${f.filename}')" class="p-4 rounded-2xl bg-white/5 hover:bg-indigo-600/25 border border-white/10 hover:border-indigo-500/50 transition flex items-center gap-3 text-left cursor-pointer group shadow-sm">
+              <span class="text-2xl">${getFileIcon(f.filename)}</span>
+              <div class="truncate flex-1">
+                <span class="text-[10px] font-mono text-indigo-400 font-bold uppercase block">File #${idx + 1}</span>
+                <span class="text-xs font-bold text-white truncate block group-hover:text-indigo-300">${f.filename}</span>
+                <span class="text-[10px] text-slate-400 font-mono">${f.filesize_mb} MB</span>
+              </div>
+            </button>
+          `).join('');
 
-          if (container) {
-            container.innerHTML = details.files.map(f => `
-              <button type="button" 
-                      onclick="switchActiveFile('${f.filename}')" 
-                      class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer ${f.filename === activeFile ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'}"
-                      data-filename="${f.filename}">
-                <span>${getIconForFile(f.filename)}</span>
-                <span class="truncate max-w-[160px]">${f.filename}</span>
+          // Populate Top File Tabs if > 1
+          if (packageFiles.length > 1) {
+            document.getElementById("fileTabsBar").classList.remove("hidden");
+            document.getElementById("filesCountBadge").innerText = packageFiles.length;
+            document.getElementById("fileTabsContainer").innerHTML = packageFiles.map((f, idx) => `
+              <button type="button" onclick="switchActiveFile('${f.filename}')" class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10" data-filename="${f.filename}">
+                <span>${getFileIcon(f.filename)}</span>
+                <span class="truncate max-w-[160px]">File #${idx + 1}: ${f.filename}</span>
                 <span class="text-[10px] opacity-60">(${f.filesize_mb} MB)</span>
               </button>
             `).join('');
@@ -459,8 +413,8 @@
       } catch(e) {}
     }
 
-    renderActiveDeliverable(activeFile);
-    syncDeliverableManifest();
+    // Call init first so the modal blocks the UI before a stream begins
+    initViewerManifest();
 
     // =========================================================================
     // ANTI-SCREENSHOT WALL (TEMPORARILY PAUSED FOR TESTING)
