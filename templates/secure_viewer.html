@@ -19,19 +19,10 @@
       background-color: #05070d;
       color: #f8fafc;
       overflow-x: hidden;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
     }
 
     .font-mono-code {
       font-family: 'JetBrains Mono', monospace;
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-      user-select: text;
     }
 
     /* Native Uncompressed Quality Rendering */
@@ -126,7 +117,7 @@
           </div>
           <div class="truncate">
             <h1 id="activeFilenameDisplay" class="text-sm font-black text-white truncate" title="{{ filename }}">{{ filename }}</h1>
-            <p class="text-[11px] text-slate-400 font-mono">Uncompressed Native Quality • DRM Stream Shielded</p>
+            <p class="text-[11px] text-slate-400 font-mono">Uncompressed Native Quality • DRM Stream Active</p>
           </div>
         </div>
 
@@ -438,7 +429,7 @@
       } catch (e) {}
     }
 
-    // Auto-discover manifest from server if Jinja rendered only 1 or fallback
+    // Auto-discover manifest from server if Jinja rendered fallback
     async function syncDeliverableManifest() {
       try {
         const res = await fetch(`/api/share-details/${shareId}`);
@@ -449,19 +440,21 @@
           const container = document.getElementById("fileTabsContainer");
           const countBadge = document.getElementById("filesCountBadge");
 
-          countBadge.innerText = details.files.length;
-          tabsBar.classList.remove("hidden");
+          if (countBadge) countBadge.innerText = details.files.length;
+          if (tabsBar) tabsBar.classList.remove("hidden");
 
-          container.innerHTML = details.files.map(f => `
-            <button type="button" 
-                    onclick="switchActiveFile('${f.filename}')" 
-                    class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer ${f.filename === activeFile ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'}"
-                    data-filename="${f.filename}">
-              <span>${getIconForFile(f.filename)}</span>
-              <span class="truncate max-w-[160px]">${f.filename}</span>
-              <span class="text-[10px] opacity-60">(${f.filesize_mb} MB)</span>
-            </button>
-          `).join('');
+          if (container) {
+            container.innerHTML = details.files.map(f => `
+              <button type="button" 
+                      onclick="switchActiveFile('${f.filename}')" 
+                      class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-semibold transition shrink-0 flex items-center gap-2 cursor-pointer ${f.filename === activeFile ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'}"
+                      data-filename="${f.filename}">
+                <span>${getIconForFile(f.filename)}</span>
+                <span class="truncate max-w-[160px]">${f.filename}</span>
+                <span class="text-[10px] opacity-60">(${f.filesize_mb} MB)</span>
+              </button>
+            `).join('');
+          }
         }
       } catch(e) {}
     }
@@ -469,47 +462,31 @@
     renderActiveDeliverable(activeFile);
     syncDeliverableManifest();
 
-    // Anti-Capture Security Handlers
+    // =========================================================================
+    // ANTI-SCREENSHOT WALL (TEMPORARILY PAUSED FOR TESTING)
+    // To re-enable later, simply uncomment the event listeners below.
+    // =========================================================================
     const shield = document.getElementById("antiCaptureShield");
     const video = document.getElementById("nativeVideoPlayer");
     const audio = document.getElementById("nativeAudioPlayer");
 
     function engageShield() {
-      shield.classList.remove("hidden");
-      if (video && !video.paused) video.pause();
-      if (audio && !audio.paused) audio.pause();
+      // Temporarily bypassed
     }
 
     function disengageShield() {
-      shield.classList.add("hidden");
+      if (shield) shield.classList.add("hidden");
     }
 
+    /*
     window.addEventListener("blur", engageShield);
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) engageShield();
     });
     window.addEventListener("focus", disengageShield);
-    shield.addEventListener("click", disengageShield);
-
+    if (shield) shield.addEventListener("click", disengageShield);
     document.addEventListener("contextmenu", (e) => e.preventDefault());
-
-    window.addEventListener("keyup", (e) => {
-      if (e.key === "PrintScreen" || e.keyCode === 44) {
-        engageShield();
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText("Protected by Zephyr DRM");
-        }
-        setTimeout(disengageShield, 2500);
-      }
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        engageShield();
-        setTimeout(disengageShield, 1500);
-      }
-    });
+    */
   </script>
 </body>
 </html>
