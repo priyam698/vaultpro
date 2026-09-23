@@ -327,7 +327,6 @@ def init_db_schema():
             );
         """)
 
-        # Multiple files table for bundling in Pay-to-Unlock Escrow
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS share_files (
                 id SERIAL PRIMARY KEY,
@@ -1025,7 +1024,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
 
     if not share.get("stripe_account_id"):
         conn.close()
-        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payouts.")
+        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
 
     cursor.execute("""
         SELECT access_token, buyer_password, permanent_password 
@@ -1038,7 +1037,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
         conn.close()
         return {
             "status": "already_paid",
-            "message": "You have already purchased lifetime access for this deliverable! Enter your permanent password to unlock."
+            "message": "You have already purchased lifetime access for this file! Enter your permanent password to unlock."
         }
 
     access_token = f"pwtk_{secrets.token_hex(20)}"
@@ -1057,7 +1056,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
             line_items=[{
                 'price_data': {
                     'currency': 'usd',
-                    'product_data': {'name': f"Unlock Deliverables: {share['filename']}"},
+                    'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
                     'unit_amount': price_cents,
                 },
                 'quantity': 1,
@@ -1423,7 +1422,6 @@ async def secure_viewer_page(
 
     selected_file = file or files[0]["filename"]
 
-    # Downloads strictly removed for confidential escrow files
     return render_template("secure_viewer.html", request, {
         "share_id": share_id,
         "token": token,
@@ -1501,7 +1499,6 @@ async def stream_paywall_media(
         guessed, _ = mimetypes.guess_type(target_name)
         content_type = guessed or "application/octet-stream"
 
-    # Support HTTP 206 Range requests for continuous 8K/4K buffering & scrubbing
     range_header = request.headers.get("range")
     try:
         head = s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
@@ -1642,7 +1639,7 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
     conn.close()
     return {"download_url": url}
 
-# ----------------- Stripe Bank Account Onboarding & Management -----------------
+# ----------------- Stripe Bank Account Onboarding (Global) -----------------
 @app.post("/api/stripe/onboard")
 async def stripe_onboard(user_id: str = Form(...)):
     if not stripe.api_key:
@@ -1661,13 +1658,10 @@ async def stripe_onboard(user_id: str = Form(...)):
 
     if not account_id:
         try:
-            # Explicitly set country to 'IN' for Indian bank accounts
             account = stripe.Account.create(
                 type="express",
-                country="IN",
                 email=user["email"] if user.get("email") else None,
                 capabilities={"transfers": {"requested": True}},
-                business_type="individual",
                 metadata={"user_id": user_id}
             )
             account_id = account.id
@@ -1677,18 +1671,6 @@ async def stripe_onboard(user_id: str = Form(...)):
             conn.close()
             raise HTTPException(status_code=500, detail=str(e))
     
-    conn.close()
-
-    try:
-        account_link = stripe.AccountLink.create(
-            account=account_id,
-            refresh_url="https://zephyr-drive.onrender.com/dashboard",
-            return_url="https://zephyr-drive.onrender.com/dashboard?stripe_connected=true",
-            type="account_onboarding",
-        )
-        return RedirectResponse(url=account_link.url, status_code=303)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))    
     conn.close()
 
     try:
