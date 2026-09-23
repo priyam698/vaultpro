@@ -1661,10 +1661,13 @@ async def stripe_onboard(user_id: str = Form(...)):
 
     if not account_id:
         try:
+            # Explicitly set country to 'IN' for Indian bank accounts
             account = stripe.Account.create(
                 type="express",
+                country="IN",
                 email=user["email"] if user.get("email") else None,
                 capabilities={"transfers": {"requested": True}},
+                business_type="individual",
                 metadata={"user_id": user_id}
             )
             account_id = account.id
@@ -1674,6 +1677,18 @@ async def stripe_onboard(user_id: str = Form(...)):
             conn.close()
             raise HTTPException(status_code=500, detail=str(e))
     
+    conn.close()
+
+    try:
+        account_link = stripe.AccountLink.create(
+            account=account_id,
+            refresh_url="https://zephyr-drive.onrender.com/dashboard",
+            return_url="https://zephyr-drive.onrender.com/dashboard?stripe_connected=true",
+            type="account_onboarding",
+        )
+        return RedirectResponse(url=account_link.url, status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))    
     conn.close()
 
     try:
