@@ -128,7 +128,8 @@
     }
 
     body.light-theme input,
-    body.light-theme textarea {
+    body.light-theme textarea,
+    body.light-theme select {
       background-color: rgba(248, 250, 253, 0.95) !important;
       border: 1px solid rgba(195, 206, 222, 0.9) !important;
       color: #0f172a !important;
@@ -136,7 +137,8 @@
     }
 
     body.light-theme input:focus,
-    body.light-theme textarea:focus {
+    body.light-theme textarea:focus,
+    body.light-theme select:focus {
       background-color: #ffffff !important;
       border-color: #6366f1 !important;
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
@@ -201,6 +203,7 @@
 
   <form id="stripeOnboardForm" action="/api/stripe/onboard" method="POST" class="hidden">
     <input type="hidden" name="user_id" id="stripeUserIdHidden">
+    <input type="hidden" name="country" id="stripeCountryHidden" value="IN">
   </form>
   <form id="stripeManageForm" action="/api/stripe/manage" method="POST" class="hidden">
     <input type="hidden" name="user_id" id="stripeManageUserIdHidden">
@@ -609,9 +612,27 @@
             Link your bank account to enable Pay-to-Unlock. When buyers unlock your files, 88% of the payout is directly wired to your bank.
           </p>
 
-          <button type="button" id="dashboardStripeActionBtn" onclick="triggerStripeBankLink()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition cursor-pointer">
-            Link Bank Account via Stripe
-          </button>
+          <div id="stripeUnlinkedSection" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold opacity-80 mb-1.5">Bank Account Country</label>
+              <select id="stripeCountrySelect" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-mono bg-slate-900/80 border border-slate-400/30 text-white focus:outline-none focus:border-indigo-400 transition cursor-pointer">
+                <option value="IN" selected>🇮🇳 India (INR / PAN / IFSC)</option>
+                <option value="US">🇺🇸 United States (USD / SSN / Routing)</option>
+                <option value="GB">🇬🇧 United Kingdom (GBP / Sort Code)</option>
+                <option value="CA">🇨🇦 Canada (CAD / Transit Number)</option>
+                <option value="AU">🇦🇺 Australia (AUD / BSB)</option>
+                <option value="DE">🇩🇪 Germany (EUR / IBAN)</option>
+                <option value="FR">🇫🇷 France (EUR / IBAN)</option>
+                <option value="AE">🇦🇪 United Arab Emirates (AED)</option>
+                <option value="SG">🇸🇬 Singapore (SGD)</option>
+              </select>
+            </div>
+
+            <button type="button" id="dashboardStripeActionBtn" onclick="triggerStripeBankLink()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white text-xs font-black shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center justify-center gap-2">
+              <span>🏦</span>
+              <span>Link Bank Account via Stripe</span>
+            </button>
+          </div>
 
           <div id="stripeConnectedControls" class="hidden space-y-2 pt-1">
             <button type="button" onclick="manageStripeBank()" class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
@@ -676,7 +697,6 @@
   </footer>
 
   <script>
-    // Exact verified live product IDs from your Dodo dashboard
     const DODO_PRODUCT_IDS = {
       micro: "pdt_0NnaihWSsabCnJhTUZspz",
       lite:  "pdt_0Nnaj4zAkRMRoDf8pyikT",
@@ -691,7 +711,7 @@
       pro:   { name: "Zephyr Pro",   price: 7.00, quotaBytes: 200 * 1024**3, gb: 200 }
     };
 
-    const MAX_VAULT_BYTES = 600 * 1024 * 1024 * 1024; // Strict 600 GB Maximum Ceiling
+    const MAX_VAULT_BYTES = 600 * 1024 * 1024 * 1024; // 600 GB Maximum Ceiling
 
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -771,7 +791,14 @@
 
     function triggerStripeBankLink() {
       const hiddenInput = document.getElementById("stripeUserIdHidden");
+      const countryHidden = document.getElementById("stripeCountryHidden");
+      const countrySelect = document.getElementById("stripeCountrySelect");
       const form = document.getElementById("stripeOnboardForm");
+
+      if (countryHidden && countrySelect) {
+        countryHidden.value = countrySelect.value || "IN";
+      }
+
       if (hiddenInput && form && currentUserId) {
         hiddenInput.value = currentUserId;
         form.submit();
@@ -815,7 +842,7 @@
     function updateStripeUI(connected) {
       isStripeConnected = connected;
       const dashBadge = document.getElementById("dashboardStripeBadge");
-      const dashBtn = document.getElementById("dashboardStripeActionBtn");
+      const unlinkedSection = document.getElementById("stripeUnlinkedSection");
       const dashControls = document.getElementById("stripeConnectedControls");
       const dashDesc = document.getElementById("stripeAccountDesc");
 
@@ -831,7 +858,7 @@
         if (dashDesc) {
           dashDesc.innerText = "Your bank account is linked. Payouts (88%) are deposited automatically upon file unlock.";
         }
-        if (dashBtn) dashBtn.classList.add("hidden");
+        if (unlinkedSection) unlinkedSection.classList.add("hidden");
         if (dashControls) dashControls.classList.remove("hidden");
 
         if (modalBadge) {
@@ -848,7 +875,7 @@
         if (dashDesc) {
           dashDesc.innerText = "Link your bank account to enable Pay-to-Unlock. When buyers unlock your files, 88% of the payout is directly wired to your bank.";
         }
-        if (dashBtn) dashBtn.classList.remove("hidden");
+        if (unlinkedSection) unlinkedSection.classList.remove("hidden");
         if (dashControls) dashControls.classList.add("hidden");
 
         if (modalBadge) {
@@ -878,7 +905,7 @@
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
         
-        currentAccountTier = (data.tier || "free").toLowerCase();
+        currentAccountTier = (data.tier || "free").lower();
         currentUserQuotaBytes = data.quota_bytes || 5368709120;
         currentPlanPrice = parseFloat(data.plan_price || 0.0);
         currentSubEndAt = data.subscription_end_at || null;
@@ -1119,7 +1146,6 @@
       document.getElementById("upgradePlanModal").classList.add("hidden");
     }
 
-    // Instant zero-lag touch handler with cumulative 600 GB ceiling and $0.80 Pro fee
     function selectUpgradeTarget(tier) {
       selectedUpgradeTarget = tier;
 

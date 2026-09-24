@@ -1640,10 +1640,16 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
     return {"download_url": url}
 
 # ----------------- Stripe Bank Account Onboarding (Global) -----------------
+# ----------------- Stripe Bank Account Onboarding (Multi-Country) -----------------
 @app.post("/api/stripe/onboard")
-async def stripe_onboard(user_id: str = Form(...)):
+async def stripe_onboard(
+    user_id: str = Form(...),
+    country: Optional[str] = Form("IN")
+):
     if not stripe.api_key:
         raise HTTPException(status_code=500, detail="Stripe integration is not configured on the server.")
+
+    clean_country = (country or "IN").strip().upper()
 
     conn = get_db()
     cursor = conn.cursor()
@@ -1658,12 +1664,19 @@ async def stripe_onboard(user_id: str = Form(...)):
 
     if not account_id:
         try:
-            account = stripe.Account.create(
-                type="express",
-                email=user["email"] if user.get("email") else None,
-                capabilities={"transfers": {"requested": True}},
-                metadata={"user_id": user_id}
-            )
+            # Create Express account matched to the user's specific country
+            account_params = {
+                "type": "express",
+                "country": clean_country,
+                "email": user["email"] if user.get("email") else None,
+                "capabilities": {"transfers": {"requested": True}},
+                "metadata": {"user_id": user_id}
+            }
+            # For individual accounts outside US/EU, business_type is individual
+            if clean_country in ["IN", "BR", "MX"]:
+                account_params["business_type"] = "individual"
+
+            account = stripe.Account.create(**account_params)
             account_id = account.id
             cursor.execute("UPDATE users SET stripe_account_id = %s WHERE user_id = %s", (account_id, user_id))
             conn.commit()
