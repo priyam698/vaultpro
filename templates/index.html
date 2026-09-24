@@ -2718,6 +2718,26 @@
         }
       }
     }
+    // Unpacks any uploaded ZIP archive into individual File objects for Escrow
+async function expandZipFile(zipFile) {
+  try {
+    const jszip = new JSZip();
+    const zipData = await jszip.loadAsync(zipFile);
+    const unpacked = [];
+    for (const [relPath, zipEntry] of Object.entries(zipData.files)) {
+      if (zipEntry.dir || relPath.includes('__MACOSX') || relPath.split('/').pop().startsWith('.')) continue;
+      const blob = await zipEntry.async("blob");
+      const cleanName = relPath.split('/').pop();
+      if (!cleanName) continue;
+      const extractedFile = new File([blob], cleanName, { type: blob.type || "application/octet-stream" });
+      unpacked.push(extractedFile);
+    }
+    return unpacked.length > 0 ? unpacked : [zipFile];
+  } catch (e) {
+    console.warn("Could not unpack zip:", e);
+    return [zipFile];
+  }
+}
 
     async function initiateTransfer() {
       if (!selectedFiles.length) {
