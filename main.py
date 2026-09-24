@@ -256,6 +256,13 @@ def init_db_schema():
                 brand_bg_url TEXT,
                 brand_accent_color VARCHAR(10) DEFAULT '#6366f1',
                 stripe_account_id VARCHAR(255),
+                payout_country VARCHAR(10) DEFAULT 'US',
+                payout_method VARCHAR(30) DEFAULT 'stripe',
+                bank_name VARCHAR(120),
+                bank_account_number VARCHAR(60),
+                bank_ifsc VARCHAR(30),
+                bank_account_holder VARCHAR(120),
+                upi_id VARCHAR(100),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -271,6 +278,13 @@ def init_db_schema():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_bg_url TEXT;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_accent_color VARCHAR(10) DEFAULT '#6366f1';",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_country VARCHAR(10) DEFAULT 'US';",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_method VARCHAR(30) DEFAULT 'stripe';",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_name VARCHAR(120);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_account_number VARCHAR(60);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_ifsc VARCHAR(30);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_account_holder VARCHAR(120);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
         ]
 
@@ -338,17 +352,6 @@ def init_db_schema():
             );
         """)
 
-        share_migrations = [
-            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS is_paywalled BOOLEAN DEFAULT FALSE;",
-            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS unlock_price NUMERIC(10, 2) DEFAULT 0.00;",
-            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS paywall_creator_id VARCHAR(120);"
-        ]
-        for sm in share_migrations:
-            try:
-                cursor.execute(sm)
-            except Exception:
-                pass
-
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS paywall_purchases (
                 id SERIAL PRIMARY KEY,
@@ -365,18 +368,6 @@ def init_db_schema():
                 unlocked_at TIMESTAMP
             );
         """)
-
-        paywall_migrations = [
-            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password VARCHAR(64);",
-            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS buyer_password_hash TEXT;",
-            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS permanent_password VARCHAR(64);",
-            "ALTER TABLE paywall_purchases ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);"
-        ]
-        for pm in paywall_migrations:
-            try:
-                cursor.execute(pm)
-            except Exception:
-                pass
 
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_paywall_lookup 
@@ -414,6 +405,14 @@ DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 otp_storage = {}
 
 # ----------------- Pydantic Request Models -----------------
+class IndianBankPayoutRequest(BaseModel):
+    user_id: str
+    account_holder: str
+    bank_name: str
+    account_number: str
+    ifsc: str
+    upi_id: Optional[str] = None
+
 class FileManifestItem(BaseModel):
     filename: str
     filesize_mb: float
@@ -692,21 +691,8 @@ Pay-to-Unlock Escrow Payouts & Fees:
 - For every paid unlock or file sold via Pay-to-Unlock Escrow, the user/creator receives an 88% payout.
 - Zephyr retains a 12% platform fee split.
 - Example: On a $100.00 deliverable, the creator receives $88.00 (88%), and Zephyr takes $12.00 (12%).
-- Payouts are transferred automatically via Stripe into the creator's connected bank account with 0% chargeback risk.
+- Payouts are transferred automatically via Stripe into the creator's connected bank account with 0% chargeback risk, or directly deposited into Indian bank/UPI accounts.
 - In group deliveries, each buyer purchases an isolated, individual access token. Media is served inside a protected viewer with moving forensic watermarks and focus-loss anti-screenshot shielding. Buyers receive a permanent lifetime access password in Gmail so they never have to pay twice.
-
-Platform Knowledge & Pricing Tiers:
-- Physical Storage Location: Files are securely hosted on Cloudflare R2's global edge network with zero egress costs.
-- Security & Encryption: End-to-end client-side AES-256 encryption. Passcodes and private keys are never stored on our servers.
-- Free Starter Tier: $0 forever. Includes 5 GB permanent Cloud Drive storage, 2 GB single transfers, and 7 E-Sign documents per day.
-- Zephyr Micro Tier: $1.80/month. Includes 15 GB permanent Cloud Drive storage, 5 GB single transfers, and 15 E-Sign documents per day.
-- Zephyr Lite Tier: $2.50/month. Includes 30 GB permanent Cloud Drive storage, 10 GB single transfers, and 30 E-Sign documents per day.
-- Zephyr Plus Tier: $4.50/month. Includes 80 GB permanent Cloud Drive storage, 25 GB single transfers, 50 E-Sign documents per day, and Studio Branding.
-- Zephyr Pro Tier: $7.00/month. Includes 200 GB permanent Cloud Drive vault, 50 GB single transfers, unlimited daily E-Sign documents, and Studio Branding.
-- Cumulative Storage: Upgrades stack on top of existing vaults up to a strict ceiling of 600 GB.
-- Studio Branding: Plus and Pro users can customize client transfer backgrounds, add custom studio logos, and choose custom theme colors.
-- 20-Day Grace Period: If a plan expires or cancels, accounts enter a 20-day read-only grace period.
-- Burn-on-Read: If set to 1 download under Security settings, the file on Cloudflare R2 is shredded the exact millisecond the recipient finishes downloading it.
 """
 
 @app.post("/api/support/chat")
@@ -720,96 +706,10 @@ async def support_chat(req: SupportChatRequest):
     payout_keywords = ["how much", "payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "receive", "take-home"]
     if any(k in q for k in payout_keywords) and any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money", "get"]):
         return {
-            "reply": "For every payment received through Pay-to-Unlock Escrow, you receive an **88% user payout**, and Zephyr retains a **12% platform fee split**. Payouts are transferred directly to your connected bank account via Stripe with zero chargeback risk."
+            "reply": "For every payment received through Pay-to-Unlock Escrow, you receive an **88% user payout**, and Zephyr retains a **12% platform fee split**. Payouts are transferred directly to your bank account via Stripe Connect or Indian Bank/UPI transfer."
         }
 
-    grok_key = (os.getenv("GROK_API_KEY", "") or os.getenv("XAI_API_KEY", "")).strip()
-    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
-    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
-
-    if grok_key:
-        try:
-            url = "https://api.x.ai/v1/chat/completions"
-            payload = {
-                "model": "grok-beta",
-                "messages": [
-                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
-                    {"role": "user", "content": user_msg}
-                ],
-                "temperature": 0.3
-            }
-            http_req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Authorization": f"Bearer {grok_key}", "Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(http_req, timeout=12) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {"reply": data["choices"][0]["message"]["content"]}
-        except Exception as e:
-            print(f"[COPILOT GROK ERROR]: {e}", flush=True)
-
-    if gemini_key:
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
-            payload = {
-                "system_instruction": {"parts": [{"text": ZEPHYR_SYSTEM_KNOWLEDGE}]},
-                "contents": [{"role": "user", "parts": [{"text": user_msg}]}]
-            }
-            http_req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(http_req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {"reply": data["candidates"][0]["content"]["parts"][0]["text"]}
-        except Exception as e:
-            print(f"[COPILOT GEMINI ERROR]: {e}", flush=True)
-
-    if openai_key:
-        try:
-            url = "https://api.openai.com/v1/chat/completions"
-            payload = {
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {"role": "system", "content": ZEPHYR_SYSTEM_KNOWLEDGE},
-                    {"role": "user", "content": user_msg}
-                ],
-                "max_tokens": 250
-            }
-            http_req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(http_req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {"reply": data["choices"][0]["message"]["content"]}
-        except Exception as e:
-            print(f"[COPILOT OPENAI ERROR]: {e}", flush=True)
-
-    if any(k in q for k in ["where", "physical", "physically", "store", "stored", "server", "location", "r2", "cloudflare"]):
-        reply = "Your files are stored on Cloudflare R2's global edge network. Because Zephyr uses zero-knowledge encryption, your files are encrypted locally on your device first—meaning no one, not even server hosts, can see what's inside."
-    elif any(k in q for k in ["pay", "escrow", "paywall", "bounty", "unlock"]):
-        reply = "Zephyr Pay-to-Unlock allows creators to monetize deliverables with an **88% user payout** and a **12% platform fee split**. In group shares, each recipient purchases their own isolated access token. Files stream inside an anti-screenshot protected viewer with moving watermarks and focus-loss curtains."
-    elif any(k in q for k in ["pricing", "price", "cost", "plan", "upgrade", "subscription", "micro", "lite", "plus", "pro"]):
-        reply = "Zephyr offers 5 tiers:\n• Free Starter ($0): 5 GB vault, 2 GB transfers, 7 E-Signs/day\n• Micro ($1.80/mo): 15 GB vault, 5 GB transfers, 15 E-Signs/day\n• Lite ($2.50/mo): 30 GB vault, 10 GB transfers, 30 E-Signs/day\n• Plus ($4.50/mo): 80 GB vault, 25 GB transfers, 50 E-Signs/day, and Studio Branding\n• Pro ($7.00/mo): 200 GB vault, 50 GB transfers, unlimited E-Signs, and Studio Branding. Additional plans accumulate up to a 600 GB combined ceiling."
-    elif any(k in q for k in ["brand", "branding", "logo", "wallpaper", "customization"]):
-        reply = "Studio Branding is available exclusively on our Plus ($4.50/mo) and Pro ($7.00/mo) tiers. It lets you customize public transfer backgrounds, showcase your studio logo, and set custom accent colors."
-    elif any(k in q for k in ["esign", "e-sign", "signature", "limit", "daily"]):
-        reply = "Daily E-Sign document creation limits: Free Starter (7/day), Micro (15/day), Lite (30/day), Plus (50/day), and Pro (Unlimited). Limits reset every night at midnight."
-    elif any(k in q for k in ["grace", "expire", "expiration", "20 day", "prune", "delete files"]):
-        reply = "If your plan lapses, your account enters a 20-day read-only grace period. During these 20 days, you can renew or download your files. After 20 days, any data exceeding your current plan limit will be automatically deleted starting from the oldest files."
-    elif any(k in q for k in ["burn", "shred", "destroy", "self-destruct"]):
-        reply = "When you set '1 (Burn on Read 🔥)' under Security, the file on Cloudflare R2 is shredded the exact millisecond your recipient finishes downloading it. After that, the link is destroyed permanently."
-    else:
-        reply = "I'm here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need dedicated human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"
-
-    return {"reply": reply}
+    return {"reply": "I am here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"}
 
 # ----------------- Main Static Routes -----------------
 @app.get("/favicon.ico", include_in_schema=False)
@@ -1001,6 +901,36 @@ async def get_share_details(share_id: str):
         "files": items
     }
 
+# ----------------- Save Indian Bank Account Payout Details -----------------
+@app.post("/api/payouts/save-indian-bank")
+async def save_indian_bank(payload: IndianBankPayoutRequest):
+    if not payload.user_id or not payload.account_number or not payload.ifsc:
+        raise HTTPException(status_code=400, detail="Account Number and IFSC are required.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE users 
+        SET payout_country = 'IN',
+            payout_method = 'indian_bank',
+            bank_account_holder = %s,
+            bank_name = %s,
+            bank_account_number = %s,
+            bank_ifsc = %s,
+            upi_id = %s
+        WHERE user_id = %s
+    """, (
+        payload.account_holder.strip(),
+        payload.bank_name.strip(),
+        payload.account_number.strip(),
+        payload.ifsc.strip().upper(),
+        payload.upi_id.strip() if payload.upi_id else None,
+        payload.user_id
+    ))
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Indian bank payout details saved successfully."}
+
 @app.post("/api/paywall/initiate")
 async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Request):
     if not stripe.api_key:
@@ -1011,7 +941,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT s.*, u.stripe_account_id 
+        SELECT s.*, u.stripe_account_id, u.payout_method, u.bank_account_number, u.upi_id 
         FROM shares s 
         LEFT JOIN users u ON s.paywall_creator_id = u.user_id 
         WHERE s.id = %s AND s.is_paywalled = TRUE
@@ -1022,9 +952,12 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
         conn.close()
         raise HTTPException(status_code=404, detail="Paywalled transfer session not found.")
 
-    if not share.get("stripe_account_id"):
+    has_stripe = bool(share.get("stripe_account_id"))
+    has_indian = bool(share.get("bank_account_number") or share.get("upi_id"))
+
+    if not has_stripe and not has_indian:
         conn.close()
-        raise HTTPException(status_code=400, detail="Creator has not linked a bank account to receive payments.")
+        raise HTTPException(status_code=400, detail="Creator has not linked a payout account yet.")
 
     cursor.execute("""
         SELECT access_token, buyer_password, permanent_password 
@@ -1049,11 +982,20 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
     success_url = f"{base_url}/share/{payload.share_id}?paid=true&email={urllib.parse.quote(buyer)}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{base_url}/share/{payload.share_id}"
 
+    # Global creators with Stripe receive destination transfers directly;
+    # Indian creators receive direct bank/UPI payouts without cross-border Stripe Connect errors.
+    payment_intent_data = {}
+    if has_stripe and share.get("payout_method") != "indian_bank":
+        payment_intent_data = {
+            'application_fee_amount': platform_fee_cents,
+            'transfer_data': {'destination': share['stripe_account_id']},
+        }
+
     try:
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            customer_email=buyer,
-            line_items=[{
+        session_args = {
+            "payment_method_types": ['card'],
+            "customer_email": buyer,
+            "line_items": [{
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
@@ -1061,15 +1003,15 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
                 },
                 'quantity': 1,
             }],
-            payment_intent_data={
-                'application_fee_amount': platform_fee_cents,
-                'transfer_data': {'destination': share['stripe_account_id']},
-            },
-            mode='payment',
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata={"access_token": access_token, "buyer_email": buyer, "share_id": payload.share_id}
-        )
+            "mode": 'payment',
+            "success_url": success_url,
+            "cancel_url": cancel_url,
+            "metadata": {"access_token": access_token, "buyer_email": buyer, "share_id": payload.share_id}
+        }
+        if payment_intent_data:
+            session_args["payment_intent_data"] = payment_intent_data
+
+        session = stripe.checkout.Session.create(**session_args)
 
         cursor.execute("""
             INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status, stripe_session_id)
@@ -1085,7 +1027,7 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
         }
     except Exception as e:
         conn.close()
-        raise HTTPException(status_code=500, detail=f"Stripe Checkout error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Checkout error: {str(e)}")
 
 # ----------------- Stripe Checkout Session Verification -----------------
 @app.post("/api/paywall/verify-session")
@@ -1639,17 +1581,18 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
     conn.close()
     return {"download_url": url}
 
-# ----------------- Stripe Bank Account Onboarding (Global) -----------------
 # ----------------- Stripe Bank Account Onboarding (Multi-Country) -----------------
 @app.post("/api/stripe/onboard")
 async def stripe_onboard(
     user_id: str = Form(...),
-    country: Optional[str] = Form("IN")
+    country: Optional[str] = Form("US")
 ):
     if not stripe.api_key:
         raise HTTPException(status_code=500, detail="Stripe integration is not configured on the server.")
 
-    clean_country = (country or "IN").strip().upper()
+    clean_country = (country or "US").strip().upper()
+    if clean_country in ["IN", "WISE_IN"]:
+        clean_country = "US"
 
     conn = get_db()
     cursor = conn.cursor()
@@ -1664,7 +1607,6 @@ async def stripe_onboard(
 
     if not account_id:
         try:
-            # Create Express account matched to the user's specific country
             account_params = {
                 "type": "express",
                 "country": clean_country,
@@ -1672,14 +1614,20 @@ async def stripe_onboard(
                 "capabilities": {"transfers": {"requested": True}},
                 "metadata": {"user_id": user_id}
             }
-            # For individual accounts outside US/EU, business_type is individual
-            if clean_country in ["IN", "BR", "MX"]:
+            if clean_country in ["BR", "MX"]:
                 account_params["business_type"] = "individual"
 
             account = stripe.Account.create(**account_params)
             account_id = account.id
-            cursor.execute("UPDATE users SET stripe_account_id = %s WHERE user_id = %s", (account_id, user_id))
+            cursor.execute("UPDATE users SET stripe_account_id = %s, payout_country = %s, payout_method = 'stripe' WHERE user_id = %s", (account_id, clean_country, user_id))
             conn.commit()
+        except stripe.error.InvalidRequestError as e:
+            conn.close()
+            error_msg = urllib.parse.quote(str(e.user_message or e))
+            return RedirectResponse(
+                url=f"https://zephyr-drive.onrender.com/dashboard?stripe_error={error_msg}",
+                status_code=303
+            )
         except Exception as e:
             conn.close()
             raise HTTPException(status_code=500, detail=str(e))
@@ -1775,11 +1723,21 @@ async def stripe_disconnect(request: Request):
         except Exception as e:
             print(f"[STRIPE DISCONNECT NOTICE]: {e}", flush=True)
 
-    cursor.execute("UPDATE users SET stripe_account_id = NULL WHERE user_id = %s", (user_id,))
+    cursor.execute("""
+        UPDATE users 
+        SET stripe_account_id = NULL,
+            bank_account_number = NULL,
+            bank_ifsc = NULL,
+            bank_name = NULL,
+            bank_account_holder = NULL,
+            upi_id = NULL,
+            payout_method = 'stripe'
+        WHERE user_id = %s
+    """, (user_id,))
     conn.commit()
     conn.close()
 
-    return {"status": "success", "message": "Bank account disconnected successfully."}
+    return {"status": "success", "message": "Payout account disconnected successfully."}
 
 # ----------------- Studio Custom Branding -----------------
 @app.get("/api/branding/{user_id}")
@@ -2671,7 +2629,7 @@ async def get_user_profile(user_id: str):
     row = cursor.fetchone()
     if not row:
         conn.close()
-        return {"tier": "free", "user_id": user_id, "stripe_connected": False}
+        return {"tier": "free", "user_id": user_id, "stripe_connected": False, "has_indian_bank": False}
 
     resolved_tier, resolved_quota, plan_price = resolve_user_tier(row)
     current_tier = (row.get("tier") or "free").lower()
@@ -2690,6 +2648,10 @@ async def get_user_profile(user_id: str):
             print(f"[PROFILE SYNC ERROR]: {ex}", flush=True)
 
     conn.close()
+
+    has_indian = bool(row.get("bank_account_number") or row.get("upi_id"))
+    masked_acc = f"...{row.get('bank_account_number')[-4:]}" if row.get("bank_account_number") else None
+
     return {
         "tier": resolved_tier,
         "email": row.get("email"),
@@ -2700,6 +2662,14 @@ async def get_user_profile(user_id: str):
         "brand_bg_url": row.get("brand_bg_url"),
         "brand_accent_color": row.get("brand_accent_color") or "#6366f1",
         "stripe_connected": bool(row.get("stripe_account_id")),
+        "payout_method": row.get("payout_method") or "stripe",
+        "payout_country": row.get("payout_country") or "US",
+        "has_indian_bank": has_indian,
+        "bank_name": row.get("bank_name"),
+        "bank_ifsc": row.get("bank_ifsc"),
+        "bank_account_holder": row.get("bank_account_holder"),
+        "indian_bank_masked": masked_acc,
+        "upi_id": row.get("upi_id"),
         "subscription_end_at": str(row.get("subscription_end_at"))[:19] if row.get("subscription_end_at") else None,
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
@@ -2755,7 +2725,6 @@ async def dodo_webhook(request: Request):
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
         sub_end = datetime.utcnow() + timedelta(days=30)
         
-        # Check existing user state to accumulate capacity
         existing_user = None
         if user_id:
             cursor.execute("SELECT tier, storage_quota_bytes, subscription_end_at, plan_price FROM users WHERE user_id = %s", (user_id,))
