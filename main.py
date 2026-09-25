@@ -93,9 +93,8 @@ PLAN_CONFIG = {
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
-MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
+MAX_VAULT_BYTES = 600 * 1024**3
 
-# ----------------- Timezone-Safe Subscription Helper -----------------
 def is_sub_active(sub_end) -> bool:
     if not sub_end:
         return False
@@ -526,7 +525,9 @@ async def send_verification_otp(req: SendOtpRequest):
         "locked_until": 0
     }
 
-    print(f"[OTP GENERATED] Verification code for {target_email} is {code}", flush=True)
+    print(f"==========================================", flush=True)
+    print(f"[ZEPHYR OTP FOR {target_email}]: {code}", flush=True)
+    print(f"==========================================", flush=True)
 
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
@@ -578,13 +579,14 @@ async def send_verification_otp(req: SendOtpRequest):
 @app.post("/api/verify-otp")
 async def verify_otp(req: VerifyOtpRequest):
     email = req.email.lower().strip()
-    now = time.time()
-    entry = otp_storage.get(email)
-
-    # Master test code allows testing without email delays
+    
+    # Master debug bypass: 123456 always verifies instantly during testing
     if req.code.strip() == "123456":
         otp_storage.pop(email, None)
         return {"status": "verified", "email": email}
+
+    now = time.time()
+    entry = otp_storage.get(email)
 
     if not entry:
         raise HTTPException(status_code=400, detail="No active verification code found for this email.")
@@ -1100,33 +1102,13 @@ async def verify_stripe_checkout_session(
         ORDER BY p.id DESC LIMIT 1
     """, (req_share_id, req_session_id, req_token, search_email, search_email))
     record = cursor.fetchone()
+    conn.close()
 
     if not record:
-        conn.close()
         raise HTTPException(status_code=400, detail="Payment verification pending or failed.")
 
     active_pwd = record.get("buyer_password") or record.get("permanent_password")
     target_buyer_email = (record.get("buyer_email") or search_email).strip().lower()
-
-    # Automatically generate permanent password & dispatch email immediately
-    if not active_pwd:
-        active_pwd = generate_permanent_password()
-        pwd_hash = hashlib.sha256(active_pwd.encode()).hexdigest()
-        cursor.execute("""
-            UPDATE paywall_purchases 
-            SET buyer_password = %s, 
-                permanent_password = %s, 
-                buyer_password_hash = %s,
-                buyer_email = COALESCE(NULLIF(%s, ''), buyer_email)
-            WHERE id = %s
-        """, (active_pwd, active_pwd, pwd_hash, target_buyer_email, record["id"]))
-        conn.commit()
-
-        if target_buyer_email:
-            send_buyer_password_email(target_buyer_email, record["filename"], active_pwd, req_share_id)
-            print(f"[AUTO PASSWORD GENERATED & SENT]: Password '{active_pwd}' emailed to '{target_buyer_email}'", flush=True)
-
-    conn.close()
 
     return {
         "verified": True,
@@ -1134,8 +1116,7 @@ async def verify_stripe_checkout_session(
         "email": target_buyer_email,
         "buyer_email": target_buyer_email,
         "token": record.get("access_token", ""),
-        "has_password": True,
-        "password": active_pwd
+        "has_password": bool(active_pwd)
     }
 
 # ----------------- Confirm Email & Send Password Flow -----------------
@@ -1198,7 +1179,7 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
     print(f"[CONFIRM & SEND]: Permanent password '{pwd}' dispatched to '{clean_email}' (Success={sent})", flush=True)
 
-    return {"status": "success", "email": clean_email, "sent": sent}
+    return {"status": "success", "email": clean_email, "sent": sent, "password": pwd}
 
 # ----------------- Unlock With Permanent Password -----------------
 @app.post("/api/paywall/unlock-password")
@@ -2828,3 +2809,75 @@ async def dodo_webhook(request: Request):
 
     conn.close()
     return {"status": "success", "event": event_type}
+
+# ----------------- Lemon Squeezy Fallback Webhook -----------------
+@app.post("/api/webhook/lemonsqueezy")
+async def lemon_webhook(request: Request):
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    event_name = payload.get("meta", {}).get("event_name", "")
+    custom_data = payload.get("meta", {}).get("custom_data") or {}
+    user_id = custom_data.get("user_id") if isinstance(custom_data, dict) else None
+
+    attributes = payload.get("data", {}).get("attributes") or {}
+    user_email = attributes.get("user_email")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if not user_id and user_email:
+        try:
+            cursor.execute("SELECT id FROM auth.users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
+            auth_row = cursor.fetchone()
+            if auth_row and auth_row.get("id"):
+                user_id = str(auth_row["id"])
+        except Exception as e:
+            print(f"[AUTH LOOKUP NOTICE]: {e}", flush=True)
+
+    if event_name in ["order_created", "subscription_created", "subscription_resumed", "subscription_payment_success"]:
+        sub_end = datetime.utcnow() + timedelta(days=30)
+        if user_id:
+            cursor.execute("""
+                INSERT INTO users (user_id, email, tier, storage_quota_bytes, plan_price, subscription_end_at, grace_period_end_at)
+                VALUES (%s, %s, 'pro', 214748364800, 7.00, %s, NULL)
+                ON CONFLICT (user_id) DO UPDATE SET 
+                    tier = 'pro', 
+                    storage_quota_bytes = 214748364800, 
+                    plan_price = 7.00, 
+                    subscription_end_at = EXCLUDED.subscription_end_at, 
+                    grace_period_end_at = NULL, 
+                    email = COALESCE(EXCLUDED.email, users.email)
+            """, (user_id, user_email, sub_end))
+        elif user_email:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'pro', storage_quota_bytes = 214748364800, plan_price = 7.00, subscription_end_at = %s, grace_period_end_at = NULL 
+                WHERE LOWER(email) = LOWER(%s)
+            """, (sub_end, user_email.strip(),))
+        conn.commit()
+
+    elif event_name in ["subscription_cancelled", "subscription_expired", "subscription_paused"]:
+        grace_end = datetime.utcnow() + timedelta(days=20)
+        if user_id:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'free', storage_quota_bytes = 5368709120, plan_price = 0.00, grace_period_end_at = %s 
+                WHERE user_id = %s
+            """, (grace_end, user_id,))
+        elif user_email:
+            cursor.execute("""
+                UPDATE users 
+                SET tier = 'free', storage_quota_bytes = 5368709120, plan_price = 0.00, grace_period_end_at = %s 
+                WHERE LOWER(email) = LOWER(%s)
+            """, (grace_end, user_email.strip()))
+        conn.commit()
+
+    conn.close()
+    return {"status": "received"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
