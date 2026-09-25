@@ -1166,9 +1166,17 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn.commit()
     conn.close()
 
-    send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
-    return {"status": "success", "email": clean_email}
+    # --- THE FIX IS HERE ---
+    # We now check if the email actually sent successfully
+    email_sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
+    
+    if not email_sent:
+        raise HTTPException(
+            status_code=500, 
+            detail="Payment verified, but we failed to dispatch the password email. Please try resending."
+        )
 
+    return {"status": "success", "email": clean_email}
 # ----------------- Unlock With Permanent Password -----------------
 @app.post("/api/paywall/unlock-password")
 @app.post("/api/paywall/unlock-with-password")
