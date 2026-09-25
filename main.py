@@ -93,8 +93,9 @@ PLAN_CONFIG = {
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
-MAX_VAULT_BYTES = 600 * 1024**3
+MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
 
+# ----------------- Timezone-Safe Subscription Helper -----------------
 def is_sub_active(sub_end) -> bool:
     if not sub_end:
         return False
@@ -145,8 +146,6 @@ def generate_permanent_password() -> str:
 def send_buyer_password_email(buyer_email: str, filename: str, password: str, share_id: str) -> bool:
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     system_sender = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
-
-    print(f"[BREVO DISPATCH ATTEMPT]: Sending permanent password '{password}' to '{buyer_email}' for file '{filename}'", flush=True)
 
     if not brevo_api_key:
         print("[BREVO EMAIL ERROR]: BREVO_API_KEY missing from environment.", flush=True)
@@ -221,7 +220,7 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
 
     try:
         with urllib.request.urlopen(http_req, timeout=15) as resp:
-            print(f"[BREVO EMAIL SUCCESS] Sent permanent password '{password}' to {buyer_email} (Status {resp.status})", flush=True)
+            print(f"[BREVO EMAIL SUCCESS] Sent permanent password to {buyer_email} (Status {resp.status})", flush=True)
             return True
     except urllib.error.HTTPError as he:
         err_msg = he.read().decode("utf-8", errors="ignore")
@@ -525,16 +524,14 @@ async def send_verification_otp(req: SendOtpRequest):
         "locked_until": 0
     }
 
-    print(f"==========================================", flush=True)
-    print(f"[ZEPHYR OTP FOR {target_email}]: {code}", flush=True)
-    print(f"==========================================", flush=True)
-
     brevo_api_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = os.getenv("SENDER_EMAIL", "priyamrana069@gmail.com").strip()
 
     if not brevo_api_key:
-        print("[NOTICE]: BREVO_API_KEY not set. Check server logs for OTP code.", flush=True)
-        return {"message": "Verification code dispatched successfully (Logged in console)."}
+        raise HTTPException(
+            status_code=500, 
+            detail="BREVO_API_KEY missing on server. Add BREVO_API_KEY in Render Environment."
+        )
 
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;">
@@ -572,19 +569,13 @@ async def send_verification_otp(req: SendOtpRequest):
             if response.status not in (200, 201, 202):
                 raise Exception(f"Brevo API returned status {response.status}")
     except Exception as e:
-        print(f"[BREVO OTP WARNING]: Email delivery failed: {e}. Check server logs for code.", flush=True)
+        raise HTTPException(status_code=500, detail=f"Failed to send email via Brevo API: {str(e)}")
 
     return {"message": "Verification code dispatched successfully."}
 
 @app.post("/api/verify-otp")
 async def verify_otp(req: VerifyOtpRequest):
     email = req.email.lower().strip()
-    
-    # Master debug bypass: 123456 always verifies instantly during testing
-    if req.code.strip() == "123456":
-        otp_storage.pop(email, None)
-        return {"status": "verified", "email": email}
-
     now = time.time()
     entry = otp_storage.get(email)
 
@@ -991,6 +982,8 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
     success_url = f"{base_url}/share/{payload.share_id}?paid=true&email={urllib.parse.quote(buyer)}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{base_url}/share/{payload.share_id}"
 
+    # Global creators with Stripe receive destination transfers directly;
+    # Indian creators receive direct bank/UPI payouts without cross-border Stripe Connect errors.
     payment_intent_data = {}
     if has_stripe and share.get("payout_method") != "indian_bank":
         payment_intent_data = {
@@ -1066,7 +1059,6 @@ async def verify_stripe_checkout_session(
     conn = get_db()
     cursor = conn.cursor()
 
-    cust_email = ""
     if req_session_id and stripe.api_key:
         try:
             stripe_session = stripe.checkout.Session.retrieve(req_session_id)
@@ -1090,8 +1082,6 @@ async def verify_stripe_checkout_session(
         except Exception as e:
             print(f"[SESSION RETRIEVE NOTICE]: {e}", flush=True)
 
-    search_email = (cust_email or req_email or "").strip().lower()
-
     cursor.execute("""
         SELECT p.id, p.buyer_email, p.buyer_password, p.permanent_password, p.payment_status, p.access_token, s.filename 
         FROM paywall_purchases p
@@ -1100,7 +1090,7 @@ async def verify_stripe_checkout_session(
           AND (p.stripe_session_id = %s OR p.access_token = %s OR (LOWER(p.buyer_email) = %s AND %s != ''))
           AND p.payment_status = 'paid'
         ORDER BY p.id DESC LIMIT 1
-    """, (req_share_id, req_session_id, req_token, search_email, search_email))
+    """, (req_share_id, req_session_id, req_token, (req_email or "").strip().lower(), (req_email or "").strip().lower()))
     record = cursor.fetchone()
     conn.close()
 
@@ -1108,13 +1098,13 @@ async def verify_stripe_checkout_session(
         raise HTTPException(status_code=400, detail="Payment verification pending or failed.")
 
     active_pwd = record.get("buyer_password") or record.get("permanent_password")
-    target_buyer_email = (record.get("buyer_email") or search_email).strip().lower()
+    buyer_email = record["buyer_email"]
 
     return {
         "verified": True,
         "status": "paid",
-        "email": target_buyer_email,
-        "buyer_email": target_buyer_email,
+        "email": buyer_email,
+        "buyer_email": buyer_email,
         "token": record.get("access_token", ""),
         "has_password": bool(active_pwd)
     }
@@ -1149,7 +1139,7 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
         WHERE p.share_id = %s 
-          AND (p.stripe_session_id = %s OR p.access_token = %s OR LOWER(p.buyer_email) = %s OR p.payment_status = 'paid' OR p.payment_status = 'pending')
+          AND (p.stripe_session_id = %s OR p.access_token = %s OR LOWER(p.buyer_email) = %s OR p.payment_status = 'pending')
         ORDER BY p.id DESC LIMIT 1
     """, (payload.share_id, payload.session_id, payload.token, clean_email))
     purchase = cursor.fetchone()
@@ -1176,10 +1166,8 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn.commit()
     conn.close()
 
-    sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
-    print(f"[CONFIRM & SEND]: Permanent password '{pwd}' dispatched to '{clean_email}' (Success={sent})", flush=True)
-
-    return {"status": "success", "email": clean_email, "sent": sent, "password": pwd}
+    send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
+    return {"status": "success", "email": clean_email}
 
 # ----------------- Unlock With Permanent Password -----------------
 @app.post("/api/paywall/unlock-password")
@@ -1207,9 +1195,7 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
     matched = False
     
     stored_plain = (row.get("buyer_password") or row.get("permanent_password") or "").strip()
-    if clean_pwd == "123456":
-        matched = True
-    elif stored_plain and stored_plain.upper() == clean_pwd.upper():
+    if stored_plain and stored_plain.upper() == clean_pwd.upper():
         matched = True
     elif row.get("buyer_password_hash") and row["buyer_password_hash"] == pwd_hash:
         matched = True
@@ -1236,8 +1222,7 @@ async def resend_paywall_password(req: ResendPasswordRequest):
         SELECT p.id, p.buyer_password, p.permanent_password, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s 
-          AND (LOWER(p.buyer_email) = %s OR p.payment_status = 'paid')
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
         ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
@@ -1252,17 +1237,14 @@ async def resend_paywall_password(req: ResendPasswordRequest):
         cursor.execute("""
             UPDATE paywall_purchases 
             SET buyer_password = %s, 
-                permanent_password = %s, 
-                buyer_password_hash = %s,
-                buyer_email = COALESCE(NULLIF(%s, ''), buyer_email)
+                permanent_password = %s,
+                buyer_password_hash = %s
             WHERE id = %s
-        """, (pwd, pwd, hashlib.sha256(pwd.encode()).hexdigest(), clean_email, row["id"]))
+        """, (pwd, pwd, hashlib.sha256(pwd.encode()).hexdigest(), row["id"]))
         conn.commit()
     conn.close()
 
     sent = send_buyer_password_email(clean_email, row["filename"], pwd, req.share_id)
-    print(f"[RESEND PASSWORD]: Password '{pwd}' dispatched to '{clean_email}' (Sent={sent})", flush=True)
-
     if not sent:
         raise HTTPException(status_code=500, detail="Could not send email via Brevo. Check server logs.")
 
@@ -1324,9 +1306,7 @@ async def paywall_login(req: LoginPaywallRequest):
     
     matched = False
     stored_plain = (row.get("buyer_password") or row.get("permanent_password") or "").strip()
-    if req.password.strip() == "123456":
-        matched = True
-    elif stored_plain and stored_plain.upper() == req.password.strip().upper():
+    if stored_plain and stored_plain.upper() == req.password.strip().upper():
         matched = True
     elif row.get("buyer_password_hash") and row["buyer_password_hash"] == pwd_hash:
         matched = True
