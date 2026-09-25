@@ -272,33 +272,41 @@
             <input id="checkoutEmailInput" type="email" placeholder="you@company.com" class="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition">
           </div>
           <div id="checkoutError" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
-          <button id="checkoutBtn" onclick="handlePaywallCheckout()" class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 via-teal-600 to-cyan-600 text-white font-black text-sm py-4 rounded-xl shadow-lg transition">
+          <button id="checkoutBtn" onclick="handlePaywallCheckout()" class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 via-teal-600 to-cyan-600 text-white font-black text-sm py-4 rounded-xl shadow-lg transition cursor-pointer">
             Pay ${{ "%.2f"|format(unlock_price) }} & Continue
           </button>
         </div>
 
         <!-- STATE 2: PAID - EXPLICITLY DISPATCH PASSCODE -->
         <div id="dispatchSection" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-lg">
-          <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
-            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-            Payment Verified
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Payment Verified
+            </div>
+            <span class="text-[10px] font-mono text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded border border-indigo-400/30">Step 1 of 2</span>
           </div>
           <p class="text-xs opacity-80 leading-relaxed">
-            Please confirm your email address and click <strong>Dispatch Passcode</strong>. We will send your permanent access code to this inbox.
+            Please confirm your email address and click <strong>Dispatch Passcode</strong>. We will generate and send your permanent access code to this inbox.
           </p>
           <div>
+            <label class="block text-xs font-semibold opacity-80 mb-1.5">Recipient Email</label>
             <input type="email" id="dispatchEmailInput" placeholder="yourname@gmail.com" class="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition">
           </div>
-          <button id="dispatchBtn" onclick="submitDispatchPasscode()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-md transition">
+          <div id="dispatchError" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
+          <button id="dispatchBtn" onclick="submitDispatchPasscode()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-md transition cursor-pointer">
             Dispatch Passcode
           </button>
         </div>
 
         <!-- STATE 3: PASSCODE SENT - ENTER PASSCODE -->
         <div id="unlockSection" class="hidden space-y-3 p-5 rounded-2xl bg-[#06241b] border border-emerald-500/40 text-left shadow-lg">
-          <div class="flex items-center gap-2 text-emerald-400 font-black text-xs tracking-wider">
-            <span>✓</span>
-            <span>PASSCODE DISPATCHED</span>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-emerald-400 font-black text-xs tracking-wider">
+              <span>✓</span>
+              <span>PASSCODE DISPATCHED</span>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">Step 2 of 2</span>
           </div>
           <p class="text-xs text-slate-300 leading-relaxed">
             Your permanent passcode was successfully sent to <strong id="dispatchedEmailDisplay" class="text-emerald-300 font-mono"></strong>. Enter it below to unlock the files.
@@ -307,10 +315,10 @@
             <input id="unlockPasscodeInput" type="text" placeholder="e.g. ZP-7492A1" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()" class="w-full bg-slate-900/40 border border-emerald-400/50 rounded-xl px-4 py-3 text-xs focus:outline-none transition font-mono uppercase tracking-widest text-emerald-300 font-bold">
           </div>
           <div class="text-right">
-            <button onclick="resendPasscode()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend Passcode</button>
+            <button id="resendBtn" onclick="resendPasscode()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend Passcode</button>
           </div>
           <div id="unlockError" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
-          <button id="unlockBtn" onclick="handleUnlockWithPassword()" class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white font-black text-sm py-4 rounded-xl shadow-lg transition">
+          <button id="unlockBtn" onclick="handleUnlockWithPassword()" class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white font-black text-sm py-4 rounded-xl shadow-lg transition cursor-pointer">
             Unlock Deliverables
           </button>
         </div>
@@ -324,6 +332,9 @@
           <a id="secureViewerLink" href="#" class="block text-center w-full py-3.5 bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-500 text-white rounded-xl text-xs font-black shadow-lg transition">
             🔒 Open Protected Viewer
           </a>
+          <button onclick="handleStandardDownload()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-semibold transition cursor-pointer">
+            Direct File Download
+          </button>
         </div>
       </div>
       {% else %}
@@ -338,7 +349,7 @@
             <input id="passwordInput" type="password" placeholder="Enter recipient password" class="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition">
           </div>
         </div>
-        <button onclick="window.location.href=`/api/download/${shareId}`" class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-600 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg active:scale-[0.99] transition duration-200 cursor-pointer">
+        <button onclick="handleStandardDownload()" class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-600 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg active:scale-[0.99] transition duration-200 cursor-pointer">
           {% if has_password %}Unlock & Download{% else %}Download File{% endif %}
         </button>
       </div>
@@ -580,13 +591,21 @@
     const isPaywalled = serverConfig.dataset.paywalled === "true";
     const urlParams = new URLSearchParams(window.location.search);
 
-    let currentSessionId = urlParams.get("session_id");
-    let currentToken = urlParams.get("token");
+    let currentSessionId = urlParams.get("session_id") || localStorage.getItem("session_" + shareId) || "";
+    let currentToken = urlParams.get("token") || localStorage.getItem("pwtk_" + shareId) || "";
 
     // Initialize UI on Load
     window.addEventListener("DOMContentLoaded", async () => {
       const isPaidParam = urlParams.get("paid") === "true";
-      const paramEmail = urlParams.get("email");
+      let paramEmail = urlParams.get("email") || localStorage.getItem("buyer_email_" + shareId) || "";
+      if (paramEmail && paramEmail.includes("%")) {
+        try { paramEmail = decodeURIComponent(paramEmail); } catch(e) {}
+      }
+
+      // Sync local storage state
+      if (currentSessionId) localStorage.setItem("session_" + shareId, currentSessionId);
+      if (currentToken) localStorage.setItem("pwtk_" + shareId, currentToken);
+      if (paramEmail) localStorage.setItem("buyer_email_" + shareId, paramEmail);
 
       // Set branding
       try {
@@ -595,8 +614,11 @@
         if (brandingData && brandingData.brand_bg_url) document.getElementById("backdropBg").style.backgroundImage = `linear-gradient(rgba(4,6,14,0.7), rgba(4,6,14,0.85)), url('${brandingData.brand_bg_url}')`;
       } catch (e) {}
 
-      // If returning from Stripe OR loading the page
+      // If returning from payment with paid=true, immediately switch view to Dispatch
       if (isPaywalled && isPaidParam) {
+        showDispatchSection(paramEmail);
+
+        // Verify status in background to check if the passcode was already dispatched
         try {
           const verifyRes = await fetch("/api/paywall/verify-session", {
             method: "POST",
@@ -608,15 +630,16 @@
           if (vData.verified) {
              const targetEmail = vData.email || paramEmail;
              if (vData.has_password) {
-                // They already clicked dispatch before, jump straight to Passcode screen
+                // If passcode was already generated/dispatched, advance directly to enter passcode
                 showUnlockSection(targetEmail);
              } else {
-                // Payment verified, but passcode NOT generated yet. Show Dispatch UI.
                 showDispatchSection(targetEmail);
              }
-             return;
           }
-        } catch(e) {}
+        } catch(e) {
+          console.warn("Session verification warning:", e);
+        }
+        return;
       }
 
       // Pre-fill email if they haven't paid yet
@@ -651,7 +674,6 @@
         const data = await res.json();
 
         if (data.status === "already_paid" || data.status === "already_unlocked") {
-          // Verify their email explicitly
           showUnlockSection(email);
           return;
         }
@@ -673,7 +695,15 @@
     // Show step 2: The Dispatch Passcode button
     function showDispatchSection(email) {
       document.getElementById("checkoutSection")?.classList.add("hidden");
-      document.getElementById("dispatchSection")?.classList.remove("hidden");
+      document.getElementById("unlockSection")?.classList.add("hidden");
+      document.getElementById("unlockedActionsSection")?.classList.add("hidden");
+
+      const dispatchSec = document.getElementById("dispatchSection");
+      if (dispatchSec) dispatchSec.classList.remove("hidden");
+
+      const iconBox = document.getElementById("iconBox");
+      if (iconBox) iconBox.innerText = "✉️";
+
       if (email) {
         const dispatchInput = document.getElementById("dispatchEmailInput");
         if (dispatchInput) dispatchInput.value = email;
@@ -685,9 +715,15 @@
       const input = document.getElementById("dispatchEmailInput");
       const email = input ? input.value.trim().toLowerCase() : "";
       const btn = document.getElementById("dispatchBtn");
+      const errBox = document.getElementById("dispatchError");
+
+      if (errBox) errBox.classList.add("hidden");
 
       if (!email || !email.includes("@")) {
-        alert("Please enter a valid email address.");
+        if (errBox) {
+          errBox.innerText = "Please enter a valid email address.";
+          errBox.classList.remove("hidden");
+        }
         return;
       }
 
@@ -709,12 +745,15 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Failed to dispatch password.");
 
-        alert("✓ Passcode dispatched! Please check your inbox and spam folder.");
+        localStorage.setItem("buyer_email_" + shareId, email);
         
         // Move to step 3
         showUnlockSection(email);
       } catch (err) {
-        alert("Error: " + err.message);
+        if (errBox) {
+          errBox.innerText = err.message;
+          errBox.classList.remove("hidden");
+        }
         btn.disabled = false;
         btn.innerText = "Dispatch Passcode";
       }
@@ -724,15 +763,22 @@
     function showUnlockSection(email) {
       document.getElementById("checkoutSection")?.classList.add("hidden");
       document.getElementById("dispatchSection")?.classList.add("hidden");
+      document.getElementById("unlockedActionsSection")?.classList.add("hidden");
       
       const unlockSec = document.getElementById("unlockSection");
       if (unlockSec) unlockSec.classList.remove("hidden");
+
+      const iconBox = document.getElementById("iconBox");
+      if (iconBox) iconBox.innerText = "🔑";
       
       const emailDisplay = document.getElementById("dispatchedEmailDisplay");
       if (emailDisplay) emailDisplay.innerText = email;
       
       const pwdInput = document.getElementById("unlockPasscodeInput");
-      if (pwdInput) pwdInput.focus();
+      if (pwdInput) {
+        pwdInput.value = "";
+        pwdInput.focus();
+      }
     }
 
     // Step 3 Action: Validate password
@@ -749,15 +795,15 @@
       
       if (!password) {
         if (errBox) {
-            errBox.innerText = "Please enter the passcode sent to your email.";
-            errBox.classList.remove("hidden");
+          errBox.innerText = "Please enter the passcode sent to your email.";
+          errBox.classList.remove("hidden");
         }
         return;
       }
 
       if (btn) {
-          btn.disabled = true;
-          btn.innerText = "Verifying Passcode...";
+        btn.disabled = true;
+        btn.innerText = "Verifying Passcode...";
       }
 
       try {
@@ -770,16 +816,16 @@
         if (!res.ok) throw new Error(data.detail || "Incorrect passcode.");
 
         // Move to step 4: Viewer
-        revealUnlockedUI(email, data.viewer_url, data.access_token);
+        revealUnlockedUI(email, data.viewer_url, data.access_token || currentToken);
         
       } catch(err) {
         if (errBox) {
-            errBox.innerText = err.message;
-            errBox.classList.remove("hidden");
+          errBox.innerText = err.message;
+          errBox.classList.remove("hidden");
         }
         if (btn) {
-            btn.disabled = false;
-            btn.innerText = "Unlock Deliverables";
+          btn.disabled = false;
+          btn.innerText = "Unlock Deliverables";
         }
       }
     }
@@ -793,11 +839,16 @@
       const actionsSec = document.getElementById("unlockedActionsSection");
       if (actionsSec) actionsSec.classList.remove("hidden");
 
+      const iconBox = document.getElementById("iconBox");
+      if (iconBox) iconBox.innerText = "🔓";
+
       const badge = document.getElementById("verifiedBuyerBadge");
       if (badge) badge.innerText = email;
 
       const vLink = document.getElementById("secureViewerLink");
-      if (vLink) vLink.href = viewerUrl || (`/secure-view/${shareId}?token=` + token);
+      if (vLink) {
+        vLink.href = viewerUrl || (`/secure-view/${shareId}?token=${token}&email=${encodeURIComponent(email)}`);
+      }
 
       localStorage.setItem("pwtk_" + shareId, token);
       localStorage.setItem("buyer_email_" + shareId, email);
@@ -807,6 +858,12 @@
     async function resendPasscode() {
       const emailDisplay = document.getElementById("dispatchedEmailDisplay");
       const email = emailDisplay ? emailDisplay.innerText.trim().toLowerCase() : "";
+      const btn = document.getElementById("resendBtn");
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Resending...";
+      }
       
       try {
         const res = await fetch("/api/paywall/resend-password", {
@@ -815,14 +872,27 @@
           body: JSON.stringify({ share_id: shareId, email: email })
         });
         if (!res.ok) throw new Error("Failed to resend.");
-        alert("✓ Passcode re-dispatched! Check your inbox.");
+        if (btn) btn.innerText = "✓ Passcode Sent!";
+        setTimeout(() => { if (btn) { btn.disabled = false; btn.innerText = "Resend Passcode"; } }, 4000);
       } catch (err) {
         alert("Error resending: " + err.message);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "Resend Passcode";
+        }
       }
     }
 
     function handleStandardDownload() {
       window.location.href = `/api/download/${shareId}`;
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-theme");
+      const icon = document.getElementById("themeIcon");
+      if (icon) {
+        icon.innerText = document.body.classList.contains("light-theme") ? "🌙" : "☀️";
+      }
     }
   </script>
 </body>
