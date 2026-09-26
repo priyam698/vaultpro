@@ -199,10 +199,14 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
     </body>
     </html>
     """
+   # Generate a unique ID to break Gmail threading during testing
+    unique_id = secrets.token_hex(3).upper()
+
     payload = {
         "sender": {"name": "Zephyr Escrow", "email": system_sender},
         "to": [{"email": buyer_email}],
-        "subject": f"Your Permanent Password to Access: {filename}",
+        "replyTo": {"email": system_sender},
+        "subject": f"Your Permanent Password to Access: {filename} [{unique_id}]",
         "htmlContent": html_content
     }
 
@@ -1123,13 +1127,14 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
         try:
             stripe_session = stripe.checkout.Session.retrieve(payload.session_id)
             if stripe_session.payment_status in ['paid', 'complete']:
+                # Corrected SQL WHERE clause to prevent overwriting other users
                 cursor.execute("""
                     UPDATE paywall_purchases 
                     SET payment_status = 'paid', 
                         unlocked_at = COALESCE(unlocked_at, CURRENT_TIMESTAMP),
                         buyer_email = COALESCE(NULLIF(%s, ''), buyer_email)
-                    WHERE stripe_session_id = %s OR access_token = %s OR share_id = %s
-                """, (clean_email, payload.session_id, payload.token, payload.share_id))
+                    WHERE share_id = %s AND (stripe_session_id = %s OR access_token = %s)
+                """, (clean_email, payload.share_id, payload.session_id, payload.token))
                 conn.commit()
         except Exception as e:
             print(f"[CONFIRM SESSION RETRIEVE NOTICE]: {e}", flush=True)
@@ -1166,18 +1171,18 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn.commit()
     conn.close()
 
-    # --- THE FIX IS HERE ---
-    # We now check if the email actually sent successfully
+    # Capture Brevo's true/false return status
     email_sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
     
+    # If Brevo drops the email, throw an error so the frontend DOES NOT show the green success banner
     if not email_sent:
         raise HTTPException(
             status_code=500, 
-            detail="Payment verified, but we failed to dispatch the password email. Please try resending."
+            detail="Brevo API Error: Failed to dispatch email. Please check your Render logs."
         )
 
     return {"status": "success", "email": clean_email}
-# ----------------- Unlock With Permanent Password -----------------
+
 @app.post("/api/paywall/unlock-password")
 @app.post("/api/paywall/unlock-with-password")
 async def unlock_with_password(req: UnlockWithPasswordRequest):
