@@ -9,7 +9,6 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34 Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22 L78 26 C66 21 34 21 18 26 Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76 L46 76 L86 34 Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78 Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -970,7 +969,7 @@
 
             <div id="progressBox" class="hidden space-y-1.5 pt-1">
               <div class="flex justify-between text-xs font-bold">
-                <span id="progressStatus">Encrypting payload...</span>
+                <span id="progressStatus">Preparing payload...</span>
                 <span id="progressPercent" class="font-mono text-indigo-400 font-black">0%</span>
               </div>
               <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
@@ -978,7 +977,7 @@
               </div>
             </div>
 
-            <button id="transferBtn" onclick="initiateTransfer()" 
+            <button id="transferBtn" onclick="executeTransferPayload()" 
                     class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
               Transfer Files
             </button>
@@ -1253,7 +1252,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 1.5: PAY-TO-UNLOCK ESCROW SHOWCASE (MATCHING IMAGE 20)           -->
+  <!-- SECTION 1.5: PAY-TO-UNLOCK ESCROW SHOWCASE                                -->
   <!-- ========================================================================= -->
   <section id="escrow" class="relative z-20 py-24 border-b border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-6">
@@ -2418,36 +2417,6 @@
       }
     }
 
-    async function bundleFilesIfMultiple(defaultTitle, progressCallback) {
-      if (selectedFiles.length === 1 && !selectedFiles[0].webkitRelativePath) {
-        return {
-          fileBlob: selectedFiles[0],
-          fileName: selectedFiles[0].name,
-          filesizeMb: parseFloat((selectedFiles[0].size / (1024 * 1024)).toFixed(2))
-        };
-      }
-
-      const zip = new JSZip();
-      for (const file of selectedFiles) {
-        const filePath = file.webkitRelativePath || file.name;
-        zip.file(filePath, file);
-      }
-
-      const zipBlob = await zip.generateAsync({
-        type: "blob",
-        compression: "DEFLATE",
-        compressionOptions: { level: 6 }
-      }, (metadata) => {
-        if (progressCallback) progressCallback(metadata.percent);
-      });
-
-      const sanitizedName = (defaultTitle || "Zephyr_Package").replace(/[^a-zA-Z0-9_\-]/g, "_");
-      const zipFileName = `${sanitizedName}.zip`;
-      const filesizeMb = parseFloat((zipBlob.size / (1024 * 1024)).toFixed(2));
-
-      return { fileBlob: zipBlob, fileName: zipFileName, filesizeMb: filesizeMb };
-    }
-
     function checkDropZoneRoute() {
       if (window.location.hash.startsWith("#dropZone")) {
         const hashQuery = window.location.hash.split("?")[1];
@@ -2491,6 +2460,9 @@
     window.addEventListener("load", checkDropZoneRoute);
     window.addEventListener("hashchange", checkDropZoneRoute);
 
+    // =========================================================================================
+    // MODIFIED: Client Deposit Logic (No Zipping - Direct Loop Upload)
+    // =========================================================================================
     async function submitClientDepositPayload() {
       if (!selectedFiles.length) {
         alert("Please select at least one file to deposit.");
@@ -2508,37 +2480,45 @@
       progressBox.classList.remove("hidden");
 
       try {
-        progressStatus.innerText = selectedFiles.length > 1 ? "Bundling files into ZIP archive..." : "Preparing payload...";
-        const { fileBlob, fileName } = await bundleFilesIfMultiple(clientDropTitle || "Client_Deposit", (pct) => {
-          progressStatus.innerText = `Compressing files (${Math.round(pct)}%)...`;
-          progressBar.style.width = `${Math.round(pct * 0.25)}%`;
-          progressPercent.innerText = `${Math.round(pct * 0.25)}%`;
-        });
+        const overallSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+        let loadedTotal = 0;
 
-        progressStatus.innerText = "Streaming to recipient vault...";
-        const emailOwnerParam = clientDropOwnerEmail ? `&owner_email=${encodeURIComponent(clientDropOwnerEmail)}` : "";
-        const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}${emailOwnerParam}&filename=${encodeURIComponent(fileName)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
-        
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", url, true);
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 75) + 25;
-            progressBar.style.width = `${pct}%`;
-            progressPercent.innerText = `${pct}%`;
-          }
-        };
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            progressBox.classList.add("hidden");
-            submitBtn.classList.add("hidden");
-            document.getElementById("clientDropSuccessBox").classList.remove("hidden");
-          } else {
-            alert("Deposit failed. Recipient storage quota may be full.");
-            submitBtn.disabled = false;
-          }
-        };
-        xhr.send(fileBlob);
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i];
+          const safeName = (file.webkitRelativePath || file.name).replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+          progressStatus.innerText = `Depositing file ${i + 1} of ${selectedFiles.length}...`;
+
+          const emailOwnerParam = clientDropOwnerEmail ? `&owner_email=${encodeURIComponent(clientDropOwnerEmail)}` : "";
+          const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}${emailOwnerParam}&filename=${encodeURIComponent(safeName)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
+
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", url, true);
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const currentLoaded = loadedTotal + e.loaded;
+                const pct = Math.round((currentLoaded / overallSize) * 100);
+                progressBar.style.width = `${pct}%`;
+                progressPercent.innerText = `${pct}%`;
+              }
+            };
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                loadedTotal += file.size;
+                resolve();
+              } else {
+                reject(new Error("Upload failed for " + safeName));
+              }
+            };
+            xhr.onerror = () => reject(new Error("Network error"));
+            xhr.send(file);
+          });
+        }
+
+        progressBox.classList.add("hidden");
+        submitBtn.classList.add("hidden");
+        document.getElementById("clientDropSuccessBox").classList.remove("hidden");
+
       } catch (err) {
         alert("Upload error: " + err.message);
         submitBtn.disabled = false;
@@ -2718,28 +2698,8 @@
         }
       }
     }
-    // Unpacks any uploaded ZIP archive into individual File objects for Escrow
-async function expandZipFile(zipFile) {
-  try {
-    const jszip = new JSZip();
-    const zipData = await jszip.loadAsync(zipFile);
-    const unpacked = [];
-    for (const [relPath, zipEntry] of Object.entries(zipData.files)) {
-      if (zipEntry.dir || relPath.includes('__MACOSX') || relPath.split('/').pop().startsWith('.')) continue;
-      const blob = await zipEntry.async("blob");
-      const cleanName = relPath.split('/').pop();
-      if (!cleanName) continue;
-      const extractedFile = new File([blob], cleanName, { type: blob.type || "application/octet-stream" });
-      unpacked.push(extractedFile);
-    }
-    return unpacked.length > 0 ? unpacked : [zipFile];
-  } catch (e) {
-    console.warn("Could not unpack zip:", e);
-    return [zipFile];
-  }
-}
 
-async function initiateTransfer() {
+    async function initiateTransfer() {
       if (!selectedFiles.length) {
         alert("Please add files or a folder to transfer first.");
         return;
@@ -2813,6 +2773,9 @@ async function initiateTransfer() {
       executeTransferPayload();
     }
 
+    // =========================================================================================
+    // MODIFIED: Standard Transfer Logic (No Zipping - Direct Loop Upload)
+    // =========================================================================================
     async function executeTransferPayload() {
       const transferBtn = document.getElementById("transferBtn");
       const progressBox = document.getElementById("progressBox");
@@ -2827,33 +2790,37 @@ async function initiateTransfer() {
 
       try {
         const titleVal = document.getElementById("transferTitle").value.trim();
-        progressStatus.innerText = selectedFiles.length > 1 ? "Bundling files into ZIP archive..." : "Preparing payload...";
+        progressStatus.innerText = "Preparing payload...";
+
+        // Calculate total size and create manifest of files for backend
+        const fileManifest = selectedFiles.map(f => ({
+            filename: (f.webkitRelativePath || f.name).replace(/[^a-zA-Z0-9_\-\.]/g, "_"),
+            filesize_mb: parseFloat((f.size / (1024 * 1024)).toFixed(2))
+        }));
         
-        const { fileBlob, fileName, filesizeMb } = await bundleFilesIfMultiple(titleVal || "Transfer_Files", (pct) => {
-          progressStatus.innerText = `Compressing files (${Math.round(pct)}%)...`;
-          progressBar.style.width = `${Math.round(pct * 0.25)}%`;
-          progressPercent.innerText = `${Math.round(pct * 0.25)}%`;
-        });
+        const totalSizeMb = fileManifest.reduce((acc, f) => acc + f.filesize_mb, 0);
+        const overallSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
 
         // Enforce Plan Single Upload Limits
-        if (filesizeMb > userSingleLimitMb) {
+        if (totalSizeMb > userSingleLimitMb) {
           progressBox.classList.add("hidden");
           transferBtn.disabled = false;
-          document.getElementById("limitModalMsg").innerText = `Your files (${filesizeMb} MB) exceed your ${userTier.toUpperCase()} limit of ${userSingleLimitMb} MB. Please upgrade your plan.`;
+          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of ${userSingleLimitMb} MB. Please upgrade your plan.`;
           document.getElementById("limitModal").classList.remove("hidden");
           return;
         }
 
         progressStatus.innerText = "Reserving cryptographic vault...";
-        progressBar.style.width = "30%";
-        progressPercent.innerText = "30%";
+        progressBar.style.width = "10%";
+        progressPercent.innerText = "10%";
 
         const isPaywalled = document.getElementById("paywallToggle") ? document.getElementById("paywallToggle").checked : false;
         const unlockPrice = isPaywalled ? parseFloat(document.getElementById("paywallPriceInput").value || 0.0) : 0.0;
 
         const payload = {
-          filename: fileName,
-          filesize_mb: filesizeMb,
+          filename: titleVal || "Zephyr_Transfer",
+          filesize_mb: totalSizeMb,
+          files: fileManifest, // Important: Sends array of all files to construct the database items
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
           max_downloads: parseInt(document.getElementById("maxDownloads").value),
@@ -2874,60 +2841,74 @@ async function initiateTransfer() {
         }
         const data = await res.json();
 
-        progressStatus.innerText = "Streaming encrypted payload to Cloudflare R2...";
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `/api/upload-file/${data.share_id}`, true);
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 65) + 30;
-            progressBar.style.width = `${pct}%`;
-            progressPercent.innerText = `${pct}%`;
-          }
-        };
-        xhr.onload = async () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            progressBar.style.width = "100%";
-            progressPercent.innerText = "100%";
-            document.getElementById("shareUrlInput").value = `${window.location.origin}/share/${data.share_id}`;
-            resultBox.classList.remove("hidden");
+        let loadedTotal = 0;
+        
+        // Loop and upload each individual file natively without zipping
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i];
+          const safeName = (file.webkitRelativePath || file.name).replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+          progressStatus.innerText = `Uploading file ${i + 1} of ${selectedFiles.length}...`;
 
-            if (transferMode === 'email') {
-              progressStatus.innerText = "Emailing recipient via Brevo...";
-              try {
-                const notifyRes = await fetch("/api/send-transfer-email", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    recipient_email: document.getElementById("emailTo").value.trim(),
-                    sender_email: document.getElementById("emailFrom").value.trim(),
-                    share_id: data.share_id,
-                    filename: payload.filename,
-                    filesize_mb: payload.filesize_mb,
-                    title: document.getElementById("transferTitle").value.trim(),
-                    message: document.getElementById("transferMessage").value.trim()
-                  })
-                });
-
-                if (!notifyRes.ok) {
-                  const errData = await notifyRes.json();
-                  alert(`Transfer uploaded, but notification email failed: ${errData.detail}`);
-                } else {
-                  alert(`Files and download link successfully sent to ${document.getElementById("emailTo").value.trim()}!`);
-                }
-              } catch (err) {
-                alert("File uploaded, but failed to reach email notification service.");
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `/api/upload-file/${data.share_id}?filename=${encodeURIComponent(safeName)}`, true);
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const currentLoaded = loadedTotal + e.loaded;
+                const pct = Math.round((currentLoaded / overallSize) * 80) + 10;
+                progressBar.style.width = `${pct}%`;
+                progressPercent.innerText = `${pct}%`;
               }
-            }
+            };
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                loadedTotal += file.size;
+                resolve();
+              } else {
+                reject(new Error("Upload failed for " + safeName));
+              }
+            };
+            xhr.onerror = () => reject(new Error("Network connection lost"));
+            xhr.send(file);
+          });
+        }
 
-            progressStatus.innerText = "Vault encrypted & active!";
-            transferBtn.disabled = false;
-          } else {
-            alert("Upload failed.");
-            progressBox.classList.add("hidden");
-            transferBtn.disabled = false;
+        progressBar.style.width = "100%";
+        progressPercent.innerText = "100%";
+        document.getElementById("shareUrlInput").value = `${window.location.origin}/share/${data.share_id}`;
+        resultBox.classList.remove("hidden");
+
+        if (transferMode === 'email') {
+          progressStatus.innerText = "Emailing recipient via Brevo...";
+          try {
+            const notifyRes = await fetch("/api/send-transfer-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                recipient_email: document.getElementById("emailTo").value.trim(),
+                sender_email: document.getElementById("emailFrom").value.trim(),
+                share_id: data.share_id,
+                filename: payload.filename,
+                filesize_mb: payload.filesize_mb,
+                title: document.getElementById("transferTitle").value.trim(),
+                message: document.getElementById("transferMessage").value.trim()
+              })
+            });
+
+            if (!notifyRes.ok) {
+              const errData = await notifyRes.json();
+              alert(`Transfer uploaded, but notification email failed: ${errData.detail}`);
+            } else {
+              alert(`Files and download link successfully sent to ${document.getElementById("emailTo").value.trim()}!`);
+            }
+          } catch (err) {
+            alert("File uploaded, but failed to reach email notification service.");
           }
-        };
-        xhr.send(fileBlob);
+        }
+
+        progressStatus.innerText = "Vault encrypted & active!";
+        transferBtn.disabled = false;
+
       } catch(err) {
         alert(err.message);
         progressBox.classList.add("hidden");
