@@ -34,7 +34,6 @@
       user-select: text;
     }
 
-    /* Native Uncompressed Quality Rendering */
     .media-high-quality {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: high-quality;
@@ -42,7 +41,6 @@
       backface-visibility: hidden;
     }
 
-    /* Soundwave bars animation for audio streams */
     @keyframes waveBounce {
       0%, 100% { height: 8px; }
       50% { height: 38px; }
@@ -63,7 +61,6 @@
   <!-- POST-PAYMENT FILE SELECTOR OVERLAY -->
   <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#05070d]/96 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
     
-    <!-- NEW: Back Arrow to Return to Vault -->
     <a href="/share/{{ share_id }}" class="absolute top-6 left-6 sm:top-8 sm:left-8 text-slate-400 hover:text-white flex items-center gap-2 text-sm font-bold transition cursor-pointer z-50 bg-white/5 hover:bg-white/10 px-4 py-2.5 rounded-xl border border-white/10 shadow-lg">
       <span class="text-lg leading-none">&larr;</span> Back to Vault
     </a>
@@ -73,9 +70,11 @@
     </div>
     <span class="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase mb-1">Payment Verified Successfully</span>
     <h2 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">Choose Which File You Want to Open</h2>
-    <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
-      This secure escrow package contains multiple deliverables. Select any file below to access it.
-    </p>
+    
+    <!-- MODIFIED: Clear disclaimer about what can and cannot be downloaded -->
+    <div class="text-xs text-slate-300 max-w-md leading-relaxed mb-6 bg-white/5 border border-white/10 p-3.5 rounded-xl shadow-inner">
+      <span class="font-black text-white">Security Note:</span> Media, PDFs, and Documents stream securely in the browser and <strong>cannot be downloaded</strong>. Archives (ZIPs) and Software (Apps/Excel) will provide a secure local download button.
+    </div>
     
     <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full max-h-[50vh] overflow-y-auto custom-scroll p-2 bg-slate-900/40 border border-white/10 rounded-2xl shadow-inner">
       <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-400 font-mono text-center col-span-2">
@@ -141,12 +140,12 @@
           </div>
           <div class="truncate">
             <h1 id="activeFilenameDisplay" class="text-sm font-black text-white truncate" title="{{ filename }}">{{ filename }}</h1>
-            <p class="text-[11px] text-slate-400 font-mono">Uncompressed Native Quality • DRM Stream Active</p>
+            <!-- MODIFIED: Dynamic status text for download rules -->
+            <p id="fileStatusText" class="text-[11px] text-slate-400 font-mono">Uncompressed Native Quality • DRM Stream Active</p>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- MODIFIED: Download button is now dynamically hidden for protected media -->
           <button id="universalDownloadBtn" type="button" onclick="downloadActiveFile()" class="hidden px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center gap-1.5">
             <span>↓</span> Download File
           </button>
@@ -172,7 +171,7 @@
           </video>
         </div>
 
-        <!-- Image Viewer (Draggable disabled for extra security) -->
+        <!-- Image Viewer -->
         <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center p-2">
           <img id="nativeImagePlayer" src="" alt="Deliverable" draggable="false" class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
         </div>
@@ -220,7 +219,7 @@
             <h3 id="genericTitle" class="text-xl font-black text-white mt-2">File</h3>
             <p class="text-[11px] text-slate-400 font-mono mt-1">This file format requires a local application to open (e.g., Excel, ZIP extractor, or OS application).</p>
           </div>
-          <button onclick="downloadActiveFile()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-black shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+          <button onclick="downloadActiveFile()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-600/30 transition cursor-pointer">
             ↓ Download Securely to Device
           </button>
         </div>
@@ -230,7 +229,8 @@
       <div class="px-5 py-3 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-slate-400">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-          <span>Zero-Knowledge Authenticated Access</span>
+          <!-- MODIFIED: Stronger wording in the footer -->
+          <span>Zero-Knowledge Authenticated Access • <strong class="text-white">Media downloads strictly disabled for security.</strong></span>
         </div>
         <span class="font-mono text-[11px]">Authorized for {{ buyer_email }}</span>
       </div>
@@ -287,6 +287,7 @@
       const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(fname)}`;
       const iconBox = document.getElementById("formatIconBox");
       const dlBtn = document.getElementById("universalDownloadBtn");
+      const statusText = document.getElementById("fileStatusText"); // Target the new subtitle text
 
       if (videoExts.includes(ext)) {
         const v = document.getElementById("nativeVideoPlayer");
@@ -294,12 +295,14 @@
         v.load();
         document.getElementById("videoContainer").classList.remove("hidden");
         iconBox.innerText = "🎬"; 
-        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent video download
+        if(statusText) statusText.innerHTML = "Uncompressed Native Quality • <strong class='text-rose-400'>Direct Download Disabled</strong>";
+        if(dlBtn) dlBtn.classList.add("hidden"); 
       } else if (imageExts.includes(ext)) {
         document.getElementById("nativeImagePlayer").src = streamUrl;
         document.getElementById("imageContainer").classList.remove("hidden");
         iconBox.innerText = "🖼️"; 
-        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent image download
+        if(statusText) statusText.innerHTML = "Original Asset Resolution • <strong class='text-rose-400'>Direct Download Disabled</strong>";
+        if(dlBtn) dlBtn.classList.add("hidden"); 
       } else if (audioExts.includes(ext)) {
         const a = document.getElementById("nativeAudioPlayer");
         document.getElementById("audioSource").src = streamUrl;
@@ -307,28 +310,33 @@
         a.load();
         document.getElementById("audioContainer").classList.remove("hidden");
         iconBox.innerText = "🎵"; 
-        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent audio download
+        if(statusText) statusText.innerHTML = "Lossless Audio Stream • <strong class='text-rose-400'>Direct Download Disabled</strong>";
+        if(dlBtn) dlBtn.classList.add("hidden"); 
       } else if (ext === 'pdf') {
         document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0`;
         document.getElementById("pdfContainer").classList.remove("hidden");
         iconBox.innerText = "📑"; 
-        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent PDF download
+        if(statusText) statusText.innerHTML = "Protected Document Viewer • <strong class='text-rose-400'>Direct Download Disabled</strong>";
+        if(dlBtn) dlBtn.classList.add("hidden"); 
       } else if (tableExts.includes(ext)) {
         document.getElementById("tableContainer").classList.remove("hidden");
         iconBox.innerText = "📊"; 
         loadTableData(streamUrl);
-        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent CSV download
+        if(statusText) statusText.innerHTML = "Spreadsheet Reader Mode • <strong class='text-rose-400'>Direct Download Disabled</strong>";
+        if(dlBtn) dlBtn.classList.add("hidden"); 
       } else if (codeExts.includes(ext)) {
         document.getElementById("codeContainer").classList.remove("hidden");
         iconBox.innerText = "💻"; 
         loadCodeSource(streamUrl, ext);
-        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent code/text download
+        if(statusText) statusText.innerHTML = "Protected Code Inspection • <strong class='text-rose-400'>Direct Download Disabled</strong>";
+        if(dlBtn) dlBtn.classList.add("hidden"); 
       } else {
         // App / Excel / Zip Fallback Download Container
         document.getElementById("genericContainer").classList.remove("hidden");
         document.getElementById("genericTitle").innerText = fname;
         iconBox.innerText = "📦"; 
-        if(dlBtn) dlBtn.classList.remove("hidden"); // Enable download for unviewable files
+        if(statusText) statusText.innerHTML = "Local Application Required • <strong class='text-emerald-400'>Direct Download Permitted</strong>";
+        if(dlBtn) dlBtn.classList.remove("hidden"); 
       }
     }
 
