@@ -199,7 +199,6 @@ def send_buyer_password_email(buyer_email: str, filename: str, password: str, sh
     </body>
     </html>
     """
-   # Generate a unique ID to break Gmail threading during testing
     unique_id = secrets.token_hex(3).upper()
 
     payload = {
@@ -289,7 +288,8 @@ def init_db_schema():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_ifsc VARCHAR(30);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_account_holder VARCHAR(120);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100);",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS message TEXT;"
         ]
 
         for m in migrations:
@@ -341,6 +341,7 @@ def init_db_schema():
                 is_paywalled BOOLEAN DEFAULT FALSE,
                 unlock_price NUMERIC(10, 2) DEFAULT 0.00,
                 paywall_creator_id VARCHAR(120),
+                message TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
@@ -467,6 +468,7 @@ class ResendPasswordRequest(BaseModel):
 
 class CreateShareRequest(BaseModel):
     filename: Optional[str] = "Transfer"
+    message: Optional[str] = None
     filesize_mb: Optional[float] = 0.00
     files: Optional[List[FileManifestItem]] = []
     password: Optional[str] = None
@@ -781,14 +783,18 @@ async def create_share(payload: CreateShareRequest):
             user_tier, _, _ = resolve_user_tier(user_row)
 
     max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
-    
     file_list = payload.files or []
-    if file_list:
-        total_batch_mb = sum(f.filesize_mb for f in file_list)
-        main_filename = f"{len(file_list)} items package" if len(file_list) > 1 else file_list[0].filename
+    
+    # FIX: Prioritize the user's custom title. Only fallback to "X items package" if title is blank.
+    if payload.filename and payload.filename != "Zephyr_Transfer":
+        main_filename = payload.filename
     else:
-        total_batch_mb = payload.filesize_mb or 0.0
-        main_filename = payload.filename or "Shared File"
+        if file_list:
+            main_filename = f"{len(file_list)} items package" if len(file_list) > 1 else file_list[0].filename
+        else:
+            main_filename = "Shared File"
+            
+    total_batch_mb = sum(f.filesize_mb for f in file_list) if file_list else (payload.filesize_mb or 0.0)
 
     if total_batch_mb > max_mb:
         conn.close()
@@ -800,17 +806,18 @@ async def create_share(payload: CreateShareRequest):
     primary_s3_key = f"transfers/{share_id}/{main_filename}"
     password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
 
+    # FIX: Add 'message' to the INSERT statement
     cursor.execute("""
         INSERT INTO shares (
             id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
             max_downloads, created_at, expires_at, downloads, user_id, 
-            is_paywalled, unlock_price, paywall_creator_id
+            is_paywalled, unlock_price, paywall_creator_id, message
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, %s, %s, %s, %s, %s)
     """, (
         share_id, main_filename, total_batch_mb, primary_s3_key, password_hash, 
         payload.expiry_hours, payload.max_downloads, created_at, expires_at, 
-        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id
+        payload.user_id, payload.is_paywalled, payload.unlock_price, payload.user_id, payload.message
     ))
 
     if file_list:
@@ -1531,6 +1538,7 @@ async def share_page(request: Request, share_id: str):
         "filename": row["filename"],
         "filesize": row["filesize_mb"],
         "downloads": row["downloads"],
+        "message": row.get("message"),
         "has_password": bool(row["password_hash"]),
         "is_paywalled": bool(row.get("is_paywalled", False)),
         "unlock_price": float(row.get("unlock_price", 0.00) or 0.00),

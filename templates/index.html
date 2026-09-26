@@ -9,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34 Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22 L78 26 C66 21 34 21 18 26 Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76 L46 76 L86 34 Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78 Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -987,7 +988,6 @@
           <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-3">
             <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
             
-            <!-- Vanishing Link Warning Alert Added Here -->
             <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium leading-relaxed">
               <span class="text-xs shrink-0">⚠️</span>
               <span><strong>Copy this link now!</strong> This transfer link will appear only once and cannot be recovered after you navigate away or close this page.</span>
@@ -2460,9 +2460,6 @@
     window.addEventListener("load", checkDropZoneRoute);
     window.addEventListener("hashchange", checkDropZoneRoute);
 
-    // =========================================================================================
-    // MODIFIED: Client Deposit Logic (No Zipping - Direct Loop Upload)
-    // =========================================================================================
     async function submitClientDepositPayload() {
       if (!selectedFiles.length) {
         alert("Please select at least one file to deposit.");
@@ -2773,9 +2770,6 @@
       executeTransferPayload();
     }
 
-    // =========================================================================================
-    // MODIFIED: Standard Transfer Logic (No Zipping - Direct Loop Upload)
-    // =========================================================================================
     async function executeTransferPayload() {
       const transferBtn = document.getElementById("transferBtn");
       const progressBox = document.getElementById("progressBox");
@@ -2792,7 +2786,6 @@
         const titleVal = document.getElementById("transferTitle").value.trim();
         progressStatus.innerText = "Preparing payload...";
 
-        // Calculate total size and create manifest of files for backend
         const fileManifest = selectedFiles.map(f => ({
             filename: (f.webkitRelativePath || f.name).replace(/[^a-zA-Z0-9_\-\.]/g, "_"),
             filesize_mb: parseFloat((f.size / (1024 * 1024)).toFixed(2))
@@ -2801,7 +2794,6 @@
         const totalSizeMb = fileManifest.reduce((acc, f) => acc + f.filesize_mb, 0);
         const overallSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
 
-        // Enforce Plan Single Upload Limits
         if (totalSizeMb > userSingleLimitMb) {
           progressBox.classList.add("hidden");
           transferBtn.disabled = false;
@@ -2819,8 +2811,9 @@
 
         const payload = {
           filename: titleVal || "Zephyr_Transfer",
+          message: document.getElementById("transferMessage").value.trim() || null,
           filesize_mb: totalSizeMb,
-          files: fileManifest, // Important: Sends array of all files to construct the database items
+          files: fileManifest, 
           password: document.getElementById("passcode").value.trim() || null,
           expiry_hours: parseInt(document.getElementById("expiryHours").value),
           max_downloads: parseInt(document.getElementById("maxDownloads").value),
@@ -2843,7 +2836,6 @@
 
         let loadedTotal = 0;
         
-        // Loop and upload each individual file natively without zipping
         for (let i = 0; i < selectedFiles.length; i++) {
           const file = selectedFiles[i];
           const safeName = (file.webkitRelativePath || file.name).replace(/[^a-zA-Z0-9_\-\.]/g, "_");

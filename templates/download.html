@@ -230,6 +230,7 @@
         {% if is_paywalled %}💰{% else %}📦{% endif %}
       </div>
 
+      <!-- TITLE AUTOMATICALLY UPDATES HERE VIA BACKEND FIX -->
       <h1 class="text-xl sm:text-2xl font-bold tracking-tight break-all">
         {{ filename }}
       </h1>
@@ -325,6 +326,17 @@
 
         <!-- State C: File Unlocked Area (Auto-download button removed) -->
         <div id="unlockedActionsSection" class="hidden space-y-2.5 pt-2">
+          
+          {% if message %}
+          <!-- NEW: Displays the sender's custom message after unlocking -->
+          <div class="mb-4 p-5 rounded-2xl bg-[#0a0f24] border border-indigo-500/30 text-left shadow-lg">
+            <span class="block text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-2 flex items-center gap-1.5">
+              <span>💬</span> Sender Message
+            </span>
+            <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{{ message }}</p>
+          </div>
+          {% endif %}
+
           <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300 flex items-center justify-between">
             <span class="font-bold flex items-center gap-2">
               <span>✓</span> Lifetime Personal Access Active
@@ -342,6 +354,17 @@
       {% else %}
       <!-- STANDARD TRANSFER VIEW -->
       <div class="mt-8 space-y-4 text-left">
+        
+        {% if message %}
+        <!-- NEW: Displays the sender's custom message for standard transfers -->
+        <div class="mb-4 p-5 rounded-2xl bg-[#0a0f24] border border-indigo-500/30 text-left shadow-lg">
+          <span class="block text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-2 flex items-center gap-1.5">
+            <span>💬</span> Sender Message
+          </span>
+          <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{{ message }}</p>
+        </div>
+        {% endif %}
+
         <div id="passwordSection" class="{% if not has_password %}hidden{% endif %} space-y-4">
           <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
             <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
