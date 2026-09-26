@@ -60,7 +60,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-[#060810]">
 
-  <!-- POST-PAYMENT FILE SELECTOR OVERLAY (Forces user to explicitly choose a file, blocking downloads) -->
+  <!-- POST-PAYMENT FILE SELECTOR OVERLAY -->
   <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#05070d]/96 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
     <div class="w-20 h-20 rounded-3xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-bounce">
       📂
@@ -68,7 +68,7 @@
     <span class="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase mb-1">Payment Verified Successfully</span>
     <h2 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">Choose Which File You Want to Open</h2>
     <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
-      This secure escrow package contains multiple deliverables. Select any file below to open and inspect it instantly inside your protected window. Direct downloads are permanently disabled.
+      This secure escrow package contains multiple deliverables. Select any file below to access it.
     </p>
     
     <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full max-h-[50vh] overflow-y-auto custom-scroll p-2 bg-slate-900/40 border border-white/10 rounded-2xl shadow-inner">
@@ -113,7 +113,7 @@
         <span>Buyer:</span> <strong class="text-indigo-300">{{ buyer_email }}</strong>
       </span>
       <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xl">
-        View-Only Mode
+        Active Access
       </span>
     </div>
   </header>
@@ -128,7 +128,7 @@
         <div id="fileTabsContainer" class="flex items-center gap-2"></div>
       </div>
 
-      <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/30">
+      <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/30 flex-wrap gap-4">
         <div class="flex items-center gap-3 overflow-hidden">
           <div id="formatIconBox" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg shrink-0">
             🎬
@@ -140,12 +140,13 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- NEW: Universal Secure Download Button -->
+          <button type="button" onclick="downloadActiveFile()" class="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center gap-1.5">
+            <span>↓</span> Download File
+          </button>
           <button type="button" onclick="openFilePickerModal()" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5">
             <span>📂</span> Choose File...
           </button>
-          <span id="formatBadge" class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-            PROTECTED STREAM
-          </span>
         </div>
       </div>
 
@@ -206,13 +207,16 @@
           </div>
         </div>
 
-        <!-- Generic / Archive Fallback -->
-        <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-4">
-          <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto text-4xl shadow-xl">📦</div>
-          <h3 id="genericTitle" class="text-lg font-black text-white mt-2">File</h3>
-          <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono">
-            Direct download disabled • Confidential inspection only
+        <!-- Universal App & Archive Fallback (Fixed to support Apps, Zip, Excel, etc) -->
+        <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-5 bg-black/40 rounded-3xl border border-white/10 shadow-2xl">
+          <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-2xl flex items-center justify-center mx-auto text-4xl">📦</div>
+          <div>
+            <h3 id="genericTitle" class="text-xl font-black text-white mt-2">File</h3>
+            <p class="text-[11px] text-slate-400 font-mono mt-1">This file format requires a local application to open (e.g., Excel, ZIP extractor, or OS application).</p>
           </div>
+          <button onclick="downloadActiveFile()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-black shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+            ↓ Download Securely to Device
+          </button>
         </div>
 
       </div>
@@ -220,7 +224,7 @@
       <div class="px-5 py-3 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-slate-400">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-          <span>Zero-Download Confidential Inspection Mode</span>
+          <span>Zero-Knowledge Authenticated Access</span>
         </div>
         <span class="font-mono text-[11px]">Authorized for {{ buyer_email }}</span>
       </div>
@@ -253,7 +257,7 @@
       if (ext === 'pdf') return '📑';
       if (tableExts.includes(ext)) return '📊';
       if (codeExts.includes(ext)) return '💻';
-      return '📄';
+      return '📦';
     }
 
     function hideAllPlayers() {
@@ -276,41 +280,41 @@
       const ext = fname.split('.').pop().toLowerCase() || '';
       const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(fname)}`;
       const iconBox = document.getElementById("formatIconBox");
-      const badge = document.getElementById("formatBadge");
 
       if (videoExts.includes(ext)) {
         const v = document.getElementById("nativeVideoPlayer");
         document.getElementById("videoSource").src = streamUrl;
         v.load();
         document.getElementById("videoContainer").classList.remove("hidden");
-        iconBox.innerText = "🎬"; badge.innerText = "32K / 8K / 4K VIDEO STREAM";
+        iconBox.innerText = "🎬"; 
       } else if (imageExts.includes(ext)) {
         document.getElementById("nativeImagePlayer").src = streamUrl;
         document.getElementById("imageContainer").classList.remove("hidden");
-        iconBox.innerText = "🖼️"; badge.innerText = "ORIGINAL IMAGE";
+        iconBox.innerText = "🖼️"; 
       } else if (audioExts.includes(ext)) {
         const a = document.getElementById("nativeAudioPlayer");
         document.getElementById("audioSource").src = streamUrl;
         document.getElementById("audioTitle").innerText = fname;
         a.load();
         document.getElementById("audioContainer").classList.remove("hidden");
-        iconBox.innerText = "🎵"; badge.innerText = "LOSSLESS AUDIO";
+        iconBox.innerText = "🎵"; 
       } else if (ext === 'pdf') {
         document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0`;
         document.getElementById("pdfContainer").classList.remove("hidden");
-        iconBox.innerText = "📑"; badge.innerText = "PDF DOCUMENT";
+        iconBox.innerText = "📑"; 
       } else if (tableExts.includes(ext)) {
         document.getElementById("tableContainer").classList.remove("hidden");
-        iconBox.innerText = "📊"; badge.innerText = "SPREADSHEET";
+        iconBox.innerText = "📊"; 
         loadTableData(streamUrl);
       } else if (codeExts.includes(ext)) {
         document.getElementById("codeContainer").classList.remove("hidden");
-        iconBox.innerText = "💻"; badge.innerText = `${ext.toUpperCase()} SCRIPT`;
+        iconBox.innerText = "💻"; 
         loadCodeSource(streamUrl, ext);
       } else {
+        // App / Excel / Zip Fallback Download Container
         document.getElementById("genericContainer").classList.remove("hidden");
         document.getElementById("genericTitle").innerText = fname;
-        iconBox.innerText = "📦"; badge.innerText = "CONFIDENTIAL";
+        iconBox.innerText = "📦"; 
       }
     }
 
@@ -334,16 +338,32 @@
       document.getElementById("postPaymentPickerModal").classList.remove("hidden");
     }
 
+    // This handles downloading ANY file (Software, Apps, Zips, Spreadsheets, Videos) locally
+    function downloadActiveFile() {
+      if (!activeFile) return;
+      const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(activeFile)}`;
+      
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = streamUrl;
+      a.download = activeFile;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     async function loadCodeSource(streamUrl, ext) {
       try {
         const res = await fetch(streamUrl);
+        if (!res.ok) throw new Error("HTTP " + res.status);
         const text = await res.text();
         rawSourceCode = text;
-        document.getElementById("codeViewerBox").textContent = text;
-        document.getElementById("codeLinesCount").innerText = `${text.split('\n').length} lines`;
-        Prism.highlightElement(document.getElementById("codeViewerBox"));
+        const codeBox = document.getElementById("codeViewerBox");
+        codeBox.textContent = text;
+        codeBox.className = `language-${ext === 'txt' ? 'none' : ext}`; // Fixes Prism crash on unknown extensions
+        Prism.highlightElement(codeBox);
       } catch (e) {
-        document.getElementById("codeViewerBox").textContent = "Error loading source code.";
+        document.getElementById("codeViewerBox").textContent = "File format could not be parsed as text. Please use the Download button above to view this file locally.";
       }
     }
 
@@ -381,10 +401,8 @@
         if (details.files && details.files.length > 0) {
           packageFiles = details.files;
           
-          // FORCIBLY SHOW THE MODAL TO PREVENT AUTO-DOWNLOAD / AUTO-VIEW
           document.getElementById("postPaymentPickerModal").classList.remove("hidden");
 
-          // Populate the modal grid
           const modalGrid = document.getElementById("modalFilesGrid");
           modalGrid.innerHTML = packageFiles.map((f, idx) => `
             <button type="button" onclick="selectFileAndOpen('${f.filename}')" class="p-4 rounded-2xl bg-white/5 hover:bg-indigo-600/25 border border-white/10 hover:border-indigo-500/50 transition flex items-center gap-3 text-left cursor-pointer group shadow-sm">
@@ -397,7 +415,6 @@
             </button>
           `).join('');
 
-          // Populate Top File Tabs if > 1
           if (packageFiles.length > 1) {
             document.getElementById("fileTabsBar").classList.remove("hidden");
             document.getElementById("filesCountBadge").innerText = packageFiles.length;
@@ -413,34 +430,18 @@
       } catch(e) {}
     }
 
-    // Call init first so the modal blocks the UI before a stream begins
     initViewerManifest();
 
     // =========================================================================
     // ANTI-SCREENSHOT WALL (TEMPORARILY PAUSED FOR TESTING)
-    // To re-enable later, simply uncomment the event listeners below.
     // =========================================================================
     const shield = document.getElementById("antiCaptureShield");
     const video = document.getElementById("nativeVideoPlayer");
     const audio = document.getElementById("nativeAudioPlayer");
 
-    function engageShield() {
-      // Temporarily bypassed
-    }
+    function engageShield() { }
+    function disengageShield() { if (shield) shield.classList.add("hidden"); }
 
-    function disengageShield() {
-      if (shield) shield.classList.add("hidden");
-    }
-
-    /*
-    window.addEventListener("blur", engageShield);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) engageShield();
-    });
-    window.addEventListener("focus", disengageShield);
-    if (shield) shield.addEventListener("click", disengageShield);
-    document.addEventListener("contextmenu", (e) => e.preventDefault());
-    */
   </script>
 </body>
 </html>
