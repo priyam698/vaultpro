@@ -16,7 +16,7 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #030407; /* Deeper premium black */
+      background-color: #030407;
       color: #f8fafc;
       overflow-x: hidden;
       -webkit-user-select: none;
@@ -50,7 +50,6 @@
       animation: waveBounce 1.2s ease-in-out infinite;
     }
 
-    /* Minimalist Scrollbar */
     .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 8px; }
@@ -164,7 +163,7 @@
       </div>
 
       <!-- Cinematic Media Stage -->
-      <div id="mediaStage" class="relative w-full flex-1 min-h-[500px] lg:min-h-[650px] flex items-center justify-center bg-[#020305] overflow-hidden p-4 sm:p-6 border-t border-white/[0.02] shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)]">
+      <div id="mediaStage" class="relative w-full flex-1 min-h-[550px] lg:min-h-[750px] flex items-center justify-center bg-[#020305] overflow-hidden p-4 sm:p-6 border-t border-white/[0.02] shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)]">
         
         <!-- Cinematic DRM HUD overlay -->
         <div class="absolute top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 border border-white/[0.06] backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] select-none transition-opacity duration-300 opacity-60 hover:opacity-100">
@@ -196,7 +195,7 @@
         </div>
 
         <!-- Code Viewer -->
-        <div id="codeContainer" class="hidden w-full h-full flex flex-col bg-[#05070a] rounded-[16px] overflow-hidden border border-white/[0.06] shadow-2xl max-w-5xl mx-auto">
+        <div id="codeContainer" class="hidden w-full h-[75vh] min-h-[500px] flex flex-col bg-[#05070a] rounded-[16px] overflow-hidden border border-white/[0.06] shadow-2xl max-w-5xl mx-auto">
           <div class="px-5 py-3 bg-[#0a0d14] border-b border-white/[0.06] flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-3">
               <div class="flex gap-1.5">
@@ -213,13 +212,13 @@
           <pre class="flex-1 p-5 overflow-auto custom-scroll text-[13px] leading-relaxed font-mono-code select-text bg-transparent m-0"><code id="codeViewerBox" class="language-javascript">Loading code...</code></pre>
         </div>
 
-        <!-- PDF Viewer -->
-        <div id="pdfContainer" class="hidden w-full h-full rounded-[16px] overflow-hidden bg-slate-900 border border-white/[0.06] shadow-2xl">
+        <!-- PDF Viewer (Restored to Full Responsive Height) -->
+        <div id="pdfContainer" class="hidden w-full h-[78vh] min-h-[600px] rounded-[16px] overflow-hidden bg-slate-900 border border-white/[0.06] shadow-2xl">
           <iframe id="pdfIframe" src="" class="w-full h-full border-0"></iframe>
         </div>
 
         <!-- Spreadsheet Viewer -->
-        <div id="tableContainer" class="hidden w-full h-full flex flex-col bg-[#05070a] rounded-[16px] overflow-hidden border border-white/[0.06] shadow-2xl max-w-6xl mx-auto">
+        <div id="tableContainer" class="hidden w-full h-[75vh] min-h-[500px] flex flex-col bg-[#05070a] rounded-[16px] overflow-hidden border border-white/[0.06] shadow-2xl max-w-6xl mx-auto">
           <div class="px-5 py-3 bg-[#0a0d14] border-b border-white/[0.06] flex items-center justify-between text-xs font-mono text-indigo-300 shadow-sm">
             <span class="font-bold tracking-wider uppercase">Spreadsheet Data</span>
             <span id="tableRowsCount" class="bg-indigo-500/20 px-2 py-0.5 rounded text-[10px] border border-indigo-500/30">Rows</span>
@@ -465,9 +464,6 @@
 
     initViewerManifest();
 
-    // =========================================================================
-    // ANTI-SCREENSHOT WALL (TEMPORARILY PAUSED FOR TESTING)
-    // =========================================================================
     const shield = document.getElementById("antiCaptureShield");
     const video = document.getElementById("nativeVideoPlayer");
     const audio = document.getElementById("nativeAudioPlayer");
