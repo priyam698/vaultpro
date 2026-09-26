@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full bg-[#05070c]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,10 +19,14 @@
       --font-mono: 'JetBrains Mono', monospace;
     }
 
-    body {
+    html, body {
+      background-color: #05070c !important;
+      background: #05070c !important;
+      color: #f8fafc;
       font-family: var(--font-sans);
-      background-color: #030508;
-      color: #f1f5f9;
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
       overflow-x: hidden;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -39,16 +43,25 @@
     }
 
     /* Ambient studio radial lights */
-    .ambient-glow {
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
       background: 
-        radial-gradient(ellipse 65% 40% at 50% -10%, rgba(99, 102, 241, 0.16) 0%, transparent 70%),
-        radial-gradient(ellipse 45% 25% at 85% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 30% at 15% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 65%);
+        radial-gradient(ellipse 60% 40% at 50% -5%, rgba(99, 102, 241, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 85% 15%, rgba(56, 189, 248, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 15% 85%, rgba(139, 92, 246, 0.05) 0%, transparent 65%),
+        #05070c;
     }
 
-    /* Studio noise overlay */
-    .studio-grid {
-      background-size: 32px 32px;
+    /* Fine grid overlay */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background-size: 36px 36px;
       background-image: 
         linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
@@ -77,10 +90,14 @@
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col justify-between relative ambient-glow studio-grid">
+<body class="min-h-full flex flex-col justify-between relative">
+
+  <!-- Permanent Dark Canvas Layers (Eliminates White Border Leaks) -->
+  <div class="ambient-canvas"></div>
+  <div class="grid-overlay"></div>
 
   <!-- POST-PAYMENT FILE SELECTOR OVERLAY -->
-  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#030508]/92 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
+  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#05070c]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
     <a href="/share/{{ share_id }}" class="absolute top-6 left-6 text-slate-400 hover:text-white flex items-center gap-2 text-xs font-mono font-medium transition bg-white/[0.04] hover:bg-white/[0.08] px-3.5 py-2 rounded-xl border border-white/[0.08] shadow-lg">
       <span>&larr;</span> Back to Vault
     </a>
@@ -103,7 +120,7 @@
   </div>
 
   <!-- Anti-Screenshot Guard -->
-  <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#030508]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
+  <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#05070c]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
     <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-[0_0_40px_rgba(99,102,241,0.25)] animate-pulse">
       🛡️
     </div>
@@ -118,7 +135,7 @@
   </div>
 
   <!-- Header -->
-  <header class="relative z-30 border-b border-white/[0.06] bg-[#030508]/75 backdrop-blur-xl px-6 h-16 flex items-center justify-between">
+  <header class="relative z-30 border-b border-white/[0.06] bg-[#05070c]/80 backdrop-blur-xl px-6 h-16 flex items-center justify-between">
     <div class="flex items-center gap-3.5">
       <a href="/" class="flex items-center gap-2.5 group">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/10 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner group-hover:border-indigo-400/50 transition">
@@ -148,12 +165,12 @@
   </header>
 
   <!-- Main Studio Workspace -->
-  <main class="relative z-10 flex-1 flex flex-col items-center px-3 sm:px-6 py-4 max-w-[1550px] mx-auto w-full">
+  <main class="relative z-10 flex-1 flex flex-col items-center px-3 sm:px-6 py-4 max-w-[1600px] mx-auto w-full">
     
-    <div class="relative w-full flex-1 flex flex-col rounded-2xl bg-[#070a11]/90 border border-white/[0.07] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)]">
+    <div class="relative w-full flex-1 flex flex-col rounded-2xl bg-[#080b13]/90 border border-white/[0.07] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] backdrop-blur-xl">
       
       <!-- Deliverables Dock (Top File Selector Switcher) -->
-      <div id="fileTabsBar" class="hidden px-4 py-2.5 bg-[#04060b] border-b border-white/[0.06] flex items-center gap-2 overflow-x-auto custom-scroll relative z-20">
+      <div id="fileTabsBar" class="hidden px-4 py-2.5 bg-[#05070d] border-b border-white/[0.06] flex items-center gap-2 overflow-x-auto custom-scroll relative z-20">
         <span class="text-[10px] font-mono text-slate-400 uppercase font-bold shrink-0 tracking-wider mr-1">
           Items (<span id="filesCountBadge">0</span>):
         </span>
@@ -161,7 +178,7 @@
       </div>
 
       <!-- Action Toolbar -->
-      <div class="px-5 py-3 border-b border-white/[0.06] bg-[#070b14]/60 flex items-center justify-between gap-4 flex-wrap z-10">
+      <div class="px-5 py-3 border-b border-white/[0.06] bg-[#090d18]/60 flex items-center justify-between gap-4 flex-wrap z-10">
         <div class="flex items-center gap-3 overflow-hidden min-w-0">
           <div id="formatIconBox" class="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-lg shrink-0 shadow-inner">
             📄
@@ -195,9 +212,9 @@
       </div>
 
       <!-- Studio Presentation Stage -->
-      <div id="mediaStage" class="relative w-full flex-1 min-h-[580px] lg:min-h-[720px] flex items-center justify-center bg-[#020306] overflow-hidden p-3 sm:p-6 shadow-[inset_0_10px_35px_rgba(0,0,0,0.9)]">
+      <div id="mediaStage" class="relative w-full flex-1 min-h-[580px] lg:min-h-[720px] flex items-center justify-center bg-[#030509] overflow-hidden p-3 sm:p-6 shadow-[inset_0_10px_35px_rgba(0,0,0,0.9)]">
         
-        <!-- Elegant Studio HUD Watermark -->
+        <!-- Studio HUD Watermark -->
         <div class="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/60 border border-white/[0.08] backdrop-blur-xl shadow-2xl select-none hud-watermark">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
           <span class="text-[9px] font-mono text-slate-300 font-semibold tracking-wider uppercase">
@@ -228,7 +245,7 @@
           </audio>
         </div>
 
-        <!-- Code Viewer -->
+        <!-- Code / Text / Log Viewer -->
         <div id="codeContainer" class="hidden w-full h-[76vh] flex flex-col bg-[#05070d] rounded-xl overflow-hidden border border-white/[0.07] shadow-2xl max-w-5xl mx-auto">
           <div class="px-4 py-2.5 bg-[#080b14] border-b border-white/[0.06] flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -236,12 +253,13 @@
               <span class="w-2.5 h-2.5 rounded-full bg-amber-500/60"></span>
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></span>
               <span id="codeLangTag" class="text-slate-400 font-mono text-[10px] font-bold tracking-wider uppercase ml-2">SOURCE</span>
+              <span id="codeLinesBadge" class="text-slate-500 font-mono text-[10px]"></span>
             </div>
             <button type="button" onclick="copyScriptCode()" class="px-2.5 py-1 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 border border-white/[0.08] rounded-md font-mono font-medium text-[10px] transition cursor-pointer">
               Copy Buffer
             </button>
           </div>
-          <pre class="flex-1 p-5 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code select-text bg-transparent m-0"><code id="codeViewerBox" class="language-javascript">Loading buffer...</code></pre>
+          <pre class="flex-1 p-5 overflow-auto custom-scroll text-xs leading-relaxed font-mono-code select-text bg-transparent m-0"><code id="codeViewerBox" class="language-none">Loading buffer...</code></pre>
         </div>
 
         <!-- Document Easel (PDF Studio Viewport with Responsive Desktop Frame) -->
@@ -366,7 +384,7 @@
         if (statusText) statusText.innerHTML = "<span>Lossless Stream</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
         if (dlBtn) dlBtn.classList.add("hidden"); 
       } else if (ext === 'pdf') {
-        document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0`;
+        document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0&navpanes=0`;
         document.getElementById("pdfContainer").classList.remove("hidden");
         iconBox.innerText = "📑"; 
         if (statusText) statusText.innerHTML = "<span>Protected PDF Viewport</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
@@ -425,24 +443,55 @@
     }
 
     async function loadCodeSource(streamUrl, ext) {
+      const codeBox = document.getElementById("codeViewerBox");
+      const linesBadge = document.getElementById("codeLinesBadge");
+      codeBox.textContent = "Loading file buffer...";
+      if (linesBadge) linesBadge.innerText = "";
+      
       try {
         const res = await fetch(streamUrl);
         if (!res.ok) throw new Error("HTTP " + res.status);
         const text = await res.text();
         rawSourceCode = text;
-        const codeBox = document.getElementById("codeViewerBox");
+        
+        if (!text || text.length === 0) {
+          codeBox.innerHTML = '<span class="text-slate-500 italic font-mono">// File is empty (0 bytes)</span>';
+          if (linesBadge) linesBadge.innerText = "0 lines";
+          return;
+        }
+
         codeBox.textContent = text;
-        codeBox.className = `language-${ext === 'txt' ? 'none' : ext}`;
-        Prism.highlightElement(codeBox);
+        const lineCount = text.split('\n').length;
+        if (linesBadge) linesBadge.innerText = `${lineCount} lines`;
+
+        const prismMap = {
+          'py': 'python',
+          'js': 'javascript',
+          'jsx': 'jsx',
+          'ts': 'typescript',
+          'tsx': 'tsx',
+          'html': 'markup',
+          'css': 'css',
+          'json': 'json',
+          'sql': 'sql',
+          'sh': 'bash',
+          'md': 'markdown'
+        };
+
+        const targetLang = prismMap[ext] || 'none';
+        codeBox.className = `language-${targetLang}`;
+        if (window.Prism && targetLang !== 'none') {
+          Prism.highlightElement(codeBox);
+        }
       } catch (e) {
-        document.getElementById("codeViewerBox").textContent = "File content could not be rendered as text buffer.";
+        codeBox.innerHTML = `<span class="text-rose-400 font-mono">// Error streaming buffer: ${e.message}</span>`;
       }
     }
 
     async function copyScriptCode() {
       if (!rawSourceCode) return;
       await navigator.clipboard.writeText(rawSourceCode);
-      alert("Source code copied to clipboard.");
+      alert("Buffer copied to clipboard.");
     }
 
     async function loadTableData(streamUrl) {
