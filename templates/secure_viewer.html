@@ -62,6 +62,12 @@
 
   <!-- POST-PAYMENT FILE SELECTOR OVERLAY -->
   <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#05070d]/96 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
+    
+    <!-- NEW: Back Arrow to Return to Vault -->
+    <a href="/share/{{ share_id }}" class="absolute top-6 left-6 sm:top-8 sm:left-8 text-slate-400 hover:text-white flex items-center gap-2 text-sm font-bold transition cursor-pointer z-50 bg-white/5 hover:bg-white/10 px-4 py-2.5 rounded-xl border border-white/10 shadow-lg">
+      <span class="text-lg leading-none">&larr;</span> Back to Vault
+    </a>
+
     <div class="w-20 h-20 rounded-3xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-2xl animate-bounce">
       📂
     </div>
@@ -140,8 +146,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- NEW: Universal Secure Download Button -->
-          <button type="button" onclick="downloadActiveFile()" class="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center gap-1.5">
+          <!-- MODIFIED: Download button is now dynamically hidden for protected media -->
+          <button id="universalDownloadBtn" type="button" onclick="downloadActiveFile()" class="hidden px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center gap-1.5">
             <span>↓</span> Download File
           </button>
           <button type="button" onclick="openFilePickerModal()" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5">
@@ -166,9 +172,9 @@
           </video>
         </div>
 
-        <!-- Image Viewer -->
+        <!-- Image Viewer (Draggable disabled for extra security) -->
         <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center p-2">
-          <img id="nativeImagePlayer" src="" alt="Deliverable" class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
+          <img id="nativeImagePlayer" src="" alt="Deliverable" draggable="false" class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition duration-200">
         </div>
 
         <!-- Audio Player -->
@@ -207,7 +213,7 @@
           </div>
         </div>
 
-        <!-- Universal App & Archive Fallback (Fixed to support Apps, Zip, Excel, etc) -->
+        <!-- Universal App & Archive Fallback (Downloads Allowed) -->
         <div id="genericContainer" class="hidden max-w-md w-full p-8 text-center space-y-5 bg-black/40 rounded-3xl border border-white/10 shadow-2xl">
           <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-2xl flex items-center justify-center mx-auto text-4xl">📦</div>
           <div>
@@ -280,6 +286,7 @@
       const ext = fname.split('.').pop().toLowerCase() || '';
       const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(fname)}`;
       const iconBox = document.getElementById("formatIconBox");
+      const dlBtn = document.getElementById("universalDownloadBtn");
 
       if (videoExts.includes(ext)) {
         const v = document.getElementById("nativeVideoPlayer");
@@ -287,10 +294,12 @@
         v.load();
         document.getElementById("videoContainer").classList.remove("hidden");
         iconBox.innerText = "🎬"; 
+        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent video download
       } else if (imageExts.includes(ext)) {
         document.getElementById("nativeImagePlayer").src = streamUrl;
         document.getElementById("imageContainer").classList.remove("hidden");
         iconBox.innerText = "🖼️"; 
+        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent image download
       } else if (audioExts.includes(ext)) {
         const a = document.getElementById("nativeAudioPlayer");
         document.getElementById("audioSource").src = streamUrl;
@@ -298,23 +307,28 @@
         a.load();
         document.getElementById("audioContainer").classList.remove("hidden");
         iconBox.innerText = "🎵"; 
+        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent audio download
       } else if (ext === 'pdf') {
         document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0`;
         document.getElementById("pdfContainer").classList.remove("hidden");
         iconBox.innerText = "📑"; 
+        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent PDF download
       } else if (tableExts.includes(ext)) {
         document.getElementById("tableContainer").classList.remove("hidden");
         iconBox.innerText = "📊"; 
         loadTableData(streamUrl);
+        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent CSV download
       } else if (codeExts.includes(ext)) {
         document.getElementById("codeContainer").classList.remove("hidden");
         iconBox.innerText = "💻"; 
         loadCodeSource(streamUrl, ext);
+        if(dlBtn) dlBtn.classList.add("hidden"); // Prevent code/text download
       } else {
         // App / Excel / Zip Fallback Download Container
         document.getElementById("genericContainer").classList.remove("hidden");
         document.getElementById("genericTitle").innerText = fname;
         iconBox.innerText = "📦"; 
+        if(dlBtn) dlBtn.classList.remove("hidden"); // Enable download for unviewable files
       }
     }
 
@@ -338,7 +352,7 @@
       document.getElementById("postPaymentPickerModal").classList.remove("hidden");
     }
 
-    // This handles downloading ANY file (Software, Apps, Zips, Spreadsheets, Videos) locally
+    // This handles downloading ANY file (Software, Apps, Zips, Spreadsheets) locally
     function downloadActiveFile() {
       if (!activeFile) return;
       const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(activeFile)}`;
@@ -360,7 +374,7 @@
         rawSourceCode = text;
         const codeBox = document.getElementById("codeViewerBox");
         codeBox.textContent = text;
-        codeBox.className = `language-${ext === 'txt' ? 'none' : ext}`; // Fixes Prism crash on unknown extensions
+        codeBox.className = `language-${ext === 'txt' ? 'none' : ext}`;
         Prism.highlightElement(codeBox);
       } catch (e) {
         document.getElementById("codeViewerBox").textContent = "File format could not be parsed as text. Please use the Download button above to view this file locally.";
