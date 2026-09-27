@@ -96,6 +96,14 @@ PLAN_CONFIG = {
 
 MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
 
+# Map Dodo Product IDs to exact tiers (Supports both test and live IDs)
+DODO_PRODUCT_MAP = {
+    "pdt_0NoSL8gp9fUEk5GKwdB1O": "micro",
+    "pdt_0NoSLFQFIcnqD2weSbr0d": "lite",
+    "pdt_0NoSKxDY49vabp3lshvdI": "plus",
+    "pdt_0NoSL3f1qb5yIZTPzv71H": "pro",
+}
+
 # ----------------- Timezone-Safe Subscription Helper -----------------
 def is_sub_active(sub_end) -> bool:
     if not sub_end:
@@ -118,16 +126,18 @@ def resolve_user_tier(user_dict: dict):
     current_quota = user_dict.get("storage_quota_bytes")
 
     if is_sub_active(sub_end) or price > 0.0:
-        if price >= 6.0 or current_tier == "pro":
+        if current_tier in PLAN_CONFIG and current_tier != "free":
+            resolved = current_tier
+        elif price >= 7.0:
             resolved = "pro"
-        elif price >= 4.0 or current_tier == "plus":
+        elif price >= 4.5:
             resolved = "plus"
-        elif price >= 2.0 or current_tier == "lite":
+        elif price >= 2.5:
             resolved = "lite"
-        elif price >= 1.0 or current_tier == "micro":
+        elif price >= 1.8:
             resolved = "micro"
         else:
-            resolved = current_tier if current_tier in PLAN_CONFIG else "pro"
+            resolved = current_tier if current_tier in PLAN_CONFIG else "micro"
 
         default_q = PLAN_CONFIG[resolved]["quota"]
         quota = min(MAX_VAULT_BYTES, max(current_quota or default_q, default_q))
@@ -423,20 +433,17 @@ def verify_dodo_svix_signature(raw_body: bytes, headers: dict, secret: str) -> b
     msg_signature = headers.get("webhook-signature") or headers.get("x-dodo-signature")
 
     if not msg_id or not msg_timestamp or not msg_signature:
-        # Fallback check for raw direct-body HMAC testing
         expected_raw = hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
         if msg_signature and hmac.compare_digest(expected_raw, msg_signature.replace("sha256=", "")):
             return True
         return False
 
-    # Extract base64 secret payload
     clean_secret = secret.replace("whsec_", "").strip()
     try:
         key = base64.b64decode(clean_secret)
     except Exception:
         key = clean_secret.encode("utf-8")
 
-    # Composite signed payload: "{id}.{timestamp}.{raw_body}"
     to_sign = f"{msg_id}.{msg_timestamp}.".encode("utf-8") + raw_body
 
     computed = base64.b64encode(
@@ -2530,6 +2537,7 @@ async def delete_drive_file(file_id: str, user_id: str):
     file = cursor.fetchone()
 
     if not file:
+        conn.close()
         raise HTTPException(status_code=404, detail="File not found.")
 
     try:
@@ -2766,9 +2774,21 @@ async def dodo_webhook(request: Request):
         or metadata.get("email")
     )
 
-    requested_tier = (metadata.get("tier") or metadata.get("plan") or "pro").lower().strip()
+    # Extract product_id from Dodo webhook payload or product_cart
+    product_id = data_block.get("product_id")
+    if not product_id:
+        product_cart = data_block.get("product_cart") or []
+        if product_cart and isinstance(product_cart, list):
+            product_id = product_cart[0].get("product_id")
+
+    # Map product_id to tier, or fallback to metadata / query parameters
+    detected_tier = DODO_PRODUCT_MAP.get(product_id)
+    if not detected_tier:
+        detected_tier = metadata.get("tier") or metadata.get("plan")
+
+    requested_tier = (detected_tier or "micro").lower().strip()
     if requested_tier not in PLAN_CONFIG or requested_tier == "free":
-        requested_tier = "pro"
+        requested_tier = "micro"
 
     tier_info = PLAN_CONFIG[requested_tier]
     target_quota = tier_info["quota"]
@@ -2797,7 +2817,10 @@ async def dodo_webhook(request: Request):
         if existing_user and is_sub_active(existing_user.get("subscription_end_at")):
             curr_bytes = existing_user.get("storage_quota_bytes") or target_quota
             new_quota = min(MAX_VAULT_BYTES, curr_bytes + target_quota)
-            resolved_tier = "pro" if "pro" in [(existing_user.get("tier") or "").lower(), requested_tier] else requested_tier
+            # If stacking tiers, choose highest tier or stack appropriately
+            existing_tier = (existing_user.get("tier") or "micro").lower()
+            tier_ranks = {"free": 0, "micro": 1, "lite": 2, "plus": 3, "pro": 4}
+            resolved_tier = requested_tier if tier_ranks.get(requested_tier, 1) >= tier_ranks.get(existing_tier, 1) else existing_tier
         else:
             new_quota = target_quota
             resolved_tier = requested_tier
