@@ -78,6 +78,10 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 
+# Dodo Payments Configuration
+DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
+DODO_API_KEY = os.getenv("DODO_API_KEY", "").strip()
+
 def get_db():
     if not DATABASE_URL:
         raise HTTPException(status_code=500, detail="DATABASE_URL environment variable is missing.")
@@ -96,7 +100,6 @@ PLAN_CONFIG = {
 
 MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
 
-# Map Dodo Product IDs to exact tiers (supports both Test and Live IDs)
 DODO_PRODUCT_MAP = {
     "pdt_0NoSL8gp9fUEk5GKwdB1O": "micro",
     "pdt_0NoSLFQFIcnqD2weSbr0d": "lite",
@@ -291,6 +294,7 @@ def init_db_schema():
                 price NUMERIC(5,2) NOT NULL,
                 auto_renew BOOLEAN DEFAULT TRUE,
                 subscription_end_at TIMESTAMP,
+                dodo_subscription_id VARCHAR(120),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
@@ -314,6 +318,7 @@ def init_db_schema():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
             "ALTER TABLE shares ADD COLUMN IF NOT EXISTS message TEXT;",
+            "ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS dodo_subscription_id VARCHAR(120);",
             "CREATE INDEX IF NOT EXISTS idx_user_subs_user ON user_subscriptions (user_id);"
         ]
 
@@ -598,8 +603,6 @@ async def get_user_subscriptions(user_id: str):
     sub_end = user.get("subscription_end_at") or (datetime.utcnow() + timedelta(days=30))
     total_quota_gb = round(user_quota_bytes / (1024**3))
 
-    # Automatic Smart Backfill: If user already has stacked plans (e.g. 245 GB) 
-    # but user_subscriptions is unpopulated, recreate them accurately.
     if not subs and total_quota_gb > 5:
         remaining_gb = total_quota_gb
         if remaining_gb >= 200:
@@ -1357,7 +1360,7 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
         SELECT p.access_token, p.buyer_password, p.permanent_password, p.buyer_password_hash, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND payment_status = 'paid'
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
         ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
