@@ -35,7 +35,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(#rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(#rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(#gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -100,7 +100,6 @@ PLAN_CONFIG = {
 
 MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
 
-# Map Dodo Product IDs to exact tiers (supports both Test and Live IDs)
 DODO_PRODUCT_MAP = {
     "pdt_0NoSL8gp9fUEk5GKwdB1O": "micro",
     "pdt_0NoSLFQFIcnqD2weSbr0d": "lite",
@@ -1400,7 +1399,7 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
         SELECT p.access_token, p.buyer_password, p.permanent_password, p.buyer_password_hash, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND payment_status = 'paid'
         ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
@@ -1753,6 +1752,7 @@ async def process_download(
     request: Request,
     password: Optional[str] = Query(None),
     access_token: Optional[str] = Query(None),
+    file: Optional[str] = Query(None),
     payload: Optional[DownloadPayload] = None
 ):
     conn = get_db()
@@ -1797,9 +1797,43 @@ async def process_download(
                 return RedirectResponse(url=f"/share/{share_id}", status_code=303)
             raise HTTPException(status_code=401, detail="Incorrect passcode.")
 
+    cursor.execute("SELECT filename, s3_key FROM share_files WHERE share_id = %s ORDER BY id ASC", (share_id,))
+    file_records = cursor.fetchall()
+
+    target_s3_key = row["s3_key"]
+    target_filename = row["filename"]
+
+    if file_records:
+        if file:
+            matched = next((fr for fr in file_records if fr["filename"] == file), None)
+            if matched:
+                target_s3_key = matched["s3_key"]
+                target_filename = matched["filename"]
+        elif len(file_records) == 1:
+            target_s3_key = file_records[0]["s3_key"]
+            target_filename = file_records[0]["filename"]
+        else:
+            urls = []
+            for fr in file_records:
+                u = s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={"Bucket": R2_BUCKET_NAME, "Key": fr["s3_key"], "ResponseContentDisposition": f'attachment; filename="{fr["filename"]}"'},
+                    ExpiresIn=3600
+                )
+                urls.append({"filename": fr["filename"], "download_url": u})
+            
+            new_count = row["downloads"] + 1
+            cursor.execute("UPDATE shares SET downloads = %s WHERE id = %s", (new_count, share_id))
+            conn.commit()
+            conn.close()
+
+            if request.method == "GET":
+                return RedirectResponse(url=f"/share/{share_id}", status_code=303)
+            return {"download_urls": urls, "files": urls}
+
     url = s3_client.generate_presigned_url(
         "get_object",
-        Params={"Bucket": R2_BUCKET_NAME, "Key": row["s3_key"], "ResponseContentDisposition": f'attachment; filename="{row["filename"]}"'},
+        Params={"Bucket": R2_BUCKET_NAME, "Key": target_s3_key, "ResponseContentDisposition": f'attachment; filename="{target_filename}"'},
         ExpiresIn=3600
     )
     new_count = row["downloads"] + 1
@@ -1808,7 +1842,7 @@ async def process_download(
 
     if max_downloads > 0 and new_count >= max_downloads:
         try:
-            s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=row["s3_key"])
+            s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=target_s3_key)
         except Exception:
             pass
 
