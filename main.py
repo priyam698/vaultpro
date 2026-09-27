@@ -96,7 +96,7 @@ PLAN_CONFIG = {
 
 MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
 
-# Map Dodo Product IDs to exact tiers (Supports both test and live IDs)
+# Map Dodo Product IDs to exact tiers (supports both Test and Live IDs)
 DODO_PRODUCT_MAP = {
     "pdt_0NoSL8gp9fUEk5GKwdB1O": "micro",
     "pdt_0NoSLFQFIcnqD2weSbr0d": "lite",
@@ -282,6 +282,19 @@ def init_db_schema():
             );
         """)
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_subscriptions (
+                id SERIAL PRIMARY KEY,
+                user_id VARCHAR(120) NOT NULL,
+                tier VARCHAR(30) NOT NULL,
+                quota_bytes BIGINT NOT NULL,
+                price NUMERIC(5,2) NOT NULL,
+                auto_renew BOOLEAN DEFAULT TRUE,
+                subscription_end_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
         migrations = [
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_at TIMESTAMP;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS grace_period_end_at TIMESTAMP;",
@@ -300,7 +313,8 @@ def init_db_schema():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_account_holder VARCHAR(120);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
-            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS message TEXT;"
+            "ALTER TABLE shares ADD COLUMN IF NOT EXISTS message TEXT;",
+            "CREATE INDEX IF NOT EXISTS idx_user_subs_user ON user_subscriptions (user_id);"
         ]
 
         for m in migrations:
@@ -554,6 +568,103 @@ class LoginPaywallRequest(BaseModel):
     share_id: str
     email: str
     password: str
+
+class ToggleAutoRenewRequest(BaseModel):
+    user_id: str
+    subscription_id: int
+    auto_renew: bool
+
+# ----------------- User Subscriptions & Multi-Plan API -----------------
+@app.get("/api/user-subscriptions")
+async def get_user_subscriptions(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user:
+        conn.close()
+        return []
+
+    cursor.execute("""
+        SELECT id, tier, quota_bytes, price, auto_renew, subscription_end_at, created_at 
+        FROM user_subscriptions 
+        WHERE user_id = %s 
+        ORDER BY created_at DESC
+    """, (user_id,))
+    subs = cursor.fetchall()
+
+    user_quota_bytes = user.get("storage_quota_bytes") or 5368709120
+    sub_end = user.get("subscription_end_at") or (datetime.utcnow() + timedelta(days=30))
+    total_quota_gb = round(user_quota_bytes / (1024**3))
+
+    # Automatic Smart Backfill: If user already has stacked plans (e.g. 245 GB) 
+    # but user_subscriptions is unpopulated, recreate them accurately.
+    if not subs and total_quota_gb > 5:
+        remaining_gb = total_quota_gb
+        if remaining_gb >= 200:
+            cursor.execute("""
+                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
+                VALUES (%s, 'pro', %s, 7.00, TRUE, %s)
+            """, (user_id, 200 * 1024**3, sub_end))
+            remaining_gb -= 200
+        while remaining_gb >= 15:
+            cursor.execute("""
+                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
+                VALUES (%s, 'micro', %s, 1.80, TRUE, %s)
+            """, (user_id, 15 * 1024**3, sub_end))
+            remaining_gb -= 15
+        conn.commit()
+
+        cursor.execute("""
+            SELECT id, tier, quota_bytes, price, auto_renew, subscription_end_at, created_at 
+            FROM user_subscriptions 
+            WHERE user_id = %s 
+            ORDER BY created_at DESC
+        """, (user_id,))
+        subs = cursor.fetchall()
+
+    conn.close()
+
+    tier_names = {
+        "free": "Free Starter",
+        "micro": "Zephyr Micro",
+        "lite": "Zephyr Lite",
+        "plus": "Zephyr Plus",
+        "pro": "Zephyr Pro"
+    }
+
+    formatted = []
+    for s in subs:
+        end_dt = s["subscription_end_at"]
+        active = is_sub_active(end_dt)
+        t = s["tier"].lower()
+        gb_val = round(s["quota_bytes"] / (1024**3))
+        formatted.append({
+            "id": s["id"],
+            "tier": t,
+            "name": tier_names.get(t, t.capitalize()),
+            "gb": gb_val,
+            "price": float(s["price"]),
+            "auto_renew": s["auto_renew"] if s.get("auto_renew") is not None else True,
+            "is_active": active,
+            "subscription_end_at": str(end_dt)[:19] if end_dt else "Active"
+        })
+
+    return formatted
+
+@app.post("/api/user-subscriptions/toggle-auto-renew")
+async def toggle_auto_renew(req: ToggleAutoRenewRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE user_subscriptions 
+        SET auto_renew = %s 
+        WHERE id = %s AND user_id = %s
+    """, (req.auto_renew, req.subscription_id, req.user_id))
+    conn.commit()
+    conn.close()
+    return {"status": "success", "auto_renew": req.auto_renew}
 
 # ----------------- OTP Verification Endpoints -----------------
 @app.post("/api/send-otp")
@@ -1246,7 +1357,7 @@ async def unlock_with_password(req: UnlockWithPasswordRequest):
         SELECT p.access_token, p.buyer_password, p.permanent_password, p.buyer_password_hash, s.filename 
         FROM paywall_purchases p
         JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND p.payment_status = 'paid'
+        WHERE p.share_id = %s AND LOWER(p.buyer_email) = %s AND payment_status = 'paid'
         ORDER BY p.id DESC LIMIT 1
     """, (req.share_id, clean_email))
     row = cursor.fetchone()
@@ -2774,14 +2885,14 @@ async def dodo_webhook(request: Request):
         or metadata.get("email")
     )
 
-    # Extract product_id from Dodo webhook payload or product_cart
+    # 1. Extract product_id from Dodo payload
     product_id = data_block.get("product_id")
     if not product_id:
         product_cart = data_block.get("product_cart") or []
         if product_cart and isinstance(product_cart, list):
             product_id = product_cart[0].get("product_id")
 
-    # Map product_id to tier, or fallback to metadata / query parameters
+    # 2. Map product_id to exact purchased tier
     detected_tier = DODO_PRODUCT_MAP.get(product_id)
     if not detected_tier:
         detected_tier = metadata.get("tier") or metadata.get("plan")
@@ -2806,26 +2917,36 @@ async def dodo_webhook(request: Request):
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
         sub_end = datetime.utcnow() + timedelta(days=30)
         
-        existing_user = None
+        # 1. Record the distinct purchased plan into user_subscriptions
         if user_id:
-            cursor.execute("SELECT tier, storage_quota_bytes, subscription_end_at, plan_price FROM users WHERE user_id = %s", (user_id,))
-            existing_user = cursor.fetchone()
-        elif user_email:
-            cursor.execute("SELECT tier, storage_quota_bytes, subscription_end_at, plan_price FROM users WHERE LOWER(email) = LOWER(%s)", (user_email.strip(),))
-            existing_user = cursor.fetchone()
+            cursor.execute("""
+                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
+                VALUES (%s, %s, %s, %s, TRUE, %s)
+            """, (user_id, requested_tier, target_quota, target_price, sub_end))
 
-        if existing_user and is_sub_active(existing_user.get("subscription_end_at")):
-            curr_bytes = existing_user.get("storage_quota_bytes") or target_quota
-            new_quota = min(MAX_VAULT_BYTES, curr_bytes + target_quota)
-            # If stacking tiers, choose highest tier or stack appropriately
-            existing_tier = (existing_user.get("tier") or "micro").lower()
+        # 2. Calculate net active stacked quota across all user subscriptions
+        if user_id:
+            cursor.execute("""
+                SELECT SUM(quota_bytes) as net_q, MAX(price) as top_price 
+                FROM user_subscriptions 
+                WHERE user_id = %s AND subscription_end_at > CURRENT_TIMESTAMP
+            """, (user_id,))
+            sum_row = cursor.fetchone()
+            net_quota = min(MAX_VAULT_BYTES, sum_row["net_q"] or target_quota)
+
+            # Determine the highest plan tier for branding/e-sign permissions
+            cursor.execute("""
+                SELECT tier FROM user_subscriptions 
+                WHERE user_id = %s AND subscription_end_at > CURRENT_TIMESTAMP
+            """, (user_id,))
+            active_rows = cursor.fetchall()
             tier_ranks = {"free": 0, "micro": 1, "lite": 2, "plus": 3, "pro": 4}
-            resolved_tier = requested_tier if tier_ranks.get(requested_tier, 1) >= tier_ranks.get(existing_tier, 1) else existing_tier
-        else:
-            new_quota = target_quota
-            resolved_tier = requested_tier
+            highest_tier = requested_tier
+            for r in active_rows:
+                t = (r.get("tier") or "micro").lower()
+                if tier_ranks.get(t, 0) > tier_ranks.get(highest_tier, 0):
+                    highest_tier = t
 
-        if user_id:
             cursor.execute("""
                 INSERT INTO users (user_id, email, tier, storage_quota_bytes, plan_price, subscription_end_at, grace_period_end_at)
                 VALUES (%s, %s, %s, %s, %s, %s, NULL)
@@ -2836,7 +2957,7 @@ async def dodo_webhook(request: Request):
                     subscription_end_at = %s, 
                     grace_period_end_at = NULL, 
                     email = COALESCE(EXCLUDED.email, users.email)
-            """, (user_id, user_email, resolved_tier, new_quota, target_price, sub_end, resolved_tier, new_quota, target_price, sub_end))
+            """, (user_id, user_email, highest_tier, net_quota, target_price, sub_end, highest_tier, net_quota, target_price, sub_end))
         elif user_email:
             cursor.execute("""
                 UPDATE users 
@@ -2846,7 +2967,7 @@ async def dodo_webhook(request: Request):
                     subscription_end_at = %s, 
                     grace_period_end_at = NULL 
                 WHERE LOWER(email) = LOWER(%s)
-            """, (resolved_tier, new_quota, target_price, sub_end, user_email.strip()))
+            """, (requested_tier, target_quota, target_price, sub_end, user_email.strip()))
         conn.commit()
 
     elif event_type in ["subscription.cancelled", "subscription.expired", "subscription.failed"]:
