@@ -579,6 +579,50 @@ class ToggleAutoRenewRequest(BaseModel):
     subscription_id: int
     auto_renew: bool
 
+# ----------------- Transaction-Time FX Rates Engine -----------------
+def get_currency_symbol(code: str) -> str:
+    symbols = {
+        "INR": "₹", "EUR": "€", "GBP": "£", "CAD": "CA$", "AUD": "A$",
+        "JPY": "¥", "AED": "AED", "SGD": "S$", "CHF": "CHF", "CNY": "¥"
+    }
+    return symbols.get(code, code)
+
+@app.get("/api/exchange-rates")
+async def get_exchange_rates():
+    targets = ["INR", "EUR", "GBP", "CAD", "AUD", "JPY", "AED", "SGD", "CHF", "CNY"]
+    gateway_markup = 1.02  # +2.0% gateway settlement spread consideration
+    try:
+        url = "https://api.frankfurter.dev/v1/latest?base=USD"
+        req = urllib.request.Request(url, headers={"User-Agent": "ZephyrDrive/3.5"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            rates = data.get("rates", {})
+            result = {}
+            for cur in targets:
+                market_rate = rates.get(cur)
+                if market_rate:
+                    adjusted_rate = round(market_rate * gateway_markup, 4)
+                    result[cur] = {
+                        "market_rate": market_rate,
+                        "gateway_rate": adjusted_rate,
+                        "symbol": get_currency_symbol(cur)
+                    }
+            return {"base": "USD", "gateway_markup_pct": 2.0, "rates": result}
+    except Exception as e:
+        fallback = {
+            "INR": {"market_rate": 83.5, "gateway_rate": 85.17, "symbol": "₹"},
+            "EUR": {"market_rate": 0.92, "gateway_rate": 0.9384, "symbol": "€"},
+            "GBP": {"market_rate": 0.78, "gateway_rate": 0.7956, "symbol": "£"},
+            "CAD": {"market_rate": 1.35, "gateway_rate": 1.377, "symbol": "CA$"},
+            "AUD": {"market_rate": 1.50, "gateway_rate": 1.53, "symbol": "A$"},
+            "JPY": {"market_rate": 155.0, "gateway_rate": 158.1, "symbol": "¥"},
+            "AED": {"market_rate": 3.67, "gateway_rate": 3.7434, "symbol": "AED"},
+            "SGD": {"market_rate": 1.34, "gateway_rate": 1.3668, "symbol": "S$"},
+            "CHF": {"market_rate": 0.88, "gateway_rate": 0.8976, "symbol": "CHF"},
+            "CNY": {"market_rate": 7.20, "gateway_rate": 7.344, "symbol": "¥"}
+        }
+        return {"base": "USD", "gateway_markup_pct": 2.0, "rates": fallback}
+
 # ----------------- User Subscriptions & Multi-Plan API -----------------
 def cancel_dodo_gateway_subscription(dodo_sub_id: str) -> bool:
     if not DODO_API_KEY or not dodo_sub_id or dodo_sub_id.startswith("local_"):
