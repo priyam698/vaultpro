@@ -7,6 +7,7 @@ import random
 import secrets
 import hashlib
 import hmac
+import base64
 import json
 import mimetypes
 import urllib.request
@@ -409,6 +410,49 @@ DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 
 otp_storage = {}
 
+# ----------------- Standard Svix Webhook Signature Verifier -----------------
+def verify_dodo_svix_signature(raw_body: bytes, headers: dict, secret: str) -> bool:
+    """
+    Verifies Dodo Payments Standard Webhook (Svix) signatures in both Test and Live modes.
+    """
+    if not secret:
+        return False
+
+    msg_id = headers.get("webhook-id")
+    msg_timestamp = headers.get("webhook-timestamp")
+    msg_signature = headers.get("webhook-signature") or headers.get("x-dodo-signature")
+
+    if not msg_id or not msg_timestamp or not msg_signature:
+        # Fallback check for raw direct-body HMAC testing
+        expected_raw = hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+        if msg_signature and hmac.compare_digest(expected_raw, msg_signature.replace("sha256=", "")):
+            return True
+        return False
+
+    # Extract base64 secret payload
+    clean_secret = secret.replace("whsec_", "").strip()
+    try:
+        key = base64.b64decode(clean_secret)
+    except Exception:
+        key = clean_secret.encode("utf-8")
+
+    # Composite signed payload: "{id}.{timestamp}.{raw_body}"
+    to_sign = f"{msg_id}.{msg_timestamp}.".encode("utf-8") + raw_body
+
+    computed = base64.b64encode(
+        hmac.new(key, to_sign, hashlib.sha256).digest()
+    ).decode("utf-8")
+
+    for item in msg_signature.split(" "):
+        parts = item.split(",", 1)
+        if len(parts) == 2 and parts[0] == "v1":
+            if hmac.compare_digest(parts[1], computed):
+                return True
+        elif hmac.compare_digest(item, computed):
+            return True
+
+    return False
+
 # ----------------- Pydantic Request Models -----------------
 class IndianBankPayoutRequest(BaseModel):
     user_id: str
@@ -785,7 +829,6 @@ async def create_share(payload: CreateShareRequest):
     max_mb = PLAN_CONFIG.get(user_tier, {}).get("single_mb", 2048)
     file_list = payload.files or []
     
-    # FIX: Prioritize the user's custom title. Only fallback to "X items package" if title is blank.
     if payload.filename and payload.filename != "Zephyr_Transfer":
         main_filename = payload.filename
     else:
@@ -806,7 +849,6 @@ async def create_share(payload: CreateShareRequest):
     primary_s3_key = f"transfers/{share_id}/{main_filename}"
     password_hash = hashlib.sha256(payload.password.encode()).hexdigest() if payload.password else None
 
-    # FIX: Add 'message' to the INSERT statement
     cursor.execute("""
         INSERT INTO shares (
             id, filename, filesize_mb, s3_key, password_hash, expiry_hours, 
@@ -993,8 +1035,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
     success_url = f"{base_url}/share/{payload.share_id}?paid=true&email={urllib.parse.quote(buyer)}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{base_url}/share/{payload.share_id}"
 
-    # Global creators with Stripe receive destination transfers directly;
-    # Indian creators receive direct bank/UPI payouts without cross-border Stripe Connect errors.
     payment_intent_data = {}
     if has_stripe and share.get("payout_method") != "indian_bank":
         payment_intent_data = {
@@ -1134,7 +1174,6 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
         try:
             stripe_session = stripe.checkout.Session.retrieve(payload.session_id)
             if stripe_session.payment_status in ['paid', 'complete']:
-                # Corrected SQL WHERE clause to prevent overwriting other users
                 cursor.execute("""
                     UPDATE paywall_purchases 
                     SET payment_status = 'paid', 
@@ -1178,10 +1217,8 @@ async def confirm_email_and_send_password(payload: ConfirmEmailSendPassRequest, 
     conn.commit()
     conn.close()
 
-    # Capture Brevo's true/false return status
     email_sent = send_buyer_password_email(clean_email, purchase["filename"], pwd, payload.share_id)
     
-    # If Brevo drops the email, throw an error so the frontend DOES NOT show the green success banner
     if not email_sent:
         raise HTTPException(
             status_code=500, 
@@ -2493,7 +2530,6 @@ async def delete_drive_file(file_id: str, user_id: str):
     file = cursor.fetchone()
 
     if not file:
-        conn.close()
         raise HTTPException(status_code=404, detail="File not found.")
 
     try:
@@ -2695,7 +2731,7 @@ async def get_user_profile(user_id: str):
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
 
-# ----------------- Dodo Payments Webhook -----------------
+# ----------------- Dodo Payments Webhook (Test & Live Mode Svix Support) -----------------
 @app.post("/api/webhook/dodo")
 async def dodo_webhook(request: Request):
     try:
@@ -2704,10 +2740,14 @@ async def dodo_webhook(request: Request):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-    webhook_signature = request.headers.get("webhook-signature") or request.headers.get("x-dodo-signature")
-    if DODO_WEBHOOK_SECRET and webhook_signature:
-        expected = hmac.new(DODO_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(expected, webhook_signature.replace("sha256=", "")):
+    headers = {
+        "webhook-id": request.headers.get("webhook-id"),
+        "webhook-timestamp": request.headers.get("webhook-timestamp"),
+        "webhook-signature": request.headers.get("webhook-signature") or request.headers.get("x-dodo-signature"),
+    }
+
+    if DODO_WEBHOOK_SECRET:
+        if not verify_dodo_svix_signature(raw_body, headers, DODO_WEBHOOK_SECRET):
             raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
     event_type = payload.get("type", "")

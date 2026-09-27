@@ -167,7 +167,7 @@
     }
 
     /* ========================================================================= */
-    /* 2-COLOR THEME: SKY CYAN + PERIWINKLE INDIGO                               */
+    /* 2-COLOR THEME: SKY CYAN + PERIWINKLE INDIGO                              */
     /* ========================================================================= */
     body.light-theme {
       background-color: #dbe4f0;
@@ -978,7 +978,7 @@
               </div>
             </div>
 
-            <button id="transferBtn" onclick="executeTransferPayload()" 
+            <button id="transferBtn" onclick="initiateTransfer()" 
                     class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
               Transfer Files
             </button>
@@ -2202,17 +2202,39 @@
 
     initTheme();
 
-    const DODO_PRODUCT_IDS = {
-      micro: "pdt_0NoSL8gp9fUEk5GKwdB1O",
-      lite: "pdt_0NoSLFQFIcnqD2weSbr0d",
-      plus: "pdt_0NoSKxDY49vabp3lshvdI",
-      pro: "pdt_0NoSL3f1qb5yIZTPzv71H"
+    // ==========================================
+    // PAYMENT ENVIRONMENT CONFIGURATION
+    // Set to "test" for Sandbox, "live" for Production
+    // ==========================================
+    const ACTIVE_PAYMENT_ENV = "test"; // <--- CHANGE TO "live" WHEN GOING LIVE
+
+    const DODO_CONFIG = {
+      test: {
+        domain: "https://test.checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_0NoSL8gp9fUEk5GKwdB1O",
+          lite:  "pdt_0NoSLFQFIcnqD2weSbr0d",
+          plus:  "pdt_0NoSKxDY49vabp3lshvdI",
+          pro:   "pdt_0NoSL3f1qb5yIZTPzv71H"
+        }
+      },
+      live: {
+        domain: "https://checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_LIVE_MICRO_ID_HERE",
+          lite:  "pdt_LIVE_LITE_ID_HERE",
+          plus:  "pdt_LIVE_PLUS_ID_HERE",
+          pro:   "pdt_LIVE_PRO_ID_HERE"
+        }
+      }
     };
 
     function openDodoCheckout(e, tier = "pro") {
       if (e) e.preventDefault();
-      const productId = DODO_PRODUCT_IDS[tier] || DODO_PRODUCT_IDS["pro"];
-      let targetUrl = `https://checkout.dodopayments.com/buy/${productId}`;
+      
+      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
+      const productId = envConfig.products[tier] || envConfig.products["pro"];
+      let targetUrl = `${envConfig.domain}/${productId}`;
       
       const uid = getStoredUserId();
       const email = getStoredUserEmail();
@@ -2220,6 +2242,7 @@
       if (email) params.append("email", email);
       if (uid) params.append("metadata_user_id", uid);
       params.append("tier", tier);
+      params.append("env", ACTIVE_PAYMENT_ENV);
       
       const qs = params.toString();
       if (qs) {

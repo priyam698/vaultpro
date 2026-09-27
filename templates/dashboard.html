@@ -697,11 +697,31 @@
   </footer>
 
   <script>
-    const DODO_PRODUCT_IDS = {
-      micro: "pdt_0NnaihWSsabCnJhTUZspz",
-      lite:  "pdt_0Nnaj4zAkRMRoDf8pyikT",
-      plus:  "pdt_0NnajLUyCZX2ARDgk003r",
-      pro:   "pdt_0NnVvaQ9xDPDhpjmiuR3A"
+    // ==========================================
+    // PAYMENT ENVIRONMENT CONFIGURATION
+    // Set to "test" for Sandbox, "live" for Production
+    // ==========================================
+    const ACTIVE_PAYMENT_ENV = "test"; // <--- CHANGE TO "live" WHEN GOING LIVE
+
+    const DODO_CONFIG = {
+      test: {
+        domain: "https://test.checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_0NoSL8gp9fUEk5GKwdB1O",
+          lite:  "pdt_0NoSLFQFIcnqD2weSbr0d",
+          plus:  "pdt_0NoSKxDY49vabp3lshvdI",
+          pro:   "pdt_0NoSL3f1qb5yIZTPzv71H"
+        }
+      },
+      live: {
+        domain: "https://checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_LIVE_MICRO_ID_HERE",
+          lite:  "pdt_LIVE_LITE_ID_HERE",
+          plus:  "pdt_LIVE_PLUS_ID_HERE",
+          pro:   "pdt_LIVE_PRO_ID_HERE"
+        }
+      }
     };
 
     const PLAN_SPECS = {
@@ -905,7 +925,7 @@
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
         
-        currentAccountTier = (data.tier || "free").lower();
+        currentAccountTier = (data.tier || "free").toLowerCase();
         currentUserQuotaBytes = data.quota_bytes || 5368709120;
         currentPlanPrice = parseFloat(data.plan_price || 0.0);
         currentSubEndAt = data.subscription_end_at || null;
@@ -1232,13 +1252,15 @@
         return;
       }
 
-      const productId = DODO_PRODUCT_IDS[selectedUpgradeTarget] || DODO_PRODUCT_IDS["pro"];
-      let targetUrl = `https://checkout.dodopayments.com/buy/${productId}`;
+      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
+      const productId = envConfig.products[selectedUpgradeTarget] || envConfig.products["pro"];
+      let targetUrl = `${envConfig.domain}/${productId}`;
       
       const params = new URLSearchParams();
       if (currentUserEmail) params.append("email", currentUserEmail);
       if (currentUserId) params.append("metadata_user_id", currentUserId);
       params.append("tier", selectedUpgradeTarget);
+      params.append("env", ACTIVE_PAYMENT_ENV);
 
       const qs = params.toString();
       if (qs) {
