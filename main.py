@@ -100,6 +100,7 @@ PLAN_CONFIG = {
 
 MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
 
+# Map Dodo Product IDs to exact tiers (supports both Test and Live IDs)
 DODO_PRODUCT_MAP = {
     "pdt_0NoSL8gp9fUEk5GKwdB1O": "micro",
     "pdt_0NoSLFQFIcnqD2weSbr0d": "lite",
@@ -580,6 +581,29 @@ class ToggleAutoRenewRequest(BaseModel):
     auto_renew: bool
 
 # ----------------- User Subscriptions & Multi-Plan API -----------------
+def cancel_dodo_gateway_subscription(dodo_sub_id: str) -> bool:
+    if not DODO_API_KEY or not dodo_sub_id or dodo_sub_id.startswith("local_"):
+        return False
+
+    is_test = "test" in DODO_WEBHOOK_SECRET.lower() or DODO_API_KEY.startswith("test_")
+    base_url = "https://test.dodopayments.com" if is_test else "https://live.dodopayments.com"
+    headers = {"Authorization": f"Bearer {DODO_API_KEY}", "Content-Type": "application/json"}
+
+    try:
+        url = f"{base_url}/subscriptions/{dodo_sub_id}/cancel"
+        req = urllib.request.Request(url, data=json.dumps({"cancel_at_period_end": True}).encode(), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.status in (200, 201, 204)
+    except Exception:
+        try:
+            patch_url = f"{base_url}/subscriptions/{dodo_sub_id}"
+            req_patch = urllib.request.Request(patch_url, data=json.dumps({"status": "cancelled"}).encode(), headers=headers, method="PATCH")
+            with urllib.request.urlopen(req_patch, timeout=10) as resp2:
+                return resp2.status in (200, 204)
+        except Exception as e:
+            print(f"[DODO CANCEL API ERROR]: {e}", flush=True)
+            return False
+
 @app.get("/api/user-subscriptions")
 async def get_user_subscriptions(user_id: str):
     conn = get_db()
@@ -592,7 +616,7 @@ async def get_user_subscriptions(user_id: str):
         return []
 
     cursor.execute("""
-        SELECT id, tier, quota_bytes, price, auto_renew, subscription_end_at, created_at 
+        SELECT id, tier, quota_bytes, price, auto_renew, subscription_end_at, dodo_subscription_id, created_at 
         FROM user_subscriptions 
         WHERE user_id = %s 
         ORDER BY created_at DESC
@@ -607,20 +631,20 @@ async def get_user_subscriptions(user_id: str):
         remaining_gb = total_quota_gb
         if remaining_gb >= 200:
             cursor.execute("""
-                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
-                VALUES (%s, 'pro', %s, 7.00, TRUE, %s)
+                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at, dodo_subscription_id)
+                VALUES (%s, 'pro', %s, 7.00, TRUE, %s, 'local_pro')
             """, (user_id, 200 * 1024**3, sub_end))
             remaining_gb -= 200
         while remaining_gb >= 15:
             cursor.execute("""
-                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
-                VALUES (%s, 'micro', %s, 1.80, TRUE, %s)
+                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at, dodo_subscription_id)
+                VALUES (%s, 'micro', %s, 1.80, TRUE, %s, 'local_micro')
             """, (user_id, 15 * 1024**3, sub_end))
             remaining_gb -= 15
         conn.commit()
 
         cursor.execute("""
-            SELECT id, tier, quota_bytes, price, auto_renew, subscription_end_at, created_at 
+            SELECT id, tier, quota_bytes, price, auto_renew, subscription_end_at, dodo_subscription_id, created_at 
             FROM user_subscriptions 
             WHERE user_id = %s 
             ORDER BY created_at DESC
@@ -661,12 +685,28 @@ async def toggle_auto_renew(req: ToggleAutoRenewRequest):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
+        SELECT id, tier, dodo_subscription_id, subscription_end_at 
+        FROM user_subscriptions 
+        WHERE id = %s AND user_id = %s
+    """, (req.subscription_id, req.user_id))
+    sub = cursor.fetchone()
+
+    if not sub:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Subscription record not found.")
+
+    dodo_sub_id = sub.get("dodo_subscription_id")
+    if not req.auto_renew and dodo_sub_id:
+        cancel_dodo_gateway_subscription(dodo_sub_id)
+
+    cursor.execute("""
         UPDATE user_subscriptions 
         SET auto_renew = %s 
         WHERE id = %s AND user_id = %s
     """, (req.auto_renew, req.subscription_id, req.user_id))
     conn.commit()
     conn.close()
+
     return {"status": "success", "auto_renew": req.auto_renew}
 
 # ----------------- OTP Verification Endpoints -----------------
@@ -1704,9 +1744,17 @@ async def share_page(request: Request, share_id: str):
         "file_count": file_count
     })
 
+@app.get("/share/{share_id}/download")
+@app.get("/api/download/{share_id}")
 @app.post("/share/{share_id}/download")
 @app.post("/api/download/{share_id}")
-async def process_download(share_id: str, payload: Optional[DownloadPayload] = None):
+async def process_download(
+    share_id: str, 
+    request: Request,
+    password: Optional[str] = Query(None),
+    access_token: Optional[str] = Query(None),
+    payload: Optional[DownloadPayload] = None
+):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
@@ -1716,19 +1764,25 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         conn.close()
         raise HTTPException(status_code=404, detail="Share link not found or expired.")
 
+    effective_token = access_token or (payload.access_token if payload else None)
+    effective_pass = password or (payload.password if payload else None)
+
     if row.get("is_paywalled"):
-        token = payload.access_token if payload else None
-        if not token:
+        if not effective_token:
             conn.close()
+            if request.method == "GET":
+                return RedirectResponse(url=f"/share/{share_id}", status_code=303)
             raise HTTPException(status_code=402, detail="Payment required. Enter your permanent password to unlock.")
 
         cursor.execute("""
             SELECT id FROM paywall_purchases 
             WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
-        """, (share_id, token))
+        """, (share_id, effective_token))
         verified = cursor.fetchone()
         if not verified:
             conn.close()
+            if request.method == "GET":
+                return RedirectResponse(url=f"/share/{share_id}", status_code=303)
             raise HTTPException(status_code=403, detail="Invalid or unpaid access token.")
 
     max_downloads = row.get("max_downloads", 0) or 0
@@ -1737,9 +1791,10 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
         raise HTTPException(status_code=410, detail="Link reached its maximum download count.")
 
     if row["password_hash"]:
-        user_pass = payload.password if payload else None
-        if not user_pass or hashlib.sha256(user_pass.encode()).hexdigest() != row["password_hash"]:
+        if not effective_pass or hashlib.sha256(effective_pass.encode()).hexdigest() != row["password_hash"]:
             conn.close()
+            if request.method == "GET":
+                return RedirectResponse(url=f"/share/{share_id}", status_code=303)
             raise HTTPException(status_code=401, detail="Incorrect passcode.")
 
     url = s3_client.generate_presigned_url(
@@ -1758,6 +1813,10 @@ async def process_download(share_id: str, payload: Optional[DownloadPayload] = N
             pass
 
     conn.close()
+
+    if request.method == "GET":
+        return RedirectResponse(url=url, status_code=303)
+
     return {"download_url": url}
 
 # ----------------- Stripe Bank Account Onboarding (Multi-Country) -----------------
@@ -2888,14 +2947,12 @@ async def dodo_webhook(request: Request):
         or metadata.get("email")
     )
 
-    # 1. Extract product_id from Dodo payload
     product_id = data_block.get("product_id")
     if not product_id:
         product_cart = data_block.get("product_cart") or []
         if product_cart and isinstance(product_cart, list):
             product_id = product_cart[0].get("product_id")
 
-    # 2. Map product_id to exact purchased tier
     detected_tier = DODO_PRODUCT_MAP.get(product_id)
     if not detected_tier:
         detected_tier = metadata.get("tier") or metadata.get("plan")
@@ -2920,14 +2977,12 @@ async def dodo_webhook(request: Request):
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
         sub_end = datetime.utcnow() + timedelta(days=30)
         
-        # 1. Record the distinct purchased plan into user_subscriptions
         if user_id:
             cursor.execute("""
                 INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
                 VALUES (%s, %s, %s, %s, TRUE, %s)
             """, (user_id, requested_tier, target_quota, target_price, sub_end))
 
-        # 2. Calculate net active stacked quota across all user subscriptions
         if user_id:
             cursor.execute("""
                 SELECT SUM(quota_bytes) as net_q, MAX(price) as top_price 
@@ -2937,7 +2992,6 @@ async def dodo_webhook(request: Request):
             sum_row = cursor.fetchone()
             net_quota = min(MAX_VAULT_BYTES, sum_row["net_q"] or target_quota)
 
-            # Determine the highest plan tier for branding/e-sign permissions
             cursor.execute("""
                 SELECT tier FROM user_subscriptions 
                 WHERE user_id = %s AND subscription_end_at > CURRENT_TIMESTAMP
