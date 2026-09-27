@@ -230,6 +230,52 @@
     </div>
   </div>
 
+  <div id="plansModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+    <div class="obsidian-card max-w-xl w-full rounded-3xl p-6 sm:p-8 relative border border-indigo-500/40 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-wider mb-1">
+            Subscription Overview
+          </div>
+          <h3 class="text-xl font-black card-heading">Your Plans</h3>
+          <p class="text-xs opacity-70">Review your active subscription, expiration date, and available plans.</p>
+        </div>
+        <button onclick="closePlansModal()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider opacity-75">Active Plan</h4>
+        <div id="modalActivePlanCard" class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span id="modalActivePlanName" class="text-sm font-black text-indigo-400">Free Starter</span>
+              <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Active</span>
+            </div>
+            <p id="modalActivePlanDetails" class="text-xs opacity-80">5 GB Vault Storage • 2 GB Single Transfer Limit</p>
+            <p id="modalActivePlanExpiry" class="text-[11px] font-mono text-indigo-300 font-semibold">Expires: Never (Forever Free)</p>
+          </div>
+          <button onclick="closePlansModal(); openUpgradeModal('pro');" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition whitespace-nowrap cursor-pointer">
+            Purchase More Plan
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <h4 class="text-xs font-black uppercase tracking-wider opacity-75">Available & Inactive Plans</h4>
+        <div id="modalInactivePlansList" class="space-y-2.5">
+          </div>
+      </div>
+
+      <div class="pt-4 border-t border-white/15 flex justify-end">
+        <button type="button" onclick="closePlansModal()" class="px-6 py-2.5 rounded-xl border border-white/15 hover:bg-white/5 text-xs font-bold transition cursor-pointer">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <div id="upgradePlanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-7 relative border border-indigo-500/40 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -525,6 +571,11 @@
       </div>
 
       <div class="flex items-center gap-2.5 sm:gap-4">
+        <button onclick="openPlansModal()" class="header-pill text-xs font-bold hover:opacity-80 transition flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 cursor-pointer">
+          <span class="text-indigo-400">⚡</span>
+          <span class="hidden sm:inline">Your Plans</span>
+        </button>
+
         <button onclick="openBrandingModal()" class="header-pill text-xs font-bold hover:opacity-80 transition flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 cursor-pointer">
           <span class="text-purple-400">🎨</span>
           <span class="hidden sm:inline">Branding</span>
@@ -725,6 +776,7 @@
     };
 
     const PLAN_SPECS = {
+      free:  { name: "Free Starter", price: 0.00, quotaBytes: 5 * 1024**3, gb: 5 },
       micro: { name: "Zephyr Micro", price: 1.80, quotaBytes: 15 * 1024**3, gb: 15 },
       lite:  { name: "Zephyr Lite",  price: 2.50, quotaBytes: 30 * 1024**3, gb: 30 },
       plus:  { name: "Zephyr Plus",  price: 4.50, quotaBytes: 80 * 1024**3, gb: 80 },
@@ -1056,6 +1108,65 @@
       } catch(e) {
         document.getElementById("filesTableBody").innerHTML = `<tr><td colspan="4" class="py-8 text-center text-rose-400">Failed to load files.</td></tr>`;
       }
+    }
+
+    // ==========================================
+    // YOUR PLANS MODAL CONTROLLER
+    // ==========================================
+    function openPlansModal() {
+      const modal = document.getElementById("plansModal");
+      modal.classList.remove("hidden");
+
+      const planSpecs = {
+        free:  { name: "Free Starter", price: "$0.00", gb: "5 GB" },
+        micro: { name: "Zephyr Micro", price: "$1.80/mo", gb: "15 GB" },
+        lite:  { name: "Zephyr Lite",  price: "$2.50/mo", gb: "30 GB" },
+        plus:  { name: "Zephyr Plus",  price: "$4.50/mo", gb: "80 GB" },
+        pro:   { name: "Zephyr Pro",   price: "$7.00/mo", gb: "200 GB" }
+      };
+
+      const activeNameEl = document.getElementById("modalActivePlanName");
+      const activeDetailsEl = document.getElementById("modalActivePlanDetails");
+      const activeExpiryEl = document.getElementById("modalActivePlanExpiry");
+
+      const activeSpec = planSpecs[currentAccountTier] || planSpecs["free"];
+      activeNameEl.innerText = activeSpec.name;
+      activeDetailsEl.innerText = `${activeSpec.gb} Vault Storage • Active Tier`;
+
+      if (currentAccountTier === "free") {
+        activeExpiryEl.innerText = "Expires: Never (Forever Free)";
+      } else if (currentSubEndAt) {
+        activeExpiryEl.innerText = `Renewal / Expiry Date: ${currentSubEndAt.split('T')[0] || currentSubEndAt}`;
+      } else {
+        activeExpiryEl.innerText = "Renewal / Expiry Date: Active (No expiry date set)";
+      }
+
+      // Render Inactive / Available Plans List
+      const inactiveListEl = document.getElementById("modalInactivePlansList");
+      const allTierKeys = ["free", "micro", "lite", "plus", "pro"];
+      const inactiveKeys = allTierKeys.filter(k => k !== currentAccountTier);
+
+      inactiveListEl.innerHTML = inactiveKeys.map(k => {
+        const spec = planSpecs[k];
+        return `
+          <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black">${spec.name}</span>
+                <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-white/10">Inactive</span>
+              </div>
+              <p class="text-[11px] opacity-70 mt-0.5">${spec.gb} Vault Storage • ${spec.price}</p>
+            </div>
+            <button onclick="closePlansModal(); openUpgradeModal('${k}');" class="px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/15 text-slate-200 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer">
+              Purchase Plan
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closePlansModal() {
+      document.getElementById("plansModal").classList.add("hidden");
     }
 
     function getFileIcon(filename) {
