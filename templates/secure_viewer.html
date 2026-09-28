@@ -28,15 +28,11 @@
       padding: 0;
       overflow-x: hidden;
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none;
-      -webkit-touch-callout: none;
     }
     .font-mono-code {
       font-family: var(--font-mono);
       -webkit-user-select: text;
-      -moz-user-select: text;
       user-select: text;
     }
     .ambient-canvas {
@@ -66,22 +62,13 @@
       backface-visibility: hidden;
       transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
-    /* Custom Scrollbar */
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.25); border-radius: 9999px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 9999px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
-
-    @keyframes pulseSoft {
-      0%, 100% { opacity: 0.95; }
-      50% { opacity: 0.5; }
-    }
-    .hud-watermark {
-      animation: pulseSoft 4s ease-in-out infinite;
-    }
   </style>
 </head>
-<body class="min-h-full flex flex-col justify-between relative bg-[#06080e]">
+<body class="min-h-full flex flex-col justify-between relative bg-[#06080e]" oncontextmenu="return false;">
 
   <div class="ambient-canvas"></div>
   <div class="grid-overlay"></div>
@@ -99,7 +86,7 @@
     <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-indigo-400 uppercase mb-1.5 block">Licensed Package Manifest</span>
     <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">Select Deliverable to Inspect</h2>
     <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
-      Under confidential inspection mode. Select any deliverable to stream inside your sandbox. Direct downloads for media, code, and documents are disabled under confidential inspection mode.
+      Under confidential inspection mode. Select any deliverable to stream inside your sandbox. Direct downloads for media, code, and documents are disabled.
     </p>
 
     <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full max-h-[55vh] overflow-y-auto custom-scroll p-1.5 text-xs text-slate-300 font-mono text-center">
@@ -122,8 +109,8 @@
     </button>
   </div>
 
-  <!-- TOP HEADER -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-[#06080e]/80 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between">
+  <!-- TOP HEADER (WITH SESSION WATERMARK POUNDED IN UPPER PANEL) -->
+  <header class="relative z-30 border-b border-white/[0.08] bg-[#06080e]/90 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between">
     <div class="flex items-center gap-2.5">
       <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/30 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner">
         Z
@@ -132,13 +119,15 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
-        <span>Verified Purchase</span>
+      <!-- Session Watermark Pill moved safely to the upper panel -->
+      <div class="hidden md:flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>CONFIDENTIAL SESSION &bull; {{ buyer_email }}</span>
       </div>
 
-      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono text-slate-300">
-        <span>Session: <strong class="text-indigo-400 font-normal truncate max-w-[200px] inline-block align-bottom">{{ buyer_email }}</strong></span>
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
+        <span class="hidden sm:inline">Verified Purchase</span>
       </div>
 
       <div class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/20 text-amber-400 font-mono font-bold tracking-wider uppercase">
@@ -199,12 +188,13 @@
       <!-- FULL-SCALE MEDIA STAGE -->
       <div id="mediaStage" class="relative w-full flex-1 flex flex-col items-center justify-center bg-[#05070d] overflow-hidden p-4 sm:p-6 select-none min-h-[500px]">
         
-        <!-- Forensic Watermark -->
-        <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-30 select-none">
-          <div class="hud-watermark px-4 py-1.5 rounded-full bg-black/75 border border-white/15 backdrop-blur-xl text-xs font-mono text-emerald-400/90 shadow-2xl flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>CONFIDENTIAL SESSION • <span id="watermarkBuyerEmail">{{ buyer_email }}</span></span>
-          </div>
+        <!-- Diagonal Repeating Watermark Grid -->
+        <div class="absolute inset-0 z-20 pointer-events-none opacity-[0.035] flex flex-wrap items-center justify-around gap-20 p-8 rotate-[-25deg] select-none overflow-hidden">
+          {% for i in range(24) %}
+          <span class="font-mono text-xs font-black tracking-widest text-white whitespace-nowrap">
+            ZEPHYR SHIELD &bull; {{ buyer_email }}
+          </span>
+          {% endfor %}
         </div>
 
         <!-- Video Player Viewport -->
@@ -215,10 +205,10 @@
           </video>
         </div>
 
-        <!-- Image Viewer Viewport (With Proper Size Expansion & Scaling) -->
-        <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center overflow-auto custom-scroll p-2 sm:p-4">
+        <!-- Image Viewer Viewport (Proper Size & Scaling) -->
+        <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4">
           <img id="nativeImageViewer" src="" alt="Deliverable" draggable="false" 
-               class="media-high-quality min-w-[280px] sm:min-w-[420px] max-w-[94vw] max-h-[75vh] w-auto h-auto object-contain rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] bg-black/40 border border-white/[0.08] select-none pointer-events-none">
+               class="media-high-quality max-w-full max-h-[78vh] w-auto h-auto object-contain rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] bg-black/40 border border-white/[0.08] select-none pointer-events-none">
         </div>
 
         <!-- Audio Player Viewport -->
@@ -233,7 +223,7 @@
           <audio id="nativeAudioPlayer" controls controlslist="nodownload" class="w-full"></audio>
         </div>
 
-        <!-- Code & Text Log Viewer (Expanded Syntax Highlighting) -->
+        <!-- Code & Text Log Viewer -->
         <div id="codeContainer" class="hidden w-full h-full max-w-6xl flex flex-col rounded-2xl border border-white/[0.08] bg-[#0c101c] overflow-hidden shadow-2xl max-h-[75vh]">
           <div class="px-4 py-2.5 bg-black/40 border-b border-white/[0.08] flex items-center justify-between text-xs">
             <span class="text-[11px] font-mono text-slate-300" id="codeLinesCount">-- lines</span>
