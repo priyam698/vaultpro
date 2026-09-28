@@ -7,14 +7,13 @@
   
   <link rel="icon" type="image/svg+xml" href="/favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
-    /* ========================================================================= */
-    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE                                   */
-    /* ========================================================================= */
+    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #06070b;
@@ -52,9 +51,7 @@
       transition: all 0.3s ease;
     }
 
-    /* ========================================================================= */
-    /* 2-COLOR LIGHT THEME (SKY CYAN + PERIWINKLE INDIGO)                        */
-    /* ========================================================================= */
+    /* 2-COLOR LIGHT THEME (SKY CYAN + PERIWINKLE INDIGO) */
     body.light-theme {
       background-color: #dbe4f0;
       color: #0f172a;
@@ -92,7 +89,6 @@
       border: 1px solid rgba(195, 206, 222, 0.85) !important;
       color: #4338ca !important;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
-      backdrop-filter: blur(12px);
     }
 
     body.light-theme .delivery-badge {
@@ -115,7 +111,9 @@
 
     body.light-theme .obsidian-card h1,
     body.light-theme .obsidian-card h2,
-    body.light-theme .obsidian-card h3 {
+    body.light-theme .obsidian-card h3,
+    body.light-theme .obsidian-card h4,
+    body.light-theme .obsidian-card .card-heading {
       color: #0f172a !important;
     }
 
@@ -128,28 +126,31 @@
     body.light-theme #iconBox {
       background: rgba(99, 102, 241, 0.15) !important;
       border-color: rgba(99, 102, 241, 0.3) !important;
-      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2) !important;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2) !important;
     }
 
     body.light-theme .paywall-banner {
-      background: linear-gradient(135deg, rgba(238, 242, 250, 0.95) 0%, rgba(228, 234, 245, 0.95) 100%) !important;
+      background: linear-gradient(to right, rgba(238, 242, 250, 0.95), rgba(228, 234, 245, 0.95)) !important;
       border: 1px solid rgba(190, 202, 219, 0.85) !important;
     }
 
-    body.light-theme input {
+    body.light-theme input,
+    body.light-theme textarea {
       background-color: rgba(248, 250, 253, 0.95) !important;
       border: 1px solid rgba(195, 206, 222, 0.9) !important;
       color: #0f172a !important;
       box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05) !important;
     }
 
-    body.light-theme input:focus {
+    body.light-theme input:focus,
+    body.light-theme textarea:focus {
       background-color: #ffffff !important;
       border-color: #6366f1 !important;
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
     }
 
-    body.light-theme input::placeholder {
+    body.light-theme input::placeholder,
+    body.light-theme textarea::placeholder {
       color: #64748b !important;
     }
 
@@ -158,6 +159,11 @@
       border-color: rgba(195, 206, 222, 0.8) !important;
       color: #475569 !important;
     }
+
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
@@ -165,125 +171,138 @@
   <div id="backdropBg" class="site-mountain-backdrop"></div>
 
   <!-- Server Metadata Transport -->
-  <div id="serverConfig" 
-       class="hidden" 
-       data-share-id="{{ share_id }}" 
-       data-paywalled="{% if is_paywalled %}true{% else %}false{% endif %}"
-       data-password="{% if has_password %}true{% else %}false{% endif %}">
+  <div id="serverConfig"
+       class="hidden"
+       data-share-id="{{ share_id }}"
+       data-filename="{{ filename }}"
+       data-filesize="{{ filesize }}"
+       data-downloads="{{ downloads }}"
+       data-has-password="{{ 'true' if has_password else 'false' }}"
+       data-is-paywalled="{{ 'true' if is_paywalled else 'false' }}"
+       data-unlock-price="{{ unlock_price }}"
+       data-file-count="{{ file_count }}">
   </div>
-  <script id="brandingConfig" type="application/json">
-    {{ branding | tojson if branding else 'null' }}
+
+  <script type="application/json" id="brandingConfig">
+    {% if branding %}{{ branding | tojson }}{% else %}null{% endif %}
   </script>
 
+  <!-- Top Header Navigation -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
-    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 group">
-        <div id="brandLogoContainer" class="brand-logo-box w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-3 group">
+        <div class="brand-logo-box w-10 h-10 rounded-xl bg-[#080d1c]/85 border border-white/10 p-1.5 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300 overflow-hidden">
           <img id="brandLogoCustom" src="" alt="Studio Logo" class="hidden w-full h-full object-contain">
           <svg id="defaultLogoSvg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
             <defs>
-              <linearGradient id="dlRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
                 <stop offset="60%" stop-color="#6366f1"/>
                 <stop offset="100%" stop-color="#4338ca"/>
               </linearGradient>
-              <linearGradient id="dlRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#c084fc"/>
                 <stop offset="50%" stop-color="#818cf8"/>
                 <stop offset="100%" stop-color="#06b6d4"/>
               </linearGradient>
-              <linearGradient id="dlGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+              <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
               </linearGradient>
             </defs>
-            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#dlRibbonCyan)"/>
-            <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#dlGlassSheen)"/>
-            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#dlRibbonViolet)"/>
-            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#dlRibbonCyan)"/>
-            <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#dlGlassSheen)"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#navGlassSheen)"/>
+            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
+            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#navRibbonCyan)"/>
+            <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#navGlassSheen)"/>
           </svg>
         </div>
-        
-        <span id="brandTitleDisplay" class="font-black text-2xl tracking-tight">
-          Zephyr
-        </span>
-      </a>
+        <span id="brandTitleDisplay" class="font-black text-2xl tracking-tight">Zephyr</span>
+      </div>
 
       <div class="flex items-center gap-3">
         <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <div class="delivery-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-semibold backdrop-blur-md">
+        <div class="delivery-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 text-xs font-semibold backdrop-blur-md">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-          Direct Cloudflare Delivery
+          <span>Direct Cloudflare Delivery</span>
         </div>
       </div>
     </div>
   </header>
 
-  <main class="relative z-20 max-w-xl mx-auto px-6 py-10 flex-1 flex flex-col items-center justify-center text-center w-full">
+  <!-- Main Container -->
+  <main class="relative z-20 max-w-5xl mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center text-center w-full">
     
-    <div class="obsidian-card rounded-3xl p-8 sm:p-10 w-full relative shadow-2xl">
+    <!-- CARD: ACCESS & WORKSPACE INTERFACE -->
+    <div id="mainTransferCard" class="obsidian-card rounded-3xl p-6 sm:p-8 w-full relative shadow-2xl space-y-6">
       
-      <div id="iconBox" class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-5 shadow-lg shadow-indigo-600/20 text-2xl transition-all">
-        {% if is_paywalled %}💰{% else %}📦{% endif %}
+      <!-- Top Overview Header -->
+      <div id="cardTopHeader" class="text-center">
+        <div id="iconBox" class="w-20 h-20 mx-auto rounded-3xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/20 text-3xl">
+          📦
+        </div>
+        
+        <h1 id="transferHeading" class="text-xl sm:text-2xl font-black tracking-tight break-all">
+          {{ filename }}
+        </h1>
+        <p class="text-xs opacity-75 mt-1 font-medium">
+          {{ filesize }} MB • Total Downloads: <span id="downloadCount">{{ downloads }}</span>
+        </p>
+
+        {% if message %}
+        <div class="mt-4 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-left text-xs max-w-lg mx-auto">
+          <span class="font-bold opacity-75 block text-[10px] uppercase text-indigo-400">Sender Message</span>
+          <p class="mt-1 whitespace-pre-wrap text-slate-300">{{ message }}</p>
+        </div>
+        {% endif %}
       </div>
 
-      <!-- TITLE AUTOMATICALLY UPDATES HERE VIA BACKEND FIX -->
-      <h1 class="text-xl sm:text-2xl font-bold tracking-tight break-all">
-        {{ filename }}
-      </h1>
-      <p class="text-xs opacity-75 mt-2 font-medium">
-        {{ filesize }} MB • Total Downloads: <span id="downloadCount" class="font-bold">{{ downloads }}</span>
-      </p>
-
+      <!-- PAYWALL ESCROW GATING BLOCK -->
       {% if is_paywalled %}
-      <!-- PAY-TO-UNLOCK ESCROW SECTION -->
-      <div id="paywallContainer" class="mt-6 space-y-4 text-left">
+      <div id="paywallContainer" class="space-y-4 max-w-md mx-auto text-left">
         
-        <!-- STEP 1: POST-PAYMENT CONFIRM/EDIT EMAIL BOX -->
-        <div id="confirmEmailBox" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-lg">
-          <div class="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
+        <!-- STEP 1: POST-PAYMENT CONFIRM/DISPATCH EMAIL BOX -->
+        <div id="confirmEmailBox" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-xl">
+          <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Payment Verified! Confirm Delivery Gmail
+            <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wide">Payment Verified • Dispatch Permanent Password</span>
           </div>
-          <p class="text-xs opacity-80 leading-relaxed">
-            Please confirm or edit the email address where your <strong>permanent lifetime unlock password</strong> will be dispatched:
+          <p class="text-xs opacity-85 leading-relaxed">
+            Please confirm or enter the email address where your <strong>permanent lifetime unlock password</strong> should be dispatched:
           </p>
           <div>
             <label class="block text-[11px] font-bold opacity-75 mb-1">Target Delivery Email</label>
-            <input type="email" id="confirmEmailInput" placeholder="yourname@gmail.com"
-                   class="w-full bg-slate-900/40 border border-indigo-400/40 focus:border-indigo-400 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none transition">
+            <input id="confirmEmailInput" type="email" placeholder="you@company.com" 
+                   class="w-full rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none transition">
           </div>
-          <button id="confirmEmailBtn" onclick="submitEmailConfirmationAndSendPass()"
-                  class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-md shadow-indigo-600/30 transition cursor-pointer">
+          <button id="dispatchPasswordBtn" onclick="confirmAndSendPassword()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
             Confirm Email & Dispatch Password
           </button>
         </div>
 
-        <!-- STEP 2: GREEN NOTIFICATION BANNER (Displayed once password is sent) -->
-        <div id="paymentVerifiedBanner" class="hidden p-4 sm:p-5 rounded-2xl bg-[#06241b] border border-emerald-500/40 text-left space-y-1.5 shadow-xl">
-          <div class="flex items-center gap-2 text-emerald-400 font-black text-xs tracking-wider">
-            <span>✓</span>
-            <span>PASSWORD DISPATCHED</span>
+        <!-- STEP 2: GREEN NOTIFICATION BANNER -->
+        <div id="greenNotificationBanner" class="hidden p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-left space-y-1.5 shadow-xl">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-black text-xs tracking-wider">✓ PASSWORD DISPATCHED</span>
           </div>
           <p class="text-xs text-slate-300 leading-relaxed">
-            We have emailed your permanent unlock password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono"></strong>. Please check your Gmail Inbox and Spam folder, then enter the password below to unlock this file.
+            We have emailed your permanent password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono">your email</strong>. Please check your Gmail inbox and Spam folder, then enter the password below to access the workspace.
           </p>
-          <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-300 hover:text-indigo-200 font-bold underline mt-1">
-            Open Gmail Inbox &rarr;
+          <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline mt-1">
+            <span>Open Gmail Inbox</span> ↗
           </a>
         </div>
 
         <!-- Escrow Pricing Bar -->
-        <div class="paywall-banner p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900/60 border border-emerald-500/30 space-y-1.5 transition-all">
-          <div class="flex justify-between items-center">
-            <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <div id="paywallBanner" class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/30 to-slate-900/50 border border-emerald-500/30 space-y-1.5 text-left transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               Pay-to-Unlock Escrow
             </span>
-            <span class="text-lg font-black font-mono text-emerald-400">${{ "%.2f"|format(unlock_price) }}</span>
+            <span class="text-xs font-black text-emerald-400 font-mono">${{ "%.2f"|format(unlock_price) }}</span>
           </div>
           <p class="text-[11px] opacity-75 leading-relaxed">
             Payment required. Once purchased, a permanent access password is sent to your email so you never have to pay twice.
@@ -291,117 +310,142 @@
         </div>
 
         <!-- Inputs Group -->
-        <div id="buyerInputSection" class="space-y-3">
+        <div id="buyerPasswordWrapper" class="space-y-3">
           <div>
             <label class="block text-xs font-semibold opacity-80 mb-1">Your Email Address</label>
-            <input id="buyerEmailInput" type="email" placeholder="recipient@company.com" oninput="handleEmailTyping()" onblur="checkBuyerEmail()"
-                   class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-emerald-400 rounded-xl px-4 py-3 text-xs focus:outline-none transition">
+            <input id="buyerEmailInput" type="email" placeholder="you@company.com" onblur="checkBuyerEmail()" oninput="handleEmailTyping()"
+                   class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
           </div>
 
-          <!-- Permanent Password Field (Visible for paid accounts / on return) -->
-          <div id="buyerPasswordField" class="hidden space-y-1.5">
+          <!-- Permanent Password Field -->
+          <div id="buyerPasswordSection" class="hidden space-y-1.5">
             <div class="flex justify-between items-center">
-              <label class="block text-xs font-semibold text-emerald-400">Enter Permanent Password</label>
-              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend code</button>
+              <label class="block text-xs font-semibold opacity-80">Enter Permanent Password</label>
+              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend Code</button>
             </div>
-            <input id="buyerPasswordInput" type="text" placeholder="e.g. ZP-7492A1" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()"
-                   class="w-full bg-slate-900/40 border border-emerald-400/50 rounded-xl px-4 py-3 text-xs focus:outline-none transition font-mono uppercase tracking-widest text-emerald-300 font-bold">
+            <input id="buyerPasswordInput" type="text" placeholder="e.g. ZP-28749FA4" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()"
+                   class="w-full rounded-xl px-4 py-2.5 text-xs font-mono font-bold tracking-widest text-emerald-400 focus:outline-none transition">
             <p class="text-[10px] opacity-70">Check your Gmail inbox or Spam folder for the code sent by Zephyr.</p>
           </div>
-
-          <div id="paywallErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
-
-          <!-- State A: Initial Checkout Button (Unpaid) -->
-          <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
-                  class="w-full bg-gradient-to-r from-emerald-600 hover:from-emerald-500 via-teal-600 hover:via-teal-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-emerald-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
-            Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
-          </button>
-
-          <!-- State B: Unlock With Password Button (Paid) -->
-          <button id="paywallUnlockBtn" onclick="handleUnlockWithPassword()" 
-                  class="hidden w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 text-white font-black text-sm py-4 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
-            Unlock & View Deliverables
-          </button>
         </div>
 
-        <!-- State C: File Unlocked Area (Auto-download button removed) -->
-        <div id="unlockedActionsSection" class="hidden space-y-2.5 pt-2">
-          
-          {% if message %}
-          <!-- NEW: Displays the sender's custom message after unlocking -->
-          <div class="mb-4 p-5 rounded-2xl bg-[#0a0f24] border border-indigo-500/30 text-left shadow-lg">
-            <span class="block text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-2 flex items-center gap-1.5">
-              <span>💬</span> Sender Message
-            </span>
-            <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{{ message }}</p>
-          </div>
-          {% endif %}
+        <div id="paywallErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 text-center font-medium"></div>
 
-          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300 flex items-center justify-between">
-            <span class="font-bold flex items-center gap-2">
-              <span>✓</span> Lifetime Personal Access Active
-            </span>
-            <span id="verifiedBuyerBadge" class="font-mono text-[11px] opacity-80"></span>
-          </div>
+        <!-- Initial Checkout Button -->
+        <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
+                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition cursor-pointer">
+          Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
+        </button>
 
-          <a id="secureViewerLink" href="#" 
-             class="block text-center w-full py-3.5 bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-500 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/30 transition">
-            🔒 Open Protected Viewer (Anti-Screenshot)
-          </a>
-        </div>
+        <!-- Unlock with Password Button -->
+        <button id="paywallUnlockBtn" onclick="handleUnlockWithPassword()" 
+                class="hidden w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 text-white font-black text-sm shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+          Unlock & View Deliverables
+        </button>
+
       </div>
+      {% endif %}
 
-      {% else %}
-      <!-- STANDARD TRANSFER VIEW -->
-      <div class="mt-8 space-y-4 text-left">
-        
-        {% if message %}
-        <!-- NEW: Displays the sender's custom message for standard transfers -->
-        <div class="mb-4 p-5 rounded-2xl bg-[#0a0f24] border border-indigo-500/30 text-left shadow-lg">
-          <span class="block text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-2 flex items-center gap-1.5">
-            <span>💬</span> Sender Message
-          </span>
-          <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{{ message }}</p>
-        </div>
-        {% endif %}
-
-        <div id="passwordSection" class="{% if not has_password %}hidden{% endif %} space-y-4">
-          <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-300 flex items-center gap-2.5">
-            <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-            </svg>
-            <span>This vault is protected. Enter the passcode to unlock.</span>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold opacity-80 mb-1.5">Recipient Passcode</label>
-            <input id="passwordInput" type="password" placeholder="Enter recipient password" 
-                   class="w-full bg-slate-900/40 border border-slate-400/30 focus:border-indigo-400 rounded-xl px-4 py-3 text-xs focus:outline-none transition">
-          </div>
-        </div>
-
-        <div id="errorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 font-medium text-center"></div>
-
-        <button id="downloadBtn" onclick="handleStandardDownload()" 
-                class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
-          {% if has_password %}Unlock & Download{% else %}Download File{% endif %}
+      <!-- PASSWORD PROTECTION PROMPT (FOR NON-PAYWALLED PASSCODE SHARES) -->
+      {% if has_password and not is_paywalled %}
+      <div id="passwordSection" class="space-y-3 max-w-sm mx-auto text-left">
+        <label class="block text-xs font-semibold opacity-80">Recipient Passcode Required</label>
+        <input id="passwordInput" type="password" placeholder="Enter recipient passcode..." onkeydown="if(event.key==='Enter') unlockWorkspaceWithPasscode()"
+               class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+        <div id="passcodeErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs text-rose-400 text-center font-medium"></div>
+        <button onclick="unlockWorkspaceWithPasscode()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black shadow-md transition cursor-pointer">
+          Verify Passcode & Open Workspace
         </button>
       </div>
       {% endif %}
 
+      <!-- ========================================================================= -->
+      <!-- INTERACTIVE WORKSPACE AREA (REVEALED ONCE UNLOCKED / OR IF UNPROTECTED)  -->
+      <!-- ========================================================================= -->
+      <div id="workspaceContainer" class="{% if is_paywalled or has_password %}hidden{% endif %} space-y-5 text-left border-t border-white/10 pt-5">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+          <div>
+            <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+              <span>✨</span> Interactive Studio Workspace
+            </h3>
+            <p class="text-[11px] opacity-70 mt-0.5">Preview, modify or edit code & text files before downloading.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="modifiedStatusBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden">
+              Modified in Editor ✓
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          
+          <!-- Left File Explorer Sidebar -->
+          <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[460px]">
+            <div>
+              <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-white/10 pb-2 mb-2">
+                <span>Package Files</span>
+                <span id="sidebarFileCount" class="font-mono">--</span>
+              </div>
+              <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[360px]">
+                <div class="p-3 text-xs opacity-60 text-center">Loading files...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right File Preview / Code Editor -->
+          <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[380px]">
+            <div class="flex items-center justify-between border-b border-white/10 pb-2">
+              <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-xs">Select a file</span>
+              <button onclick="discardActiveFileChanges()" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 transition cursor-pointer">
+                Reset Original
+              </button>
+            </div>
+
+            <!-- Dynamic Workspace Body: Code Editor / Media Viewer -->
+            <div class="flex-1 relative flex flex-col rounded-xl overflow-hidden bg-black/60 border border-white/5">
+              <textarea id="workspaceCodeEditor" oninput="handleCodeModification()" class="w-full flex-1 p-3.5 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed" placeholder="Select a text, code, or markdown file to inspect or edit..."></textarea>
+              <div id="workspaceMediaViewer" class="absolute inset-0 bg-slate-950 flex items-center justify-center p-3 hidden"></div>
+            </div>
+
+            <div class="flex items-center justify-between text-[10px] opacity-65 font-mono pt-1">
+              <span>Editing enabled • Changes apply when clicking "Download This File"</span>
+              <span>Cloudflare R2 Direct</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- THE 2 PRIMARY ACTION BUTTONS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+          <button id="downloadThisFileBtn" onclick="downloadActiveFile()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>📥</span>
+            <span>Download This File</span>
+          </button>
+
+          <button id="downloadAllFilesZipBtn" onclick="downloadAllFilesAsZip()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:opacity-95 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>📦</span>
+            <span>Download All Files (.zip)</span>
+          </button>
+        </div>
+
+      </div>
+
     </div>
 
-    <p class="mt-8 text-xs opacity-75">
-      Need to send large files? <a href="/" class="text-indigo-400 hover:underline font-medium">Send up to 2 GB for free on Zephyr &rarr;</a>
-    </p>
+    <div class="mt-8 text-center text-xs opacity-75">
+      Need to send large files? <a href="/" class="text-indigo-400 hover:underline font-medium">Send up to 2 GB for free on Zephyr →</a>
+    </div>
 
   </main>
 
-  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-5 text-center text-xs opacity-75">
-    © 2026 Zephyr Systems. Zero-knowledge edge transfers.
+  <!-- Footer -->
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-6 text-center text-xs opacity-75">
+    © 2026 Zephyr Systems. Zero-knowledge edge transfers & workspace delivery.
   </footer>
 
   <script>
+    // Theme Engine
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
@@ -423,31 +467,31 @@
 
     initTheme();
 
+    // Context & Parameter Parsing
+    const urlParams = new URLSearchParams(window.location.search);
     const serverConfig = document.getElementById("serverConfig");
     const shareId = serverConfig.dataset.shareId;
-    const isPaywalled = serverConfig.dataset.paywalled === "true";
-    const hasPassword = serverConfig.dataset.password === "true";
-    const urlParams = new URLSearchParams(window.location.search);
+    const isPaywalled = serverConfig.dataset.isPaywalled === "true";
+    const hasPassword = serverConfig.dataset.hasPassword === "true";
+    const unlockPrice = parseFloat(serverConfig.dataset.unlockPrice || "0.00");
+    const totalFilesCount = parseInt(serverConfig.dataset.fileCount || "1");
 
-    let typingTimer = null;
     let currentSessionId = urlParams.get("session_id");
-    let currentToken = urlParams.get("token");
+    let currentToken = urlParams.get("token") || localStorage.getItem(`buyer_token_${shareId}`) || "";
+    let validatedPasscode = "";
 
+    // Branding Parser
     let brandingData = null;
     try {
-      brandingData = JSON.parse(document.getElementById("brandingConfig").textContent);
-    } catch (e) {
-      brandingData = null;
-    }
+      const rawBranding = document.getElementById("brandingConfig").textContent;
+      brandingData = JSON.parse(rawBranding);
+    } catch(e) {}
 
     if (brandingData) {
       if (brandingData.brand_title) {
+        document.title = `Download from ${brandingData.brand_title} | Zephyr`;
         const titleEl = document.getElementById("brandTitleDisplay");
-        if (titleEl) {
-          titleEl.innerText = brandingData.brand_title;
-          titleEl.className = "font-extrabold text-2xl tracking-tight text-white";
-        }
-        document.title = "Download from " + brandingData.brand_title + " | Zephyr";
+        if (titleEl) titleEl.innerText = brandingData.brand_title;
       }
       if (brandingData.brand_logo_url) {
         const customLogo = document.getElementById("brandLogoCustom");
@@ -459,215 +503,188 @@
         }
       }
       if (brandingData.brand_bg_url) {
-        const bg = document.getElementById("backdropBg");
-        if (bg) {
-          bg.style.backgroundImage = "linear-gradient(rgba(4, 6, 14, 0.7), rgba(4, 6, 14, 0.85)), url('" + brandingData.brand_bg_url + "')";
+        const bgEl = document.getElementById("backdropBg");
+        if (bgEl) {
+          bgEl.style.backgroundImage = `linear-gradient(rgba(6, 7, 11, 0.75), rgba(6, 7, 11, 0.90)), url('${brandingData.brand_bg_url}')`;
+          bgEl.style.backgroundSize = "cover";
+          bgEl.style.backgroundPosition = "center";
         }
+      }
+      if (brandingData.brand_accent_color) {
+        const accent = brandingData.brand_accent_color;
+        const mainBtns = [document.getElementById("downloadThisFileBtn"), document.getElementById("dispatchPasswordBtn")];
+        mainBtns.forEach(btn => {
+          if (btn) btn.style.backgroundColor = accent;
+        });
       }
     }
 
-    // On Load Check
+    // Workspace File Cache
+    let packageFiles = [];
+    let activeFileIdx = 0;
+    let fileOriginalCache = {};
+    let fileContentsCache = {};
+
+    // Initialization Logic
     window.addEventListener("DOMContentLoaded", async () => {
-      const isPaidParam = urlParams.get("paid") === "true";
+      const isPaidReturn = urlParams.get("paid") === "true";
       const emailParam = urlParams.get("email");
 
-      // 1. If returning from Stripe Checkout, explicitly STOP and ask the user to hit "Dispatch"
-      if (isPaidParam) {
-        let candidateEmail = (emailParam || "").trim();
-        
-        // Hide standard checkout immediately
+      if (isPaidReturn) {
+        const confirmBox = document.getElementById("confirmEmailBox");
+        const confirmInput = document.getElementById("confirmEmailInput");
+        if (confirmBox && confirmInput) {
+          confirmBox.classList.remove("hidden");
+          confirmInput.value = emailParam || "";
+          confirmInput.focus();
+        }
+        const paywallBanner = document.getElementById("paywallBanner");
+        if (paywallBanner) paywallBanner.classList.add("hidden");
         const checkoutBtn = document.getElementById("paywallCheckoutBtn");
-        const inputSec = document.getElementById("buyerInputSection");
         if (checkoutBtn) checkoutBtn.classList.add("hidden");
-        if (inputSec) inputSec.classList.add("hidden");
-
-        // Force show the explicit email dispatch box
-        showConfirmEmailDialog(candidateEmail);
         return;
       }
 
-      // 2. Pre-fill remembered email and verify lifetime status (if opening link later)
-      const savedEmail = localStorage.getItem("buyer_email_" + shareId);
-      if (savedEmail) {
-        const emailInput = document.getElementById("buyerEmailInput");
-        if (emailInput) {
-          emailInput.value = savedEmail;
-          checkBuyerEmail();
-        }
+      // If unlocked or free without password, initialize workspace immediately
+      if (!isPaywalled && !hasPassword) {
+        initWorkspaceView();
+      } else if (currentToken) {
+        verifyExistingToken();
       }
     });
 
-    // Confirmation Dialog Controller
-    function showConfirmEmailDialog(email) {
-      const confirmBox = document.getElementById("confirmEmailBox");
-      const confirmInput = document.getElementById("confirmEmailInput");
-
-      if (confirmBox && confirmInput) {
-        confirmInput.value = email || "";
-        confirmBox.classList.remove("hidden");
-        confirmInput.focus();
-      }
-    }
-
-    // Explicit User Action: Click "Dispatch Password"
-    async function submitEmailConfirmationAndSendPass() {
-      const input = document.getElementById("confirmEmailInput");
-      const email = input ? input.value.trim().toLowerCase() : "";
-      const btn = document.getElementById("confirmEmailBtn");
-
-      if (!email || !email.includes("@")) {
-        alert("Please enter a valid Gmail address.");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerText = "Dispatching Password via Brevo...";
-
+    async function verifyExistingToken() {
       try {
-        const res = await fetch("/api/paywall/confirm-and-send-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            share_id: shareId,
-            session_id: currentSessionId,
-            token: currentToken,
-            email: email
-          })
-        });
-
+        const res = await fetch(`/api/paywall/verify-access?share_id=${shareId}&access_token=${currentToken}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Failed to send password.");
-
-        alert("✓ Password dispatched! Please check your Gmail (including the Spam folder).");
-
-        // Hide confirmation box and show password entry
-        document.getElementById("confirmEmailBox").classList.add("hidden");
-        document.getElementById("buyerInputSection").classList.remove("hidden");
-        switchToPasswordMode(email);
-        
-      } catch (err) {
-        alert("Error: " + err.message);
-        btn.disabled = false;
-        btn.innerText = "Confirm Email & Dispatch Password";
-      }
+        if (data.unlocked) {
+          revealWorkspace();
+        }
+      } catch(e) {}
     }
 
+    // Paywall Handlers
+    let typingTimer = null;
     function handleEmailTyping() {
       clearTimeout(typingTimer);
-      typingTimer = setTimeout(checkBuyerEmail, 350);
+      typingTimer = setTimeout(checkBuyerEmail, 400);
     }
 
-    // Auto-check if buyer email already has lifetime access
     async function checkBuyerEmail() {
       const emailInput = document.getElementById("buyerEmailInput");
       if (!emailInput) return;
       const email = emailInput.value.trim().toLowerCase();
       if (!email || !email.includes("@")) return;
 
-      // Skip background check if we are in the middle of a Stripe return
-      if (urlParams.get("paid") === "true") return;
-
       try {
-        const res = await fetch(`/api/paywall/check-email?share_id=${shareId}&email=${encodeURIComponent(email)}`);
+        const res = await fetch(`/api/paywall/check-buyer?share_id=${shareId}&email=${encodeURIComponent(email)}`);
         const data = await res.json();
-
         if (data.has_paid) {
-          switchToPasswordMode(email);
+          switchToPasswordMode(true);
         } else {
-          switchToPaymentMode();
+          switchToPasswordMode(false);
         }
       } catch(e) {}
     }
 
-    // Transition to Password Input Mode
-    function switchToPasswordMode(email) {
-      const pwdField = document.getElementById("buyerPasswordField");
+    function switchToPasswordMode(hasPaid) {
+      const passSec = document.getElementById("buyerPasswordSection");
       const checkoutBtn = document.getElementById("paywallCheckoutBtn");
       const unlockBtn = document.getElementById("paywallUnlockBtn");
-      const emailInput = document.getElementById("buyerEmailInput");
-      const greenBanner = document.getElementById("paymentVerifiedBanner");
-      const emailDisplay = document.getElementById("verifiedEmailDisplay");
-
-      if (emailInput) emailInput.value = email;
-      if (emailDisplay) emailDisplay.innerText = email;
-      if (greenBanner) greenBanner.classList.remove("hidden");
-      if (pwdField) pwdField.classList.remove("hidden");
-      if (checkoutBtn) checkoutBtn.classList.add("hidden");
-      if (unlockBtn) unlockBtn.classList.remove("hidden");
-
-      localStorage.setItem("buyer_email_" + shareId, email);
-
-      const passInput = document.getElementById("buyerPasswordInput");
-      if (passInput) passInput.focus();
-    }
-
-    function switchToPaymentMode() {
-      const pwdField = document.getElementById("buyerPasswordField");
-      const checkoutBtn = document.getElementById("paywallCheckoutBtn");
-      const unlockBtn = document.getElementById("paywallUnlockBtn");
-      const greenBanner = document.getElementById("paymentVerifiedBanner");
-
-      if (greenBanner) greenBanner.classList.add("hidden");
-      if (pwdField) pwdField.classList.add("hidden");
-      if (checkoutBtn) checkoutBtn.classList.remove("hidden");
-      if (unlockBtn) unlockBtn.classList.add("hidden");
-    }
-
-    // Submit Password to Unlock and Download
-    async function handleUnlockWithPassword() {
-      const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
-      const password = document.getElementById("buyerPasswordInput").value.trim();
-      const errBox = document.getElementById("paywallErrorMsg");
-      const btn = document.getElementById("paywallUnlockBtn");
-
-      errBox.classList.add("hidden");
-
-      if (!email) {
-        errBox.innerText = "Please enter your Gmail address.";
-        errBox.classList.remove("hidden");
-        return;
+      if (hasPaid) {
+        if (passSec) passSec.classList.remove("hidden");
+        if (checkoutBtn) checkoutBtn.classList.add("hidden");
+        if (unlockBtn) unlockBtn.classList.remove("hidden");
+      } else {
+        if (passSec) passSec.classList.add("hidden");
+        if (checkoutBtn) checkoutBtn.classList.remove("hidden");
+        if (unlockBtn) unlockBtn.classList.add("hidden");
       }
-      if (!password) {
-        errBox.innerText = "Please enter the permanent password sent to your Gmail.";
-        errBox.classList.remove("hidden");
+    }
+
+    async function confirmAndSendPassword() {
+      const email = document.getElementById("confirmEmailInput").value.trim().toLowerCase();
+      const btn = document.getElementById("dispatchPasswordBtn");
+      if (!email || !email.includes("@")) {
+        alert("Please enter a valid Gmail address.");
         return;
       }
 
       btn.disabled = true;
-      btn.innerText = "Verifying Password...";
+      btn.innerText = "Dispatching via Brevo...";
+
+      try {
+        const res = await fetch("/api/paywall/confirm-and-send-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ share_id: shareId, email: email, session_id: currentSessionId, token: currentToken })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Dispatch failed");
+
+        document.getElementById("confirmEmailBox").classList.add("hidden");
+        const greenBanner = document.getElementById("greenNotificationBanner");
+        if (greenBanner) {
+          greenBanner.classList.remove("hidden");
+          document.getElementById("verifiedEmailDisplay").innerText = email;
+        }
+        document.getElementById("buyerEmailInput").value = email;
+        switchToPasswordMode(true);
+      } catch(err) {
+        alert("Email Dispatch Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Confirm Email & Dispatch Password";
+      }
+    }
+
+    async function handleUnlockWithPassword() {
+      const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
+      const pwd = document.getElementById("buyerPasswordInput").value.trim();
+      const errBox = document.getElementById("paywallErrorMsg");
+      const btn = document.getElementById("paywallUnlockBtn");
+
+      if (errBox) errBox.classList.add("hidden");
+      if (!email || !pwd) {
+        if (errBox) {
+          errBox.innerText = "Please enter both email and permanent password.";
+          errBox.classList.remove("hidden");
+        }
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Verifying...";
 
       try {
         const res = await fetch("/api/paywall/unlock-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ share_id: shareId, email: email, password: password })
+          body: JSON.stringify({ share_id: shareId, email: email, password: pwd })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Incorrect password.");
+        if (!res.ok) throw new Error(data.detail || "Incorrect permanent password.");
 
-        // File is unlocked only after valid password entry (no auto download)
-        revealUnlockedUI(email, data.download_url, data.viewer_url, data.access_token);
+        currentToken = data.access_token;
+        localStorage.setItem(`buyer_token_${shareId}`, currentToken);
+        revealWorkspace();
       } catch(err) {
-        errBox.innerText = err.message;
-        errBox.classList.remove("hidden");
+        if (errBox) {
+          errBox.innerText = err.message;
+          errBox.classList.remove("hidden");
+        }
+      } finally {
         btn.disabled = false;
         btn.innerText = "Unlock & View Deliverables";
       }
     }
 
-    // Resend Password to Gmail via Brevo
     async function resendPassword() {
       const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
-      if (!email) {
-        alert("Please enter your Gmail address first.");
+      if (!email || !email.includes("@")) {
+        alert("Please enter your email address first.");
         return;
       }
-
-      const btn = document.querySelector('button[onclick="resendPassword()"]');
-      const oldText = btn.innerText;
-      btn.innerText = "Sending...";
-      btn.disabled = true;
-
       try {
         const res = await fetch("/api/paywall/resend-password", {
           method: "POST",
@@ -677,28 +694,25 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Failed to resend.");
         alert("✓ Permanent password re-dispatched! Please check your Gmail inbox and Spam folder.");
-      } catch (err) {
-        alert("Error: " + err.message);
-      } finally {
-        btn.innerText = oldText;
-        btn.disabled = false;
+      } catch(err) {
+        alert(err.message);
       }
     }
 
-    // Initial Stripe Checkout
     async function handlePaywallCheckout() {
       const email = document.getElementById("buyerEmailInput").value.trim().toLowerCase();
       const errBox = document.getElementById("paywallErrorMsg");
-      const btn = document.getElementById("paywallCheckoutBtn");
-
-      errBox.classList.add("hidden");
+      if (errBox) errBox.classList.add("hidden");
 
       if (!email || !email.includes("@")) {
-        errBox.innerText = "Please enter a valid Gmail address to continue.";
-        errBox.classList.remove("hidden");
+        if (errBox) {
+          errBox.innerText = "Please enter a valid Gmail address to proceed.";
+          errBox.classList.remove("hidden");
+        }
         return;
       }
 
+      const btn = document.getElementById("paywallCheckoutBtn");
       btn.disabled = true;
       btn.innerText = "Initializing Checkout...";
 
@@ -709,43 +723,258 @@
           body: JSON.stringify({ share_id: shareId, buyer_email: email })
         });
         const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Checkout session error.");
 
-        if (data.status === "already_paid" || data.status === "already_unlocked") {
-          switchToPasswordMode(email);
-          return;
-        }
-
-        if (data.checkout_url) {
-          localStorage.setItem("buyer_email_" + shareId, email);
+        if (data.status === "already_paid") {
+          switchToPasswordMode(true);
+        } else if (data.checkout_url) {
           window.location.href = data.checkout_url;
-        } else {
-          throw new Error("Could not initialize Stripe Checkout.");
         }
       } catch(err) {
-        errBox.innerText = err.message;
-        errBox.classList.remove("hidden");
+        if (errBox) {
+          errBox.innerText = err.message;
+          errBox.classList.remove("hidden");
+        }
+      } finally {
         btn.disabled = false;
-        btn.innerText = "Pay ${{ '%.2f'|format(unlock_price) }} & Unlock Personal Access";
+        btn.innerText = `Pay $${unlockPrice.toFixed(2)} & Unlock Personal Access`;
       }
     }
 
-    function revealUnlockedUI(email, downloadUrl, viewerUrl, token) {
-      document.getElementById("buyerInputSection").classList.add("hidden");
-      const greenBanner = document.getElementById("paymentVerifiedBanner");
-      if (greenBanner) greenBanner.classList.add("hidden");
+    // Standard Passcode Unlocking
+    function unlockWorkspaceWithPasscode() {
+      const input = document.getElementById("passwordInput");
+      const errBox = document.getElementById("passcodeErrorMsg");
+      if (errBox) errBox.classList.add("hidden");
 
-      document.getElementById("unlockedActionsSection").classList.remove("hidden");
-      document.getElementById("verifiedBuyerBadge").innerText = email;
+      if (!input || !input.value.trim()) {
+        if (errBox) {
+          errBox.innerText = "Please enter the transfer passcode.";
+          errBox.classList.remove("hidden");
+        }
+        return;
+      }
 
-      const vLink = document.getElementById("secureViewerLink");
-      vLink.href = viewerUrl || (`/secure-view/${shareId}?token=` + token);
-
-      localStorage.setItem("pwtk_" + shareId, token);
-      localStorage.setItem("buyer_email_" + shareId, email);
+      validatedPasscode = input.value.trim();
+      revealWorkspace();
     }
 
-    function handleStandardDownload() {
-      window.location.href = `/api/download/${shareId}`;
+    function revealWorkspace() {
+      const paywallSec = document.getElementById("paywallContainer");
+      const passSec = document.getElementById("passwordSection");
+      if (paywallSec) paywallSec.classList.add("hidden");
+      if (passSec) passSec.classList.add("hidden");
+
+      initWorkspaceView();
+    }
+
+    // =========================================================================
+    // WORKSPACE & EDITING ENGINE
+    // =========================================================================
+    async function initWorkspaceView() {
+      const ws = document.getElementById("workspaceContainer");
+      if (ws) ws.classList.remove("hidden");
+
+      try {
+        const res = await fetch(`/api/share-details/${shareId}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Could not load files");
+
+        packageFiles = data.files || [{ filename: data.filename, filesize_mb: data.filesize_mb }];
+        document.getElementById("sidebarFileCount").innerText = `${packageFiles.length} file(s)`;
+
+        renderSidebarFiles();
+        if (packageFiles.length > 0) {
+          selectWorkspaceFile(0);
+        }
+      } catch(err) {
+        document.getElementById("sidebarFileList").innerHTML = `<div class="p-3 text-xs text-rose-400 text-center">${err.message}</div>`;
+      }
+    }
+
+    function renderSidebarFiles() {
+      const listEl = document.getElementById("sidebarFileList");
+      listEl.innerHTML = packageFiles.map((f, idx) => `
+        <div onclick="selectWorkspaceFile(${idx})" id="sidebarItem-${idx}" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
+          <div class="flex items-center gap-2 truncate">
+            <span class="text-sm">📄</span>
+            <div class="truncate">
+              <span class="text-xs font-bold block truncate">${f.filename}</span>
+              <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
+            </div>
+          </div>
+          <span id="modDot-${idx}" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 hidden"></span>
+        </div>
+      `).join('');
+    }
+
+    async function selectWorkspaceFile(idx) {
+      activeFileIdx = idx;
+      renderSidebarFiles();
+
+      const f = packageFiles[idx];
+      document.getElementById("activeWorkspaceFileName").innerText = f.filename;
+
+      const editor = document.getElementById("workspaceCodeEditor");
+      const media = document.getElementById("workspaceMediaViewer");
+      const badge = document.getElementById("modifiedStatusBadge");
+
+      media.classList.add("hidden");
+      media.innerHTML = "";
+      editor.classList.remove("hidden");
+
+      if (fileContentsCache[f.filename] !== undefined) {
+        editor.value = fileContentsCache[f.filename];
+        if (fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+        return;
+      }
+
+      editor.value = "Loading file content for editing...";
+      editor.disabled = true;
+
+      try {
+        const tokenParam = currentToken ? `&access_token=${currentToken}` : "";
+        const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${tokenParam}`);
+        if (!res.ok) throw new Error("Stream unreachable");
+
+        const ext = f.filename.split('.').pop().toLowerCase();
+
+        // Image Viewports
+        if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+          const blob = await res.blob();
+          const imgUrl = URL.createObjectURL(blob);
+          editor.classList.add("hidden");
+          media.classList.remove("hidden");
+          media.innerHTML = `<img src="${imgUrl}" class="max-h-full max-w-full object-contain rounded-lg">`;
+          editor.disabled = false;
+          return;
+        }
+
+        // Video Viewports
+        if (['mp4', 'mov', 'webm', 'mkv'].includes(ext)) {
+          const blob = await res.blob();
+          const vUrl = URL.createObjectURL(blob);
+          editor.classList.add("hidden");
+          media.classList.remove("hidden");
+          media.innerHTML = `<video src="${vUrl}" controls class="max-h-full max-w-full rounded-lg"></video>`;
+          editor.disabled = false;
+          return;
+        }
+
+        const text = await res.text();
+        fileOriginalCache[f.filename] = text;
+        fileContentsCache[f.filename] = text;
+        editor.value = text;
+        editor.disabled = false;
+        badge.classList.add("hidden");
+
+      } catch(err) {
+        editor.value = "// Binary file or preview unavailable. Click 'Download This File' to save directly.";
+        editor.disabled = false;
+      }
+    }
+
+    function handleCodeModification() {
+      const f = packageFiles[activeFileIdx];
+      const editor = document.getElementById("workspaceCodeEditor");
+      fileContentsCache[f.filename] = editor.value;
+
+      const badge = document.getElementById("modifiedStatusBadge");
+      const dot = document.getElementById(`modDot-${activeFileIdx}`);
+
+      if (editor.value !== fileOriginalCache[f.filename]) {
+        badge.classList.remove("hidden");
+        if (dot) dot.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+        if (dot) dot.classList.add("hidden");
+      }
+    }
+
+    function discardActiveFileChanges() {
+      const f = packageFiles[activeFileIdx];
+      if (fileOriginalCache[f.filename] !== undefined) {
+        fileContentsCache[f.filename] = fileOriginalCache[f.filename];
+        document.getElementById("workspaceCodeEditor").value = fileOriginalCache[f.filename];
+        document.getElementById("modifiedStatusBadge").classList.add("hidden");
+        const dot = document.getElementById(`modDot-${activeFileIdx}`);
+        if (dot) dot.classList.add("hidden");
+      }
+    }
+
+    // 1. DOWNLOAD THIS FILE
+    async function downloadActiveFile() {
+      const f = packageFiles[activeFileIdx];
+      const modifiedContent = fileContentsCache[f.filename];
+
+      // If user modified text/code in the editor, download their modified version directly
+      if (modifiedContent !== undefined && modifiedContent !== fileOriginalCache[f.filename]) {
+        const blob = new Blob([modifiedContent], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = f.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Otherwise fetch pre-signed URL from server
+      try {
+        const tokenParam = currentToken ? `&access_token=${currentToken}` : "";
+        const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+        const res = await fetch(`/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${tokenParam}${passParam}`);
+        const data = await res.json();
+        
+        if (data.download_url) {
+          window.location.href = data.download_url;
+        } else if (data.download_urls) {
+          const match = data.download_urls.find(d => d.filename === f.filename);
+          if (match) window.location.href = match.download_url;
+        }
+      } catch(err) {
+        alert("Failed to start download: " + err.message);
+      }
+    }
+
+    // 2. DOWNLOAD ALL FILES (.ZIP)
+    async function downloadAllFilesAsZip() {
+      const zip = new JSZip();
+      const tokenParam = currentToken ? `&access_token=${currentToken}` : "";
+      const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+
+      alert("📦 Bundling all files into a .zip archive...");
+
+      for (let i = 0; i < packageFiles.length; i++) {
+        const f = packageFiles[i];
+        if (fileContentsCache[f.filename] !== undefined) {
+          zip.file(f.filename, fileContentsCache[f.filename]);
+        } else {
+          try {
+            const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${tokenParam}${passParam}`);
+            if (res.ok) {
+              const blob = await res.blob();
+              zip.file(f.filename, blob);
+            }
+          } catch(e) {}
+        }
+      }
+
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Zephyr_Transfer_${shareId}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>
