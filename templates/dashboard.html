@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Encrypted Cloud Storage & Studio Branding</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cdefs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,7 +61,6 @@
     /* ========================================================================= */
     /* HIGH-CONTRAST PLANS MODAL THEME ENGINE                                     */
     /* ========================================================================= */
-    /* Dark Theme Defaults */
     .plans-active-box {
       background: rgba(30, 27, 75, 0.55);
       border: 1px solid rgba(129, 140, 248, 0.4);
@@ -99,6 +98,22 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #f8fafc;
     }
+
+    /* FX Rates Card Styling (Dark Mode Defaults) */
+    .fx-tile {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      transition: all 0.2s ease;
+    }
+    .fx-tile:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+    }
+    .fx-tile-title { color: #ffffff; }
+    .fx-tile-sub { color: #94a3b8; }
+    .fx-tile-val { color: #38bdf8; }
+    .fx-tile-rate { color: #cbd5e1; }
 
     /* Light Theme (Day Mode) Overrides */
     body.light-theme {
@@ -170,7 +185,7 @@
       color: #334155 !important;
     }
 
-    /* Light Theme Crisp Styling for Plans Modal */
+    /* Light Theme Styling for Plans Modal */
     body.light-theme #plansModal .obsidian-card {
       background: #ffffff !important;
       border: 1px solid #cbd5e1 !important;
@@ -218,9 +233,29 @@
       border: 1px solid #cbd5e1 !important;
       color: #334155 !important;
     }
-    body.light-theme #plansModal .plans-btn-close:hover {
-      background: #e2e8f0 !important;
+
+    /* Light Theme Styling for FX Widget */
+    body.light-theme #currencyConversionBox {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
     }
+    body.light-theme #currencyConversionBox h4 {
+      color: #4338ca !important;
+    }
+    body.light-theme .fx-tile {
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+    }
+    body.light-theme .fx-tile:hover {
+      border-color: #818cf8 !important;
+      background: #ffffff !important;
+    }
+    body.light-theme .fx-tile-title { color: #0f172a !important; font-weight: 800 !important; }
+    body.light-theme .fx-tile-sub { color: #64748b !important; }
+    body.light-theme .fx-tile-val { color: #1e1b4b !important; font-weight: 900 !important; }
+    body.light-theme .fx-tile-rate { color: #475569 !important; font-weight: 600 !important; }
 
     body.light-theme input,
     body.light-theme textarea,
@@ -276,6 +311,7 @@
     </div>
   </div>
 
+  <!-- YOUR PLANS MODAL -->
   <div id="plansModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-2xl w-full rounded-3xl p-6 sm:p-8 relative border border-indigo-500/40 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
       
@@ -290,19 +326,23 @@
         <button onclick="closePlansModal()" class="opacity-75 hover:opacity-100 text-sm font-bold p-1 cursor-pointer">✕</button>
       </div>
 
+      <!-- Active Plan Section -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-black uppercase tracking-wider text-indigo-500">Active Subscriptions & Stacked Vaults</h4>
           <span id="modalActiveTotalBadge" class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-500 border border-indigo-500/30">Total: 245 GB</span>
         </div>
         <div id="modalActivePlansList" class="space-y-3">
-          </div>
+          <!-- Dynamically populated via openPlansModal() -->
+        </div>
       </div>
 
+      <!-- Available / Inactive Plans Section -->
       <div class="space-y-3 pt-2">
         <h4 class="text-xs font-black uppercase tracking-wider opacity-75 plans-text-title">Available Plans to Add</h4>
         <div id="modalInactivePlansList" class="space-y-2.5">
-          </div>
+          <!-- Dynamically populated via openPlansModal() -->
+        </div>
       </div>
 
       <div class="pt-4 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -591,11 +631,7 @@
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
               </linearGradient>
             </defs>
-            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#driveRibbonCyan)"/>
-            <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#driveGlassSheen)"/>
-            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#driveRibbonViolet)"/>
-            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#driveRibbonCyan)"/>
-            <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#driveGlassSheen)"/>
+            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/>
           </svg>
         </div>
         
@@ -611,6 +647,7 @@
       </div>
 
       <div class="flex items-center gap-2.5 sm:gap-4">
+        <!-- YOUR PLANS BUTTON (BESIDE BRANDING) -->
         <button onclick="openPlansModal()" class="header-pill text-xs font-bold hover:opacity-80 transition flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 cursor-pointer">
           <span class="text-indigo-400">⚡</span>
           <span class="hidden sm:inline">Your Plans</span>
@@ -752,25 +789,54 @@
           <div id="uploadStatus" class="text-xs font-semibold text-indigo-400 mt-3 hidden">Uploading files...</div>
         </div>
 
-        <div id="currencyConversionBox" class="obsidian-card rounded-3xl p-5 sm:p-6 space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
-            <div>
-              <h4 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                <span>🌐</span> Live Transaction-Time FX Rates (Top 10 Major Currencies)
-              </h4>
-              <p class="text-[11px] opacity-70 mt-0.5">Calculated at live transaction moment including gateway consideration spread.</p>
+        <!-- ULTRA-PREMIUM LIVE TRANSACTION FX RATES CARD (TOP 10 MAJOR CURRENCIES) -->
+        <div id="currencyConversionBox" class="obsidian-card rounded-3xl p-6 space-y-5 border border-indigo-500/30 shadow-2xl">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <h4 class="text-xs font-black uppercase tracking-wider text-indigo-400 card-heading">
+                  Real-Time Gateway FX Rates (Top 10 Global Currencies)
+                </h4>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Dodo / Gateway Spread Included
+                </span>
+              </div>
+              <p class="text-[11px] opacity-70">
+                Live transaction settlement conversion including processor spread. Rates update daily with market volatility.
+              </p>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] font-bold opacity-80">Test USD:</span>
-              <div class="relative w-24">
-                <span class="absolute left-2.5 top-1.5 text-xs opacity-60 font-bold">$</span>
-                <input id="fxTestAmountInput" type="number" step="1" value="1" min="1" oninput="updateCurrencyPreview(parseFloat(this.value) || 1)" 
-                       class="w-full pl-6 pr-2 py-1 text-xs font-mono font-bold rounded-lg bg-black/40 border border-white/15 focus:outline-none focus:border-indigo-400 text-white">
+
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="flex items-center gap-1 bg-black/20 p-1 rounded-xl border border-white/10">
+                <button type="button" onclick="setFxTestAmount(1)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$1</button>
+                <button type="button" onclick="setFxTestAmount(10)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$10</button>
+                <button type="button" onclick="setFxTestAmount(50)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$50</button>
+                <button type="button" onclick="setFxTestAmount(100)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$100</button>
+              </div>
+
+              <div class="relative w-28">
+                <span class="absolute left-3 top-2 text-xs font-black opacity-60">$</span>
+                <input 
+                  id="fxTestAmountInput" 
+                  type="number" 
+                  step="any" 
+                  value="1" 
+                  min="0.1" 
+                  oninput="updateCurrencyPreview(parseFloat(this.value) || 1)" 
+                  class="w-full pl-7 pr-3 py-1.5 text-xs font-mono font-black rounded-xl bg-black/40 border border-white/15 focus:outline-none focus:border-indigo-400 text-white transition"
+                >
               </div>
             </div>
           </div>
-          <div id="currencyRatesGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs font-mono">
-            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 opacity-60 text-center col-span-full">Loading live currency settlement rates...</div>
+
+          <div id="currencyRatesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs font-mono">
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 opacity-60 text-center col-span-full">
+              Loading live currency settlement rates...
+            </div>
           </div>
         </div>
 
@@ -941,21 +1007,56 @@
       } catch (e) {}
     }
 
+    function setFxTestAmount(val) {
+      const input = document.getElementById("fxTestAmountInput");
+      if (input) {
+        input.value = val;
+        updateCurrencyPreview(val);
+      }
+    }
+
     function updateCurrencyPreview(usdValue) {
       const grid = document.getElementById("currencyRatesGrid");
       if (!grid || !globalFxRates || Object.keys(globalFxRates).length === 0) return;
 
+      const validUSD = Math.max(0.01, usdValue || 1.00);
+
       grid.innerHTML = Object.keys(globalFxRates).map(cur => {
         const item = globalFxRates[cur];
-        const converted = (usdValue * item.gateway_rate).toFixed(2);
+        const converted = (validUSD * item.gateway_rate).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        const isUp = item.is_positive;
+        const arrow = isUp ? "▲" : "▼";
+        const changeBadgeClass = isUp 
+          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" 
+          : "bg-rose-500/15 text-rose-400 border-rose-500/30";
+
         return `
-          <div class="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-1">
+          <div class="fx-tile p-3.5 rounded-2xl flex flex-col justify-between space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-black opacity-75">${cur}</span>
-              <span class="text-[9px] text-emerald-400 font-mono font-bold">${item.gateway_rate}</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-base">${item.flag}</span>
+                <div>
+                  <span class="fx-tile-title text-xs font-black block">${cur}</span>
+                  <span class="fx-tile-sub text-[9px] block leading-none">${item.name}</span>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md border ${changeBadgeClass}">
+                ${arrow} ${Math.abs(item.change_pct).toFixed(2)}%
+              </span>
             </div>
-            <div class="text-xs font-extrabold text-indigo-300">
-              ${item.symbol}${converted}
+
+            <div class="pt-1 border-t border-white/5">
+              <div class="fx-tile-val text-sm font-black truncate">
+                ${item.symbol}${converted}
+              </div>
+              <div class="flex items-center justify-between text-[9px] fx-tile-rate font-mono mt-0.5">
+                <span>1 USD = ${item.gateway_rate}</span>
+                <span class="text-[8px] opacity-75">Mkt: ${item.market_rate}</span>
+              </div>
             </div>
           </div>
         `;
@@ -1078,7 +1179,7 @@
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
         
-        currentAccountTier = (data.tier || "free").toLowerCase();
+        currentAccountTier = (data.tier || "free").lower();
         currentUserQuotaBytes = data.quota_bytes || 5368709120;
         currentPlanPrice = parseFloat(data.plan_price || 0.0);
         currentSubEndAt = data.subscription_end_at || null;
