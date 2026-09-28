@@ -207,7 +207,7 @@
               </linearGradient>
               <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
               </linearGradient>
             </defs>
             <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
@@ -233,25 +233,25 @@
   </header>
 
   <!-- Main Container -->
-  <main class="relative z-20 max-w-5xl mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center text-center w-full">
+  <main class="relative z-20 {% if is_paywalled %}max-w-xl{% else %}max-w-5xl{% endif %} mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center text-center w-full">
     
-    <!-- CARD: ACCESS & WORKSPACE INTERFACE -->
+    <!-- CARD CONTAINER -->
     <div id="mainTransferCard" class="obsidian-card rounded-3xl p-6 sm:p-8 w-full relative shadow-2xl space-y-6">
       
       <!-- Top Overview Header -->
       <div id="cardTopHeader" class="text-center">
-        <div id="iconBox" class="w-20 h-20 mx-auto rounded-3xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/20 text-3xl">
+        <div id="iconBox" class="w-20 h-20 mx-auto rounded-3xl bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/20 text-3xl transition-all">
           📦
         </div>
         
-        <h1 id="transferHeading" class="text-xl sm:text-2xl font-black tracking-tight break-all">
+        <h1 id="fileTitle" class="text-xl sm:text-2xl font-black tracking-tight break-all">
           {{ filename }}
         </h1>
-        <p class="text-xs opacity-75 mt-1 font-medium">
+        <p id="fileMeta" class="text-xs opacity-75 mt-1 font-medium">
           {{ filesize }} MB • Total Downloads: <span id="downloadCount">{{ downloads }}</span>
         </p>
 
-        {% if message %}
+        {% if message and is_paywalled %}
         <div class="mt-4 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-left text-xs max-w-lg mx-auto">
           <span class="font-bold opacity-75 block text-[10px] uppercase text-indigo-400">Sender Message</span>
           <p class="mt-1 whitespace-pre-wrap text-slate-300">{{ message }}</p>
@@ -259,7 +259,9 @@
         {% endif %}
       </div>
 
-      <!-- PAYWALL ESCROW GATING BLOCK -->
+      <!-- ========================================================================= -->
+      <!-- 1. ZEPHYR ESCROW FLOW (ORIGINAL DEDICATED EXPERIENCE FOR PAID TRANSFERS)  -->
+      <!-- ========================================================================= -->
       {% if is_paywalled %}
       <div id="paywallContainer" class="space-y-4 max-w-md mx-auto text-left">
         
@@ -267,17 +269,17 @@
         <div id="confirmEmailBox" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-xl">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wide">Payment Verified • Dispatch Permanent Password</span>
+            <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wide">Payment Verified • Confirm Delivery Email</span>
           </div>
           <p class="text-xs opacity-85 leading-relaxed">
-            Please confirm or enter the email address where your <strong>permanent lifetime unlock password</strong> should be dispatched:
+            Please confirm or enter the email address where your <strong>permanent lifetime unlock password</strong> will be dispatched:
           </p>
           <div>
             <label class="block text-[11px] font-bold opacity-75 mb-1">Target Delivery Email</label>
             <input id="confirmEmailInput" type="email" placeholder="you@company.com" 
                    class="w-full rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none transition">
           </div>
-          <button id="dispatchPasswordBtn" onclick="confirmAndSendPassword()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
+          <button id="dispatchPasswordBtn" onclick="submitConfirmEmailAndSend()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
             Confirm Email & Dispatch Password
           </button>
         </div>
@@ -288,7 +290,7 @@
             <span class="text-emerald-400 font-black text-xs tracking-wider">✓ PASSWORD DISPATCHED</span>
           </div>
           <p class="text-xs text-slate-300 leading-relaxed">
-            We have emailed your permanent password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono">your email</strong>. Please check your Gmail inbox and Spam folder, then enter the password below to access the workspace.
+            We have emailed your permanent password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono">your email</strong>. Please check your Gmail Inbox and Spam folder, then enter the password below to unlock this file.
           </p>
           <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline mt-1">
             <span>Open Gmail Inbox</span> ↗
@@ -296,7 +298,7 @@
         </div>
 
         <!-- Escrow Pricing Bar -->
-        <div id="paywallBanner" class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/30 to-slate-900/50 border border-emerald-500/30 space-y-1.5 text-left transition-all">
+        <div id="paywallBanner" class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/30 to-slate-900/50 border border-emerald-500/30 space-y-1.5 transition-all">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-white flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -313,17 +315,17 @@
         <div id="buyerPasswordWrapper" class="space-y-3">
           <div>
             <label class="block text-xs font-semibold opacity-80 mb-1">Your Email Address</label>
-            <input id="buyerEmailInput" type="email" placeholder="you@company.com" onblur="checkBuyerEmail()" oninput="handleEmailTyping()"
+            <input id="buyerEmailInput" type="email" placeholder="you@company.com" onblur="checkBuyerEmail()" oninput="handleEmailTyping()" 
                    class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
           </div>
 
           <!-- Permanent Password Field -->
           <div id="buyerPasswordSection" class="hidden space-y-1.5">
-            <div class="flex justify-between items-center">
+            <div class="flex items-center justify-between">
               <label class="block text-xs font-semibold opacity-80">Enter Permanent Password</label>
-              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend Code</button>
+              <button type="button" onclick="resendPassword()" class="text-[11px] text-indigo-400 hover:underline font-bold cursor-pointer">Resend Password</button>
             </div>
-            <input id="buyerPasswordInput" type="text" placeholder="e.g. ZP-28749FA4" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()"
+            <input id="buyerPasswordInput" type="text" placeholder="e.g. ZP-28749FA4" onkeydown="if(event.key==='Enter') handleUnlockWithPassword()" 
                    class="w-full rounded-xl px-4 py-2.5 text-xs font-mono font-bold tracking-widest text-emerald-400 focus:outline-none transition">
             <p class="text-[10px] opacity-70">Check your Gmail inbox or Spam folder for the code sent by Zephyr.</p>
           </div>
@@ -333,103 +335,116 @@
 
         <!-- Initial Checkout Button -->
         <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
-                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition cursor-pointer">
+                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white font-black text-sm shadow-lg shadow-emerald-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
           Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
         </button>
 
         <!-- Unlock with Password Button -->
         <button id="paywallUnlockBtn" onclick="handleUnlockWithPassword()" 
-                class="hidden w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 to-purple-600 text-white font-black text-sm shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+                class="hidden w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-purple-800 text-white font-black text-sm shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
           Unlock & View Deliverables
         </button>
 
-      </div>
-      {% endif %}
-
-      <!-- PASSWORD PROTECTION PROMPT (FOR NON-PAYWALLED PASSCODE SHARES) -->
-      {% if has_password and not is_paywalled %}
-      <div id="passwordSection" class="space-y-3 max-w-sm mx-auto text-left">
-        <label class="block text-xs font-semibold opacity-80">Recipient Passcode Required</label>
-        <input id="passwordInput" type="password" placeholder="Enter recipient passcode..." onkeydown="if(event.key==='Enter') unlockWorkspaceWithPasscode()"
-               class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-        <div id="passcodeErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs text-rose-400 text-center font-medium"></div>
-        <button onclick="unlockWorkspaceWithPasscode()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black shadow-md transition cursor-pointer">
-          Verify Passcode & Open Workspace
-        </button>
-      </div>
-      {% endif %}
-
-      <!-- ========================================================================= -->
-      <!-- INTERACTIVE WORKSPACE AREA (REVEALED ONCE UNLOCKED / OR IF UNPROTECTED)  -->
-      <!-- ========================================================================= -->
-      <div id="workspaceContainer" class="{% if is_paywalled or has_password %}hidden{% endif %} space-y-5 text-left border-t border-white/10 pt-5">
-        
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
-          <div>
-            <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-              <span>✨</span> Interactive Studio Workspace
-            </h3>
-            <p class="text-[11px] opacity-70 mt-0.5">Preview, modify or edit code & text files before downloading.</p>
+        <!-- State C: File Unlocked Area (Protected Viewer Access) -->
+        <div id="unlockedActionSection" class="hidden space-y-2.5 pt-2">
+          <div class="rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-emerald-300 flex items-center justify-between">
+            <span class="font-bold text-xs">Lifetime Personal Access Active</span>
+            <span id="verifiedBuyerBadge" class="font-mono text-[9px] opacity-80"></span>
           </div>
-          <div class="flex items-center gap-2">
-            <span id="modifiedStatusBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden">
-              Modified in Editor ✓
-            </span>
-          </div>
+          <a id="secureViewerLink" href="#" class="block text-center w-full py-3.5 bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-cyan-600 text-white font-black text-xs rounded-xl shadow-lg transition">
+            Open Protected Viewer (Anti-screenshot)
+          </a>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. NON-PAYMENT TRANSFERS: INTERACTIVE STUDIO WORKSPACE TAB                -->
+      <!-- ========================================================================= -->
+      {% else %}
+
+        {% if has_password %}
+        <!-- Passcode Gate for Protected Non-Paywalled Transfers -->
+        <div id="passcodeSection" class="space-y-3 max-w-sm mx-auto text-left">
+          <label class="block text-xs font-semibold opacity-80">Enter Recipient Passcode</label>
+          <input id="passwordInput" type="password" placeholder="Passcode..." onkeydown="if(event.key==='Enter') unlockWorkspaceWithPasscode()"
+                 class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+          <div id="passcodeErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs text-rose-400 text-center font-medium"></div>
+          <button onclick="unlockWorkspaceWithPasscode()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black shadow-md transition cursor-pointer">
+            Unlock Studio Workspace
+          </button>
+        </div>
+        {% endif %}
+
+        <!-- Interactive Workspace Container -->
+        <div id="workspaceContainer" class="{% if has_password %}hidden{% endif %} space-y-5 text-left border-t border-white/10 pt-5">
           
-          <!-- Left File Explorer Sidebar -->
-          <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[460px]">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
             <div>
-              <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-white/10 pb-2 mb-2">
-                <span>Package Files</span>
-                <span id="sidebarFileCount" class="font-mono">--</span>
-              </div>
-              <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[360px]">
-                <div class="p-3 text-xs opacity-60 text-center">Loading files...</div>
-              </div>
+              <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                <span>✨</span> Interactive Studio Workspace
+              </h3>
+              <p class="text-[11px] opacity-70 mt-0.5">Inspect, modify, or edit files in your browser before saving.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="modifiedStatusBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden">
+                Modified in Editor ✓
+              </span>
             </div>
           </div>
 
-          <!-- Right File Preview / Code Editor -->
-          <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[380px]">
-            <div class="flex items-center justify-between border-b border-white/10 pb-2">
-              <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-xs">Select a file</span>
-              <button onclick="discardActiveFileChanges()" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 transition cursor-pointer">
-                Reset Original
-              </button>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            
+            <!-- Left: File Explorer Sidebar -->
+            <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[460px]">
+              <div>
+                <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-white/10 pb-2 mb-2">
+                  <span>Package Files</span>
+                  <span id="sidebarFileCount" class="font-mono">--</span>
+                </div>
+                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[360px]">
+                  <div class="p-3 text-xs opacity-60 text-center">Loading files...</div>
+                </div>
+              </div>
             </div>
 
-            <!-- Dynamic Workspace Body: Code Editor / Media Viewer -->
-            <div class="flex-1 relative flex flex-col rounded-xl overflow-hidden bg-black/60 border border-white/5">
-              <textarea id="workspaceCodeEditor" oninput="handleCodeModification()" class="w-full flex-1 p-3.5 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed" placeholder="Select a text, code, or markdown file to inspect or edit..."></textarea>
-              <div id="workspaceMediaViewer" class="absolute inset-0 bg-slate-950 flex items-center justify-center p-3 hidden"></div>
+            <!-- Right: Code Editor & Media Preview Window -->
+            <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[380px]">
+              <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-xs">Select a file</span>
+                <button onclick="discardActiveFileChanges()" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 transition cursor-pointer">
+                  Reset Original
+                </button>
+              </div>
+
+              <div class="flex-1 relative flex flex-col rounded-xl overflow-hidden bg-black/60 border border-white/5">
+                <textarea id="workspaceCodeEditor" oninput="handleCodeModification()" class="w-full flex-1 p-3.5 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed" placeholder="Select a text, code, or markdown file to inspect or edit..."></textarea>
+                <div id="workspaceMediaViewer" class="absolute inset-0 bg-slate-950 flex items-center justify-center p-3 hidden"></div>
+              </div>
+
+              <div class="flex items-center justify-between text-[10px] opacity-65 font-mono pt-1">
+                <span>Live modification enabled</span>
+                <span>Cloudflare R2 Direct</span>
+              </div>
             </div>
 
-            <div class="flex items-center justify-between text-[10px] opacity-65 font-mono pt-1">
-              <span>Editing enabled • Changes apply when clicking "Download This File"</span>
-              <span>Cloudflare R2 Direct</span>
-            </div>
+          </div>
+
+          <!-- THE 2 ACTION BUTTONS FOR NON-PAYMENT TRANSFERS -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+            <button id="downloadThisFileBtn" onclick="downloadActiveFile()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>📥</span>
+              <span>Download This File</span>
+            </button>
+
+            <button id="downloadAllFilesZipBtn" onclick="downloadAllFilesAsZip()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:opacity-95 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+              <span>📦</span>
+              <span>Download All Files (.zip)</span>
+            </button>
           </div>
 
         </div>
-
-        <!-- THE 2 PRIMARY ACTION BUTTONS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-          <button id="downloadThisFileBtn" onclick="downloadActiveFile()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>📥</span>
-            <span>Download This File</span>
-          </button>
-
-          <button id="downloadAllFilesZipBtn" onclick="downloadAllFilesAsZip()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:opacity-95 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>📦</span>
-            <span>Download All Files (.zip)</span>
-          </button>
-        </div>
-
-      </div>
+      {% endif %}
 
     </div>
 
@@ -474,7 +489,6 @@
     const isPaywalled = serverConfig.dataset.isPaywalled === "true";
     const hasPassword = serverConfig.dataset.hasPassword === "true";
     const unlockPrice = parseFloat(serverConfig.dataset.unlockPrice || "0.00");
-    const totalFilesCount = parseInt(serverConfig.dataset.fileCount || "1");
 
     let currentSessionId = urlParams.get("session_id");
     let currentToken = urlParams.get("token") || localStorage.getItem(`buyer_token_${shareId}`) || "";
@@ -519,55 +533,13 @@
       }
     }
 
-    // Workspace File Cache
-    let packageFiles = [];
-    let activeFileIdx = 0;
-    let fileOriginalCache = {};
-    let fileContentsCache = {};
-
-    // Initialization Logic
-    window.addEventListener("DOMContentLoaded", async () => {
-      const isPaidReturn = urlParams.get("paid") === "true";
-      const emailParam = urlParams.get("email");
-
-      if (isPaidReturn) {
-        const confirmBox = document.getElementById("confirmEmailBox");
-        const confirmInput = document.getElementById("confirmEmailInput");
-        if (confirmBox && confirmInput) {
-          confirmBox.classList.remove("hidden");
-          confirmInput.value = emailParam || "";
-          confirmInput.focus();
-        }
-        const paywallBanner = document.getElementById("paywallBanner");
-        if (paywallBanner) paywallBanner.classList.add("hidden");
-        const checkoutBtn = document.getElementById("paywallCheckoutBtn");
-        if (checkoutBtn) checkoutBtn.classList.add("hidden");
-        return;
-      }
-
-      // If unlocked or free without password, initialize workspace immediately
-      if (!isPaywalled && !hasPassword) {
-        initWorkspaceView();
-      } else if (currentToken) {
-        verifyExistingToken();
-      }
-    });
-
-    async function verifyExistingToken() {
-      try {
-        const res = await fetch(`/api/paywall/verify-access?share_id=${shareId}&access_token=${currentToken}`);
-        const data = await res.json();
-        if (data.unlocked) {
-          revealWorkspace();
-        }
-      } catch(e) {}
-    }
-
-    // Paywall Handlers
+    // =========================================================================
+    // ZEPHYR ESCROW METHODS (RESTORED TO ORIGINAL BEHAVIOR)
+    // =========================================================================
     let typingTimer = null;
     function handleEmailTyping() {
       clearTimeout(typingTimer);
-      typingTimer = setTimeout(checkBuyerEmail, 400);
+      typingTimer = setTimeout(checkBuyerEmail, 350);
     }
 
     async function checkBuyerEmail() {
@@ -579,15 +551,11 @@
       try {
         const res = await fetch(`/api/paywall/check-buyer?share_id=${shareId}&email=${encodeURIComponent(email)}`);
         const data = await res.json();
-        if (data.has_paid) {
-          switchToPasswordMode(true);
-        } else {
-          switchToPasswordMode(false);
-        }
+        switchPaymentMode(data.has_paid);
       } catch(e) {}
     }
 
-    function switchToPasswordMode(hasPaid) {
+    function switchPaymentMode(hasPaid) {
       const passSec = document.getElementById("buyerPasswordSection");
       const checkoutBtn = document.getElementById("paywallCheckoutBtn");
       const unlockBtn = document.getElementById("paywallUnlockBtn");
@@ -602,7 +570,7 @@
       }
     }
 
-    async function confirmAndSendPassword() {
+    async function submitConfirmEmailAndSend() {
       const email = document.getElementById("confirmEmailInput").value.trim().toLowerCase();
       const btn = document.getElementById("dispatchPasswordBtn");
       if (!email || !email.includes("@")) {
@@ -620,7 +588,7 @@
           body: JSON.stringify({ share_id: shareId, email: email, session_id: currentSessionId, token: currentToken })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Dispatch failed");
+        if (!res.ok) throw new Error(data.detail || "Failed to dispatch password.");
 
         document.getElementById("confirmEmailBox").classList.add("hidden");
         const greenBanner = document.getElementById("greenNotificationBanner");
@@ -629,9 +597,9 @@
           document.getElementById("verifiedEmailDisplay").innerText = email;
         }
         document.getElementById("buyerEmailInput").value = email;
-        switchToPasswordMode(true);
+        switchPaymentMode(true);
       } catch(err) {
-        alert("Email Dispatch Error: " + err.message);
+        alert("Error: " + err.message);
       } finally {
         btn.disabled = false;
         btn.innerText = "Confirm Email & Dispatch Password";
@@ -647,7 +615,7 @@
       if (errBox) errBox.classList.add("hidden");
       if (!email || !pwd) {
         if (errBox) {
-          errBox.innerText = "Please enter both email and permanent password.";
+          errBox.innerText = "Please enter both your email and permanent password.";
           errBox.classList.remove("hidden");
         }
         return;
@@ -667,7 +635,7 @@
 
         currentToken = data.access_token;
         localStorage.setItem(`buyer_token_${shareId}`, currentToken);
-        revealWorkspace();
+        revealUnlockedState(email, currentToken);
       } catch(err) {
         if (errBox) {
           errBox.innerText = err.message;
@@ -677,6 +645,23 @@
         btn.disabled = false;
         btn.innerText = "Unlock & View Deliverables";
       }
+    }
+
+    function revealUnlockedState(email, token) {
+      const pwWrapper = document.getElementById("buyerPasswordWrapper");
+      const checkoutBtn = document.getElementById("paywallCheckoutBtn");
+      const unlockBtn = document.getElementById("paywallUnlockBtn");
+      const unlockedSec = document.getElementById("unlockedActionSection");
+      const viewerLink = document.getElementById("secureViewerLink");
+      const buyerBadge = document.getElementById("verifiedBuyerBadge");
+
+      if (pwWrapper) pwWrapper.classList.add("hidden");
+      if (checkoutBtn) checkoutBtn.classList.add("hidden");
+      if (unlockBtn) unlockBtn.classList.add("hidden");
+
+      if (unlockedSec) unlockedSec.classList.remove("hidden");
+      if (viewerLink) viewerLink.href = `/secure-view/${shareId}?token=${token}`;
+      if (buyerBadge) buyerBadge.innerText = email || "";
     }
 
     async function resendPassword() {
@@ -693,7 +678,7 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Failed to resend.");
-        alert("✓ Permanent password re-dispatched! Please check your Gmail inbox and Spam folder.");
+        alert("✓ Permanent password dispatched! Please check your Gmail Inbox and Spam folder.");
       } catch(err) {
         alert(err.message);
       }
@@ -706,7 +691,7 @@
 
       if (!email || !email.includes("@")) {
         if (errBox) {
-          errBox.innerText = "Please enter a valid Gmail address to proceed.";
+          errBox.innerText = "Please enter a valid Gmail address to continue.";
           errBox.classList.remove("hidden");
         }
         return;
@@ -723,10 +708,10 @@
           body: JSON.stringify({ share_id: shareId, buyer_email: email })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Checkout session error.");
+        if (!res.ok) throw new Error(data.detail || "Checkout failed");
 
         if (data.status === "already_paid") {
-          switchToPasswordMode(true);
+          switchPaymentMode(true);
         } else if (data.checkout_url) {
           window.location.href = data.checkout_url;
         }
@@ -741,7 +726,14 @@
       }
     }
 
-    // Standard Passcode Unlocking
+    // =========================================================================
+    // NON-PAYMENT TRANSFERS: INTERACTIVE STUDIO WORKSPACE
+    // =========================================================================
+    let packageFiles = [];
+    let activeFileIdx = 0;
+    let fileOriginalCache = {};
+    let fileContentsCache = {};
+
     function unlockWorkspaceWithPasscode() {
       const input = document.getElementById("passwordInput");
       const errBox = document.getElementById("passcodeErrorMsg");
@@ -749,32 +741,19 @@
 
       if (!input || !input.value.trim()) {
         if (errBox) {
-          errBox.innerText = "Please enter the transfer passcode.";
+          errBox.innerText = "Please enter the passcode.";
           errBox.classList.remove("hidden");
         }
         return;
       }
 
       validatedPasscode = input.value.trim();
-      revealWorkspace();
-    }
-
-    function revealWorkspace() {
-      const paywallSec = document.getElementById("paywallContainer");
-      const passSec = document.getElementById("passwordSection");
-      if (paywallSec) paywallSec.classList.add("hidden");
-      if (passSec) passSec.classList.add("hidden");
-
+      document.getElementById("passcodeSection").classList.add("hidden");
+      document.getElementById("workspaceContainer").classList.remove("hidden");
       initWorkspaceView();
     }
 
-    // =========================================================================
-    // WORKSPACE & EDITING ENGINE
-    // =========================================================================
     async function initWorkspaceView() {
-      const ws = document.getElementById("workspaceContainer");
-      if (ws) ws.classList.remove("hidden");
-
       try {
         const res = await fetch(`/api/share-details/${shareId}`);
         const data = await res.json();
@@ -795,7 +774,7 @@
     function renderSidebarFiles() {
       const listEl = document.getElementById("sidebarFileList");
       listEl.innerHTML = packageFiles.map((f, idx) => `
-        <div onclick="selectWorkspaceFile(${idx})" id="sidebarItem-${idx}" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
+        <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
           <div class="flex items-center gap-2 truncate">
             <span class="text-sm">📄</span>
             <div class="truncate">
@@ -837,13 +816,12 @@
       editor.disabled = true;
 
       try {
-        const tokenParam = currentToken ? `&access_token=${currentToken}` : "";
-        const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${tokenParam}`);
+        const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+        const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`);
         if (!res.ok) throw new Error("Stream unreachable");
 
         const ext = f.filename.split('.').pop().toLowerCase();
 
-        // Image Viewports
         if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
           const blob = await res.blob();
           const imgUrl = URL.createObjectURL(blob);
@@ -854,7 +832,6 @@
           return;
         }
 
-        // Video Viewports
         if (['mp4', 'mov', 'webm', 'mkv'].includes(ext)) {
           const blob = await res.blob();
           const vUrl = URL.createObjectURL(blob);
@@ -906,12 +883,11 @@
       }
     }
 
-    // 1. DOWNLOAD THIS FILE
+    // 1. DOWNLOAD THIS FILE (Saves modified edits or downloads directly)
     async function downloadActiveFile() {
       const f = packageFiles[activeFileIdx];
       const modifiedContent = fileContentsCache[f.filename];
 
-      // If user modified text/code in the editor, download their modified version directly
       if (modifiedContent !== undefined && modifiedContent !== fileOriginalCache[f.filename]) {
         const blob = new Blob([modifiedContent], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -925,11 +901,9 @@
         return;
       }
 
-      // Otherwise fetch pre-signed URL from server
       try {
-        const tokenParam = currentToken ? `&access_token=${currentToken}` : "";
         const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
-        const res = await fetch(`/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${tokenParam}${passParam}`);
+        const res = await fetch(`/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`);
         const data = await res.json();
         
         if (data.download_url) {
@@ -939,14 +913,13 @@
           if (match) window.location.href = match.download_url;
         }
       } catch(err) {
-        alert("Failed to start download: " + err.message);
+        alert("Download error.");
       }
     }
 
-    // 2. DOWNLOAD ALL FILES (.ZIP)
+    // 2. DOWNLOAD ALL FILES (.ZIP VIA JSZip)
     async function downloadAllFilesAsZip() {
       const zip = new JSZip();
-      const tokenParam = currentToken ? `&access_token=${currentToken}` : "";
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
 
       alert("📦 Bundling all files into a .zip archive...");
@@ -957,7 +930,7 @@
           zip.file(f.filename, fileContentsCache[f.filename]);
         } else {
           try {
-            const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${tokenParam}${passParam}`);
+            const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`);
             if (res.ok) {
               const blob = await res.blob();
               zip.file(f.filename, blob);
@@ -976,6 +949,44 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+
+    // DOM Ready Checker for Return URL & Auto-unlocks
+    window.addEventListener("DOMContentLoaded", async () => {
+      const isPaidReturn = urlParams.get("paid") === "true";
+      const emailParam = urlParams.get("email");
+
+      if (isPaywalled) {
+        if (isPaidReturn) {
+          const confirmBox = document.getElementById("confirmEmailBox");
+          const confirmInput = document.getElementById("confirmEmailInput");
+          if (confirmBox && confirmInput) {
+            confirmBox.classList.remove("hidden");
+            confirmInput.value = emailParam || "";
+            confirmInput.focus();
+          }
+          const paywallBanner = document.getElementById("paywallBanner");
+          if (paywallBanner) paywallBanner.classList.add("hidden");
+          const checkoutBtn = document.getElementById("paywallCheckoutBtn");
+          if (checkoutBtn) checkoutBtn.classList.add("hidden");
+          return;
+        }
+
+        if (currentToken) {
+          try {
+            const res = await fetch(`/api/paywall/verify-access?share_id=${shareId}&access_token=${currentToken}`);
+            const data = await res.json();
+            if (data.unlocked) {
+              revealUnlockedState(data.buyer_email, currentToken);
+            }
+          } catch(e) {}
+        }
+      } else {
+        // Non-payment transfer: auto load workspace if no passcode required
+        if (!hasPassword) {
+          initWorkspaceView();
+        }
+      }
+    });
   </script>
 </body>
 </html>
