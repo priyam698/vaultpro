@@ -35,7 +35,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -440,9 +440,6 @@ otp_storage = {}
 
 # ----------------- Standard Svix Webhook Signature Verifier -----------------
 def verify_dodo_svix_signature(raw_body: bytes, headers: dict, secret: str) -> bool:
-    """
-    Verifies Dodo Payments Standard Webhook (Svix) signatures in both Test and Live modes.
-    """
     if not secret:
         return False
 
@@ -1684,25 +1681,39 @@ async def secure_viewer_page(
 
 # ----------------- High-Quality Media Streaming (HTTP 206 Range) -----------------
 @app.get("/api/paywall/stream/{share_id}")
+@app.get("/api/stream/{share_id}")
 async def stream_paywall_media(
     share_id: str, 
     request: Request, 
-    token: str = Query(...), 
-    file: Optional[str] = Query(None)
+    token: Optional[str] = Query(None), 
+    file: Optional[str] = Query(None),
+    password: Optional[str] = Query(None)
 ):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT p.buyer_email, s.s3_key, s.filename 
-        FROM paywall_purchases p
-        JOIN shares s ON s.id = p.share_id
-        WHERE p.share_id = %s AND p.access_token = %s AND p.payment_status = 'paid'
-    """, (share_id, token))
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
     item = cursor.fetchone()
 
     if not item:
         conn.close()
-        raise HTTPException(status_code=403, detail="Protected content stream access denied.")
+        raise HTTPException(status_code=404, detail="Transfer not found.")
+
+    if item.get("is_paywalled"):
+        if not token:
+            conn.close()
+            raise HTTPException(status_code=403, detail="Protected content stream access denied.")
+        cursor.execute("""
+            SELECT id FROM paywall_purchases 
+            WHERE share_id = %s AND access_token = %s AND payment_status = 'paid'
+        """, (share_id, token))
+        if not cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=403, detail="Payment verification required.")
+
+    if item.get("password_hash"):
+        if not password or hashlib.sha256(password.encode()).hexdigest() != item["password_hash"]:
+            conn.close()
+            raise HTTPException(status_code=401, detail="Incorrect password.")
 
     target_name = file if file else item["filename"]
 
@@ -1714,41 +1725,12 @@ async def stream_paywall_media(
 
     ext = target_name.split(".")[-1].lower() if "." in target_name else ""
     mime_map = {
-        "mp4": "video/mp4",
-        "mov": "video/quicktime",
-        "webm": "video/webm",
-        "mkv": "video/x-matroska",
-        "avi": "video/x-msvideo",
-        "m4v": "video/mp4",
-        "mp3": "audio/mpeg",
-        "wav": "audio/wav",
-        "m4a": "audio/mp4",
-        "flac": "audio/flac",
-        "ogg": "audio/ogg",
-        "aac": "audio/aac",
-        "pdf": "application/pdf",
-        "png": "image/png",
-        "jpg": "image/jpeg",
-        "jpeg": "image/jpeg",
-        "webp": "image/webp",
-        "gif": "image/gif",
-        "svg": "image/svg+xml",
-        "bmp": "image/bmp",
-        "txt": "text/plain; charset=utf-8",
-        "csv": "text/plain; charset=utf-8",
-        "tsv": "text/plain; charset=utf-8",
-        "json": "application/json",
-        "js": "text/javascript",
-        "py": "text/plain; charset=utf-8",
-        "ipynb": "application/json",
-        "html": "text/html; charset=utf-8",
-        "css": "text/css; charset=utf-8"
+        "mp4": "video/mp4", "mov": "video/quicktime", "webm": "video/webm", "mkv": "video/x-matroska", "avi": "video/x-msvideo",
+        "mp3": "audio/mpeg", "wav": "audio/wav", "m4a": "audio/mp4", "flac": "audio/flac", "ogg": "audio/ogg",
+        "pdf": "application/pdf", "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "webp": "image/webp", "gif": "image/gif", "svg": "image/svg+xml",
+        "txt": "text/plain; charset=utf-8", "csv": "text/plain; charset=utf-8", "json": "application/json", "js": "text/javascript", "py": "text/plain; charset=utf-8", "html": "text/html; charset=utf-8"
     }
-
-    content_type = mime_map.get(ext)
-    if not content_type:
-        guessed, _ = mimetypes.guess_type(target_name)
-        content_type = guessed or "application/octet-stream"
+    content_type = mime_map.get(ext) or mimetypes.guess_type(target_name)[0] or "application/octet-stream"
 
     range_header = request.headers.get("range")
     try:
@@ -1760,13 +1742,10 @@ async def stream_paywall_media(
             parts = range_val.split("-")
             start = int(parts[0]) if parts[0] else 0
             end = int(parts[1]) if len(parts) > 1 and parts[1] else total_size - 1
-            if end >= total_size:
-                end = total_size - 1
+            if end >= total_size: end = total_size - 1
             content_length = end - start + 1
 
-            r2_range = f"bytes={start}-{end}"
-            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key, Range=r2_range)
-
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key, Range=f"bytes={start}-{end}")
             return StreamingResponse(
                 obj["Body"].iter_chunks(chunk_size=1024 * 512),
                 status_code=206,
@@ -1919,9 +1898,10 @@ async def process_download(
             conn.commit()
             conn.close()
 
-            if request.method == "GET":
-                return RedirectResponse(url=f"/share/{share_id}", status_code=303)
-            return {"download_urls": urls, "files": urls}
+            accept = request.headers.get("accept", "")
+            if "application/json" in accept or request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return {"download_urls": urls, "files": urls}
+            return RedirectResponse(url=urls[0]["download_url"], status_code=303)
 
     url = s3_client.generate_presigned_url(
         "get_object",
@@ -1940,10 +1920,11 @@ async def process_download(
 
     conn.close()
 
-    if request.method == "GET":
-        return RedirectResponse(url=url, status_code=303)
+    accept = request.headers.get("accept", "")
+    if "application/json" in accept or request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return {"download_url": url}
 
-    return {"download_url": url}
+    return RedirectResponse(url=url, status_code=303)
 
 # ----------------- Stripe Bank Account Onboarding (Multi-Country) -----------------
 @app.post("/api/stripe/onboard")
