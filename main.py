@@ -35,7 +35,29 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#38bdf8'/><stop offset='60%' stop-color='#6366f1'/><stop offset='100%' stop-color='#4338ca'/></linearGradient><linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#c084fc'/><stop offset='50%' stop-color='#818cf8'/><stop offset='100%' stop-color='#06b6d4'/></linearGradient><linearGradient id='gs' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/><stop offset='100%' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(%23gs)'/><path d='M86 22L30 76 L46 76 L86 34Z' fill='url(%23rv)'/><path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(%23rc)'/><path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>"""
+SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+<defs>
+<linearGradient id='rc' x1='0%' y1='0%' x2='100%' y2='100%'>
+<stop offset='0%' stop-color='#38bdf8'/>
+<stop offset='60%' stop-color='#6366f1'/>
+<stop offset='100%' stop-color='#4338ca'/>
+</linearGradient>
+<linearGradient id='rv' x1='0%' y1='0%' x2='100%' y2='100%'>
+<stop offset='0%' stop-color='#c084fc'/>
+<stop offset='50%' stop-color='#818cf8'/>
+<stop offset='100%' stop-color='#06b6d4'/>
+</linearGradient>
+<linearGradient id='gs' x1='0%' y1='0%' x2='0%' y2='100%'>
+<stop offset='0%' stop-color='#ffffff' stop-opacity='0.85'/>
+<stop offset='100%' stop-color='#ffffff' stop-opacity='0'/>
+</linearGradient>
+</defs>
+<path d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(#rc)'/>
+<path d='M18 22C36 16 74 16 86 22L78 26C66 21 34 21 18 26Z' fill='url(#gs)'/>
+<path d='M86 22L30 76 L46 76 L86 34Z' fill='url(#rv)'/>
+<path d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78Z' fill='url(#rc)'/>
+<path d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(#gs)'/>
+</svg>"""
 
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
@@ -1716,21 +1738,26 @@ async def stream_paywall_media(
             raise HTTPException(status_code=401, detail="Incorrect password.")
 
     target_name = file if file else item["filename"]
+    clean_target = urllib.parse.unquote(target_name).strip()
 
-    cursor.execute("SELECT s3_key, filename FROM share_files WHERE share_id = %s AND filename = %s", (share_id, target_name))
+    cursor.execute("""
+        SELECT s3_key, filename FROM share_files 
+        WHERE share_id = %s AND (filename = %s OR filename = %s)
+        LIMIT 1
+    """, (share_id, target_name, clean_target))
     sub = cursor.fetchone()
     conn.close()
 
-    s3_key = sub["s3_key"] if sub else f"transfers/{share_id}/{target_name}"
+    s3_key = sub["s3_key"] if sub else f"transfers/{share_id}/{clean_target}"
 
-    ext = target_name.split(".")[-1].lower() if "." in target_name else ""
+    ext = clean_target.split(".")[-1].lower() if "." in clean_target else ""
     mime_map = {
         "mp4": "video/mp4", "mov": "video/quicktime", "webm": "video/webm", "mkv": "video/x-matroska", "avi": "video/x-msvideo",
         "mp3": "audio/mpeg", "wav": "audio/wav", "m4a": "audio/mp4", "flac": "audio/flac", "ogg": "audio/ogg",
         "pdf": "application/pdf", "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "webp": "image/webp", "gif": "image/gif", "svg": "image/svg+xml",
         "txt": "text/plain; charset=utf-8", "csv": "text/plain; charset=utf-8", "json": "application/json", "js": "text/javascript", "py": "text/plain; charset=utf-8", "html": "text/html; charset=utf-8"
     }
-    content_type = mime_map.get(ext) or mimetypes.guess_type(target_name)[0] or "application/octet-stream"
+    content_type = mime_map.get(ext) or mimetypes.guess_type(clean_target)[0] or "application/octet-stream"
 
     range_header = request.headers.get("range")
     try:
@@ -1755,7 +1782,7 @@ async def stream_paywall_media(
                     "Accept-Ranges": "bytes",
                     "Content-Length": str(content_length),
                     "Cache-Control": "no-store, no-cache, must-revalidate, private",
-                    "Content-Disposition": f'inline; filename="{target_name}"'
+                    "Content-Disposition": f'inline; filename="{clean_target}"'
                 }
             )
         else:
@@ -1767,7 +1794,7 @@ async def stream_paywall_media(
                     "Accept-Ranges": "bytes",
                     "Content-Length": str(total_size),
                     "Cache-Control": "no-store, no-cache, must-revalidate, private",
-                    "Content-Disposition": f'inline; filename="{target_name}"'
+                    "Content-Disposition": f'inline; filename="{clean_target}"'
                 }
             )
     except Exception as e:
@@ -1876,10 +1903,14 @@ async def process_download(
 
     if file_records:
         if file:
-            matched = next((fr for fr in file_records if fr["filename"] == file), None)
+            clean_file = urllib.parse.unquote(file).strip()
+            matched = next((fr for fr in file_records if fr["filename"] == file or fr["filename"] == clean_file), None)
             if matched:
                 target_s3_key = matched["s3_key"]
                 target_filename = matched["filename"]
+            else:
+                target_s3_key = f"transfers/{share_id}/{clean_file}"
+                target_filename = clean_file
         elif len(file_records) == 1:
             target_s3_key = file_records[0]["s3_key"]
             target_filename = file_records[0]["filename"]
