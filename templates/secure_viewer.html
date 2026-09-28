@@ -109,7 +109,7 @@
     </button>
   </div>
 
-  <!-- TOP HEADER (WITH SESSION WATERMARK POUNDED IN UPPER PANEL) -->
+  <!-- TOP HEADER (CONTAINS ALL SESSION IDENTIFICATION) -->
   <header class="relative z-30 border-b border-white/[0.08] bg-[#06080e]/90 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between">
     <div class="flex items-center gap-2.5">
       <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/30 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner">
@@ -119,7 +119,7 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- Session Watermark Pill moved safely to the upper panel -->
+      <!-- Session identifier positioned in upper panel outside of content -->
       <div class="hidden md:flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono shadow-sm">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
         <span>CONFIDENTIAL SESSION &bull; {{ buyer_email }}</span>
@@ -168,7 +168,6 @@
 
         <!-- Controls: Image Zoom & File Switcher -->
         <div class="flex items-center gap-2.5 shrink-0">
-          <!-- Responsive Zoom Controls for Images -->
           <div id="imageZoomControls" class="hidden flex items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
             <button type="button" onclick="zoomImage(-0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
             <span id="imageZoomPercent" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
@@ -185,30 +184,21 @@
         </div>
       </div>
 
-      <!-- FULL-SCALE MEDIA STAGE -->
-      <div id="mediaStage" class="relative w-full flex-1 flex flex-col items-center justify-center bg-[#05070d] overflow-hidden p-4 sm:p-6 select-none min-h-[500px]">
-        
-        <!-- Diagonal Repeating Watermark Grid -->
-        <div class="absolute inset-0 z-20 pointer-events-none opacity-[0.035] flex flex-wrap items-center justify-around gap-20 p-8 rotate-[-25deg] select-none overflow-hidden">
-          {% for i in range(24) %}
-          <span class="font-mono text-xs font-black tracking-widest text-white whitespace-nowrap">
-            ZEPHYR SHIELD &bull; {{ buyer_email }}
-          </span>
-          {% endfor %}
-        </div>
+      <!-- CLEAN FULL-SCALE MEDIA STAGE (NO OVERLAY WATERMARKS) -->
+      <div id="mediaStage" class="relative w-full flex-1 flex flex-col items-center justify-center bg-[#05070d] overflow-hidden p-4 sm:p-6 select-none min-h-[520px]">
 
         <!-- Video Player Viewport -->
         <div id="videoContainer" class="hidden w-full h-full flex flex-col items-center justify-center">
           <video id="nativeVideoPlayer" controls controlslist="nodownload noplaybackrate" disablepictureinpicture playsinline preload="metadata" 
-                 class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl border border-white/[0.08] bg-black">
+                 class="media-high-quality max-h-[76vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl border border-white/[0.08] bg-black">
             <source id="videoSource" src="" type="video/mp4">
           </video>
         </div>
 
-        <!-- Image Viewer Viewport (Proper Size & Scaling) -->
+        <!-- Image Viewer Viewport (Proper Display Size) -->
         <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4">
           <img id="nativeImageViewer" src="" alt="Deliverable" draggable="false" 
-               class="media-high-quality max-w-full max-h-[78vh] w-auto h-auto object-contain rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] bg-black/40 border border-white/[0.08] select-none pointer-events-none">
+               class="media-high-quality w-full max-w-2xl sm:max-w-3xl max-h-[76vh] h-auto object-contain rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] bg-black/40 border border-white/[0.08] select-none pointer-events-none">
         </div>
 
         <!-- Audio Player Viewport -->
@@ -224,7 +214,7 @@
         </div>
 
         <!-- Code & Text Log Viewer -->
-        <div id="codeContainer" class="hidden w-full h-full max-w-6xl flex flex-col rounded-2xl border border-white/[0.08] bg-[#0c101c] overflow-hidden shadow-2xl max-h-[75vh]">
+        <div id="codeContainer" class="hidden w-full h-full max-w-4xl flex flex-col rounded-2xl border border-white/[0.08] bg-[#0c101c] overflow-hidden shadow-2xl max-h-[76vh]">
           <div class="px-4 py-2.5 bg-black/40 border-b border-white/[0.08] flex items-center justify-between text-xs">
             <span class="text-[11px] font-mono text-slate-300" id="codeLinesCount">-- lines</span>
             <button type="button" onclick="copyScriptCode()" class="px-3 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded-lg text-[10px] font-mono font-bold transition">
@@ -235,12 +225,12 @@
         </div>
 
         <!-- Document Viewer (PDF Embed) -->
-        <div id="pdfContainer" class="hidden w-full h-full max-w-6xl max-h-[78vh] flex flex-col rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-950">
+        <div id="pdfContainer" class="hidden w-full h-full max-w-4xl max-h-[78vh] flex flex-col rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-950">
           <iframe id="pdfEmbed" src="" class="w-full h-full border-0"></iframe>
         </div>
 
         <!-- Spreadsheet Table Viewer (CSV/TSV) -->
-        <div id="tableContainer" class="hidden w-full h-full max-w-6xl max-h-[78vh] flex flex-col rounded-2xl border border-white/10 bg-slate-900/90 overflow-hidden shadow-2xl">
+        <div id="tableContainer" class="hidden w-full h-full max-w-4xl max-h-[78vh] flex flex-col rounded-2xl border border-white/10 bg-slate-900/90 overflow-hidden shadow-2xl">
           <div class="overflow-auto custom-scroll flex-1 p-4 text-xs font-mono">
             <table id="parsedTable" class="w-full text-left border-collapse"></table>
           </div>
