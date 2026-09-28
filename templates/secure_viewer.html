@@ -1,32 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-[#030407]">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Shield | {{ filename }}</title>
   
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-
+  
   <style>
     :root {
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
-
     html, body {
-      background-color: #030407 !important;
-      background: #030407 !important;
-      color: #f8fafc;
       font-family: var(--font-sans);
+      background: #06080e !important;
+      color: #e2e8f0;
+      min-height: 100vh;
       margin: 0;
       padding: 0;
-      min-height: 100%;
       overflow-x: hidden;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -34,27 +33,22 @@
       user-select: none;
       -webkit-touch-callout: none;
     }
-
     .font-mono-code {
       font-family: var(--font-mono);
       -webkit-user-select: text;
       -moz-user-select: text;
       user-select: text;
     }
-
-    /* Ambient studio radial lights */
     .ambient-canvas {
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 0;
       background: 
-        radial-gradient(ellipse 70% 45% at 50% -5%, rgba(99, 102, 241, 0.18) 0%, transparent 75%),
-        radial-gradient(ellipse 40% 30% at 85% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 30% at 15% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 65%),
-        #030407;
+        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(99, 102, 241, 0.18), transparent 75%),
+        radial-gradient(ellipse 50% 30% at 15% 100%, rgba(56, 189, 248, 0.08), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 85% 100%, rgba(168, 85, 247, 0.08), transparent 60%);
     }
-
     .grid-overlay {
       position: fixed;
       inset: 0;
@@ -62,229 +56,216 @@
       z-index: 1;
       background-size: 36px 36px;
       background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     }
-
     .media-high-quality {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: high-quality;
       transform: translateZ(0);
       backface-visibility: hidden;
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
-
-    /* Custom scrollbar */
-    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 9999px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.25); border-radius: 9999px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 9999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
 
     @keyframes pulseSoft {
-      0%, 100% { opacity: 0.55; }
-      50% { opacity: 0.9; }
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 0.5; }
     }
     .hud-watermark {
       animation: pulseSoft 4s ease-in-out infinite;
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col justify-between relative">
+<body class="min-h-full flex flex-col justify-between relative bg-[#06080e]">
 
   <div class="ambient-canvas"></div>
   <div class="grid-overlay"></div>
 
   <!-- POST-PAYMENT FILE SELECTOR OVERLAY -->
-  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-[#030407]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
-    <a href="/share/{{ share_id }}" class="absolute top-6 left-6 text-slate-400 hover:text-white flex items-center gap-2 text-xs font-mono font-medium transition bg-white/[0.04] hover:bg-white/[0.08] px-3.5 py-2 rounded-xl border border-white/[0.08] shadow-lg">
-      <span>&larr;</span> Back to Vault
+  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
+    <a href="/share/{{ share_id }}" class="absolute top-6 left-6 text-slate-400 hover:text-white flex items-center gap-2 text-sm font-medium transition bg-white/[0.04] px-4 py-2 rounded-xl border border-white/10 shadow-lg cursor-pointer">
+      ← Back to Vault
     </a>
-
-    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl mb-4 text-indigo-400 shadow-[0_0_35px_rgba(99,102,241,0.25)]">
-      📂
+    
+    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-2xl mb-4 text-indigo-400 shadow-[0_0_35px_rgba(99,102,241,0.3)] animate-pulse">
+      📁
     </div>
-    <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-indigo-400 uppercase mb-1.5">Licensed Package Manifest</span>
+    
+    <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-indigo-400 uppercase mb-1.5 block">Licensed Package Manifest</span>
     <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">Select Deliverable to Inspect</h2>
-    
     <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
-      Direct downloads for media, code, and documents are disabled under confidential inspection mode. Select any deliverable to stream inside your sandbox.
+      Under confidential inspection mode. Select any deliverable to stream inside your sandbox. Direct downloads for media, code, and documents are disabled under confidential inspection mode.
     </p>
-    
-    <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl w-full max-h-[55vh] overflow-y-auto custom-scroll p-1.5">
-      <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-xs text-slate-500 font-mono text-center col-span-2">
-        Loading package manifest...
-      </div>
+
+    <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full max-h-[55vh] overflow-y-auto custom-scroll p-1.5 text-xs text-slate-300 font-mono text-center">
+      <!-- Populated via initViewerManifest() -->
     </div>
   </div>
 
-  <!-- Anti-Screenshot Guard -->
-  <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#030407]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none transition-all duration-150">
-    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-3xl mb-4 text-indigo-400 shadow-[0_0_40px_rgba(99,102,241,0.25)] animate-pulse">
+  <!-- ANTI-SCREENSHOT GUARD SHIELD -->
+  <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#06080e]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-150">
+    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl mb-4 text-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.3)] animate-pulse">
       🛡️
     </div>
-    <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-indigo-400 uppercase mb-2">Zephyr Shield Active</span>
-    <h3 class="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">Viewing Window Inactive</h3>
+    <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-amber-400 uppercase mb-1">Zephyr Shield Active</span>
+    <h2 class="text-2xl font-extrabold text-white mb-2 tracking-tight">Viewing Window Inactive</h2>
     <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-      Deliverables are concealed while the application is backgrounded or a screen utility is active. Click anywhere inside this window to resume viewing.
+      Media and deliverables are concealed while the application is backgrounded or a screen utility is active. Click anywhere inside this window to resume viewing.
     </p>
-    <div class="mt-6 px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-semibold shadow-lg transition">
+    <button type="button" onclick="dismissShield()" class="mt-5 px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-semibold shadow-lg transition cursor-pointer">
       Resume Viewing
-    </div>
+    </button>
   </div>
 
-  <!-- Header -->
-  <header class="relative z-30 border-b border-white/[0.06] bg-[#030407]/80 backdrop-blur-xl px-4 sm:px-8 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-3.5">
-      <a href="/" class="flex items-center gap-2.5 group">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/10 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner group-hover:border-indigo-400/50 transition">
-          Z
-        </div>
-        <span class="font-extrabold text-sm tracking-tight text-slate-100">Zephyr Shield</span>
-      </a>
-      
-      <div class="h-4 w-px bg-white/[0.08]"></div>
-
-      <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/[0.08] border border-emerald-500/20">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-        <span class="text-[10px] font-mono font-semibold text-emerald-400 tracking-wider uppercase">Verified Purchase</span>
+  <!-- TOP HEADER -->
+  <header class="relative z-30 border-b border-white/[0.08] bg-[#06080e]/80 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/30 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner">
+        Z
       </div>
+      <span class="font-extrabold text-sm tracking-tight text-slate-100">Zephyr Shield</span>
     </div>
 
     <div class="flex items-center gap-3">
-      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-mono">
-        <span class="text-slate-500 text-[11px]">Licensed to:</span>
-        <span class="text-indigo-300 font-medium text-[11px]">{{ buyer_email }}</span>
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
+        <span>Verified Purchase</span>
       </div>
 
-      <div class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono font-bold tracking-wider uppercase">
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono text-slate-300">
+        <span>Session: <strong class="text-indigo-400 font-normal truncate max-w-[200px] inline-block align-bottom">{{ buyer_email }}</strong></span>
+      </div>
+
+      <div class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/20 text-amber-400 font-mono font-bold tracking-wider uppercase">
         Inspection Mode
       </div>
     </div>
   </header>
 
-  <!-- Expanded Full-Bleed Studio Workspace -->
-  <main class="relative z-10 flex-1 flex flex-col items-center px-2 sm:px-6 py-3 w-full">
-    
-    <div class="relative w-full flex-1 flex flex-col rounded-2xl bg-[#060810]/90 border border-white/[0.08] overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] backdrop-blur-2xl">
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="relative z-20 w-full flex-1 flex flex-col items-center px-2 sm:px-4 py-3 w-full">
+    <div class="relative w-full flex-1 flex flex-col rounded-2xl bg-[#090c14]/90 border border-white/[0.08] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
       
-      <!-- Deliverables Dock (Top File Selector Switcher) -->
-      <div id="fileTabsBar" class="hidden px-5 py-3 bg-[#03050a] border-b border-white/[0.06] flex items-center gap-2 overflow-x-auto custom-scroll relative z-20">
-        <span class="text-[11px] font-mono text-slate-400 uppercase font-bold shrink-0 tracking-wider mr-2">
-          Deliverables (<span id="filesCountBadge">0</span>):
-        </span>
-        <div id="fileTabsContainer" class="flex items-center gap-2"></div>
+      <!-- Deliverables Deck (Top File Tabs) -->
+      <div class="deliverables-deck px-4 py-2 border-b border-white/[0.06] flex items-center justify-between gap-3 overflow-x-auto custom-scroll relative z-20 bg-black/20">
+        <div id="fileTabsContainer" class="flex items-center gap-2">
+          <button type="button" onclick="openPickerModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 shadow-sm transition shrink-0 cursor-pointer">
+            <span>📁 Deliverables (<span id="filesCountBadge">{{ files_count }}</span>)</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Action Toolbar -->
-      <div class="px-6 py-3.5 border-b border-white/[0.06] bg-[#070b14]/70 flex items-center justify-between gap-4 flex-wrap z-10">
+      <!-- Action Toolbar with Zoom Controls & File Info -->
+      <div class="px-4 py-2.5 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-4 relative z-20 bg-black/30">
         <div class="flex items-center gap-3.5 overflow-hidden min-w-0">
-          <div id="formatIconBox" class="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-xl shrink-0 shadow-inner">
+          <div id="formatIconBadge" class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
             📄
           </div>
-          <div class="truncate">
-            <div class="flex items-center gap-2.5">
-              <h1 id="activeFilenameDisplay" class="text-sm sm:text-base font-bold text-slate-100 truncate font-mono tracking-tight" title="{{ filename }}">
-                {{ filename }}
-              </h1>
-              <span id="activeFileFormatTag" class="px-2 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] text-[10px] font-mono text-indigo-300 uppercase font-bold">
-                FILE
-              </span>
+          <div>
+            <h3 id="activeFileNameDisplay" class="text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-md md:max-w-lg tracking-tight">
+              {{ filename }}
+            </h3>
+            <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
+              <span id="activeFileFormatTag" class="px-1.5 py-0.2 rounded bg-white/10 text-slate-300 font-bold uppercase">FILE</span>
+              <span id="statusText">Original Resolution &bull; <span class="text-rose-400 font-semibold">Direct Download Disabled</span></span>
             </div>
-            <p id="fileStatusText" class="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
-              <span>DRM Protected Stream</span>
-              <span>•</span>
-              <span class="text-rose-400 font-semibold">Direct Download Disabled</span>
-            </p>
           </div>
         </div>
 
+        <!-- Controls: Image Zoom & File Switcher -->
         <div class="flex items-center gap-2.5 shrink-0">
-          <button id="universalDownloadBtn" type="button" onclick="downloadActiveFile()" class="hidden px-4 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-semibold rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.15)] transition cursor-pointer flex items-center gap-1.5">
-            <span>↓</span> Download File
+          <!-- Responsive Zoom Controls for Images -->
+          <div id="imageZoomControls" class="hidden flex items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
+            <button type="button" onclick="zoomImage(-0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
+            <span id="imageZoomPercent" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
+            <button type="button" onclick="zoomImage(0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom In">+</button>
+            <button type="button" onclick="fitImageToScreen()" class="px-2.5 py-1 text-[10px] font-bold text-indigo-400 hover:bg-white/10 rounded-lg transition">Fit</button>
+          </div>
+
+          <button id="downloadActiveFileBtn" type="button" onclick="downloadActiveFile()" class="hidden px-4 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+            <span>⬇️ Download File</span>
           </button>
-          
-          <button type="button" onclick="openFilePickerModal()" class="px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 hover:text-white text-xs font-mono font-medium rounded-xl transition cursor-pointer flex items-center gap-2 shadow-sm">
-            <span>📂</span> Browse All Deliverables
+          <button type="button" onclick="openPickerModal()" class="px-4 py-2 bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+            <span>📁 Browse All Deliverables</span>
           </button>
         </div>
       </div>
 
-      <!-- Full-Scale Media Stage -->
-      <div id="mediaStage" class="relative w-full flex-1 min-h-[680px] lg:min-h-[82vh] flex items-stretch justify-center bg-[#020306] overflow-hidden p-2 sm:p-5 shadow-[inset_0_15px_40px_rgba(0,0,0,0.95)]">
+      <!-- FULL-SCALE MEDIA STAGE -->
+      <div id="mediaStage" class="relative w-full flex-1 flex flex-col items-center justify-center bg-[#05070d] overflow-hidden p-4 sm:p-6 select-none min-h-[500px]">
         
-        <!-- Studio HUD Watermark -->
-        <div class="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/70 border border-white/[0.08] backdrop-blur-xl shadow-2xl select-none hud-watermark">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-          <span class="text-[10px] font-mono text-slate-300 font-semibold tracking-wider uppercase">
-            Confidential Session &bull; {{ buyer_email }}
-          </span>
+        <!-- Forensic Watermark -->
+        <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-30 select-none">
+          <div class="hud-watermark px-4 py-1.5 rounded-full bg-black/75 border border-white/15 backdrop-blur-xl text-xs font-mono text-emerald-400/90 shadow-2xl flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>CONFIDENTIAL SESSION • <span id="watermarkBuyerEmail">{{ buyer_email }}</span></span>
+          </div>
         </div>
 
-        <!-- Video Player -->
+        <!-- Video Player Viewport -->
         <div id="videoContainer" class="hidden w-full h-full flex flex-col items-center justify-center">
-          <video id="nativeVideoPlayer" controls controlsList="nodownload noplaybackrate" disablePictureInPicture playsinline preload="metadata" class="media-high-quality max-h-[80vh] w-full object-contain rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] bg-black border border-white/[0.06]">
+          <video id="nativeVideoPlayer" controls controlslist="nodownload noplaybackrate" disablepictureinpicture playsinline preload="metadata" 
+                 class="media-high-quality max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl border border-white/[0.08] bg-black">
             <source id="videoSource" src="" type="video/mp4">
           </video>
         </div>
 
-        <!-- Image Viewer -->
-        <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center p-2">
-          <img id="nativeImagePlayer" src="" alt="Deliverable" draggable="false" class="media-high-quality max-h-[80vh] w-auto max-w-full object-contain rounded-xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] border border-white/[0.06]">
+        <!-- Image Viewer Viewport (With Proper Size Expansion & Scaling) -->
+        <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center overflow-auto custom-scroll p-2 sm:p-4">
+          <img id="nativeImageViewer" src="" alt="Deliverable" draggable="false" 
+               class="media-high-quality min-w-[280px] sm:min-w-[420px] max-w-[94vw] max-h-[75vh] w-auto h-auto object-contain rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] bg-black/40 border border-white/[0.08] select-none pointer-events-none">
         </div>
 
-        <!-- Audio Player -->
-        <div id="audioContainer" class="hidden w-full max-w-lg m-auto p-10 flex flex-col items-center justify-center text-center space-y-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl shadow-2xl backdrop-blur-xl">
-          <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center text-4xl shadow-inner">
+        <!-- Audio Player Viewport -->
+        <div id="audioContainer" class="hidden w-full max-w-lg p-8 rounded-3xl bg-slate-900/90 border border-white/15 text-center space-y-5 shadow-2xl">
+          <div class="w-20 h-20 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-3xl font-bold border border-indigo-500/30">
             🎵
           </div>
-          <h3 id="audioTitle" class="text-base font-bold text-slate-200 tracking-tight font-mono">Audio Stream</h3>
-          <audio id="nativeAudioPlayer" controls class="w-full rounded-xl opacity-90 hover:opacity-100 transition" controlsList="nodownload">
-            <source id="audioSource" src="">
-          </audio>
+          <div>
+            <h3 id="audioTitle" class="text-sm font-black text-white truncate">{{ filename }}</h3>
+            <p class="text-[10px] font-mono text-slate-400 mt-1">Confidential Audio Stream</p>
+          </div>
+          <audio id="nativeAudioPlayer" controls controlslist="nodownload" class="w-full"></audio>
         </div>
 
-        <!-- Code / Text / Log Viewer (Expanded Full-Scale Editor View) -->
-        <div id="codeContainer" class="hidden w-full h-[80vh] min-h-[620px] flex flex-col bg-[#05070d] rounded-xl overflow-hidden border border-white/[0.08] shadow-2xl">
-          <div class="px-5 py-3 bg-[#080b14] border-b border-white/[0.07] flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-500/60"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/60"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></span>
-              <span id="codeLangTag" class="text-slate-300 font-mono text-[11px] font-bold tracking-wider uppercase ml-2">SOURCE</span>
-              <span id="codeLinesBadge" class="text-slate-400 font-mono text-[11px] bg-white/[0.04] px-2 py-0.5 rounded border border-white/[0.06]"></span>
-            </div>
-            <button type="button" onclick="copyScriptCode()" class="px-3 py-1.5 bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 border border-white/[0.08] rounded-lg font-mono font-medium text-xs transition cursor-pointer shadow-sm">
+        <!-- Code & Text Log Viewer (Expanded Syntax Highlighting) -->
+        <div id="codeContainer" class="hidden w-full h-full max-w-6xl flex flex-col rounded-2xl border border-white/[0.08] bg-[#0c101c] overflow-hidden shadow-2xl max-h-[75vh]">
+          <div class="px-4 py-2.5 bg-black/40 border-b border-white/[0.08] flex items-center justify-between text-xs">
+            <span class="text-[11px] font-mono text-slate-300" id="codeLinesCount">-- lines</span>
+            <button type="button" onclick="copyScriptCode()" class="px-3 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded-lg text-[10px] font-mono font-bold transition">
               Copy Buffer
             </button>
           </div>
-          <pre class="flex-1 p-6 overflow-auto custom-scroll text-[14.5px] leading-7 font-mono-code select-text bg-transparent m-0"><code id="codeViewerBox" class="language-none font-mono">Loading buffer...</code></pre>
+          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs font-mono m-0 bg-transparent"><code id="codeViewerBox" class="language-none"></code></pre>
         </div>
 
-        <!-- Document Easel (PDF Studio Full-Viewport) -->
-        <div id="pdfContainer" class="hidden w-full h-[80vh] min-h-[640px] flex flex-col rounded-xl overflow-hidden bg-slate-900 border border-white/[0.08] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)]">
-          <iframe id="pdfIframe" src="" class="w-full h-full border-0 bg-[#0e131f]"></iframe>
+        <!-- Document Viewer (PDF Embed) -->
+        <div id="pdfContainer" class="hidden w-full h-full max-w-6xl max-h-[78vh] flex flex-col rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-950">
+          <iframe id="pdfEmbed" src="" class="w-full h-full border-0"></iframe>
         </div>
 
-        <!-- Spreadsheet Viewer -->
-        <div id="tableContainer" class="hidden w-full h-[80vh] min-h-[620px] flex flex-col bg-[#05070d] rounded-xl overflow-hidden border border-white/[0.08] shadow-2xl">
-          <div class="px-5 py-3 bg-[#080b14] border-b border-white/[0.07] flex items-center justify-between text-xs font-mono text-indigo-300">
-            <span class="font-bold tracking-wider uppercase">Spreadsheet Dataset</span>
-            <span id="tableRowsCount" class="bg-indigo-500/20 px-2.5 py-0.5 rounded text-[11px] border border-indigo-500/30">Rows</span>
-          </div>
-          <div class="flex-1 overflow-auto custom-scroll bg-[#080b14]/50 p-3">
-            <table id="dataTable" class="w-full text-left text-xs border-collapse font-mono"></table>
+        <!-- Spreadsheet Table Viewer (CSV/TSV) -->
+        <div id="tableContainer" class="hidden w-full h-full max-w-6xl max-h-[78vh] flex flex-col rounded-2xl border border-white/10 bg-slate-900/90 overflow-hidden shadow-2xl">
+          <div class="overflow-auto custom-scroll flex-1 p-4 text-xs font-mono">
+            <table id="parsedTable" class="w-full text-left border-collapse"></table>
           </div>
         </div>
 
-        <!-- Universal App & Archive Fallback -->
-        <div id="genericContainer" class="hidden max-w-md w-full m-auto p-10 text-center space-y-6 bg-white/[0.02] rounded-2xl border border-white/[0.06] shadow-2xl backdrop-blur-xl">
-          <div class="w-20 h-20 rounded-2xl bg-indigo-500/10 border border-white/10 flex items-center justify-center mx-auto text-4xl shadow-inner">
+        <!-- Universal Archive Fallback -->
+        <div id="genericContainer" class="hidden w-full max-w-md p-8 rounded-3xl bg-slate-900/90 border border-white/15 text-center space-y-4 shadow-2xl">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-2xl font-bold">
             📦
           </div>
-          <div>
-            <h3 id="genericTitle" class="text-lg font-extrabold text-white mt-1 truncate px-2 font-mono">File</h3>
-            <p class="text-xs text-slate-400 font-mono mt-1.5 leading-relaxed">External application binary or archive deliverable.</p>
-          </div>
-          <button onclick="downloadActiveFile()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider shadow-lg transition cursor-pointer">
+          <h3 id="genericFileName" class="text-sm font-black text-white truncate">{{ filename }}</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Direct browser playback is not supported for this deliverable type. Click below to download.
+          </p>
+          <button type="button" onclick="downloadActiveFile()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">
             Download Deliverable
           </button>
         </div>
@@ -292,266 +273,290 @@
       </div>
 
       <!-- Studio Status Bar -->
-      <div class="px-6 py-3 border-t border-white/[0.05] bg-[#03050a] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 z-10 font-mono">
+      <div class="px-4 py-2 border-t border-white/[0.06] bg-black/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-400 z-20">
         <div class="flex items-center gap-2">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-          <span>Zero-Knowledge Confidential Stream</span>
+          <span>Zero-Knowledge Confidential Stream [AES-256]</span>
         </div>
-        <span class="opacity-60 text-[11px]">End-to-End Keyed Pipeline</span>
+        <div class="opacity-70 text-[10px]">End-to-End Keyed Pipeline</div>
       </div>
 
     </div>
   </main>
 
   <script>
-    let activeFile = "";
     const shareId = "{{ share_id }}";
     const token = "{{ token }}";
-    let rawSourceCode = "";
+    let activeFile = "{{ filename }}";
     let packageFiles = [];
 
     const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v', 'flv'];
-    const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'wma'];
-    const imageExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp', 'tiff', 'tif', 'raw', 'dng', 'heic'];
-    const codeExts  = ['py', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'sql', 'sh', 'cpp', 'c', 'h', 'cs', 'java', 'go', 'rs', 'php', 'rb', 'yml', 'yaml', 'md', 'txt', 'log', 'ipynb'];
+    const imageExts = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'raw', 'dng', 'heic'];
+    const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'aiff'];
+    const codeExts = ['txt', 'json', 'js', 'ts', 'jsx', 'tsx', 'py', 'html', 'css', 'scss', 'c', 'cpp', 'cs', 'go', 'rs', 'php', 'rb', 'yaml', 'yml', 'xml', 'md', 'log', 'ipynb'];
+    const pdfExt = ['pdf'];
     const tableExts = ['csv', 'tsv'];
 
-    function getFileIcon(fname) {
-      const ext = fname.split('.').pop().toLowerCase() || '';
-      if (videoExts.includes(ext)) return '🎬';
-      if (imageExts.includes(ext)) return '🖼️';
-      if (audioExts.includes(ext)) return '🎵';
-      if (ext === 'pdf') return '📑';
-      if (tableExts.includes(ext)) return '📊';
-      if (codeExts.includes(ext)) return '💻';
-      return '📦';
+    function getDeliverableType(ext) {
+      if (videoExts.includes(ext)) return 'video';
+      if (imageExts.includes(ext)) return 'image';
+      if (audioExts.includes(ext)) return 'audio';
+      if (codeExts.includes(ext)) return 'code';
+      if (pdfExt.includes(ext)) return 'pdf';
+      if (tableExts.includes(ext)) return 'table';
+      return 'generic';
     }
 
-    function hideAllPlayers() {
+    function hideAllViewers() {
       ['videoContainer', 'imageContainer', 'audioContainer', 'codeContainer', 'pdfContainer', 'tableContainer', 'genericContainer'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.classList.add("hidden");
+        if (el) el.classList.add('hidden');
       });
-      const v = document.getElementById("nativeVideoPlayer");
-      const a = document.getElementById("nativeAudioPlayer");
-      if (v) { v.pause(); v.removeAttribute('src'); v.load(); }
-      if (a) { a.pause(); a.removeAttribute('src'); a.load(); }
+      const zoomControls = document.getElementById("imageZoomControls");
+      if (zoomControls) zoomControls.classList.add("hidden");
+
+      const vid = document.getElementById('nativeVideoPlayer');
+      if (vid) { vid.pause(); vid.removeAttribute('src'); vid.load(); }
+      const aud = document.getElementById('nativeAudioPlayer');
+      if (aud) { aud.pause(); aud.removeAttribute('src'); }
     }
 
-    function renderActiveDeliverable(fname) {
-      if (!fname) return;
-      hideAllPlayers();
+    // Image Zoom Logic
+    let currentImageScale = 1.0;
+
+    function applyImageZoom() {
+      const img = document.getElementById("nativeImageViewer");
+      const zoomText = document.getElementById("imageZoomPercent");
+      if (img) {
+        img.style.transform = `scale(${currentImageScale})`;
+      }
+      if (zoomText) {
+        zoomText.innerText = `${Math.round(currentImageScale * 100)}%`;
+      }
+    }
+
+    function zoomImage(delta) {
+      currentImageScale = Math.min(3.5, Math.max(0.4, currentImageScale + delta));
+      applyImageZoom();
+    }
+
+    function fitImageToScreen() {
+      currentImageScale = 1.0;
+      applyImageZoom();
+    }
+
+    async function renderActiveDeliverable(fname) {
+      hideAllViewers();
       activeFile = fname;
-      document.getElementById("activeFilenameDisplay").innerText = fname;
+      fitImageToScreen();
 
-      const ext = fname.split('.').pop().toLowerCase() || '';
+      document.getElementById('activeFileNameDisplay').innerText = fname;
       const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(fname)}`;
-      const iconBox = document.getElementById("formatIconBox");
-      const dlBtn = document.getElementById("universalDownloadBtn");
-      const statusText = document.getElementById("fileStatusText");
-      const formatTag = document.getElementById("activeFileFormatTag");
+      const ext = fname.split('.').pop().toLowerCase();
+      const formatTag = document.getElementById('activeFileFormatTag');
+      if (formatTag) formatTag.innerText = ext.toUpperCase();
 
-      if (formatTag) {
-        formatTag.innerText = ext ? ext.toUpperCase() : "FILE";
-      }
+      const type = getDeliverableType(ext);
 
-      if (videoExts.includes(ext)) {
-        const v = document.getElementById("nativeVideoPlayer");
-        document.getElementById("videoSource").src = streamUrl;
-        v.load();
-        document.getElementById("videoContainer").classList.remove("hidden");
-        iconBox.innerText = "🎬"; 
-        if (statusText) statusText.innerHTML = "<span>Uncompressed Stream</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
-        if (dlBtn) dlBtn.classList.add("hidden"); 
-      } else if (imageExts.includes(ext)) {
-        document.getElementById("nativeImagePlayer").src = streamUrl;
-        document.getElementById("imageContainer").classList.remove("hidden");
-        iconBox.innerText = "🖼️"; 
-        if (statusText) statusText.innerHTML = "<span>Original Resolution</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
-        if (dlBtn) dlBtn.classList.add("hidden"); 
-      } else if (audioExts.includes(ext)) {
-        const a = document.getElementById("nativeAudioPlayer");
-        document.getElementById("audioSource").src = streamUrl;
-        document.getElementById("audioTitle").innerText = fname;
-        a.load();
-        document.getElementById("audioContainer").classList.remove("hidden");
-        iconBox.innerText = "🎵"; 
-        if (statusText) statusText.innerHTML = "<span>Lossless Stream</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
-        if (dlBtn) dlBtn.classList.add("hidden"); 
-      } else if (ext === 'pdf') {
-        document.getElementById("pdfIframe").src = `${streamUrl}#toolbar=0&navpanes=0`;
-        document.getElementById("pdfContainer").classList.remove("hidden");
-        iconBox.innerText = "📑"; 
-        if (statusText) statusText.innerHTML = "<span>Protected PDF Viewport</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
-        if (dlBtn) dlBtn.classList.add("hidden"); 
-      } else if (tableExts.includes(ext)) {
-        document.getElementById("tableContainer").classList.remove("hidden");
-        iconBox.innerText = "📊"; 
+      if (type === 'video') {
+        const vc = document.getElementById('videoContainer');
+        const player = document.getElementById('nativeVideoPlayer');
+        const source = document.getElementById('videoSource');
+        source.src = streamUrl;
+        player.load();
+        vc.classList.remove('hidden');
+        document.getElementById('formatIconBadge').innerText = '🎬';
+      } else if (type === 'image') {
+        const ic = document.getElementById('imageContainer');
+        const img = document.getElementById('nativeImageViewer');
+        img.src = streamUrl;
+        ic.classList.remove('hidden');
+        document.getElementById("imageZoomControls").classList.remove("hidden");
+        document.getElementById('formatIconBadge').innerText = '🖼️';
+      } else if (type === 'audio') {
+        const ac = document.getElementById('audioContainer');
+        const aud = document.getElementById('nativeAudioPlayer');
+        document.getElementById('audioTitle').innerText = fname;
+        aud.src = streamUrl;
+        ac.classList.remove('hidden');
+        document.getElementById('formatIconBadge').innerText = '🎵';
+      } else if (type === 'code') {
+        document.getElementById('codeContainer').classList.remove('hidden');
+        document.getElementById('formatIconBadge').innerText = '💻';
+        loadSourceCode(streamUrl, ext);
+      } else if (type === 'pdf') {
+        const pc = document.getElementById('pdfContainer');
+        document.getElementById('pdfEmbed').src = `${streamUrl}#toolbar=0`;
+        pc.classList.remove('hidden');
+        document.getElementById('formatIconBadge').innerText = '📑';
+      } else if (type === 'table') {
+        document.getElementById('tableContainer').classList.remove('hidden');
+        document.getElementById('formatIconBadge').innerText = '📊';
         loadTableData(streamUrl);
-        if (statusText) statusText.innerHTML = "<span>Spreadsheet Table Mode</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
-        if (dlBtn) dlBtn.classList.add("hidden"); 
-      } else if (codeExts.includes(ext)) {
-        document.getElementById("codeContainer").classList.remove("hidden");
-        iconBox.innerText = "💻"; 
-        loadCodeSource(streamUrl, ext);
-        if (statusText) statusText.innerHTML = "<span>Code Buffer Inspector</span> • <span class='text-rose-400 font-semibold'>Direct Download Disabled</span>";
-        if (dlBtn) dlBtn.classList.add("hidden"); 
       } else {
-        document.getElementById("genericContainer").classList.remove("hidden");
-        document.getElementById("genericTitle").innerText = fname;
-        iconBox.innerText = "📦"; 
-        if (statusText) statusText.innerHTML = "<span>Application Binary</span> • <span class='text-emerald-400 font-semibold'>Direct Download Permitted</span>";
-        if (dlBtn) dlBtn.classList.remove("hidden"); 
+        const gc = document.getElementById('genericContainer');
+        document.getElementById('genericFileName').innerText = fname;
+        gc.classList.remove('hidden');
+        document.getElementById('formatIconBadge').innerText = '📦';
       }
     }
 
-    function switchActiveFile(fname) {
-      document.querySelectorAll(".file-tab-btn").forEach(b => {
-        if (b.dataset.filename === fname) {
-          b.className = "file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-medium transition shrink-0 flex items-center gap-2 cursor-pointer bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]";
-        } else {
-          b.className = "file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-medium transition shrink-0 flex items-center gap-2 cursor-pointer bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 border border-transparent";
-        }
-      });
-      renderActiveDeliverable(fname);
-    }
+    async function loadSourceCode(streamUrl, ext) {
+      const codeBox = document.getElementById('codeViewerBox');
+      const linesEl = document.getElementById('codeLinesCount');
+      codeBox.textContent = 'Loading source code...';
 
-    function selectFileAndOpen(fname) {
-      document.getElementById("postPaymentPickerModal").classList.add("hidden");
-      switchActiveFile(fname);
-    }
-
-    function openFilePickerModal() {
-      document.getElementById("postPaymentPickerModal").classList.remove("hidden");
-    }
-
-    function downloadActiveFile() {
-      if (!activeFile) return;
-      const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(activeFile)}`;
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = streamUrl;
-      a.download = activeFile;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    async function loadCodeSource(streamUrl, ext) {
-      const codeBox = document.getElementById("codeViewerBox");
-      const linesBadge = document.getElementById("codeLinesBadge");
-      codeBox.textContent = "Loading file buffer...";
-      if (linesBadge) linesBadge.innerText = "";
-      
       try {
         const res = await fetch(streamUrl);
-        if (!res.ok) throw new Error("HTTP " + res.status);
         const text = await res.text();
-        rawSourceCode = text;
-        
-        if (!text || text.length === 0) {
-          codeBox.innerHTML = '<span class="text-slate-500 italic font-mono">// File is empty (0 bytes)</span>';
-          if (linesBadge) linesBadge.innerText = "0 lines";
-          return;
-        }
+        codeBox.textContent = text || '// Empty file';
+        const lines = text.split('\n').length;
+        if (linesEl) linesEl.innerText = `${lines} lines`;
 
-        codeBox.textContent = text;
-        const lineCount = text.split('\n').length;
-        if (linesBadge) linesBadge.innerText = `${lineCount} lines`;
-
-        const prismMap = {
-          'py': 'python',
-          'js': 'javascript',
-          'jsx': 'jsx',
-          'ts': 'typescript',
-          'tsx': 'tsx',
-          'html': 'markup',
-          'css': 'css',
-          'json': 'json',
-          'sql': 'sql',
-          'sh': 'bash',
-          'md': 'markdown'
+        const langMap = {
+          'js': 'javascript', 'ts': 'typescript', 'py': 'python',
+          'html': 'markup', 'css': 'css', 'json': 'json', 'md': 'markdown'
         };
-
-        const targetLang = prismMap[ext] || 'none';
-        codeBox.className = `language-${targetLang} font-mono`;
-        if (window.Prism && targetLang !== 'none') {
-          Prism.highlightElement(codeBox);
-        }
-      } catch (e) {
-        codeBox.innerHTML = `<span class="text-rose-400 font-mono">// Error streaming buffer: ${e.message}</span>`;
+        const lang = langMap[ext] || 'none';
+        codeBox.className = `language-${lang}`;
+        if (window.Prism) Prism.highlightElement(codeBox);
+      } catch (err) {
+        codeBox.textContent = `// Failed to load source: ${err.message}`;
       }
     }
 
-    async function copyScriptCode() {
-      if (!rawSourceCode) return;
-      await navigator.clipboard.writeText(rawSourceCode);
-      alert("Source code copied to clipboard.");
+    function copyScriptCode() {
+      const code = document.getElementById('codeViewerBox').textContent;
+      navigator.clipboard.writeText(code);
+      alert('Source code copied to clipboard!');
     }
 
     async function loadTableData(streamUrl) {
+      const table = document.getElementById('parsedTable');
+      table.innerHTML = '<tr><td class="p-3 text-slate-400">Loading spreadsheet data...</td></tr>';
       try {
         const res = await fetch(streamUrl);
-        const csv = await res.text();
-        const rows = csv.trim().split('\n').map(r => r.split(','));
-        document.getElementById("tableRowsCount").innerText = `${rows.length} rows`;
-        let html = `<thead><tr class="bg-white/[0.04] text-indigo-300 font-bold border-b border-white/[0.06]">`;
-        rows[0].forEach(col => html += `<th class="py-3 px-4 border-r border-white/[0.03] whitespace-nowrap">${col.trim()}</th>`);
-        html += `</tr></thead><tbody class="divide-y divide-white/[0.03]">`;
-        rows.slice(1, 150).forEach(r => {
-          html += `<tr class="hover:bg-white/[0.02] transition">`;
-          r.forEach(c => html += `<td class="py-2.5 px-4 border-r border-white/[0.03] text-slate-300 whitespace-nowrap">${c.trim()}</td>`);
-          html += `</tr>`;
+        const text = await res.text();
+        const rows = text.split('\n').filter(r => r.trim());
+        if (!rows.length) return;
+
+        let html = '';
+        rows.forEach((row, idx) => {
+          const cols = row.split(',');
+          if (idx === 0) {
+            html += '<tr class="bg-indigo-950/40 text-indigo-300 font-bold border-b border-white/10">';
+            cols.forEach(c => html += `<th class="p-2.5 border-r border-white/5 truncate">${c.trim()}</th>`);
+            html += '</tr>';
+          } else {
+            html += '<tr class="border-b border-white/5 hover:bg-white/[0.02]">';
+            cols.forEach(c => html += `<td class="p-2 border-r border-white/5 truncate text-slate-300">${c.trim()}</td>`);
+            html += '</tr>';
+          }
         });
-        html += `</tbody>`;
-        document.getElementById("dataTable").innerHTML = html;
-      } catch (e) {}
+        table.innerHTML = html;
+      } catch (e) {
+        table.innerHTML = '<tr><td class="p-3 text-rose-400">Failed to render table</td></tr>';
+      }
+    }
+
+    function downloadActiveFile() {
+      window.location.href = `/api/download/${shareId}?file=${encodeURIComponent(activeFile)}&access_token=${token}`;
+    }
+
+    function openPickerModal() {
+      document.getElementById('postPaymentPickerModal').classList.remove('hidden');
+    }
+
+    function closePickerModal() {
+      document.getElementById('postPaymentPickerModal').classList.add('hidden');
+    }
+
+    function switchActiveFile(fname) {
+      closePickerModal();
+      renderActiveDeliverable(fname);
+      renderFileTabs();
+    }
+
+    function renderFileTabs() {
+      const container = document.getElementById('fileTabsContainer');
+      container.innerHTML = `
+        <button type="button" onclick="openPickerModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 shadow-sm transition shrink-0 cursor-pointer">
+          <span>📁 Deliverables (${packageFiles.length})</span>
+        </button>
+      `;
+
+      packageFiles.slice(0, 5).forEach(f => {
+        const isActive = f.filename === activeFile;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => switchActiveFile(f.filename);
+        btn.className = `px-3 py-1.5 rounded-xl text-xs font-mono transition shrink-0 cursor-pointer ${
+          isActive 
+            ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' 
+            : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5'
+        }`;
+        btn.innerText = f.filename;
+        container.appendChild(btn);
+      });
     }
 
     async function initViewerManifest() {
       try {
         const res = await fetch(`/api/share-details/${shareId}`);
-        if (!res.ok) return;
-        const details = await res.json();
+        const data = await res.json();
+        packageFiles = data.files || [{ filename: data.filename, filesize_mb: data.filesize_mb }];
         
-        if (details.files && details.files.length > 0) {
-          packageFiles = details.files;
-          
-          document.getElementById("postPaymentPickerModal").classList.remove("hidden");
+        document.getElementById('filesCountBadge').innerText = packageFiles.length;
 
-          const modalGrid = document.getElementById("modalFilesGrid");
-          modalGrid.innerHTML = packageFiles.map((f, idx) => `
-            <button type="button" onclick="selectFileAndOpen('${f.filename}')" class="p-4 rounded-xl bg-white/[0.02] hover:bg-indigo-500/[0.08] border border-white/[0.06] hover:border-indigo-500/30 transition-all flex items-center gap-3.5 text-left cursor-pointer group shadow-sm">
-              <div class="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-lg shrink-0 group-hover:bg-indigo-500/20 group-hover:border-indigo-500/30 transition">
-                ${getFileIcon(f.filename)}
+        const grid = document.getElementById('modalFilesGrid');
+        grid.innerHTML = packageFiles.map(f => `
+          <button type="button" onclick="switchActiveFile('${f.filename}')" class="p-3 rounded-2xl border transition flex items-center justify-between text-left cursor-pointer ${
+            f.filename === activeFile 
+              ? 'bg-indigo-600/25 border-indigo-500/50 text-white shadow-lg shadow-indigo-600/20' 
+              : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.08] text-slate-300'
+          }">
+            <div class="flex items-center gap-2.5 truncate">
+              <span class="text-base">📄</span>
+              <div class="truncate">
+                <span class="text-xs font-bold block truncate">${f.filename}</span>
+                <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
               </div>
-              <div class="truncate flex-1">
-                <span class="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-wider block">Item #${idx + 1}</span>
-                <span class="text-xs font-semibold text-slate-200 truncate block group-hover:text-indigo-300 transition">${f.filename}</span>
-                <span class="text-[10px] text-slate-500 font-mono mt-0.5 block">${f.filesize_mb} MB</span>
-              </div>
-            </button>
-          `).join('');
+            </div>
+            ${f.filename === activeFile ? '<span class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Active</span>' : ''}
+          </button>
+        `).join('');
 
-          if (packageFiles.length > 1) {
-            document.getElementById("fileTabsBar").classList.remove("hidden");
-            document.getElementById("filesCountBadge").innerText = packageFiles.length;
-            document.getElementById("fileTabsContainer").innerHTML = packageFiles.map((f, idx) => `
-              <button type="button" onclick="switchActiveFile('${f.filename}')" class="file-tab-btn px-3.5 py-2 rounded-xl text-xs font-mono font-medium transition shrink-0 flex items-center gap-2 cursor-pointer bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 border border-transparent" data-filename="${f.filename}">
-                <span class="text-sm">${getFileIcon(f.filename)}</span>
-                <span class="truncate max-w-[150px]">#${idx + 1}: ${f.filename}</span>
-              </button>
-            `).join('');
-          }
-        }
-      } catch(e) {}
+        renderFileTabs();
+        renderActiveDeliverable(activeFile);
+      } catch (err) {
+        console.error('Failed to load viewer manifest:', err);
+      }
     }
 
-    initViewerManifest();
+    // Anti-Screenshot / Privacy Blur Handler
+    const shield = document.getElementById('antiCaptureShield');
+    function triggerShield() {
+      if (shield) shield.classList.remove('hidden');
+    }
+    function dismissShield() {
+      if (shield) shield.classList.add('hidden');
+    }
 
-    const shield = document.getElementById("antiCaptureShield");
-    function engageShield() { }
-    function disengageShield() { if (shield) shield.classList.add("hidden"); }
+    window.addEventListener('blur', triggerShield);
+    window.addEventListener('focus', dismissShield);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) triggerShield();
+      else dismissShield();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'PrintScreen' || (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u'))) {
+        e.preventDefault();
+        triggerShield();
+      }
+    });
+
+    initViewerManifest();
   </script>
 </body>
 </html>
