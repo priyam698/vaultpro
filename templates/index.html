@@ -166,8 +166,24 @@
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
 
+    /* Ultra-Premium FX Card Styles */
+    .fx-tile {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      transition: all 0.2s ease;
+    }
+    .fx-tile:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+    }
+    .fx-tile-title { color: #ffffff; }
+    .fx-tile-sub { color: #94a3b8; }
+    .fx-tile-val { color: #38bdf8; }
+    .fx-tile-rate { color: #cbd5e1; }
+
     /* ========================================================================= */
-    /* 2-COLOR THEME: SKY CYAN + PERIWINKLE INDIGO                              */
+    /* LIGHT THEME (DAY MODE) OVERRIDES                                          */
     /* ========================================================================= */
     body.light-theme {
       background-color: #dbe4f0;
@@ -412,6 +428,29 @@
     body.light-theme .glass-chip strong {
       color: #0f172a !important;
     }
+
+    /* Light Theme FX Card Overrides */
+    body.light-theme #currencyConversionBox {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-theme #currencyConversionBox h4 {
+      color: #4338ca !important;
+    }
+    body.light-theme .fx-tile {
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+    }
+    body.light-theme .fx-tile:hover {
+      border-color: #818cf8 !important;
+      background: #ffffff !important;
+    }
+    body.light-theme .fx-tile-title { color: #0f172a !important; font-weight: 800 !important; }
+    body.light-theme .fx-tile-sub { color: #64748b !important; }
+    body.light-theme .fx-tile-val { color: #1e1b4b !important; font-weight: 900 !important; }
+    body.light-theme .fx-tile-rate { color: #475569 !important; font-weight: 600 !important; }
 
     body.light-theme table tr td { color: #0f172a !important; }
     body.light-theme table tr th { color: #0f172a !important; background-color: rgba(215, 224, 236, 0.8) !important; }
@@ -763,367 +802,400 @@
   <!-- ========================================================================= -->
   <!-- HERO TRANSFER PORTAL                                                      -->
   <!-- ========================================================================= -->
-  <main class="relative z-20 max-w-7xl mx-auto px-6 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+  <main class="relative z-20 max-w-7xl mx-auto px-6 py-12 lg:py-20 space-y-12">
     
-    <div class="lg:col-span-6 space-y-6">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 text-xs font-bold shadow-lg backdrop-blur-md">
-        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-        Zero-Knowledge Transfers & Encrypted Cloud Drive
-      </div>
-
-      <h1 class="hero-headline text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-        Send files. <br />
-        <span class="hero-gradient-text">
-          Move ideas privately.
-        </span>
-      </h1>
-
-      <p class="hero-desc text-base sm:text-lg leading-relaxed max-w-lg font-medium opacity-90">
-        Transfer massive project deliverables, raw footage, and folder trees directly via zero-knowledge edge storage with instant link shredding, pay-to-unlock escrow, and client-side passcodes.
-      </p>
-
-      <!-- Feature Badges (Cool Slate Styled) -->
-      <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
-        <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
-          <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          </div>
-          <span>AES-256 Client Encrypted</span>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      
+      <div class="lg:col-span-6 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 text-xs font-bold shadow-lg backdrop-blur-md">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+          Zero-Knowledge Transfers & Encrypted Cloud Drive
         </div>
-        <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
-          <div class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-500 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          </div>
-          <span>Cloudflare R2 Direct Pipe</span>
-        </div>
-      </div>
 
-      <div class="pt-2 flex flex-wrap items-center gap-2.5 text-xs font-bold">
-        <span class="opacity-70">Quick Actions:</span>
-        <button onclick="openRequestModal()" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📥 Receive Client Files</button>
-        <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📁 Cloud Drive Vault</a>
-        <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">✨ E-Sign Studio</a>
-      </div>
+        <h1 class="hero-headline text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
+          Send files. <br />
+          <span class="hero-gradient-text">
+            Move ideas privately.
+          </span>
+        </h1>
 
-      <!-- In-Flow Safe Ambient Cards -->
-      <div class="pt-3 hidden sm:flex items-center gap-3">
-        <div class="editorial-card float-editorial-2 px-3.5 py-2 rounded-2xl flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">
-            🎵
+        <p class="hero-desc text-base sm:text-lg leading-relaxed max-w-lg font-medium opacity-90">
+          Transfer massive project deliverables, raw footage, and folder trees directly via zero-knowledge edge storage with instant link shredding, pay-to-unlock escrow, and client-side passcodes.
+        </p>
+
+        <!-- Feature Badges -->
+        <div class="grid grid-cols-2 gap-3.5 pt-2 text-xs font-bold">
+          <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <span>AES-256 Client Encrypted</span>
           </div>
-          <div>
-            <p class="text-[10px] font-mono font-bold leading-tight editorial-card-title">Master_Mix_96k.wav</p>
-            <span class="text-[9px] font-mono text-emerald-600 font-semibold">Lossless 24-bit</span>
+          <div class="feature-badge flex items-center gap-3 bg-[#0a0f24]/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 shadow-lg">
+            <div class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-500 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <span>Cloudflare R2 Direct Pipe</span>
           </div>
         </div>
 
-        <div class="editorial-folder float-editorial-3 px-3.5 py-2 rounded-2xl flex items-center gap-2">
-          <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-            📁
+        <div class="pt-2 flex flex-wrap items-center gap-2.5 text-xs font-bold">
+          <span class="opacity-70">Quick Actions:</span>
+          <button onclick="openRequestModal()" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📥 Receive Client Files</button>
+          <a href="/dashboard" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">📁 Cloud Drive Vault</a>
+          <a href="/sign" class="quick-btn px-3.5 py-1.5 rounded-xl border shadow-sm transition">✨ E-Sign Studio</a>
+        </div>
+      </div>
+
+      <!-- Right Column: Main Transfer Card Box -->
+      <div class="lg:col-span-6 relative">
+        <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10">
+          
+          <input type="file" id="fileInput" multiple class="hidden">
+          <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
+
+          <!-- VIEW A: STANDARD TRANSFER VIEW -->
+          <div id="transferStandardView">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+              <div class="mode-tab-track flex items-center bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
+                <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer">
+                  Get link
+                </button>
+                <button id="modeEmailBtn" onclick="switchTransferMode('email')" class="inactive-tab px-4 py-2 rounded-lg font-bold opacity-70 hover:opacity-100 transition cursor-pointer">
+                  Send email
+                </button>
+              </div>
+
+              <span id="tierCapBadge" class="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20">
+                Free: 2 GB limit
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3.5 mb-5">
+              <button onclick="handleFileSelectClick()" class="drop-zone-btn flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/10 border-2 border-dashed border-white/15 hover:border-indigo-400 transition duration-200 group cursor-pointer">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <span class="text-xs font-black">Add files</span>
+                <span class="text-[11px] opacity-65 mt-0.5 font-medium">Documents, video, audio</span>
+              </button>
+
+              <button onclick="handleFolderSelectClick()" class="drop-zone-btn flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition duration-200 group cursor-pointer">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                </div>
+                <span class="text-xs font-black">Add folders</span>
+                <span class="text-[11px] opacity-65 mt-0.5 font-medium">Retain directory hierarchy</span>
+              </button>
+            </div>
+
+            <div id="selectedFilesSummary" class="hidden bg-indigo-500/15 border border-indigo-500/30 rounded-2xl p-4 mb-4 space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span id="selectedFilesCountText" class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>0 files queued</span>
+                </span>
+                <span id="selectedFilesSizeText" class="font-mono text-indigo-400 font-extrabold text-sm">0 MB</span>
+              </div>
+              <div id="selectedFilesList" class="max-h-24 overflow-y-auto space-y-1.5 custom-scroll pr-1"></div>
+            </div>
+
+            <div class="space-y-3.5">
+              <div id="emailFieldsGroup" class="space-y-2.5 hidden">
+                <div>
+                  <label class="block text-xs font-bold mb-1">Recipient Email</label>
+                  <input id="emailTo" type="email" placeholder="client@company.com" 
+                         class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">Your Email</label>
+                  <input id="emailFrom" type="email" placeholder="you@studio.com" 
+                         class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold mb-1">Title</label>
+                <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
+                       class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold mb-1">Message</label>
+                <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
+                          class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
+              </div>
+
+              <!-- Expiry & Security Row -->
+              <div class="flex items-center gap-2 pt-1">
+                <div class="flex-1">
+                  <select id="expiryHours" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
+                    <option value="1">Expire in 1 Hour</option>
+                    <option value="24" selected>Expire in 24 Hours</option>
+                    <option value="72">Expire in 3 Days</option>
+                    <option value="0">Never (Store in Drive Vault)</option>
+                  </select>
+                </div>
+
+                <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
+                        class="quick-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                  <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                  <span>Security</span>
+                </button>
+              </div>
+
+              <!-- Collapsible Security Drawer -->
+              <div id="securityDrawer" class="hidden p-4 rounded-2xl bg-black/40 border border-slate-400/20 space-y-3">
+                <div>
+                  <label class="block text-xs font-bold mb-1">Passcode Protection</label>
+                  <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
+                         class="w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">Max Downloads (Burn-on-Read)</label>
+                  <select id="maxDownloads" class="w-full border rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
+                    <option value="0" selected>Unlimited Downloads</option>
+                    <option value="1">1 (Burn on Read 🔥)</option>
+                    <option value="5">5 Downloads</option>
+                    <option value="10">10 Downloads</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- PAY-TO-UNLOCK ESCROW CARD -->
+              <div class="paywall-feature-card p-3.5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-black/40 border border-indigo-500/30 space-y-2.5 transition">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center justify-center text-xs font-bold">
+                      $
+                    </div>
+                    <div>
+                      <span class="paywall-title text-xs font-black text-white block">Pay-to-Unlock Escrow</span>
+                      <span class="paywall-subtitle text-[10px] text-slate-400 block leading-tight">Require payment before buyers can unlock & stream files.</span>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="paywallToggle" onchange="togglePaywallInput()" class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+
+                <div id="paywallPriceContainer" class="hidden flex items-center gap-2 pt-2 border-t border-white/10">
+                  <span class="text-xs font-bold text-slate-300">Price per unlock ($):</span>
+                  <input type="number" id="paywallPriceInput" min="0.50" step="0.50" placeholder="10.00" 
+                         class="flex-1 bg-black/60 border border-white/20 rounded-xl px-3.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:outline-none focus:border-emerald-400">
+                </div>
+              </div>
+
+              <div id="progressBox" class="hidden space-y-1.5 pt-1">
+                <div class="flex justify-between text-xs font-bold">
+                  <span id="progressStatus">Preparing payload...</span>
+                  <span id="progressPercent" class="font-mono text-indigo-400 font-black">0%</span>
+                </div>
+                <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
+                  <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <button id="transferBtn" onclick="initiateTransfer()" 
+                      class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+                Transfer Files
+              </button>
+            </div>
+
+            <!-- RESULT BOX WITH VANISHING LINK WARNING -->
+            <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-3">
+              <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
+              
+              <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium leading-relaxed">
+                <span class="text-xs shrink-0">⚠️</span>
+                <span><strong>Copy this link now!</strong> This transfer link will appear only once and cannot be recovered after you navigate away or close this page.</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input id="shareUrlInput" type="text" readonly class="flex-1 border rounded-xl px-3.5 py-2.5 text-xs text-indigo-400 font-mono font-bold focus:outline-none">
+                <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
+                  Copy
+                </button>
+              </div>
+            </div>
           </div>
-          <span class="text-[10px] font-mono font-bold">Zephyr_Archive_v01</span>
+
+          <!-- VIEW B: EMAIL VERIFICATION VIEW -->
+          <div id="transferVerificationView" class="hidden space-y-5">
+            <div class="text-left space-y-2">
+              <h2 class="text-2xl font-black tracking-tight">Enter verification code</h2>
+              <p class="text-xs opacity-75 leading-relaxed">
+                To verify sender authorization, enter the code sent to:
+                <br/>
+                <strong id="verificationEmailDisplay" class="text-indigo-400 font-mono font-bold text-sm block mt-1"></strong>
+              </p>
+            </div>
+
+            <div class="space-y-3 pt-2">
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="block text-xs font-bold opacity-80">Verification Code</label>
+                  <div class="flex items-center gap-2">
+                    <span id="attemptTracker" class="text-[11px] font-mono font-bold text-indigo-400">4 attempts remaining</span>
+                    <span class="opacity-40 text-xs">•</span>
+                    <span id="otpCountdownBadge" class="text-[11px] font-mono font-bold text-amber-400">03:00</span>
+                  </div>
+                </div>
+                <input id="emailOtpInput" type="text" maxlength="6" placeholder="Enter 6-digit code" 
+                       class="w-full rounded-2xl px-4 py-3.5 text-center text-lg tracking-[0.3em] font-mono font-bold focus:outline-none transition">
+              </div>
+
+              <div class="flex items-center justify-between text-xs pt-1">
+                <button type="button" id="resendOtpBtn" onclick="resendOtpCode()" class="text-indigo-400 hover:underline font-bold cursor-pointer">
+                  Resend code
+                </button>
+                <a href="https://mail.google.com" target="_blank" class="opacity-70 hover:opacity-100 flex items-center gap-1 font-medium">
+                  <span>Open Gmail</span> ↗
+                </a>
+              </div>
+
+              <div id="otpErrorBox" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-center font-bold"></div>
+
+              <div class="flex items-center gap-3 pt-3">
+                <button type="button" onclick="cancelVerificationView()" title="Back to transfer details" 
+                        class="w-14 py-3.5 rounded-2xl border border-white/20 bg-white/5 hover:bg-white/10 flex items-center justify-center font-bold text-base transition cursor-pointer">
+                  &larr;
+                </button>
+
+                <button type="button" id="verifyOtpSubmitBtn" onclick="submitEmailVerificationOtp()"
+                        class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
+                  Verify & Transfer
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW C: CLIENT DROP-ZONE PORTAL VIEW -->
+          <div id="clientDropView" class="hidden space-y-5">
+            <div class="text-left space-y-1.5 border-b border-white/10 pb-4">
+              <div class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                Client Deposit Portal
+              </div>
+              <h2 id="clientDropProjectTitle" class="text-xl sm:text-2xl font-black tracking-tight text-white">Upload Project Files</h2>
+              <p class="text-xs opacity-75 leading-relaxed">
+                Files uploaded here will be encrypted and deposited directly into the recipient's secure Zephyr Drive Vault.
+              </p>
+            </div>
+
+            <div class="space-y-3 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-[11px] font-bold mb-1 opacity-80">Your Name / Company</label>
+                  <input id="clientSenderName" type="text" placeholder="e.g. Acme Media" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold mb-1 opacity-80">Your Email (Optional)</label>
+                  <input id="clientSenderEmail" type="email" placeholder="client@acme.com" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition">
+                </div>
+              </div>
+
+              <div class="pt-1">
+                <button type="button" onclick="handleFileSelectClick()" class="drop-zone-btn w-full py-8 flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition cursor-pointer group">
+                  <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                  </div>
+                  <span class="text-xs font-bold">Select file(s) to deposit</span>
+                  <span class="text-[10px] opacity-60 mt-0.5">Encrypted direct transmission</span>
+                </button>
+              </div>
+
+              <div id="clientDropFilesSummary" class="hidden bg-cyan-500/15 border border-cyan-500/30 rounded-2xl p-3 space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-bold">
+                  <span id="clientDropFileCountText">0 file(s) selected</span>
+                  <span id="clientDropFileSizeText" class="font-mono text-cyan-400">0 MB</span>
+                </div>
+              </div>
+
+              <div id="clientDropProgressBox" class="hidden space-y-1.5 pt-1">
+                <div class="flex justify-between text-xs font-bold">
+                  <span id="clientDropProgressStatus">Uploading to recipient vault...</span>
+                  <span id="clientDropProgressPercent" class="font-mono text-cyan-400 font-black">0%</span>
+                </div>
+                <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
+                  <div id="clientDropProgressBar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-150" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <div id="clientDropSuccessBox" class="hidden p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-center space-y-2">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-sm font-bold">✓</div>
+                <h4 class="text-xs font-black text-emerald-400">Deposit Complete!</h4>
+                <p class="text-[11px] opacity-80">Your files have been safely uploaded to the project vault.</p>
+              </div>
+
+              <button id="clientDropSubmitBtn" type="button" onclick="submitClientDepositPayload()"
+                      class="w-full bg-gradient-to-r from-cyan-600 hover:from-cyan-500 via-indigo-600 hover:via-indigo-500 to-purple-600 text-white font-black text-xs py-3.5 rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
+                Deposit Files into Vault
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
 
     </div>
 
-    <!-- Right Column: Main Transfer Card Box -->
-    <div class="lg:col-span-6 relative">
-      <div class="obsidian-panel rounded-3xl p-6 sm:p-8 relative z-10">
-        
-        <input type="file" id="fileInput" multiple class="hidden">
-        <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
-
-        <!-- VIEW A: STANDARD TRANSFER VIEW -->
-        <div id="transferStandardView">
-          <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
-            <div class="mode-tab-track flex items-center bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
-              <button id="modeLinkBtn" onclick="switchTransferMode('link')" class="px-4 py-2 rounded-lg font-black text-white bg-indigo-600 shadow-md transition cursor-pointer">
-                Get link
-              </button>
-              <button id="modeEmailBtn" onclick="switchTransferMode('email')" class="inactive-tab px-4 py-2 rounded-lg font-bold opacity-70 hover:opacity-100 transition cursor-pointer">
-                Send email
-              </button>
-            </div>
-
-            <span id="tierCapBadge" class="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20">
-              Free: 2 GB limit
+    <!-- LIVE TRANSACTION FX RATES WIDGET (TOP 10 MAJOR CURRENCIES) -->
+    <div id="currencyConversionBox" class="obsidian-panel rounded-3xl p-6 space-y-5 border border-indigo-500/30 shadow-2xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-
+            <h4 class="text-xs font-black uppercase tracking-wider text-indigo-400 card-heading">
+              Real-Time Gateway FX Rates (Top 10 Global Currencies)
+            </h4>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              Dodo / Gateway Spread Included
+            </span>
           </div>
-
-          <div class="grid grid-cols-2 gap-3.5 mb-5">
-            <button onclick="handleFileSelectClick()" class="drop-zone-btn flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/10 border-2 border-dashed border-white/15 hover:border-indigo-400 transition duration-200 group cursor-pointer">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-              </div>
-              <span class="text-xs font-black">Add files</span>
-              <span class="text-[11px] opacity-65 mt-0.5 font-medium">Documents, video, audio</span>
-            </button>
-
-            <button onclick="handleFolderSelectClick()" class="drop-zone-btn flex flex-col items-center justify-center p-5 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition duration-200 group cursor-pointer">
-              <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-500 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-              </div>
-              <span class="text-xs font-black">Add folders</span>
-              <span class="text-[11px] opacity-65 mt-0.5 font-medium">Retain directory hierarchy</span>
-            </button>
-          </div>
-
-          <div id="selectedFilesSummary" class="hidden bg-indigo-500/15 border border-indigo-500/30 rounded-2xl p-4 mb-4 space-y-2">
-            <div class="flex items-center justify-between text-xs font-bold">
-              <span id="selectedFilesCountText" class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                <span>0 files queued</span>
-              </span>
-              <span id="selectedFilesSizeText" class="font-mono text-indigo-400 font-extrabold text-sm">0 MB</span>
-            </div>
-            <div id="selectedFilesList" class="max-h-24 overflow-y-auto space-y-1.5 custom-scroll pr-1"></div>
-          </div>
-
-          <div class="space-y-3.5">
-            <div id="emailFieldsGroup" class="space-y-2.5 hidden">
-              <div>
-                <label class="block text-xs font-bold mb-1">Recipient Email</label>
-                <input id="emailTo" type="email" placeholder="client@company.com" 
-                       class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-              </div>
-              <div>
-                <label class="block text-xs font-bold mb-1">Your Email</label>
-                <input id="emailFrom" type="email" placeholder="you@studio.com" 
-                       class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold mb-1">Title</label>
-              <input id="transferTitle" type="text" placeholder="Project deliverables (optional)" 
-                     class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold mb-1">Message</label>
-              <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                        class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
-            </div>
-
-            <!-- Expiry & Security Row -->
-            <div class="flex items-center gap-2 pt-1">
-              <div class="flex-1">
-                <select id="expiryHours" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none transition">
-                  <option value="1">Expire in 1 Hour</option>
-                  <option value="24" selected>Expire in 24 Hours</option>
-                  <option value="72">Expire in 3 Days</option>
-                  <option value="0">Never (Store in Drive Vault)</option>
-                </select>
-              </div>
-
-              <button type="button" onclick="toggleSecurityOptions()" title="Security & Passcode settings"
-                      class="quick-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                <span>Security</span>
-              </button>
-            </div>
-
-            <!-- Collapsible Security Drawer -->
-            <div id="securityDrawer" class="hidden p-4 rounded-2xl bg-black/40 border border-slate-400/20 space-y-3">
-              <div>
-                <label class="block text-xs font-bold mb-1">Passcode Protection</label>
-                <input id="passcode" type="password" placeholder="Passcode (derived client-side)" 
-                       class="w-full border rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
-              </div>
-              <div>
-                <label class="block text-xs font-bold mb-1">Max Downloads (Burn-on-Read)</label>
-                <select id="maxDownloads" class="w-full border rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none transition">
-                  <option value="0" selected>Unlimited Downloads</option>
-                  <option value="1">1 (Burn on Read 🔥)</option>
-                  <option value="5">5 Downloads</option>
-                  <option value="10">10 Downloads</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- STAR FEATURE: PAY-TO-UNLOCK ESCROW CARD -->
-            <div class="paywall-feature-card p-3.5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-black/40 border border-indigo-500/30 space-y-2.5 transition">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center justify-center text-xs font-bold">
-                    $
-                  </div>
-                  <div>
-                    <span class="paywall-title text-xs font-black text-white block">Pay-to-Unlock Escrow</span>
-                    <span class="paywall-subtitle text-[10px] text-slate-400 block leading-tight">Require payment before buyers can unlock & stream files.</span>
-                  </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="paywallToggle" onchange="togglePaywallInput()" class="sr-only peer">
-                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-
-              <div id="paywallPriceContainer" class="hidden flex items-center gap-2 pt-2 border-t border-white/10">
-                <span class="text-xs font-bold text-slate-300">Price per unlock ($):</span>
-                <input type="number" id="paywallPriceInput" min="0.50" step="0.50" placeholder="10.00" 
-                       class="flex-1 bg-black/60 border border-white/20 rounded-xl px-3.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:outline-none focus:border-emerald-400">
-              </div>
-            </div>
-
-            <div id="progressBox" class="hidden space-y-1.5 pt-1">
-              <div class="flex justify-between text-xs font-bold">
-                <span id="progressStatus">Preparing payload...</span>
-                <span id="progressPercent" class="font-mono text-indigo-400 font-black">0%</span>
-              </div>
-              <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
-                <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <button id="transferBtn" onclick="initiateTransfer()" 
-                    class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
-              Transfer Files
-            </button>
-          </div>
-
-          <!-- RESULT BOX WITH VANISHING LINK WARNING -->
-          <div id="resultBox" class="mt-5 pt-4 border-t border-white/10 hidden space-y-3">
-            <label class="block text-xs font-bold text-emerald-500">✓ Secure Vault Link Ready (SHA-256 Verified)</label>
-            
-            <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium leading-relaxed">
-              <span class="text-xs shrink-0">⚠️</span>
-              <span><strong>Copy this link now!</strong> This transfer link will appear only once and cannot be recovered after you navigate away or close this page.</span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <input id="shareUrlInput" type="text" readonly class="flex-1 border rounded-xl px-3.5 py-2.5 text-xs text-indigo-400 font-mono font-bold focus:outline-none">
-              <button onclick="copyResultLink()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer">
-                Copy
-              </button>
-            </div>
-          </div>
+          <p class="text-[11px] opacity-70">
+            Live transaction settlement conversion including processor spread. Rates update daily with market volatility.
+          </p>
         </div>
 
-        <!-- VIEW B: WETRANSFER-STYLE EMAIL VERIFICATION VIEW -->
-        <div id="transferVerificationView" class="hidden space-y-5">
-          <div class="text-left space-y-2">
-            <h2 class="text-2xl font-black tracking-tight">Enter verification code</h2>
-            <p class="text-xs opacity-75 leading-relaxed">
-              To verify sender authorization, enter the code sent to:
-              <br/>
-              <strong id="verificationEmailDisplay" class="text-indigo-400 font-mono font-bold text-sm block mt-1"></strong>
-            </p>
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="flex items-center gap-1 bg-black/20 p-1 rounded-xl border border-white/10">
+            <button type="button" onclick="setFxTestAmount(1)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$1</button>
+            <button type="button" onclick="setFxTestAmount(10)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$10</button>
+            <button type="button" onclick="setFxTestAmount(50)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$50</button>
+            <button type="button" onclick="setFxTestAmount(100)" class="px-2 py-1 text-[10px] font-bold rounded-lg hover:bg-white/10 transition">$100</button>
           </div>
 
-          <div class="space-y-3 pt-2">
-            <div>
-              <div class="flex justify-between items-center mb-1.5">
-                <label class="block text-xs font-bold opacity-80">Verification Code</label>
-                <div class="flex items-center gap-2">
-                  <span id="attemptTracker" class="text-[11px] font-mono font-bold text-indigo-400">4 attempts remaining</span>
-                  <span class="opacity-40 text-xs">•</span>
-                  <span id="otpCountdownBadge" class="text-[11px] font-mono font-bold text-amber-400">03:00</span>
-                </div>
-              </div>
-              <input id="emailOtpInput" type="text" maxlength="6" placeholder="Enter 6-digit code" 
-                     class="w-full rounded-2xl px-4 py-3.5 text-center text-lg tracking-[0.3em] font-mono font-bold focus:outline-none transition">
-            </div>
-
-            <div class="flex items-center justify-between text-xs pt-1">
-              <button type="button" id="resendOtpBtn" onclick="resendOtpCode()" class="text-indigo-400 hover:underline font-bold cursor-pointer">
-                Resend code
-              </button>
-              <a href="https://mail.google.com" target="_blank" class="opacity-70 hover:opacity-100 flex items-center gap-1 font-medium">
-                <span>Open Gmail</span> ↗
-              </a>
-            </div>
-
-            <div id="otpErrorBox" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-center font-bold"></div>
-
-            <div class="flex items-center gap-3 pt-3">
-              <button type="button" onclick="cancelVerificationView()" title="Back to transfer details" 
-                      class="w-14 py-3.5 rounded-2xl border border-white/20 bg-white/5 hover:bg-white/10 flex items-center justify-center font-bold text-base transition cursor-pointer">
-                &larr;
-              </button>
-
-              <button type="button" id="verifyOtpSubmitBtn" onclick="submitEmailVerificationOtp()"
-                      class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
-                Verify & Transfer
-              </button>
-            </div>
+          <div class="relative w-28">
+            <span class="absolute left-3 top-2 text-xs font-black opacity-60">$</span>
+            <input 
+              id="fxTestAmountInput" 
+              type="number" 
+              step="any" 
+              value="1" 
+              min="0.1" 
+              oninput="updateCurrencyPreview(parseFloat(this.value) || 1)" 
+              class="w-full pl-7 pr-3 py-1.5 text-xs font-mono font-black rounded-xl bg-black/40 border border-white/15 focus:outline-none focus:border-indigo-400 text-white transition"
+            >
           </div>
         </div>
+      </div>
 
-        <!-- VIEW C: CLIENT DROP-ZONE PORTAL VIEW -->
-        <div id="clientDropView" class="hidden space-y-5">
-          <div class="text-left space-y-1.5 border-b border-white/10 pb-4">
-            <div class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-              Client Deposit Portal
-            </div>
-            <h2 id="clientDropProjectTitle" class="text-xl sm:text-2xl font-black tracking-tight text-white">Upload Project Files</h2>
-            <p class="text-xs opacity-75 leading-relaxed">
-              Files uploaded here will be encrypted and deposited directly into the recipient's secure Zephyr Drive Vault.
-            </p>
-          </div>
-
-          <div class="space-y-3 pt-1">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div>
-                <label class="block text-[11px] font-bold mb-1 opacity-80">Your Name / Company</label>
-                <input id="clientSenderName" type="text" placeholder="e.g. Acme Media" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold mb-1 opacity-80">Your Email (Optional)</label>
-                <input id="clientSenderEmail" type="email" placeholder="client@acme.com" class="w-full rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition">
-              </div>
-            </div>
-
-            <div class="pt-1">
-              <button type="button" onclick="handleFileSelectClick()" class="drop-zone-btn w-full py-8 flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] hover:bg-cyan-500/10 border-2 border-dashed border-white/15 hover:border-cyan-400 transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                </div>
-                <span class="text-xs font-bold">Select file(s) to deposit</span>
-                <span class="text-[10px] opacity-60 mt-0.5">Encrypted direct transmission</span>
-              </button>
-            </div>
-
-            <div id="clientDropFilesSummary" class="hidden bg-cyan-500/15 border border-cyan-500/30 rounded-2xl p-3 space-y-1.5">
-              <div class="flex items-center justify-between text-xs font-bold">
-                <span id="clientDropFileCountText">0 file(s) selected</span>
-                <span id="clientDropFileSizeText" class="font-mono text-cyan-400">0 MB</span>
-              </div>
-            </div>
-
-            <div id="clientDropProgressBox" class="hidden space-y-1.5 pt-1">
-              <div class="flex justify-between text-xs font-bold">
-                <span id="clientDropProgressStatus">Uploading to recipient vault...</span>
-                <span id="clientDropProgressPercent" class="font-mono text-cyan-400 font-black">0%</span>
-              </div>
-              <div class="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-slate-400/20">
-                <div id="clientDropProgressBar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-150" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <div id="clientDropSuccessBox" class="hidden p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-center space-y-2">
-              <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-sm font-bold">✓</div>
-              <h4 class="text-xs font-black text-emerald-400">Deposit Complete!</h4>
-              <p class="text-[11px] opacity-80">Your files have been safely uploaded to the project vault.</p>
-            </div>
-
-            <button id="clientDropSubmitBtn" type="button" onclick="submitClientDepositPayload()"
-                    class="w-full bg-gradient-to-r from-cyan-600 hover:from-cyan-500 via-indigo-600 hover:via-indigo-500 to-purple-600 text-white font-black text-xs py-3.5 rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
-              Deposit Files into Vault
-            </button>
-          </div>
+      <div id="currencyRatesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs font-mono">
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 opacity-60 text-center col-span-full">
+          Loading live currency settlement rates...
         </div>
-
       </div>
     </div>
 
   </main>
 
   <!-- ========================================================================= -->
-  <!-- SECTION 1: PROTON-STYLE "STAY IN CONTROL OF YOUR FILES"                   -->
+  <!-- SECTION 1: PROTON-STYLE "STAY IN CONTROL OF YOUR FILES"                  -->
   <!-- ========================================================================= -->
   <section id="control" class="relative z-20 py-20 border-t border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-6">
@@ -1258,11 +1330,10 @@
     <div class="max-w-7xl mx-auto px-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         
-        <!-- Left: Premium Escrow Card Mockup (Exact Match to Reference Design) -->
+        <!-- Left: Premium Escrow Card Mockup -->
         <div class="lg:col-span-6 flex justify-center">
           <div class="w-full max-w-sm rounded-[36px] obsidian-panel p-5 shadow-2xl space-y-4 border border-white/15">
             
-            <!-- Top Card Header: Back Nav & Member Avatars -->
             <div class="flex items-center justify-between px-1">
               <span class="opacity-70 hover:opacity-100 cursor-pointer font-bold text-sm">←</span>
               <div class="flex items-center gap-2">
@@ -1277,27 +1348,23 @@
               </div>
             </div>
 
-            <!-- Hero Asset Frame -->
             <div class="rounded-2xl overflow-hidden h-48 relative shadow-lg bg-slate-900 border border-white/10 group">
               <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80" 
                    alt="Master Cinema Frame" 
                    class="w-full h-full object-cover">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20"></div>
               
-              <!-- Floating Top Badges -->
               <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/15 text-[9px] font-mono font-bold text-emerald-400 flex items-center gap-1.5 shadow">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>Pay-to-Unlock Active</span>
               </div>
 
-              <!-- Bottom Bar Info -->
               <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-[10px]">
                 <span class="font-mono font-bold">14.2 GB • 8K ProRes</span>
                 <span class="px-2 py-0.5 rounded-md bg-indigo-600/90 font-bold shadow">Encrypted</span>
               </div>
             </div>
 
-            <!-- Card Body & Action Buttons -->
             <div class="px-1 space-y-2.5">
               <div>
                 <p class="text-[10px] font-mono font-semibold opacity-70">21 September 2026 • 3 Deliverables</p>
@@ -1314,7 +1381,6 @@
               </div>
             </div>
 
-            <!-- 3 Bottom Media Thumbnails (Matching Reference Grid) -->
             <div class="grid grid-cols-3 gap-2 pt-1">
               <div class="h-20 rounded-xl overflow-hidden relative shadow-sm border border-white/10 bg-slate-900">
                 <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=300&q=80" alt="Video Reel" class="w-full h-full object-cover">
@@ -1333,7 +1399,6 @@
           </div>
         </div>
 
-        <!-- Right: Editorial Feature Breakdown & Pill Actions -->
         <div class="lg:col-span-6 space-y-6">
           <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/25">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -1392,7 +1457,6 @@
       
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
-        <!-- Left: Mobile Photo Vault Mockup -->
         <div class="lg:col-span-6 flex justify-center">
           <div class="w-full max-w-sm rounded-[36px] obsidian-panel p-4 shadow-2xl space-y-3">
             
@@ -1687,7 +1751,6 @@
               <img src="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1000&q=90" alt="Signing legal document" class="w-full h-full object-cover">
               <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
 
-              <!-- Interactive E-Sign Mockup Pill Card -->
               <div class="absolute top-6 left-6 max-w-xs w-full glass-chip rounded-2xl p-4 shadow-2xl space-y-2.5">
                 <div class="flex items-center justify-between border-b border-slate-400/20 pb-2 text-[10px]">
                   <span class="font-bold opacity-80 flex items-center gap-1.5">
@@ -2179,7 +2242,7 @@
   </script>
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- Core Pipeline, Email OTP & Chatbot Scripts -->
+  <!-- Core Pipeline, Email OTP, FX Widget & Chatbot Scripts -->
   <script>
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -2204,7 +2267,6 @@
 
     // ==========================================
     // PAYMENT ENVIRONMENT CONFIGURATION
-    // Set to "test" for Sandbox, "live" for Production
     // ==========================================
     const ACTIVE_PAYMENT_ENV = "test"; // <--- CHANGE TO "live" WHEN GOING LIVE
 
@@ -2229,9 +2291,81 @@
       }
     };
 
+    let globalFxRates = {};
+
+    async function fetchExchangeRates() {
+      try {
+        const res = await fetch("/api/exchange-rates");
+        const data = await res.json();
+        if (data && data.rates) {
+          globalFxRates = data.rates;
+          const initialInput = document.getElementById("fxTestAmountInput");
+          const initialVal = initialInput ? (parseFloat(initialInput.value) || 1.00) : 1.00;
+          updateCurrencyPreview(initialVal);
+        }
+      } catch (e) {
+        console.error("Failed to load FX rates", e);
+      }
+    }
+
+    function setFxTestAmount(val) {
+      const input = document.getElementById("fxTestAmountInput");
+      if (input) {
+        input.value = val;
+        updateCurrencyPreview(val);
+      }
+    }
+
+    function updateCurrencyPreview(usdValue) {
+      const grid = document.getElementById("currencyRatesGrid");
+      if (!grid || !globalFxRates || Object.keys(globalFxRates).length === 0) return;
+
+      const validUSD = Math.max(0.01, usdValue || 1.00);
+
+      grid.innerHTML = Object.keys(globalFxRates).map(cur => {
+        const item = globalFxRates[cur];
+        const converted = (validUSD * item.gateway_rate).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        const isUp = item.is_positive;
+        const arrow = isUp ? "▲" : "▼";
+        const changeBadgeClass = isUp 
+          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" 
+          : "bg-rose-500/15 text-rose-400 border-rose-500/30";
+
+        return `
+          <div class="fx-tile p-3.5 rounded-2xl flex flex-col justify-between space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="text-base">${item.flag}</span>
+                <div>
+                  <span class="fx-tile-title text-xs font-black block">${cur}</span>
+                  <span class="fx-tile-sub text-[9px] block leading-none">${item.name}</span>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md border ${changeBadgeClass}">
+                ${arrow} ${Math.abs(item.change_pct).toFixed(2)}%
+              </span>
+            </div>
+
+            <div class="pt-1 border-t border-white/5">
+              <div class="fx-tile-val text-sm font-black truncate">
+                ${item.symbol}${converted}
+              </div>
+              <div class="flex items-center justify-between text-[9px] fx-tile-rate font-mono mt-0.5">
+                <span>1 USD = ${item.gateway_rate}</span>
+                <span class="text-[8px] opacity-75">Mkt: ${item.market_rate}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function openDodoCheckout(e, tier = "pro") {
       if (e) e.preventDefault();
-      
       const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
       const productId = envConfig.products[tier] || envConfig.products["pro"];
       let targetUrl = `${envConfig.domain}/${productId}`;
@@ -2245,9 +2379,7 @@
       params.append("env", ACTIVE_PAYMENT_ENV);
       
       const qs = params.toString();
-      if (qs) {
-        targetUrl += "?" + qs;
-      }
+      if (qs) targetUrl += "?" + qs;
       window.location.href = targetUrl;
     }
 
@@ -3103,6 +3235,8 @@
         container.scrollTop = container.scrollHeight;
       }
     }
+
+    fetchExchangeRates();
   </script>
 </body>
 </html>
