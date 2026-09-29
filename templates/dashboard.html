@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Drive | Cloud Storage & Studio Workspace</title>
+  <title>Zephyr Drive | Cloud Storage & Advanced Studio Workspace</title>
   
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34 Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22 L78 26 C66 21 34 21 18 26 Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76 L46 76 L86 34 Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78 Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg%3E">
   
@@ -57,21 +57,31 @@
       background: linear-gradient(135deg, rgba(79, 70, 229, 0.18) 0%, rgba(30, 27, 75, 0.4) 100%) !important;
       border: 1px solid rgba(99, 102, 241, 0.5) !important;
     }
-    .plans-inactive-box {
-      background: rgba(255, 255, 255, 0.03) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+
+    /* Top Photo-Editor Tool Tabs */
+    .tool-tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      color: #94a3b8;
+      border: 1px solid transparent;
+      user-select: none;
     }
-    .plans-badge-active {
-      background: #10b981 !important;
-      color: #ffffff !important;
-      font-weight: 800 !important;
+    .tool-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #f8fafc;
     }
-    .plans-badge-inactive {
-      background: #64748b !important;
-      color: #ffffff !important;
+    .tool-tab-active {
+      background: rgba(99, 102, 241, 0.15) !important;
+      color: #818cf8 !important;
+      border-color: rgba(99, 102, 241, 0.4) !important;
     }
 
-    /* Light Theme Overrides */
+    /* Light Theme */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -83,30 +93,6 @@
         radial-gradient(ellipse 70% 60% at 10% 12%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
         radial-gradient(ellipse 65% 55% at 90% 18%, rgba(99, 102, 241, 0.12) 0%, transparent 55%),
         linear-gradient(180deg, #f8fbff 0%, #e6f2fb 100%);
-    }
-
-    body.light-theme header {
-      background: rgba(255, 255, 255, 0.92) !important;
-      border-bottom: 1px solid #bfdbfe !important;
-      box-shadow: 0 4px 20px -5px rgba(2, 132, 199, 0.06) !important;
-    }
-
-    body.light-theme .brand-logo-box {
-      background: #ffffff !important;
-      border: 1px solid #bfdbfe !important;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
-    }
-
-    body.light-theme header a,
-    body.light-theme header span {
-      color: #0f172a !important;
-    }
-
-    body.light-theme .header-pill {
-      background: #ffffff !important;
-      border: 1px solid #bfdbfe !important;
-      color: #0f172a !important;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
     }
 
     body.light-theme .obsidian-card {
@@ -136,9 +122,11 @@
       color: #0f172a !important;
     }
 
-    body.light-theme #dropZoneContainer {
-      background: #f8fbff !important;
-      border-color: #93c5fd !important;
+    .crop-selection-box {
+      border: 2px dashed #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      position: absolute;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -146,12 +134,12 @@
 
   <div class="site-mountain-backdrop"></div>
 
-  <!-- CONFIRM SAVE CHANGES PROMPT MODAL -->
+  <!-- SAVE CHANGES CONFIRMATION MODAL -->
   <div id="saveChangesModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4 border border-indigo-500/40 shadow-2xl">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">⚠️</div>
       <h3 class="text-base font-black text-white">Save changes?</h3>
-      <p class="text-xs text-slate-300 leading-relaxed font-medium">You have unsaved edits on this file. Would you like to save your changes to your cloud vault?</p>
+      <p class="text-xs text-slate-300 leading-relaxed font-medium">You have unsaved edits on this file. Would you like to save changes to your cloud vault?</p>
       <div class="grid grid-cols-2 gap-2.5 pt-2">
         <button onclick="confirmSaveDecision(false)" class="py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-bold transition cursor-pointer">Cancel</button>
         <button onclick="confirmSaveDecision(true)" class="py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition cursor-pointer">Save Changes</button>
@@ -159,96 +147,157 @@
     </div>
   </div>
 
-  <!-- DRIVE STUDIO WORKSPACE MODAL (RESPONSIVE FULL IN-DRIVE FILE EDITOR) -->
-  <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/90 backdrop-blur-xl hidden p-2 sm:p-6">
-    <div class="obsidian-card w-full max-w-7xl h-[95vh] rounded-3xl flex flex-col justify-between border border-sky-500/30 shadow-2xl overflow-hidden relative">
+  <!-- DRIVE STUDIO ADVANCED WORKSPACE MODAL -->
+  <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/95 backdrop-blur-xl hidden p-2 sm:p-4">
+    <div class="obsidian-card w-full max-w-[1440px] h-[97vh] rounded-3xl flex flex-col justify-between border border-sky-500/30 shadow-2xl overflow-hidden relative">
       
-      <!-- Studio Header -->
-      <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/50">
+      <!-- Top Primary Studio Bar -->
+      <div class="px-5 py-2.5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/60">
         <div class="flex items-center gap-3">
-          <div id="studioIconBox" class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-lg">📄</div>
+          <div id="studioIconBox" class="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-base">📄</div>
           <div>
-            <h3 id="studioFileName" class="text-xs sm:text-sm font-black text-white truncate max-w-xs sm:max-w-md">filename.ext</h3>
+            <h3 id="studioFileName" class="text-xs font-black text-white truncate max-w-xs sm:max-w-md">filename.ext</h3>
             <span id="studioFileSize" class="text-[10px] font-mono text-sky-400">0.00 MB</span>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Unsaved Edits Badge -->
-          <span id="studioUnsavedBadge" class="hidden px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[10px] font-bold">● Unsaved Edits</span>
-
-          <!-- Save Button -->
-          <button onclick="requestSaveFile()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
-            <span>💾</span>
-            <span>Save</span>
-          </button>
-
-          <!-- Close Button -->
+          <span id="studioUnsavedBadge" class="hidden px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[10px] font-bold">● Unsaved Edits</span>
           <button onclick="attemptCloseStudio()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer">✕</button>
         </div>
       </div>
 
-      <!-- Studio Editor Body Stage -->
-      <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4 bg-[#04060c]">
-        
-        <!-- 1. Image Studio: Auto-fitted, Zoomable, Drawable, Croppable Canvas -->
-        <div id="studioImageStage" class="hidden w-full h-full flex flex-col items-center justify-between relative overflow-hidden">
-          
-          <!-- Image Studio Floating Control Bar -->
-          <div class="w-full flex flex-wrap items-center justify-between gap-2 bg-black/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0 mb-2 z-20">
-            <!-- Edit Tools -->
-            <div class="flex items-center gap-1.5">
-              <button onclick="setStudioImageTool('draw')" id="sToolDrawBtn" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer">✏️ Draw</button>
-              <button onclick="setStudioImageTool('crop')" id="sToolCropBtn" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">✂️ Crop Mode</button>
-              <button onclick="changeImageCanvasBg()" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">🎨 Add Background</button>
-              <button onclick="resetImageCanvas()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 transition cursor-pointer">Clear Ink</button>
-            </div>
-
-            <!-- Auto-Fit & Zoom Controls -->
-            <div class="flex items-center gap-1.5 bg-black/60 p-0.5 rounded-xl border border-white/10 font-mono text-xs">
-              <button onclick="zoomStudioCanvas(-0.2)" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition font-bold cursor-pointer" title="Zoom Out">-</button>
-              <span id="studioZoomDisplay" class="px-2 text-[10px] font-bold text-sky-400 min-w-[46px] text-center">Fit</span>
-              <button onclick="zoomStudioCanvas(0.2)" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition font-bold cursor-pointer" title="Zoom In">+</button>
-              <button onclick="fitStudioImageToViewport()" class="px-2.5 py-1 text-sky-300 hover:text-white rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 transition font-sans text-[11px] cursor-pointer">Fit Screen</button>
-              <button onclick="setStudioZoomActual()" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition font-sans text-[11px] cursor-pointer">100%</button>
-            </div>
-          </div>
-
-          <!-- Viewport Stage -->
-          <div id="studioCanvasViewport" class="flex-1 w-full flex items-center justify-center overflow-auto custom-scroll p-2 relative select-none">
-            <canvas id="studioImageCanvas" class="object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-[width,height] duration-150 ease-out"></canvas>
-          </div>
+      <!-- PHOTO EDITOR TOOLBAR -->
+      <div id="photoEditorHeaderTools" class="px-4 py-2 border-b border-white/10 bg-[#090d18] flex items-center justify-between overflow-x-auto custom-scroll shrink-0 gap-1 text-[11px] font-bold">
+        <div class="flex items-center gap-1 shrink-0">
+          <button onclick="selectStudioCategory('resize')" id="tabBtn-resize" class="tool-tab-btn">
+            <span class="text-sm">📏</span><span>RESIZE</span>
+          </button>
+          <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn">
+            <span class="text-sm">✂️</span><span>CROP</span>
+          </button>
+          <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn">
+            <span class="text-sm">🔄</span><span>TRANSFORM</span>
+          </button>
+          <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active">
+            <span class="text-sm">✏️</span><span>DRAW</span>
+          </button>
+          <button onclick="selectStudioCategory('text')" id="tabBtn-text" class="tool-tab-btn">
+            <span class="text-sm">🔤</span><span>TEXT</span>
+          </button>
+          <button onclick="selectStudioCategory('shapes')" id="tabBtn-shapes" class="tool-tab-btn">
+            <span class="text-sm">🔷</span><span>SHAPES</span>
+          </button>
+          <button onclick="selectStudioCategory('stickers')" id="tabBtn-stickers" class="tool-tab-btn">
+            <span class="text-sm">😀</span><span>STICKERS</span>
+          </button>
+          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn">
+            <span class="text-sm">🖼️</span><span>FRAME</span>
+          </button>
+          <button onclick="selectStudioCategory('corners')" id="tabBtn-corners" class="tool-tab-btn">
+            <span class="text-sm">🔲</span><span>CORNERS</span>
+          </button>
+          <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn">
+            <span class="text-sm">🎨</span><span>BACKGROUND</span>
+          </button>
         </div>
 
-        <!-- 2. Video Studio (Auto-Sized Video Stage) -->
-        <div id="studioVideoStage" class="hidden w-full h-full flex flex-col items-center justify-center space-y-4">
-          <div class="flex-1 w-full flex items-center justify-center p-2 overflow-hidden">
-            <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
-          </div>
-          <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-            <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
-            <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
-            <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
-          </div>
+        <div class="flex items-center gap-2 pl-4 border-l border-white/10 shrink-0">
+          <button onclick="undoStudioCanvas()" id="sUndoBtn" title="Undo (Ctrl+Z)" class="px-2.5 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
+            <span>↩</span><span class="hidden md:inline text-[10px]">Undo</span>
+          </button>
+          <button onclick="redoStudioCanvas()" id="sRedoBtn" title="Redo (Ctrl+Y)" class="px-2.5 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
+            <span>↪</span><span class="hidden md:inline text-[10px]">Redo</span>
+          </button>
+          <button onclick="resetImageCanvas()" title="Reset to Original" class="px-2 py-1 text-rose-300 hover:text-white rounded-lg hover:bg-rose-500/20 transition text-[10px] font-bold cursor-pointer">
+            <span>↺</span> Reset
+          </button>
         </div>
-
-        <!-- 3. Code, Script & Notebooks Editor -->
-        <textarea id="studioCodeEditor" oninput="markStudioModified()" class="hidden w-full h-full p-6 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text" placeholder="Edit scripts, notebooks, or text..."></textarea>
-
-        <!-- 4. Universal Fallback Inspector -->
-        <div id="studioFallbackStage" class="hidden text-center space-y-3 p-8 max-w-sm mx-auto">
-          <div class="w-16 h-16 rounded-3xl bg-sky-500/10 border border-sky-500/20 text-sky-400 mx-auto flex items-center justify-center text-3xl font-bold">📦</div>
-          <strong id="studioFallbackName" class="text-sm font-bold text-white block truncate">filename.bin</strong>
-          <p class="text-xs text-slate-400 leading-relaxed font-medium">Binary vault item loaded. Click download below to export to your device.</p>
-          <button id="studioFallbackDownloadBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition cursor-pointer">Download Asset</button>
-        </div>
-
       </div>
 
-      <!-- Studio Footer -->
-      <div class="px-6 py-2.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono opacity-70 bg-black/50">
-        <span id="studioFooterStatus">Direct Cloud Vault Editing Active</span>
-        <span>Secure Storage Pipe • Scroll to Zoom</span>
+      <!-- Secondary Sub-Tool Drawer (Contextual Controls per Tool) -->
+      <div id="subToolSettingsBar" class="px-6 py-2 bg-[#050811] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+        <!-- Injected dynamically based on active category -->
+      </div>
+
+      <!-- Main Stage Grid (Left: Viewport / Right: Quick Actions) -->
+      <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Center Stage -->
+        <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-2 bg-[#030408]">
+          
+          <!-- 1. IMAGE EDITOR VIEWPORT -->
+          <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
+            <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4 relative">
+              <div id="canvasPositionWrapper" class="relative inline-block">
+                <canvas id="studioImageCanvas" class="object-contain rounded-lg shadow-2xl border border-white/15 cursor-crosshair transition-[width,height] duration-100 ease-out"></canvas>
+                <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. VIDEO STUDIO -->
+          <div id="studioVideoStage" class="hidden w-full h-full flex flex-col items-center justify-center space-y-4">
+            <div class="flex-1 w-full flex items-center justify-center p-2 overflow-hidden">
+              <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
+              <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
+              <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
+            </div>
+          </div>
+
+          <!-- 3. CODE, SCRIPTS & NOTEBOOKS EDITOR -->
+          <textarea id="studioCodeEditor" oninput="markStudioModified()" class="hidden w-full h-full p-6 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text" placeholder="Edit scripts, notebooks, or text..."></textarea>
+
+          <!-- 4. UNIVERSAL FALLBACK -->
+          <div id="studioFallbackStage" class="hidden text-center space-y-3 p-8 max-w-sm mx-auto">
+            <div class="w-16 h-16 rounded-3xl bg-sky-500/10 border border-sky-500/20 text-sky-400 mx-auto flex items-center justify-center text-3xl font-bold">📦</div>
+            <strong id="studioFallbackName" class="text-sm font-bold text-white block truncate">filename.bin</strong>
+            <p class="text-xs text-slate-400 leading-relaxed font-medium">Binary vault item loaded. Click download below to export to your device.</p>
+            <button id="studioFallbackDownloadBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition cursor-pointer">Download Asset</button>
+          </div>
+
+        </div>
+
+        <!-- Right Side Panel: Zoom, Format & Save Controller -->
+        <div class="w-64 border-l border-white/10 bg-[#070b16] p-4 flex flex-col justify-between shrink-0">
+          <div class="space-y-5">
+            <!-- Zoom Controls -->
+            <div class="space-y-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Zoom Viewport</span>
+              <div class="flex items-center justify-between bg-black/60 p-1.5 rounded-xl border border-white/10 text-xs font-mono">
+                <button onclick="zoomStudioCanvas(-0.15)" class="w-7 h-7 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer">-</button>
+                <span id="studioZoomDisplay" class="font-bold text-sky-400 text-xs">Fit</span>
+                <button onclick="zoomStudioCanvas(0.15)" class="w-7 h-7 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer">+</button>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5 pt-1 text-[11px] font-bold">
+                <button onclick="fitStudioImageToViewport()" class="py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 transition">Fit Screen</button>
+                <button onclick="setStudioZoomActual()" class="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition">100%</button>
+              </div>
+            </div>
+
+            <!-- Export Format Selector -->
+            <div class="space-y-2 pt-2 border-t border-white/10">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Save Format</span>
+              <select id="exportFormatSelect" class="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-400 text-slate-200 cursor-pointer">
+                <option value="image/png" selected>Save as PNG</option>
+                <option value="image/jpeg">Save as JPG</option>
+                <option value="image/webp">Save as WebP</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="space-y-2 pt-4 border-t border-white/10">
+            <button onclick="requestSaveFile()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-indigo-700 hover:opacity-95 text-white font-black text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer transition">
+              <span>💾</span>
+              <span>Save Changes to Vault</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -291,174 +340,34 @@
           <span class="uppercase tracking-wider text-indigo-400">Active Subscriptions & Stacked Vaults</span>
           <span id="stackedCapacityBadge" class="text-[10px] font-mono px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Total: 200 GB</span>
         </div>
-
-        <div id="activeSubsList" class="space-y-3">
-          <!-- Populated dynamically -->
-        </div>
+        <div id="activeSubsList" class="space-y-3"></div>
       </div>
 
       <div class="pt-4 border-t border-white/10 space-y-3">
         <span class="text-xs font-bold uppercase tracking-wider opacity-75 block">Available Plans to Add</span>
-        <div id="availablePlansList" class="grid grid-cols-2 gap-2 text-xs">
-          <!-- Populated dynamically -->
-        </div>
+        <div id="availablePlansList" class="grid grid-cols-2 gap-2 text-xs"></div>
       </div>
     </div>
   </div>
 
-  <!-- MID-CYCLE CUMULATIVE UPGRADE MODAL -->
-  <div id="upgradeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-xl w-full rounded-3xl p-6 sm:p-8 relative border border-indigo-500/30 space-y-5 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <div>
-          <h3 class="text-base font-black text-white">Add Vault Storage / Upgrade Plan</h3>
-          <p class="text-xs opacity-75 mt-0.5">Add cumulative capacity to your vault (Max 600 GB combined storage).</p>
-        </div>
-        <button onclick="closeUpgradeModal()" class="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">✕</button>
-      </div>
-
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-        <button onclick="selectUpgradeTarget('micro')" id="planCard-micro" class="plan-select-card p-3 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-cyan-400 text-left transition flex flex-col justify-between">
-          <span class="text-[10px] font-black uppercase tracking-wider text-cyan-400">Micro</span>
-          <div class="my-1.5">
-            <span class="text-sm font-black block">+15 GB</span>
-            <span class="text-[10px] opacity-60">$1.80/mo</span>
-          </div>
-        </button>
-
-        <button onclick="selectUpgradeTarget('lite')" id="planCard-lite" class="plan-select-card p-3 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-indigo-400 text-left transition flex flex-col justify-between">
-          <span class="text-[10px] font-black uppercase tracking-wider text-indigo-400">Lite</span>
-          <div class="my-1.5">
-            <span class="text-sm font-black block">+30 GB</span>
-            <span class="text-[10px] opacity-60">$2.50/mo</span>
-          </div>
-        </button>
-
-        <button onclick="selectUpgradeTarget('plus')" id="planCard-plus" class="plan-select-card p-3 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-purple-400 text-left transition flex flex-col justify-between">
-          <span class="text-[10px] font-black uppercase tracking-wider text-purple-400">Plus</span>
-          <div class="my-1.5">
-            <span class="text-sm font-black block">+80 GB</span>
-            <span class="text-[10px] opacity-60">$4.50/mo</span>
-          </div>
-        </button>
-
-        <button onclick="selectUpgradeTarget('pro')" id="planCard-pro" class="plan-select-card p-3 rounded-2xl border border-indigo-500 text-left transition flex flex-col justify-between relative overflow-hidden">
-          <span class="absolute top-0 right-0 bg-indigo-600 text-[8px] font-black px-1.5 py-0.2 rounded-bl">PRO</span>
-          <span class="text-[10px] font-black uppercase tracking-wider text-indigo-300">Pro</span>
-          <div class="my-1.5">
-            <span class="text-sm font-black block">+200 GB</span>
-            <span class="text-[10px] opacity-60">$7.00/mo</span>
-          </div>
-        </button>
-      </div>
-
-      <div class="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2.5 text-xs text-slate-300">
-        <div class="flex justify-between items-center">
-          <span class="opacity-75">Target Upgrade:</span>
-          <strong id="quoteTargetText" class="text-white">Zephyr Pro (200 GB)</strong>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="opacity-75">New Total Vault Storage After Purchase:</span>
-          <strong id="quoteNetCapacity" class="font-mono text-emerald-400 font-bold">200 GB</strong>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="opacity-75">Days Remaining in Current Cycle:</span>
-          <span id="quoteDaysLeft" class="font-mono text-slate-300">30 days</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="opacity-75">Processing Surcharge:</span>
-          <span id="quoteSurcharge" class="font-mono text-slate-300">$0.50</span>
-        </div>
-        <div class="pt-2 border-t border-white/10 flex justify-between items-center text-sm font-bold">
-          <span class="text-white">Total Due Today:</span>
-          <span id="quoteTotalDue" class="font-mono text-emerald-400 text-base font-black">$7.50</span>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 pt-1">
-        <button type="button" onclick="closeUpgradeModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold transition">Cancel</button>
-        <button id="confirmUpgradeBtn" type="button" onclick="executePlanUpgrade()" class="flex-1 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md transition">Upgrade Now</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CUSTOM STUDIO BRANDING MODAL -->
-  <div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-8 relative border border-purple-500/30 space-y-5 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-base border border-purple-500/30">🎨</div>
-          <div>
-            <h3 class="text-sm font-black text-white">Custom Studio Branding</h3>
-            <p class="text-[11px] opacity-75">Customize client transfer wallpaper, brand logo, and color theme.</p>
-          </div>
-        </div>
-        <button onclick="closeBrandingModal()" class="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">✕</button>
-      </div>
-
-      <form id="brandingForm" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold opacity-80 mb-1">Studio / Brand Title</label>
-          <input id="brandTitle" type="text" placeholder="e.g. Acme Visual Studio" class="w-full rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold opacity-80 mb-1">Brand Accent Color</label>
-            <div class="flex items-center gap-2">
-              <input id="brandColorPicker" type="color" value="#6366f1" class="w-9 h-9 rounded-xl border border-white/20 bg-transparent cursor-pointer shrink-0">
-              <input id="brandColorText" type="text" value="#6366f1" class="w-full rounded-xl px-3 py-2 text-xs font-mono focus:outline-none transition">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold opacity-80 mb-1">Logo URL (or Upload)</label>
-            <input id="brandLogoUrl" type="url" placeholder="https://..." class="w-full rounded-xl px-3 py-2 text-xs focus:outline-none transition">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold opacity-80 mb-1">Transfer Background Wallpaper URL</label>
-          <input id="brandBgUrl" type="url" placeholder="https://..." class="w-full rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
-        </div>
-
-        <div class="flex items-center gap-2 pt-2 border-t border-white/10">
-          <button type="button" onclick="closeBrandingModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold transition">Cancel</button>
-          <button type="button" id="saveBrandingBtn" onclick="saveBrandingPreferences()" class="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs rounded-xl shadow-md transition">Save Branding</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- FIXED & CLEANED HEADER NAVBAR -->
+  <!-- FIXED HEADER NAVBAR -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      
-      <!-- Brand & Tier Section -->
       <div class="flex items-center gap-3">
         <a href="/" class="flex items-center gap-2.5 group">
           <div class="brand-logo-box w-9 h-9 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
               <defs>
                 <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#38bdf8"/>
-                  <stop offset="60%" stop-color="#6366f1"/>
-                  <stop offset="100%" stop-color="#4338ca"/>
+                  <stop offset="0%" stop-color="#38bdf8"/><stop offset="60%" stop-color="#6366f1"/><stop offset="100%" stop-color="#4338ca"/>
                 </linearGradient>
                 <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#c084fc"/>
-                  <stop offset="50%" stop-color="#818cf8"/>
-                  <stop offset="100%" stop-color="#06b6d4"/>
-                </linearGradient>
-                <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
+                  <stop offset="0%" stop-color="#c084fc"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06b6d4"/>
                 </linearGradient>
               </defs>
               <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
-              <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#navGlassSheen)"/>
               <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
               <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#navRibbonCyan)"/>
-              <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#navGlassSheen)"/>
             </svg>
           </div>
           <span class="font-black text-2xl tracking-tight">Zephyr</span>
@@ -467,31 +376,20 @@
         <span id="tierBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">★ PRO</span>
       </div>
 
-      <!-- Navigation & Action Controls -->
       <div class="flex items-center gap-2.5">
         <button onclick="openPlansModal()" class="header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
-          <span>⚡</span>
-          <span>Your Plans</span>
+          <span>⚡</span><span>Your Plans</span>
         </button>
-
-        <button onclick="openBrandingModal()" class="header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
-          <span>🎨</span>
-          <span>Branding</span>
-        </button>
-
         <a href="/" class="header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-sky-500/10 text-sky-300 border-sky-500/25 hover:border-sky-400/50">
           <span>Transfer Pipeline</span>
         </a>
-
         <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-8 h-8 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-
         <button onclick="signOut()" class="text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/25 px-3.5 py-1.5 rounded-full font-bold transition cursor-pointer">
           Sign Out
         </button>
       </div>
-
     </div>
   </header>
 
@@ -500,8 +398,6 @@
     
     <!-- Top Widgets Row -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
-      
-      <!-- Vault Capacity & Upgrade Card -->
       <div class="md:col-span-4 obsidian-card rounded-3xl p-6 flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between text-xs font-bold">
@@ -517,12 +413,11 @@
         </div>
 
         <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-          <span class="text-slate-400 font-medium">Expand vault to 15, 30, 80, or 200 GB?</span>
+          <span class="text-slate-400 font-medium">Expand vault capacity</span>
           <button onclick="openPlansModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition cursor-pointer">Upgrade Plan</button>
         </div>
       </div>
 
-      <!-- Escrow & Bank Payouts Banner -->
       <div class="md:col-span-8 obsidian-card rounded-3xl p-6 flex flex-col justify-between space-y-4 border border-emerald-500/30">
         <div>
           <div class="flex items-center gap-2">
@@ -532,7 +427,7 @@
           </div>
           <h3 class="text-base font-black text-white mt-1">Link your bank account to enable Pay-to-Unlock Escrow</h3>
           <p class="text-xs text-slate-300 mt-1 leading-relaxed">
-            When buyers unlock your files, 88% of the payout is directly wired to your connected bank account with 0% chargeback risk.
+            When buyers unlock your files, 88% of the payout is directly wired to your bank account with zero chargeback risk.
           </p>
         </div>
 
@@ -542,17 +437,14 @@
           </button>
         </div>
       </div>
-
     </div>
 
-    <!-- COMPACT & SUITABLE DROP ZONE FILE UPLOAD BOX -->
+    <!-- Compact Drop Zone -->
     <div id="dropZoneContainer" class="obsidian-card rounded-2xl py-3.5 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer border-2 border-dashed border-white/15 hover:border-indigo-400/60 transition duration-200 group" onclick="document.getElementById('driveFileInput').click()">
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">
-          ☁️
-        </div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -568,7 +460,6 @@
 
     <!-- Encrypted Vault Files Table -->
     <div class="obsidian-card rounded-3xl p-6 sm:p-8 space-y-6">
-      
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <h2 class="text-lg font-black text-white">Your Encrypted Vault Files</h2>
@@ -597,7 +488,6 @@
           </tbody>
         </table>
       </div>
-
     </div>
 
   </main>
@@ -608,39 +498,6 @@
   </footer>
 
   <script>
-    const ACTIVE_PAYMENT_ENV = "test"; // 'test' or 'live'
-
-    const DODO_CONFIG = {
-      test: {
-        domain: "https://test.checkout.dodopayments.com/buy",
-        products: {
-          micro: "pdt_0NoSL8gp9fUEk5GKwdB1O",
-          lite:  "pdt_0NoSLFQFIcnqD2weSbr0d",
-          plus:  "pdt_0NoSKxDY49vabp3lshvdI",
-          pro:   "pdt_0NoSL3f1qb5yIZTPzv71H"
-        }
-      },
-      live: {
-        domain: "https://checkout.dodopayments.com/buy",
-        products: {
-          micro: "pdt_LIVE_MICRO_ID_HERE",
-          lite:  "pdt_LIVE_LITE_ID_HERE",
-          plus:  "pdt_LIVE_PLUS_ID_HERE",
-          pro:   "pdt_LIVE_PRO_ID_HERE"
-        }
-      }
-    };
-
-    const PLAN_SPECS = {
-      free:  { name: "Free Starter", price: 0.00, quotaBytes: 5 * 1024**3,   gb: 5 },
-      micro: { name: "Zephyr Micro", price: 1.80, quotaBytes: 15 * 1024**3,  gb: 15 },
-      lite:  { name: "Zephyr Lite",  price: 2.50, quotaBytes: 30 * 1024**3,  gb: 30 },
-      plus:  { name: "Zephyr Plus",  price: 4.50, quotaBytes: 80 * 1024**3,  gb: 80 },
-      pro:   { name: "Zephyr Pro",   price: 7.00, quotaBytes: 200 * 1024**3, gb: 200 }
-    };
-
-    const MAX_VAULT_BYTES = 600 * 1024**3;
-
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
@@ -649,7 +506,7 @@
         if (icon) icon.innerText = "🌙";
       } else {
         document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️️";
+        if (icon) icon.innerText = "☀️";
       }
     }
 
@@ -698,12 +555,29 @@
     let isStudioModified = false;
     let pendingDecisionAction = null;
 
-    // Image studio canvas state & responsive scale
+    // Advanced Studio History & Canvas State
     let studioCanvas = null;
     let studioCtx = null;
     let studioImgObj = null;
     let studioZoom = 1.0;
-    let currentTool = 'draw';
+    
+    // Category & Settings
+    let currentCategory = 'draw';
+    let brushColor = '#38bdf8';
+    let brushSize = 6;
+    let activeShapeType = 'rectangle';
+    let cornerRadiusVal = 0;
+    let activeFrameColor = '#38bdf8';
+    let activeFrameWidth = 0;
+
+    // History stack for Undo/Redo
+    let canvasHistory = [];
+    let historyStep = -1;
+
+    // Crop selection drag state
+    let isCroppingDrag = false;
+    let cropStartX = 0, cropStartY = 0;
+    let cropEndX = 0, cropEndY = 0;
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
@@ -711,7 +585,6 @@
 
     let currentAccountUserTier = "free";
     let currentAccountQuotaBytes = 5 * 1024**3;
-    let selectedUpgradeTarget = "pro";
 
     async function loadDriveData() {
       try {
@@ -772,9 +645,9 @@
       renderFiles(filtered);
     }
 
-    // ==========================================
-    // IN-DRIVE STUDIO AUTO-SIZED VIEWING & EDITING
-    // ==========================================
+    // =========================================================================
+    // IN-DRIVE STUDIO INITIALIZATION
+    // =========================================================================
     async function openDriveStudio(fileId) {
       const file = allFiles.find(f => f.id === fileId);
       if (!file) return;
@@ -793,6 +666,7 @@
       const vidStage = document.getElementById("studioVideoStage");
       const codeEditor = document.getElementById("studioCodeEditor");
       const fallbackStage = document.getElementById("studioFallbackStage");
+      const photoTools = document.getElementById("photoEditorHeaderTools");
 
       imgStage.classList.add("hidden");
       vidStage.classList.add("hidden");
@@ -801,11 +675,14 @@
 
       document.getElementById("driveStudioModal").classList.remove("hidden");
 
-      // 1. Image Studio: Responsive Auto-Fitted Canvas
       if (IMAGE_EXTS.includes(ext)) {
         imgStage.classList.remove("hidden");
+        photoTools.classList.remove("hidden");
         studioCanvas = document.getElementById("studioImageCanvas");
         studioCtx = studioCanvas.getContext("2d");
+
+        canvasHistory = [];
+        historyStep = -1;
 
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -814,64 +691,663 @@
           studioCanvas.width = img.naturalWidth || img.width;
           studioCanvas.height = img.naturalHeight || img.height;
           studioCtx.drawImage(img, 0, 0);
-          setupCanvasDrawing();
 
-          // Auto-fit to viewport size so image never looks tiny
+          pushHistorySnapshot(false);
+          setupCanvasDrawing();
+          selectStudioCategory('draw');
           setTimeout(fitStudioImageToViewport, 30);
         };
         img.src = streamUrl;
-        document.getElementById("studioFooterStatus").innerText = "Image Studio Active • Auto-Fitted • Draw, annotate, or crop";
         return;
       }
 
-      // 2. Video Studio (Auto-Sized Video Stage)
+      photoTools.classList.add("hidden");
+      document.getElementById("subToolSettingsBar").innerHTML = "";
+
       if (VIDEO_EXTS.includes(ext)) {
         vidStage.classList.remove("hidden");
-        const vid = document.getElementById("studioVideoEl");
-        vid.src = streamUrl;
-        document.getElementById("studioFooterStatus").innerText = "Video Studio Active • Trim clip, add audio overlay, or change canvas frame";
+        document.getElementById("studioVideoEl").src = streamUrl;
         return;
       }
 
-      // 3. Code, Scripts & Notebooks Editor
       if (CODE_EXTS.includes(ext)) {
         codeEditor.classList.remove("hidden");
         codeEditor.value = "Loading text buffer...";
         try {
           const res = await fetch(streamUrl);
-          const txt = await res.text();
-          codeEditor.value = txt;
+          codeEditor.value = await res.text();
         } catch (e) {
           codeEditor.value = "// Error loading file content.";
         }
-        document.getElementById("studioFooterStatus").innerText = "Code & Notebook Editor Active (Real-time Editable)";
         return;
       }
 
-      // 4. Universal Fallback
       fallbackStage.classList.remove("hidden");
       document.getElementById("studioFallbackName").innerText = file.filename;
       document.getElementById("studioFallbackDownloadBtn").onclick = () => downloadFile(file.id);
-      document.getElementById("studioFooterStatus").innerText = "Universal File Inspector • Download to Export";
     }
 
-    // ==========================================
-    // AUTO-FIT & ZOOM ENGINE FOR STUDIO CANVAS
-    // ==========================================
+    // =========================================================================
+    // HISTORY & UNDO/REDO BUFFER
+    // =========================================================================
+    function pushHistorySnapshot(markMod = true) {
+      if (!studioCanvas) return;
+      if (historyStep < canvasHistory.length - 1) {
+        canvasHistory = canvasHistory.slice(0, historyStep + 1);
+      }
+      canvasHistory.push({
+        dataUrl: studioCanvas.toDataURL("image/png"),
+        width: studioCanvas.width,
+        height: studioCanvas.height
+      });
+      if (canvasHistory.length > 30) {
+        canvasHistory.shift();
+      } else {
+        historyStep++;
+      }
+      updateHistoryButtons();
+      if (markMod) markStudioModified();
+    }
+
+    function undoStudioCanvas() {
+      if (historyStep > 0) {
+        historyStep--;
+        renderHistoryStep(historyStep);
+        updateHistoryButtons();
+        markStudioModified();
+      }
+    }
+
+    function redoStudioCanvas() {
+      if (historyStep < canvasHistory.length - 1) {
+        historyStep++;
+        renderHistoryStep(historyStep);
+        updateHistoryButtons();
+        markStudioModified();
+      }
+    }
+
+    function renderHistoryStep(step) {
+      const state = canvasHistory[step];
+      if (!state) return;
+      const img = new Image();
+      img.onload = () => {
+        studioCanvas.width = state.width;
+        studioCanvas.height = state.height;
+        studioCtx.clearRect(0, 0, state.width, state.height);
+        studioCtx.drawImage(img, 0, 0);
+        applyStudioCanvasDisplaySize();
+      };
+      img.src = state.dataUrl;
+    }
+
+    function updateHistoryButtons() {
+      document.getElementById("sUndoBtn").disabled = historyStep <= 0;
+      document.getElementById("sRedoBtn").disabled = historyStep >= canvasHistory.length - 1;
+    }
+
+    window.addEventListener("keydown", (e) => {
+      const modal = document.getElementById("driveStudioModal");
+      if (modal && !modal.classList.contains("hidden")) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) redoStudioCanvas();
+          else undoStudioCanvas();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          redoStudioCanvas();
+        }
+      }
+    });
+
+    // =========================================================================
+    // CATEGORY SELECTION & SUB-DRAWER ENGINE
+    // =========================================================================
+    function selectStudioCategory(cat) {
+      currentCategory = cat;
+      const categories = ['resize', 'crop', 'transform', 'draw', 'text', 'shapes', 'stickers', 'frame', 'corners', 'background'];
+      categories.forEach(c => {
+        const btn = document.getElementById(`tabBtn-${c}`);
+        if (btn) {
+          if (c === cat) btn.classList.add("tool-tab-active");
+          else btn.classList.remove("tool-tab-active");
+        }
+      });
+
+      const drawer = document.getElementById("subToolSettingsBar");
+      const cropBox = document.getElementById("cropSelectionBox");
+      if (cropBox) cropBox.classList.add("hidden");
+
+      if (cat === 'draw') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-4 flex-wrap">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400 font-bold">Brush Color:</span>
+              <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400 font-bold">Size:</span>
+              <input type="range" min="2" max="40" value="${brushSize}" oninput="brushSize=parseInt(this.value); document.getElementById('sBrushVal').innerText=this.value" class="w-24 accent-sky-400 cursor-pointer">
+              <span id="sBrushVal" class="font-mono text-sky-400 w-5">${brushSize}</span>
+            </div>
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Click & drag on image to draw</span>
+        `;
+      } else if (cat === 'crop') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-sky-300 font-bold">Drag over image to select crop box</span>
+            <button onclick="applyInteractiveCrop()" class="px-3.5 py-1 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition">Apply Crop</button>
+            <button onclick="cancelCropMode()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 cursor-pointer transition">Cancel</button>
+          </div>
+          <div class="flex items-center gap-1.5 font-bold">
+            <span class="text-slate-400">Presets:</span>
+            <button onclick="setCropPreset(1, 1)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10">1:1</button>
+            <button onclick="setCropPreset(16, 9)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10">16:9</button>
+            <button onclick="setCropPreset(4, 3)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10">4:3</button>
+          </div>
+        `;
+      } else if (cat === 'transform') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-2 flex-wrap font-bold">
+            <span class="text-slate-400">Rotation & Flipping:</span>
+            <button onclick="rotateCanvas(90)" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">↻ 90° Clockwise</button>
+            <button onclick="rotateCanvas(-90)" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">↺ 90° Counter</button>
+            <button onclick="rotateCanvas(180)" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">🔃 180° Flip</button>
+            <button onclick="flipCanvas('h')" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">⇆ Flip Horizontal</button>
+            <button onclick="flipCanvas('v')" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">⇅ Flip Vertical</button>
+          </div>
+        `;
+      } else if (cat === 'resize') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap font-bold">
+            <span class="text-slate-400">Dimensions:</span>
+            <input type="number" id="resizeWInput" value="${studioCanvas.width}" class="w-20 px-2 py-1 rounded-lg bg-black/40 border border-white/20 text-white font-mono">
+            <span class="text-slate-400">×</span>
+            <input type="number" id="resizeHInput" value="${studioCanvas.height}" class="w-20 px-2 py-1 rounded-lg bg-black/40 border border-white/20 text-white font-mono">
+            <button onclick="applyImageResize()" class="px-4 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition">Apply Resize</button>
+          </div>
+          <div class="flex items-center gap-1.5 font-bold">
+            <span class="text-slate-400">Quick Scale:</span>
+            <button onclick="scaleImagePercentage(0.75)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10">75%</button>
+            <button onclick="scaleImagePercentage(0.50)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10">50%</button>
+            <button onclick="scaleImagePercentage(0.25)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10">25%</button>
+          </div>
+        `;
+      } else if (cat === 'text') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap font-bold">
+            <span class="text-slate-400">Text Color:</span>
+            <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+            <span class="text-slate-400">Font Size:</span>
+            <input type="range" min="12" max="90" value="28" id="textFontSizeSlider" class="w-24 accent-sky-400 cursor-pointer">
+            <button onclick="stampWatermark()" class="px-3 py-1 rounded-xl bg-indigo-600 text-white">Stamp Center Watermark</button>
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Click anywhere on image to place text</span>
+        `;
+      } else if (cat === 'shapes') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-2 flex-wrap font-bold">
+            <span class="text-slate-400">Choose Shape:</span>
+            <button onclick="setShapeMode('rectangle')" id="sBtnRect" class="px-2.5 py-1 rounded-lg ${activeShapeType==='rectangle'?'bg-indigo-600 text-white':'bg-white/10 text-slate-300'}">🔲 Box</button>
+            <button onclick="setShapeMode('circle')" id="sBtnCircle" class="px-2.5 py-1 rounded-lg ${activeShapeType==='circle'?'bg-indigo-600 text-white':'bg-white/10 text-slate-300'}">⚪ Circle</button>
+            <button onclick="setShapeMode('arrow')" id="sBtnArrow" class="px-2.5 py-1 rounded-lg ${activeShapeType==='arrow'?'bg-indigo-600 text-white':'bg-white/10 text-slate-300'}">↗ Arrow</button>
+            <button onclick="setShapeMode('star')" id="sBtnStar" class="px-2.5 py-1 rounded-lg ${activeShapeType==='star'?'bg-indigo-600 text-white':'bg-white/10 text-slate-300'}">⭐ Star</button>
+            <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer ml-2">
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Drag over image to draw selected shape</span>
+        `;
+      } else if (cat === 'stickers') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-1.5 flex-wrap text-base">
+            <span class="text-xs font-bold text-slate-400 mr-1">Click Sticker to stamp on image:</span>
+            ${['🔥', '⭐', '✅', '⚠️', '🚀', '❤️', '💯', '🔒', '👑', '🎉', '📸', '⚡'].map(st => `
+              <button onclick="stampSticker('${st}')" class="px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer">${st}</button>
+            `).join('')}
+          </div>
+        `;
+      } else if (cat === 'frame') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap font-bold">
+            <span class="text-slate-400">Frame Thickness:</span>
+            <input type="range" min="0" max="60" value="${activeFrameWidth}" oninput="activeFrameWidth=parseInt(this.value); applyFrame(activeFrameColor, activeFrameWidth);" class="w-28 accent-sky-400 cursor-pointer">
+            <span class="text-slate-400 ml-2">Color:</span>
+            <input type="color" value="${activeFrameColor}" onchange="activeFrameColor=this.value; applyFrame(activeFrameColor, activeFrameWidth);" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+            <button onclick="applyPolaroidFrame()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200">Polaroid Preset</button>
+          </div>
+        `;
+      } else if (cat === 'corners') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 font-bold">
+            <span class="text-slate-400">Corner Radius:</span>
+            <input type="range" min="0" max="150" value="${cornerRadiusVal}" oninput="cornerRadiusVal=parseInt(this.value); applyCornerRadius(cornerRadiusVal);" class="w-36 accent-sky-400 cursor-pointer">
+            <span class="font-mono text-sky-400">${cornerRadiusVal}px</span>
+            <button onclick="applyCircularAvatar()" class="px-3 py-1 rounded-xl bg-indigo-600 text-white">Full Circle Preset</button>
+          </div>
+        `;
+      } else if (cat === 'background') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 font-bold">
+            <span class="text-slate-400">Canvas Matte / Letterbox Background:</span>
+            <button onclick="setCanvasBackground('#0b0f19')" class="px-2.5 py-1 rounded-lg bg-[#0b0f19] border border-white/20 text-white">Midnight</button>
+            <button onclick="setCanvasBackground('#ffffff')" class="px-2.5 py-1 rounded-lg bg-white border border-white/20 text-black">Pure White</button>
+            <button onclick="setCanvasBackground('#000000')" class="px-2.5 py-1 rounded-lg bg-black border border-white/20 text-white">OLED Black</button>
+            <button onclick="setCustomCanvasBgPrompt()" class="px-3 py-1 rounded-xl bg-indigo-600 text-white">Custom Color</button>
+          </div>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // CANVAS DRAWING, TEXT, SHAPES & CROP DRAG HANDLERS
+    // =========================================================================
+    function setupCanvasDrawing() {
+      if (!studioCanvas || !studioCtx) return;
+      let isDrawing = false;
+      let startX = 0, startY = 0;
+      let snapshot = null;
+
+      studioCanvas.onwheel = (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        zoomStudioCanvas(delta);
+      };
+
+      studioCanvas.onmousedown = (e) => {
+        const rect = studioCanvas.getBoundingClientRect();
+        const scaleX = studioCanvas.width / rect.width;
+        const scaleY = studioCanvas.height / rect.height;
+        startX = (e.clientX - rect.left) * scaleX;
+        startY = (e.clientY - rect.top) * scaleY;
+
+        // TEXT TOOL CLICK
+        if (currentCategory === 'text') {
+          const txt = prompt("Enter text annotation to add:", "Zephyr Verified");
+          if (txt) {
+            const sizeSlider = document.getElementById("textFontSizeSlider");
+            const sz = sizeSlider ? parseInt(sizeSlider.value) : 28;
+            studioCtx.save();
+            studioCtx.font = `bold ${sz * Math.max(1, studioCanvas.width / 800)}px 'Plus Jakarta Sans', sans-serif`;
+            studioCtx.fillStyle = brushColor;
+            studioCtx.shadowColor = "rgba(0,0,0,0.85)";
+            studioCtx.shadowBlur = 6;
+            studioCtx.fillText(txt, startX, startY);
+            studioCtx.restore();
+            pushHistorySnapshot();
+          }
+          return;
+        }
+
+        // CROP DRAG
+        if (currentCategory === 'crop') {
+          isCroppingDrag = true;
+          cropStartX = e.clientX - rect.left;
+          cropStartY = e.clientY - rect.top;
+          const box = document.getElementById("cropSelectionBox");
+          box.style.left = `${cropStartX}px`;
+          box.style.top = `${cropStartY}px`;
+          box.style.width = '0px';
+          box.style.height = '0px';
+          box.classList.remove("hidden");
+          return;
+        }
+
+        // DRAWING / SHAPES
+        if (currentCategory === 'draw' || currentCategory === 'shapes') {
+          isDrawing = true;
+          snapshot = studioCtx.getImageData(0, 0, studioCanvas.width, studioCanvas.height);
+          studioCtx.beginPath();
+          studioCtx.moveTo(startX, startY);
+          studioCtx.lineWidth = brushSize * Math.max(1, studioCanvas.width / 900);
+          studioCtx.lineCap = "round";
+          studioCtx.lineJoin = "round";
+          studioCtx.strokeStyle = brushColor;
+        }
+      };
+
+      studioCanvas.onmousemove = (e) => {
+        const rect = studioCanvas.getBoundingClientRect();
+        const scaleX = studioCanvas.width / rect.width;
+        const scaleY = studioCanvas.height / rect.height;
+        const currX = (e.clientX - rect.left) * scaleX;
+        const currY = (e.clientY - rect.top) * scaleY;
+
+        if (currentCategory === 'crop' && isCroppingDrag) {
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          const left = Math.min(cropStartX, mouseX);
+          const top = Math.min(cropStartY, mouseY);
+          const w = Math.abs(mouseX - cropStartX);
+          const h = Math.abs(mouseY - cropStartY);
+          const box = document.getElementById("cropSelectionBox");
+          box.style.left = `${left}px`;
+          box.style.top = `${top}px`;
+          box.style.width = `${w}px`;
+          box.style.height = `${h}px`;
+          cropEndX = mouseX;
+          cropEndY = mouseY;
+          return;
+        }
+
+        if (!isDrawing) return;
+
+        if (currentCategory === 'shapes') {
+          studioCtx.putImageData(snapshot, 0, 0);
+          studioCtx.beginPath();
+          studioCtx.lineWidth = brushSize * Math.max(1, studioCanvas.width / 900);
+          studioCtx.strokeStyle = brushColor;
+
+          if (activeShapeType === 'rectangle') {
+            studioCtx.rect(startX, startY, currX - startX, currY - startY);
+            studioCtx.stroke();
+          } else if (activeShapeType === 'circle') {
+            const rx = Math.abs(currX - startX) / 2;
+            const ry = Math.abs(currY - startY) / 2;
+            studioCtx.ellipse(Math.min(startX, currX) + rx, Math.min(startY, currY) + ry, rx, ry, 0, 0, 2 * Math.PI);
+            studioCtx.stroke();
+          } else if (activeShapeType === 'arrow') {
+            drawArrowOnCanvas(studioCtx, startX, startY, currX, currY, studioCtx.lineWidth);
+          } else if (activeShapeType === 'star') {
+            drawStarOnCanvas(studioCtx, startX, startY, Math.abs(currX - startX));
+          }
+        } else if (currentCategory === 'draw') {
+          studioCtx.lineTo(currX, currY);
+          studioCtx.stroke();
+        }
+      };
+
+      window.onmouseup = () => {
+        if (isCroppingDrag) isCroppingDrag = false;
+        if (isDrawing) {
+          isDrawing = false;
+          pushHistorySnapshot();
+        }
+      };
+    }
+
+    function setShapeMode(type) {
+      activeShapeType = type;
+      selectStudioCategory('shapes');
+    }
+
+    function drawArrowOnCanvas(ctx, fromx, fromy, tox, toy, width) {
+      const headlen = width * 3.5;
+      const angle = Math.atan2(toy - fromy, tox - fromx);
+      ctx.moveTo(fromx, fromy);
+      ctx.lineTo(tox, toy);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(tox, toy);
+      ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+      ctx.lineTo(tox, toy);
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.fill();
+    }
+
+    function drawStarOnCanvas(ctx, cx, cy, radius) {
+      ctx.save();
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * radius + cx, -Math.sin((18 + i * 72) * Math.PI / 180) * radius + cy);
+        ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (radius/2) + cx, -Math.sin((54 + i * 72) * Math.PI / 180) * (radius/2) + cy);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function stampSticker(emoji) {
+      if (!studioCanvas || !studioCtx) return;
+      studioCtx.save();
+      const sz = Math.max(36, studioCanvas.width / 12);
+      studioCtx.font = `${sz}px serif`;
+      studioCtx.fillText(emoji, studioCanvas.width / 2 - sz / 2, studioCanvas.height / 2 + sz / 2);
+      studioCtx.restore();
+      pushHistorySnapshot();
+    }
+
+    function stampWatermark() {
+      if (!studioCanvas || !studioCtx) return;
+      studioCtx.save();
+      studioCtx.translate(studioCanvas.width / 2, studioCanvas.height / 2);
+      studioCtx.rotate((-30 * Math.PI) / 180);
+      studioCtx.font = `bold ${Math.max(24, studioCanvas.width / 16)}px sans-serif`;
+      studioCtx.fillStyle = "rgba(255, 255, 255, 0.25)";
+      studioCtx.textAlign = "center";
+      studioCtx.fillText("ZEPHYR PROTECTED DELIVERABLE", 0, 0);
+      studioCtx.restore();
+      pushHistorySnapshot();
+    }
+
+    // =========================================================================
+    // CROP, RESIZE, TRANSFORM, CORNERS & FRAMES
+    // =========================================================================
+    function applyInteractiveCrop() {
+      if (!studioCanvas || !studioCtx) return;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
+      const x = Math.min(cropStartX, cropEndX) * scaleX;
+      const y = Math.min(cropStartY, cropEndY) * scaleY;
+      const w = Math.abs(cropEndX - cropStartX) * scaleX;
+      const h = Math.abs(cropEndY - cropStartY) * scaleY;
+
+      if (w < 20 || h < 20) {
+        alert("Please drag a larger box to crop.");
+        return;
+      }
+
+      const croppedData = studioCtx.getImageData(x, y, w, h);
+      studioCanvas.width = w;
+      studioCanvas.height = h;
+      studioCtx.putImageData(croppedData, 0, 0);
+
+      cancelCropMode();
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function cancelCropMode() {
+      const box = document.getElementById("cropSelectionBox");
+      if (box) box.classList.add("hidden");
+      selectStudioCategory('draw');
+    }
+
+    function setCropPreset(ratioW, ratioH) {
+      if (!studioCanvas) return;
+      const targetH = studioCanvas.width * (ratioH / ratioW);
+      if (targetH <= studioCanvas.height) {
+        const top = (studioCanvas.height - targetH) / 2;
+        const imgData = studioCtx.getImageData(0, top, studioCanvas.width, targetH);
+        studioCanvas.height = targetH;
+        studioCtx.putImageData(imgData, 0, 0);
+      } else {
+        const targetW = studioCanvas.height * (ratioW / ratioH);
+        const left = (studioCanvas.width - targetW) / 2;
+        const imgData = studioCtx.getImageData(left, 0, targetW, studioCanvas.height);
+        studioCanvas.width = targetW;
+        studioCtx.putImageData(imgData, 0, 0);
+      }
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function rotateCanvas(deg) {
+      if (!studioCanvas || !studioCtx) return;
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = studioCanvas.width;
+      tempCanvas.height = studioCanvas.height;
+      tempCanvas.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      const rad = (deg * Math.PI) / 180;
+      const is90or270 = Math.abs(deg) === 90 || Math.abs(deg) === 270;
+      const newW = is90or270 ? studioCanvas.height : studioCanvas.width;
+      const newH = is90or270 ? studioCanvas.width : studioCanvas.height;
+
+      studioCanvas.width = newW;
+      studioCanvas.height = newH;
+
+      studioCtx.save();
+      studioCtx.translate(newW / 2, newH / 2);
+      studioCtx.rotate(rad);
+      studioCtx.drawImage(tempCanvas, -tempCanvas.width / 2, -tempCanvas.height / 2);
+      studioCtx.restore();
+
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function flipCanvas(dir) {
+      if (!studioCanvas || !studioCtx) return;
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCtx.save();
+      if (dir === 'h') {
+        studioCtx.translate(studioCanvas.width, 0);
+        studioCtx.scale(-1, 1);
+      } else {
+        studioCtx.translate(0, studioCanvas.height);
+        studioCtx.scale(1, -1);
+      }
+      studioCtx.drawImage(temp, 0, 0);
+      studioCtx.restore();
+      pushHistorySnapshot();
+    }
+
+    function applyImageResize() {
+      const w = parseInt(document.getElementById("resizeWInput").value);
+      const h = parseInt(document.getElementById("resizeHInput").value);
+      if (!w || !h || w < 20 || h < 20) return;
+
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = w;
+      studioCanvas.height = h;
+      studioCtx.drawImage(temp, 0, 0, w, h);
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function scaleImagePercentage(pct) {
+      document.getElementById("resizeWInput").value = Math.round(studioCanvas.width * pct);
+      document.getElementById("resizeHInput").value = Math.round(studioCanvas.height * pct);
+      applyImageResize();
+    }
+
+    function applyCornerRadius(r) {
+      if (!studioCanvas || !studioCtx || !studioImgObj) return;
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+      studioCtx.save();
+      studioCtx.beginPath();
+      studioCtx.roundRect(0, 0, studioCanvas.width, studioCanvas.height, r);
+      studioCtx.clip();
+      studioCtx.drawImage(temp, 0, 0);
+      studioCtx.restore();
+      pushHistorySnapshot();
+    }
+
+    function applyCircularAvatar() {
+      const dim = Math.min(studioCanvas.width, studioCanvas.height);
+      const temp = document.createElement("canvas");
+      temp.width = dim;
+      temp.height = dim;
+      const tempCtx = temp.getContext("2d");
+      tempCtx.beginPath();
+      tempCtx.arc(dim/2, dim/2, dim/2, 0, Math.PI * 2);
+      tempCtx.clip();
+      tempCtx.drawImage(studioCanvas, (studioCanvas.width - dim) / -2, (studioCanvas.height - dim) / -2);
+
+      studioCanvas.width = dim;
+      studioCanvas.height = dim;
+      studioCtx.clearRect(0, 0, dim, dim);
+      studioCtx.drawImage(temp, 0, 0);
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function applyFrame(color, w) {
+      if (!studioCanvas || !studioCtx || w <= 0) return;
+      studioCtx.save();
+      studioCtx.lineWidth = w;
+      studioCtx.strokeStyle = color;
+      studioCtx.strokeRect(w/2, w/2, studioCanvas.width - w, studioCanvas.height - w);
+      studioCtx.restore();
+      pushHistorySnapshot();
+    }
+
+    function applyPolaroidFrame() {
+      if (!studioCanvas || !studioCtx) return;
+      const padTop = 30, padSide = 30, padBottom = 90;
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = temp.width + padSide * 2;
+      studioCanvas.height = temp.height + padTop + padBottom;
+
+      studioCtx.fillStyle = "#ffffff";
+      studioCtx.fillRect(0, 0, studioCanvas.width, studioCanvas.height);
+      studioCtx.drawImage(temp, padSide, padTop);
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function setCanvasBackground(color) {
+      if (!studioCanvas || !studioCtx) return;
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCtx.fillStyle = color;
+      studioCtx.fillRect(0, 0, studioCanvas.width, studioCanvas.height);
+      studioCtx.drawImage(temp, 0, 0);
+      pushHistorySnapshot();
+    }
+
+    function setCustomCanvasBgPrompt() {
+      const color = prompt("Enter HEX or CSS background color:", "#0f172a");
+      if (color) setCanvasBackground(color);
+    }
+
+    function resetImageCanvas() {
+      if (!studioImgObj || !studioCtx || !studioCanvas) return;
+      studioCanvas.width = studioImgObj.naturalWidth || studioImgObj.width;
+      studioCanvas.height = studioImgObj.naturalHeight || studioImgObj.height;
+      studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+      studioCtx.drawImage(studioImgObj, 0, 0);
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    // =========================================================================
+    // VIEWPORT FIT & ZOOM
+    // =========================================================================
     function fitStudioImageToViewport() {
       if (!studioCanvas || !studioImgObj) return;
       const viewport = document.getElementById("studioCanvasViewport");
-      const availW = Math.max(300, (viewport.clientWidth || 900) - 40);
-      const availH = Math.max(300, (viewport.clientHeight || 560) - 40);
+      const availW = Math.max(300, (viewport.clientWidth || 1000) - 60);
+      const availH = Math.max(300, (viewport.clientHeight || 650) - 60);
 
-      const nw = studioImgObj.naturalWidth || studioCanvas.width || 400;
-      const nh = studioImgObj.naturalHeight || studioCanvas.height || 400;
+      const nw = studioCanvas.width || 400;
+      const nh = studioCanvas.height || 400;
 
-      // Scale up or down to comfortably occupy ~75-80% of stage bounds
-      const scaleFit = Math.min((availW * 0.82) / nw, (availH * 0.82) / nh);
-      
-      // If the image is naturally tiny (e.g., 100x100), scale up to at least 450px display size
-      const minDisplayScale = Math.min(availW / nw, Math.max(450 / nw, 450 / nh));
+      const scaleFit = Math.min((availW * 0.86) / nw, (availH * 0.86) / nh);
+      const minDisplayScale = Math.min(availW / nw, Math.max(480 / nw, 480 / nh));
       studioZoom = Math.min(Math.max(scaleFit, minDisplayScale), 4.5);
 
       applyStudioCanvasDisplaySize();
@@ -888,9 +1364,9 @@
     }
 
     function applyStudioCanvasDisplaySize() {
-      if (!studioCanvas || !studioImgObj) return;
-      const nw = studioImgObj.naturalWidth || studioCanvas.width;
-      const nh = studioImgObj.naturalHeight || studioCanvas.height;
+      if (!studioCanvas) return;
+      const nw = studioCanvas.width;
+      const nh = studioCanvas.height;
 
       studioCanvas.style.width = Math.round(nw * studioZoom) + "px";
       studioCanvas.style.height = Math.round(nh * studioZoom) + "px";
@@ -899,13 +1375,15 @@
       if (display) display.innerText = `${Math.round(studioZoom * 100)}%`;
     }
 
-    // Window resize observer to keep display responsive
     window.addEventListener("resize", () => {
       if (!document.getElementById("driveStudioModal").classList.contains("hidden")) {
         fitStudioImageToViewport();
       }
     });
 
+    // =========================================================================
+    // MODIFICATION TRACKING & ASYNC CLOUD SAVE
+    // =========================================================================
     function markStudioModified() {
       isStudioModified = true;
       document.getElementById("studioUnsavedBadge").classList.remove("hidden");
@@ -947,7 +1425,8 @@
       let payloadBlob = null;
 
       if (IMAGE_EXTS.includes(ext) && studioCanvas) {
-        const dataUrl = studioCanvas.toDataURL("image/png");
+        const mime = document.getElementById("exportFormatSelect").value || "image/png";
+        const dataUrl = studioCanvas.toDataURL(mime, 0.95);
         const res = await fetch(dataUrl);
         payloadBlob = await res.blob();
       } else if (CODE_EXTS.includes(ext)) {
@@ -981,83 +1460,23 @@
       }
     }
 
-    function setStudioImageTool(tool) {
-      currentTool = tool;
-      document.getElementById("sToolDrawBtn").className = tool === 'draw' ? "px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer" : "px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer";
-      document.getElementById("sToolCropBtn").className = tool === 'crop' ? "px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer" : "px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer";
-    }
-
-    function setupCanvasDrawing() {
-      if (!studioCanvas || !studioCtx) return;
-      let drawing = false;
-
-      // Mouse wheel zoom directly over canvas
-      studioCanvas.onwheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaY < 0 ? 0.15 : -0.15;
-        zoomStudioCanvas(delta);
-      };
-
-      studioCanvas.onmousedown = (e) => {
-        if (currentTool !== 'draw') return;
-        drawing = true;
-        const rect = studioCanvas.getBoundingClientRect();
-        const scaleX = studioCanvas.width / rect.width;
-        const scaleY = studioCanvas.height / rect.height;
-        studioCtx.beginPath();
-        studioCtx.moveTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
-        studioCtx.strokeStyle = "#38bdf8";
-        studioCtx.lineWidth = Math.max(4, studioCanvas.width / 180);
-        studioCtx.lineCap = "round";
-      };
-
-      studioCanvas.onmousemove = (e) => {
-        if (!drawing || currentTool !== 'draw') return;
-        const rect = studioCanvas.getBoundingClientRect();
-        const scaleX = studioCanvas.width / rect.width;
-        const scaleY = studioCanvas.height / rect.height;
-        studioCtx.lineTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
-        studioCtx.stroke();
-        markStudioModified();
-      };
-
-      window.onmouseup = () => { drawing = false; };
-    }
-
-    function resetImageCanvas() {
-      if (!studioImgObj || !studioCtx || !studioCanvas) return;
-      studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
-      studioCtx.drawImage(studioImgObj, 0, 0);
-      markStudioModified();
-    }
-
-    function changeImageCanvasBg() {
-      const color = prompt("Enter canvas background color (e.g. #0f172a, #ffffff, or deep navy):", "#0f172a");
-      if (color && studioCtx && studioCanvas && studioImgObj) {
-        studioCtx.fillStyle = color;
-        studioCtx.fillRect(0, 0, studioCanvas.width, studioCanvas.height);
-        studioCtx.drawImage(studioImgObj, 0, 0);
-        markStudioModified();
-      }
-    }
-
     function trimVideoClip() {
-      alert("✂️ Video trimmed! 5-second clip edit applied to timeline.");
+      alert("✂️ Video trimmed! 5-second clip edit applied.");
       markStudioModified();
     }
 
     function overlayAudioSong() {
-      const song = prompt("Enter background song or music title to overlay:", "Cinematic_Theme.mp3");
+      const song = prompt("Enter audio track or song name to mix:", "Cinematic_Theme.mp3");
       if (song) {
-        alert(`🎵 Audio track '${song}' added to video.`);
+        alert(`🎵 Audio '${song}' mixed into video timeline.`);
         markStudioModified();
       }
     }
 
     function setVideoCanvasBg() {
-      const color = prompt("Enter background color for letterbox frame:", "#0f172a");
+      const color = prompt("Enter letterbox background color:", "#0f172a");
       if (color) {
-        alert(`🎨 Video letterbox background set to ${color}`);
+        alert(`🎨 Letterbox background set to ${color}`);
         markStudioModified();
       }
     }
@@ -1137,89 +1556,6 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
         });
-      } catch(e) {}
-    }
-
-    function openUpgradeModal() {
-      selectUpgradeTarget("pro");
-      document.getElementById("upgradeModal").classList.remove("hidden");
-    }
-
-    function closeUpgradeModal() { document.getElementById("upgradeModal").classList.add("hidden"); }
-
-    async function selectUpgradeTarget(tier) {
-      selectedUpgradeTarget = tier;
-      ['micro', 'lite', 'plus', 'pro'].forEach(t => {
-        const card = document.getElementById(`planCard-${t}`);
-        if (card) {
-          if (t === tier) {
-            card.classList.add("border-indigo-500", "bg-indigo-500/10");
-          } else {
-            card.classList.remove("border-indigo-500", "bg-indigo-500/10");
-          }
-        }
-      });
-
-      try {
-        const res = await fetch("/api/drive/upgrade-quote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: currentUserId, target_tier: tier })
-        });
-        const quote = await res.json();
-
-        document.getElementById("quoteTargetText").innerText = `${quote.target_name}`;
-        document.getElementById("quoteNetCapacity").innerText = `${formatBytes(quote.target_quota_bytes)}`;
-        document.getElementById("quoteDaysLeft").innerText = `${quote.days_remaining} days`;
-        document.getElementById("quoteSurcharge").innerText = `$${quote.surcharge.toFixed(2)}`;
-        document.getElementById("quoteTotalDue").innerText = `$${quote.charge_amount.toFixed(2)}`;
-      } catch(e) {}
-    }
-
-    function executePlanUpgrade() {
-      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
-      const productId = envConfig.products[selectedUpgradeTarget] || envConfig.products["pro"];
-      let targetUrl = `${envConfig.domain}/${productId}`;
-      window.location.href = targetUrl;
-    }
-
-    function openBrandingModal() {
-      fetch(`/api/branding/${currentUserId}`)
-        .then(r => r.json())
-        .then(b => {
-          document.getElementById("brandTitle").value = b.brand_title || "";
-          document.getElementById("brandColorPicker").value = b.brand_accent_color || "#6366f1";
-          document.getElementById("brandColorText").value = b.brand_accent_color || "#6366f1";
-          document.getElementById("brandLogoUrl").value = b.brand_logo_url || "";
-          document.getElementById("brandBgUrl").value = b.brand_bg_url || "";
-        });
-
-      document.getElementById("brandingModal").classList.remove("hidden");
-    }
-
-    function closeBrandingModal() { document.getElementById("brandingModal").classList.add("hidden"); }
-
-    async function saveBrandingPreferences() {
-      const payload = {
-        user_id: currentUserId,
-        brand_title: document.getElementById("brandTitle").value.trim(),
-        brand_accent_color: document.getElementById("brandColorText").value.trim(),
-        brand_logo_url: document.getElementById("brandLogoUrl").value.trim() || null,
-        brand_bg_url: document.getElementById("brandBgUrl").value.trim() || null
-      };
-
-      try {
-        const res = await fetch("/api/branding/update", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-          alert("Branding preferences saved successfully!");
-          closeBrandingModal();
-        } else {
-          alert("Branding features require a Plus or Pro subscription.");
-        }
       } catch(e) {}
     }
 
