@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -49,6 +49,27 @@
     }
 
     /* ========================================================================= */
+    /* SIDEBAR COLOR TABS (DARK MODE: VIBRANT INDIGO TAB, NO HARSH WHITE BORDER) */
+    /* ========================================================================= */
+    .sidebar-file-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      color: #94a3b8;
+      transition: all 0.2s ease;
+    }
+    .sidebar-file-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(99, 102, 241, 0.35) !important;
+      color: #f1f5f9;
+    }
+    .sidebar-file-active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.32) 0%, rgba(79, 70, 229, 0.45) 100%) !important;
+      border: 1px solid rgba(129, 140, 248, 0.65) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 16px -2px rgba(99, 102, 241, 0.35) !important;
+    }
+
+    /* ========================================================================= */
     /* VIBRANT HIGH-CONTRAST ACTION BUTTONS (ALWAYS CRISP WHITE TEXT)            */
     /* ========================================================================= */
     .btn-download-this {
@@ -80,7 +101,7 @@
     }
 
     /* ========================================================================= */
-    /* DAY MODE: PURE WHITE WITH SOFT SKY/ICE BLUE SHADES (NO DULL GREY)        */
+    /* DAY MODE: PURE WHITE WITH SOFT SKY/ICE BLUE SHADES                        */
     /* ========================================================================= */
     body.light-theme {
       background-color: #f0f7ff;
@@ -133,19 +154,19 @@
 
     body.light-theme .sidebar-file-item {
       background: #ffffff !important;
-      border-color: #e0f2fe !important;
+      border: 1px solid #e0f2fe !important;
       color: #334155 !important;
     }
     body.light-theme .sidebar-file-item:hover {
-      background: #e0f2fe !important;
+      background: #f0f9ff !important;
       border-color: #7dd3fc !important;
       color: #0369a1 !important;
     }
     body.light-theme .sidebar-file-active {
       background: #e0f2fe !important;
-      border-color: #0284c7 !important;
+      border: 1px solid #0284c7 !important;
       color: #0284c7 !important;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15) !important;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.18) !important;
     }
 
     body.light-theme #iconBox {
@@ -424,7 +445,7 @@
         <!-- Interactive Studio Workspace Area -->
         <div id="workspaceContainer" class="{% if has_password %}hidden{% endif %} space-y-5 text-left border-t border-sky-500/20 pt-5">
           
-          <!-- TOP ROW: TITLE & RELOCATED PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
+          <!-- TOP ROW: TITLE & PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-sky-500/20 pb-4">
             <div>
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
@@ -465,7 +486,7 @@
             <!-- Right: Prominent High-Capacity Preview Stage -->
             <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
               
-              <!-- Toolbar above the stage: File info, Zoom controls, Reset button, Big Screen -->
+              <!-- Toolbar above the stage -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
                 <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
                   <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
@@ -955,11 +976,11 @@
         const isActive = idx === activeFileIdx;
 
         return `
-          <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer sidebar-file-item ${isActive ? 'sidebar-file-active' : ''}">
+          <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl transition flex items-center justify-between cursor-pointer sidebar-file-item ${isActive ? 'sidebar-file-active' : ''}">
             <div class="flex items-center gap-2 truncate">
               <span class="text-sm">${icon}</span>
               <div class="truncate">
-                <span class="text-xs font-bold block truncate">${f.filename}</span>
+                <span class="text-xs font-bold block truncate ${isActive ? 'text-white' : ''}">${f.filename}</span>
                 <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
               </div>
             </div>
