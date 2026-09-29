@@ -189,15 +189,14 @@
       color: #64748b !important;
     }
 
+    /* Hand Zoom / Inspection Indicator */
     .image-zoom-hand {
-      cursor: grab !important;
+      cursor: zoom-in !important;
       user-select: none;
       -webkit-user-drag: none;
     }
 
-    /* ========================================================================= */
-    /* SUPER ULTRA HD ENHANCEMENT ENGINE STYLES                                 */
-    /* ========================================================================= */
+    /* Super Ultra HD Convolution Sharpening */
     .super-ultra-hd-active {
       filter: url(#superHdSharpenFilter) contrast(1.08) saturate(1.12) brightness(1.02) !important;
       image-rendering: -webkit-optimize-contrast !important;
@@ -284,7 +283,6 @@
   <!-- SVG FILTER PIPELINE FOR SUPER ULTRA HD CONVOLUTION SHARPENING -->
   <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
     <filter id="superHdSharpenFilter">
-      <!-- High-Pass Unsharp Detail Amplification Matrix Kernel -->
       <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -0.55 0  -0.55 3.2 -0.55  0 -0.55 0"/>
     </filter>
   </svg>
@@ -505,7 +503,7 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom with wheel or toggle Super Ultra HD.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom into any point of interest or toggle Super Ultra HD.</p>
             </div>
 
             <!-- PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
@@ -548,7 +546,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
-                  <!-- Zoom Controls for Images -->
+                  <!-- Zoom Controls for Images & Videos -->
                   <div id="workspaceZoomBar" class="hidden items-center bg-black/50 light-subpanel border border-sky-500/20 rounded-xl p-0.5 text-xs font-mono">
                     <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold" title="Zoom Out">-</button>
                     <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold min-w-[46px] text-center text-sky-600">100%</span>
@@ -562,7 +560,7 @@
                   </button>
 
                   <!-- RESET TO ORIGINAL BUTTON -->
-                  <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold items-center gap-1.5 transition cursor-pointer" title="Reset image zoom back to 100% original center">
+                  <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold items-center gap-1.5 transition cursor-pointer" title="Reset zoom back to 100% original center">
                     <span>↺</span>
                     <span class="hidden sm:inline">Reset</span>
                   </button>
@@ -575,7 +573,7 @@
                 </div>
               </div>
 
-              <!-- High-Resolution Full-Stage Box (Locked Center, No Moving/Drifting) -->
+              <!-- High-Resolution Full-Stage Box -->
               <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#050811] border border-sky-500/20 min-h-[480px] p-2 sm:p-4">
                 
                 <!-- Floating Controls Overlay for Fullscreen Mode -->
@@ -597,7 +595,7 @@
                 <!-- Read-Only Code Viewer -->
                 <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
 
-                <!-- Media Viewer (Centered, Scalable, Scroll to Zoom) -->
+                <!-- Media Viewer (Focal Zoom on Any Point) -->
                 <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
               </div>
 
@@ -903,7 +901,7 @@
     let packageFiles = [];
     let activeFileIdx = 0;
     
-    // Zoom Engine (Anchored Center Scale)
+    // Smooth Focal Zoom Engine
     let currentZoom = 1.0;
     let isSuperHdActive = false;
 
@@ -912,12 +910,16 @@
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
     const AUDIO_EXTS = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac'];
 
+    function getActiveMediaEl() {
+      return document.getElementById("workspaceImageEl") || document.getElementById("workspaceVideoEl");
+    }
+
     function applyZoom() {
-      const img = document.getElementById("workspaceImageEl");
+      const activeMedia = getActiveMediaEl();
       const zoomText = document.getElementById("zoomPercentDisplay");
       const fsZoomText = document.getElementById("fsZoomPercent");
-      if (img) {
-        img.style.transform = `scale(${currentZoom})`;
+      if (activeMedia) {
+        activeMedia.style.transform = `scale(${currentZoom})`;
       }
       const label = `${Math.round(currentZoom * 100)}%`;
       if (zoomText) zoomText.innerText = label;
@@ -926,6 +928,10 @@
 
     function zoomImage(delta) {
       currentZoom = Math.min(5.0, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
+      if (currentZoom <= 1.0) {
+        const activeMedia = getActiveMediaEl();
+        if (activeMedia) activeMedia.style.transformOrigin = "50% 50%";
+      }
       applyZoom();
     }
 
@@ -957,31 +963,69 @@
           btn.classList.add("text-sky-500", "border-sky-500/30");
         }
         if (btnText) btnText.innerText = "Enhance to Super HD";
-        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Center Locked • Scroll to Zoom";
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Focal Zoom • Scroll to Inspect";
       }
     }
 
-    // RESET TO ORIGINAL (Snaps cleanly to 100% scale and resets enhancement)
+    // RESET TO ORIGINAL (Snaps scale to 100% and centers focal origin)
     function resetToOriginal() {
       currentZoom = 1.0;
+      const activeMedia = getActiveMediaEl();
+      if (activeMedia) {
+        activeMedia.style.transformOrigin = "50% 50%";
+        activeMedia.style.transform = "scale(1)";
+      }
       applyZoom();
       if (isSuperHdActive) {
         toggleSuperUltraHD();
       }
     }
 
-    function attachScrollZoom(img) {
-      if (!img) return;
-      img.classList.add("image-zoom-hand");
+    // POINT-TARGETED FOCAL ZOOM & SMOOTH CURSOR TRACKING
+    function attachFocalPointZoom(el) {
+      if (!el) return;
+      el.classList.add("image-zoom-hand");
+      el.style.transition = "transform 0.15s ease-out, transform-origin 0.2s cubic-bezier(0.2, 0, 0, 1)";
 
-      img.addEventListener("dragstart", (e) => e.preventDefault());
-      img.addEventListener("mousedown", (e) => e.preventDefault());
+      // Track cursor position to dynamically shift focal point to any spot
+      el.addEventListener("mousemove", (e) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+          const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+          if (currentZoom > 1.05) {
+            el.style.transformOrigin = `${x}% ${y}%`;
+          }
+        }
+      });
 
-      img.addEventListener("wheel", (e) => {
+      // Mouse wheel zoom directly into hovered point
+      el.addEventListener("wheel", (e) => {
         e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+          const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+          el.style.transformOrigin = `${x}% ${y}%`;
+        }
         const delta = e.deltaY < 0 ? 0.25 : -0.25;
         zoomImage(delta);
       }, { passive: false });
+
+      // Double-click toggle (Zoom 2.2x directly at clicked point / or reset)
+      el.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+        const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+        el.style.transformOrigin = `${x}% ${y}%`;
+        if (currentZoom > 1.2) {
+          resetToOriginal();
+        } else {
+          currentZoom = 2.2;
+          applyZoom();
+        }
+      });
     }
 
     function toggleFullScreen() {
@@ -1092,7 +1136,7 @@
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // 1. High-Resolution Visual Image (PROPER BIGGER SIZE, LOCKED CENTER, SUPER HD OPTION)
+      // 1. High-Resolution Visual Image (Focal Zoom on Any Point)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
@@ -1106,37 +1150,48 @@
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
             <img id="workspaceImageEl" src="${streamUrl}" alt="${f.filename}" 
-                 style="transform-origin: center center; transform: scale(1);"
-                 class="w-full h-full max-h-[540px] sm:max-h-[580px] object-contain rounded-xl shadow-2xl transition-transform duration-150 ease-out select-none">
+                 style="transform-origin: 50% 50%; transform: scale(1);"
+                 class="w-full h-full max-h-[540px] sm:max-h-[580px] object-contain rounded-xl shadow-2xl select-none">
           </div>
         `;
         
         const imgEl = document.getElementById("workspaceImageEl");
-        attachScrollZoom(imgEl);
+        attachFocalPointZoom(imgEl);
         
-        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Center Locked • Scroll to Zoom • Super HD Ready";
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Focal Zoom • Hover over any point to zoom • Super HD Ready";
+        return;
+      }
+
+      enhanceBtn.classList.add("hidden");
+      enhanceBtn.classList.remove("flex");
+
+      // 2. Video Player (Also supports Point Zoom & Fullscreen Expansion)
+      if (VIDEO_EXTS.includes(ext)) {
+        codeViewer.classList.add("hidden");
+        media.classList.remove("hidden");
+        zoomBar.classList.remove("hidden");
+        zoomBar.classList.add("flex");
+        resetBtn.classList.remove("hidden");
+        resetBtn.classList.add("flex");
+
+        media.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
+            <video id="workspaceVideoEl" src="${streamUrl}" controls playsinline 
+                   style="transform-origin: 50% 50%; transform: scale(1);"
+                   class="w-full h-full max-h-[540px] sm:max-h-[580px] object-contain rounded-xl shadow-2xl bg-black select-none"></video>
+          </div>
+        `;
+        const vidEl = document.getElementById("workspaceVideoEl");
+        attachFocalPointZoom(vidEl);
+
+        if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206 Range • Focal Point Zoom Active";
         return;
       }
 
       zoomBar.classList.add("hidden");
       zoomBar.classList.remove("flex");
-      enhanceBtn.classList.add("hidden");
-      enhanceBtn.classList.remove("flex");
       resetBtn.classList.add("hidden");
       resetBtn.classList.remove("flex");
-
-      // 2. Video Player
-      if (VIDEO_EXTS.includes(ext)) {
-        codeViewer.classList.add("hidden");
-        media.classList.remove("hidden");
-        media.innerHTML = `
-          <div class="w-full h-full flex items-center justify-center p-2">
-            <video src="${streamUrl}" controls playsinline class="w-full h-full max-h-[540px] sm:max-h-[580px] object-contain rounded-xl shadow-2xl bg-black"></video>
-          </div>
-        `;
-        if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206 Range";
-        return;
-      }
 
       // 3. Audio Files
       if (AUDIO_EXTS.includes(ext)) {
