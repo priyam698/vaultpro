@@ -166,7 +166,7 @@
   </header>
 
   <!-- Main Container -->
-  <main class="relative z-20 {% if is_paywalled %}max-w-xl{% else %}max-w-5xl{% endif %} mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center text-center w-full">
+  <main class="relative z-20 {% if is_paywalled %}max-w-xl{% else %}max-w-6xl 2xl:max-w-7xl{% endif %} mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center text-center w-full">
     
     <div id="mainTransferCard" class="obsidian-card rounded-3xl p-6 sm:p-8 w-full relative shadow-2xl space-y-6">
       
@@ -318,43 +318,48 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-70 mt-0.5">Inspect, modify, or edit files in your browser before saving.</p>
+              <p class="text-[11px] opacity-70 mt-0.5">Inspect deliverables directly in your browser with full zoom controls.</p>
             </div>
-            <div class="flex items-center gap-2">
-              <span id="modifiedStatusBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden">
-                Modified in Editor ✓
-              </span>
+            
+            <!-- Zoom Controls Bar (Visible for images) -->
+            <div id="workspaceZoomBar" class="hidden flex items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
+              <button type="button" onclick="zoomImage(-0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
+              <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
+              <button type="button" onclick="zoomImage(0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom In">+</button>
+              <button type="button" onclick="resetZoom()" class="px-2.5 py-1 text-[10px] font-bold text-indigo-400 hover:bg-white/10 rounded-lg transition">Fit</button>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             
             <!-- Left: File Explorer Sidebar -->
-            <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[460px]">
+            <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[580px]">
               <div>
                 <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-white/10 pb-2 mb-2">
                   <span>Package Files</span>
                   <span id="sidebarFileCount" class="font-mono">--</span>
                 </div>
-                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[360px]">
+                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[500px]">
                   <div class="p-3 text-xs opacity-60 text-center">Loading files...</div>
                 </div>
               </div>
             </div>
 
-            <!-- Right: Code Editor & Media Preview Window -->
-            <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[380px]">
+            <!-- Right: High-Capacity Preview Stage -->
+            <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[500px] sm:min-h-[580px]">
               <div class="flex items-center justify-between border-b border-white/10 pb-2">
-                <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-xs">Select a file</span>
-                <button id="resetOriginalBtn" onclick="discardActiveFileChanges()" class="hidden text-[10px] font-bold px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 transition cursor-pointer">
-                  Reset Original
-                </button>
+                <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-md">Select a file</span>
+                <span id="formatTagBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-400 uppercase font-semibold">VIEWER</span>
               </div>
 
-              <!-- Content Stage -->
-              <div class="flex-1 relative flex flex-col rounded-xl overflow-hidden bg-black/60 border border-white/5 min-h-[280px]">
-                <textarea id="workspaceCodeEditor" oninput="handleCodeModification()" class="hidden w-full flex-1 p-3.5 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed" placeholder="Select a text, code, or markdown file to inspect or edit..."></textarea>
-                <div id="workspaceMediaViewer" class="w-full flex-1 flex flex-col items-center justify-center p-4"></div>
+              <!-- High-Resolution Non-Editable Content Stage -->
+              <div class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-black/70 border border-white/5 min-h-[420px] p-2 sm:p-4">
+                
+                <!-- Read-Only Code Viewer -->
+                <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[500px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
+
+                <!-- Media Viewer (For Images, Videos, Audio, PDFs, and Fallbacks) -->
+                <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-auto custom-scroll p-2"></div>
               </div>
 
               <div class="flex items-center justify-between text-[10px] opacity-65 font-mono pt-1">
@@ -678,17 +683,33 @@
     // ==========================================
     let packageFiles = [];
     let activeFileIdx = 0;
-    let fileOriginalCache = {};
-    let fileContentsCache = {};
+    let currentZoom = 1.0;
 
-    const EDITABLE_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
+    const TEXT_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
     const AUDIO_EXTS = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac'];
 
-    function isFileEditable(fname) {
-      const ext = fname.split('.').pop().toLowerCase();
-      return EDITABLE_EXTS.includes(ext);
+    // Zoom Controls
+    function applyZoom() {
+      const img = document.getElementById("workspaceImageEl");
+      const zoomText = document.getElementById("zoomPercentDisplay");
+      if (img) {
+        img.style.transform = `scale(${currentZoom})`;
+      }
+      if (zoomText) {
+        zoomText.innerText = `${Math.round(currentZoom * 100)}%`;
+      }
+    }
+
+    function zoomImage(delta) {
+      currentZoom = Math.min(3.5, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
+      applyZoom();
+    }
+
+    function resetZoom() {
+      currentZoom = 1.0;
+      applyZoom();
     }
 
     function unlockWorkspaceWithPasscode() {
@@ -732,7 +753,7 @@
       const listEl = document.getElementById("sidebarFileList");
       listEl.innerHTML = packageFiles.map((f, idx) => {
         const ext = f.filename.split('.').pop().toLowerCase();
-        const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : AUDIO_EXTS.includes(ext) ? '🎵' : ext === 'pdf' ? '📑' : ['xlsx', 'xls', 'csv'].includes(ext) ? '📊' : isFileEditable(f.filename) ? '💻' : '📦';
+        const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : AUDIO_EXTS.includes(ext) ? '🎵' : ext === 'pdf' ? '📑' : ['xlsx', 'xls', 'csv'].includes(ext) ? '📊' : TEXT_EXTS.includes(ext) ? '💻' : '📦';
 
         return `
           <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
@@ -743,7 +764,6 @@
                 <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
               </div>
             </div>
-            <span id="modDot-${idx}" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 hidden"></span>
           </div>
         `;
       }).join('');
@@ -752,44 +772,47 @@
     async function selectWorkspaceFile(idx) {
       activeFileIdx = idx;
       renderSidebarFiles();
+      resetZoom();
 
       const f = packageFiles[idx];
       document.getElementById("activeWorkspaceFileName").innerText = f.filename;
 
-      const editor = document.getElementById("workspaceCodeEditor");
+      const codeViewer = document.getElementById("workspaceCodeViewer");
       const media = document.getElementById("workspaceMediaViewer");
-      const badge = document.getElementById("modifiedStatusBadge");
-      const resetBtn = document.getElementById("resetOriginalBtn");
+      const zoomBar = document.getElementById("workspaceZoomBar");
       const footerStatus = document.getElementById("footerStatusText");
+      const formatBadge = document.getElementById("formatTagBadge");
       const ext = f.filename.split('.').pop().toLowerCase();
 
-      // Reset indicators
-      badge.classList.add("hidden");
-      resetBtn.classList.add("hidden");
+      if (formatBadge) formatBadge.innerText = ext.toUpperCase();
 
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // 1. Image Files
+      // 1. High-Resolution Visual Image (Bigger Sized with Zoom Controls)
       if (IMAGE_EXTS.includes(ext)) {
-        editor.classList.add("hidden");
+        codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
+        zoomBar.classList.remove("hidden");
         media.innerHTML = `
-          <div class="w-full h-full flex items-center justify-center p-2">
-            <img src="${streamUrl}" alt="${f.filename}" class="max-h-[340px] max-w-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40">
+          <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
+            <img id="workspaceImageEl" src="${streamUrl}" alt="${f.filename}" 
+                 class="max-h-[480px] sm:max-h-[540px] max-w-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40 transition-transform duration-150 ease-out select-none pointer-events-none">
           </div>
         `;
-        if (footerStatus) footerStatus.innerText = "Native Image Viewport • Original Scale";
+        if (footerStatus) footerStatus.innerText = "Native Viewport • Zoom Enabled";
         return;
       }
 
-      // 2. Video Files
+      zoomBar.classList.add("hidden");
+
+      // 2. Video Player
       if (VIDEO_EXTS.includes(ext)) {
-        editor.classList.add("hidden");
+        codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2">
-            <video src="${streamUrl}" controls playsinline class="max-h-[340px] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black"></video>
+            <video src="${streamUrl}" controls playsinline class="max-h-[480px] sm:max-h-[540px] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black"></video>
           </div>
         `;
         if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206";
@@ -798,13 +821,14 @@
 
       // 3. Audio Files
       if (AUDIO_EXTS.includes(ext)) {
-        editor.classList.add("hidden");
+        codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
-          <div class="text-center space-y-3 p-6">
-            <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-3xl font-bold border border-indigo-500/30">🎵</div>
-            <strong class="text-sm font-bold text-white block truncate max-w-xs">${f.filename}</strong>
-            <audio controls src="${streamUrl}" class="w-full max-w-xs mx-auto"></audio>
+          <div class="text-center space-y-4 p-8">
+            <div class="w-20 h-20 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-4xl font-bold border border-indigo-500/30">🎵</div>
+            <strong class="text-base font-bold text-white block truncate max-w-md mx-auto">${f.filename}</strong>
+            <p class="text-xs text-slate-400 font-mono">${f.filesize_mb} MB</p>
+            <audio controls src="${streamUrl}" class="w-full max-w-sm mx-auto"></audio>
           </div>
         `;
         if (footerStatus) footerStatus.innerText = "Lossless Audio Stream";
@@ -813,112 +837,51 @@
 
       // 4. PDF Documents
       if (ext === 'pdf') {
-        editor.classList.add("hidden");
+        codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
-          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[340px] rounded-xl border-0"></iframe>
+          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[480px] rounded-xl border-0"></iframe>
         `;
         if (footerStatus) footerStatus.innerText = "Document Viewport";
         return;
       }
 
-      // 5. Spreadsheets and Binary Archives
-      if (!isFileEditable(f.filename)) {
-        editor.classList.add("hidden");
-        media.classList.remove("hidden");
-        const icon = ['xlsx', 'xls'].includes(ext) ? '📊' : ['docx', 'doc'].includes(ext) ? '📑' : ['zip', 'rar', 'tar', 'gz'].includes(ext) ? '📦' : '💾';
-        media.innerHTML = `
-          <div class="text-center space-y-3 p-6 max-w-sm">
-            <span class="text-5xl block animate-bounce">${icon}</span>
-            <strong class="text-sm font-bold text-white block truncate">${f.filename}</strong>
-            <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" to download.</p>
-          </div>
-        `;
-        if (footerStatus) footerStatus.innerText = "Binary Container";
-        return;
-      }
+      // 5. Plaintext & Code (Read-Only Viewer — Non-Editable)
+      if (TEXT_EXTS.includes(ext)) {
+        media.classList.add("hidden");
+        codeViewer.classList.remove("hidden");
+        codeViewer.textContent = "Loading file contents...";
 
-      // 6. Plaintext & Code (Live Editable!)
-      media.classList.add("hidden");
-      editor.classList.remove("hidden");
-      resetBtn.classList.remove("hidden");
-
-      if (fileContentsCache[f.filename] !== undefined) {
-        editor.value = fileContentsCache[f.filename];
-        if (fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
-          badge.classList.remove("hidden");
+        try {
+          const res = await fetch(streamUrl);
+          if (!res.ok) throw new Error("Could not read stream");
+          const text = await res.text();
+          codeViewer.textContent = text || "// Empty file";
+          if (footerStatus) footerStatus.innerText = "Source Code (Read-Only)";
+        } catch(e) {
+          codeViewer.textContent = `// Preview unavailable: ${e.message}`;
         }
         return;
       }
 
-      editor.value = "Loading source code...";
-      editor.disabled = true;
-
-      try {
-        const res = await fetch(streamUrl);
-        if (!res.ok) throw new Error("Could not read text buffer");
-        const text = await res.text();
-        fileOriginalCache[f.filename] = text;
-        fileContentsCache[f.filename] = text;
-        editor.value = text;
-        editor.disabled = false;
-        if (footerStatus) footerStatus.innerText = "Live Code Editor Active";
-      } catch(e) {
-        editor.value = "// Error loading file content.";
-        editor.disabled = false;
-      }
+      // 6. Spreadsheets and Binary Archives Card
+      codeViewer.classList.add("hidden");
+      media.classList.remove("hidden");
+      const icon = ['xlsx', 'xls'].includes(ext) ? '📊' : ['docx', 'doc'].includes(ext) ? '📑' : ['zip', 'rar', 'tar', 'gz'].includes(ext) ? '📦' : '💾';
+      media.innerHTML = `
+        <div class="text-center space-y-3 p-8 max-w-sm">
+          <span class="text-6xl block">${icon}</span>
+          <strong class="text-base font-bold text-white block truncate">${f.filename}</strong>
+          <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" to download.</p>
+        </div>
+      `;
+      if (footerStatus) footerStatus.innerText = "Binary Container";
     }
 
-    function handleCodeModification() {
-      const f = packageFiles[activeFileIdx];
-      if (!isFileEditable(f.filename)) return;
-
-      const editor = document.getElementById("workspaceCodeEditor");
-      fileContentsCache[f.filename] = editor.value;
-
-      const badge = document.getElementById("modifiedStatusBadge");
-      const dot = document.getElementById(`modDot-${activeFileIdx}`);
-
-      if (editor.value !== fileOriginalCache[f.filename]) {
-        badge.classList.remove("hidden");
-        if (dot) dot.classList.remove("hidden");
-      } else {
-        badge.classList.add("hidden");
-        if (dot) dot.classList.add("hidden");
-      }
-    }
-
-    function discardActiveFileChanges() {
-      const f = packageFiles[activeFileIdx];
-      if (fileOriginalCache[f.filename] !== undefined) {
-        fileContentsCache[f.filename] = fileOriginalCache[f.filename];
-        document.getElementById("workspaceCodeEditor").value = fileOriginalCache[f.filename];
-        document.getElementById("modifiedStatusBadge").classList.add("hidden");
-        const dot = document.getElementById(`modDot-${activeFileIdx}`);
-        if (dot) dot.classList.add("hidden");
-      }
-    }
-
-    // 1. DOWNLOAD THIS FILE (Direct Browser Download)
+    // 1. DOWNLOAD THIS FILE (Direct Browser Download — No JSON parse crash)
     function downloadActiveFile() {
       const f = packageFiles[activeFileIdx];
       if (!f) return;
-
-      // Only download as edited text if it's an editable code/text file that was actually modified
-      if (isFileEditable(f.filename) && fileContentsCache[f.filename] !== undefined && fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
-        const blob = new Blob([fileContentsCache[f.filename]], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = f.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return;
-      }
-
-      // For all images, excel, audio, video, pdfs & unmodified files, download genuine binary directly
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const tokenParam = currentToken ? `&access_token=${encodeURIComponent(currentToken)}` : "";
       window.location.href = `/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}${tokenParam}`;
@@ -943,15 +906,11 @@
           const f = packageFiles[i];
           btn.innerHTML = `<span>⏳</span><span>Packing ${i + 1}/${packageFiles.length}: ${f.filename}...</span>`;
 
-          if (isFileEditable(f.filename) && fileContentsCache[f.filename] !== undefined && fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
-            zip.file(f.filename, fileContentsCache[f.filename]);
-          } else {
-            const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
-            const res = await fetch(streamUrl);
-            if (res.ok) {
-              const blob = await res.blob();
-              zip.file(f.filename, blob);
-            }
+          const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
+          const res = await fetch(streamUrl);
+          if (res.ok) {
+            const blob = await res.blob();
+            zip.file(f.filename, blob);
           }
         }
 
