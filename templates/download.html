@@ -93,6 +93,40 @@
       color: #0f172a !important;
     }
 
+    /* Hand Grabbing & Panning Engine */
+    .pan-grab {
+      cursor: grab !important;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .pan-grabbing {
+      cursor: grabbing !important;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* Fullscreen Stage Styling */
+    #contentStageBox:fullscreen {
+      background-color: #06070b;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+    }
+    #contentStageBox:-webkit-full-screen {
+      background-color: #06070b;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+    }
+
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
@@ -318,48 +352,56 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-70 mt-0.5">Inspect deliverables directly in your browser with full zoom controls.</p>
+              <p class="text-[11px] opacity-70 mt-0.5">Inspect media in high resolution. Click and drag with hand cursor to pan while zoomed.</p>
             </div>
             
-            <!-- Zoom Controls Bar (Visible for images) -->
-            <div id="workspaceZoomBar" class="hidden flex items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
-              <button type="button" onclick="zoomImage(-0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
-              <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
-              <button type="button" onclick="zoomImage(0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom In">+</button>
-              <button type="button" onclick="resetZoom()" class="px-2.5 py-1 text-[10px] font-bold text-indigo-400 hover:bg-white/10 rounded-lg transition">Fit</button>
+            <!-- Controls Bar (Zoom + Fullscreen Mode) -->
+            <div id="workspaceControlBar" class="flex items-center gap-2">
+              <div id="workspaceZoomBar" class="hidden items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
+                <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
+                <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
+                <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom In">+</button>
+                <button type="button" onclick="resetZoom()" class="px-2.5 py-1 text-[10px] font-bold text-indigo-400 hover:bg-white/10 rounded-lg transition">Fit</button>
+              </div>
+
+              <!-- Full Big Screen Toggle Button -->
+              <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Toggle Fullscreen Theater View">
+                <span id="fsIcon">⛶</span>
+                <span class="hidden sm:inline">Big Screen</span>
+              </button>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             
             <!-- Left: File Explorer Sidebar -->
-            <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[580px]">
+            <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[620px]">
               <div>
                 <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-white/10 pb-2 mb-2">
                   <span>Package Files</span>
                   <span id="sidebarFileCount" class="font-mono">--</span>
                 </div>
-                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[500px]">
+                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[530px]">
                   <div class="p-3 text-xs opacity-60 text-center">Loading files...</div>
                 </div>
               </div>
             </div>
 
-            <!-- Right: High-Capacity Preview Stage -->
-            <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[500px] sm:min-h-[580px]">
+            <!-- Right: Prominent High-Capacity Preview Stage -->
+            <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[560px] sm:min-h-[620px]">
               <div class="flex items-center justify-between border-b border-white/10 pb-2">
                 <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-md">Select a file</span>
                 <span id="formatTagBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-400 uppercase font-semibold">VIEWER</span>
               </div>
 
-              <!-- High-Resolution Non-Editable Content Stage -->
-              <div class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-black/70 border border-white/5 min-h-[420px] p-2 sm:p-4">
+              <!-- High-Resolution Full-Stage Box -->
+              <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-black/80 border border-white/5 min-h-[460px] p-2 sm:p-4">
                 
                 <!-- Read-Only Code Viewer -->
-                <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[500px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
+                <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[520px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
 
-                <!-- Media Viewer (For Images, Videos, Audio, PDFs, and Fallbacks) -->
-                <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-auto custom-scroll p-2"></div>
+                <!-- Media Viewer (For Images with Pan & Grab Hand, Videos, Audio, PDFs, and Fallbacks) -->
+                <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
               </div>
 
               <div class="flex items-center justify-between text-[10px] opacity-65 font-mono pt-1">
@@ -683,19 +725,25 @@
     // ==========================================
     let packageFiles = [];
     let activeFileIdx = 0;
+    
+    // Pan & Zoom Engine Variables
     let currentZoom = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let startMouseX = 0;
+    let startMouseY = 0;
 
     const TEXT_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
     const AUDIO_EXTS = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac'];
 
-    // Zoom Controls
-    function applyZoom() {
+    function applyZoomAndPan() {
       const img = document.getElementById("workspaceImageEl");
       const zoomText = document.getElementById("zoomPercentDisplay");
       if (img) {
-        img.style.transform = `scale(${currentZoom})`;
+        img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
       }
       if (zoomText) {
         zoomText.innerText = `${Math.round(currentZoom * 100)}%`;
@@ -703,14 +751,81 @@
     }
 
     function zoomImage(delta) {
-      currentZoom = Math.min(3.5, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
-      applyZoom();
+      currentZoom = Math.min(4.0, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
+      applyZoomAndPan();
     }
 
     function resetZoom() {
       currentZoom = 1.0;
-      applyZoom();
+      panX = 0;
+      panY = 0;
+      applyZoomAndPan();
     }
+
+    function attachPanHandlers(img) {
+      if (!img) return;
+      img.classList.add("pan-grab");
+
+      img.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        isPanning = true;
+        startMouseX = e.clientX - panX;
+        startMouseY = e.clientY - panY;
+        img.classList.remove("pan-grab");
+        img.classList.add("pan-grabbing");
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isPanning) return;
+        panX = e.clientX - startMouseX;
+        panY = e.clientY - startMouseY;
+        applyZoomAndPan();
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (isPanning) {
+          isPanning = false;
+          img.classList.remove("pan-grabbing");
+          img.classList.add("pan-grab");
+        }
+      });
+
+      // Mouse wheel zoom
+      img.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.2 : -0.2;
+        zoomImage(delta);
+      }, { passive: false });
+    }
+
+    // Full Big Screen Mode Toggle
+    function toggleFullScreen() {
+      const stageBox = document.getElementById("contentStageBox");
+      const fsIcon = document.getElementById("fsIcon");
+
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (stageBox.requestFullscreen) {
+          stageBox.requestFullscreen();
+        } else if (stageBox.webkitRequestFullscreen) {
+          stageBox.webkitRequestFullscreen();
+        }
+        if (fsIcon) fsIcon.innerText = "✕";
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        if (fsIcon) fsIcon.innerText = "⛶";
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const fsIcon = document.getElementById("fsIcon");
+      if (fsIcon) {
+        fsIcon.innerText = document.fullscreenElement ? "✕" : "⛶";
+      }
+    });
 
     function unlockWorkspaceWithPasscode() {
       const input = document.getElementById("passwordInput");
@@ -789,22 +904,29 @@
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // 1. High-Resolution Visual Image (Bigger Sized with Zoom Controls)
+      // 1. High-Resolution Visual Image (With Hand Pan & Zoom Controls)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         zoomBar.classList.remove("hidden");
+        zoomBar.classList.add("flex");
+        
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
             <img id="workspaceImageEl" src="${streamUrl}" alt="${f.filename}" 
-                 class="max-h-[480px] sm:max-h-[540px] max-w-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40 transition-transform duration-150 ease-out select-none pointer-events-none">
+                 class="max-h-[500px] sm:max-h-[560px] max-w-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40 transition-transform duration-75 select-none">
           </div>
         `;
-        if (footerStatus) footerStatus.innerText = "Native Viewport • Zoom Enabled";
+        
+        const imgEl = document.getElementById("workspaceImageEl");
+        attachPanHandlers(imgEl);
+        
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Drag with Hand to Pan • Scroll to Zoom";
         return;
       }
 
       zoomBar.classList.add("hidden");
+      zoomBar.classList.remove("flex");
 
       // 2. Video Player
       if (VIDEO_EXTS.includes(ext)) {
@@ -812,10 +934,10 @@
         media.classList.remove("hidden");
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2">
-            <video src="${streamUrl}" controls playsinline class="max-h-[480px] sm:max-h-[540px] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black"></video>
+            <video src="${streamUrl}" controls playsinline class="max-h-[500px] sm:max-h-[560px] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black"></video>
           </div>
         `;
-        if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206";
+        if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206 Range";
         return;
       }
 
@@ -840,24 +962,24 @@
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
-          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[480px] rounded-xl border-0"></iframe>
+          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[500px] rounded-xl border-0"></iframe>
         `;
         if (footerStatus) footerStatus.innerText = "Document Viewport";
         return;
       }
 
-      // 5. Plaintext & Code (Read-Only Viewer — Non-Editable)
+      // 5. Plaintext & Code (Read-Only Viewer)
       if (TEXT_EXTS.includes(ext)) {
         media.classList.add("hidden");
         codeViewer.classList.remove("hidden");
-        codeViewer.textContent = "Loading file contents...";
+        codeViewer.textContent = "Loading file buffer...";
 
         try {
           const res = await fetch(streamUrl);
           if (!res.ok) throw new Error("Could not read stream");
           const text = await res.text();
           codeViewer.textContent = text || "// Empty file";
-          if (footerStatus) footerStatus.innerText = "Source Code (Read-Only)";
+          if (footerStatus) footerStatus.innerText = "Source Code (Read-Only Inspection)";
         } catch(e) {
           codeViewer.textContent = `// Preview unavailable: ${e.message}`;
         }
@@ -870,7 +992,7 @@
       const icon = ['xlsx', 'xls'].includes(ext) ? '📊' : ['docx', 'doc'].includes(ext) ? '📑' : ['zip', 'rar', 'tar', 'gz'].includes(ext) ? '📦' : '💾';
       media.innerHTML = `
         <div class="text-center space-y-3 p-8 max-w-sm">
-          <span class="text-6xl block">${icon}</span>
+          <span class="text-6xl block animate-bounce">${icon}</span>
           <strong class="text-base font-bold text-white block truncate">${f.filename}</strong>
           <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" to download.</p>
         </div>
@@ -878,7 +1000,7 @@
       if (footerStatus) footerStatus.innerText = "Binary Container";
     }
 
-    // 1. DOWNLOAD THIS FILE (Direct Browser Download — No JSON parse crash)
+    // 1. DOWNLOAD THIS FILE (Direct Browser Download)
     function downloadActiveFile() {
       const f = packageFiles[activeFileIdx];
       if (!f) return;
