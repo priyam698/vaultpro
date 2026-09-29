@@ -49,11 +49,11 @@
     }
 
     /* ========================================================================= */
-    /* SIDEBAR COLOR TABS (DARK MODE: VIBRANT INDIGO TAB, NO HARSH WHITE BORDER) */
+    /* DARK MODE SIDEBAR TABS (NO WHITE BORDER; VIBRANT COLOR ACTIVE TAB)        */
     /* ========================================================================= */
     .sidebar-file-item {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
       color: #94a3b8;
       transition: all 0.2s ease;
     }
@@ -63,10 +63,10 @@
       color: #f1f5f9;
     }
     .sidebar-file-active {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.32) 0%, rgba(79, 70, 229, 0.45) 100%) !important;
-      border: 1px solid rgba(129, 140, 248, 0.65) !important;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.35) 0%, rgba(79, 70, 229, 0.5) 100%) !important;
+      border: 1px solid rgba(129, 140, 248, 0.7) !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 16px -2px rgba(99, 102, 241, 0.35) !important;
+      box-shadow: 0 4px 18px -2px rgba(99, 102, 241, 0.4) !important;
     }
 
     /* ========================================================================= */
@@ -77,7 +77,7 @@
       color: #ffffff !important;
       font-weight: 800 !important;
       box-shadow: 0 6px 20px -4px rgba(2, 132, 199, 0.45) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
       transition: all 0.2s ease;
     }
     .btn-download-this:hover {
@@ -91,7 +91,7 @@
       color: #ffffff !important;
       font-weight: 800 !important;
       box-shadow: 0 6px 20px -4px rgba(99, 102, 241, 0.45) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
       transition: all 0.2s ease;
     }
     .btn-download-all:hover {
@@ -200,14 +200,9 @@
       color: #64748b !important;
     }
 
-    /* Hand Grabbing and Panning */
-    .pan-grab {
+    /* Hand Zoom Indicator (No Drifting/Translation) */
+    .image-zoom-hand {
       cursor: grab !important;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-    .pan-grabbing {
-      cursor: grabbing !important;
       user-select: none;
       -webkit-user-drag: none;
     }
@@ -451,7 +446,7 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom, pan with hand cursor, and download below.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom with wheel or controls below.</p>
             </div>
 
             <!-- PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
@@ -470,7 +465,7 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             
-            <!-- Left: File Explorer Sidebar -->
+            <!-- Left: File Explorer Sidebar (No white border in dark mode) -->
             <div class="lg:col-span-4 rounded-2xl bg-black/40 light-subpanel border border-sky-500/20 p-3.5 flex flex-col justify-between space-y-3 max-h-[640px]">
               <div>
                 <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-sky-500/20 pb-2 mb-2">
@@ -486,7 +481,7 @@
             <!-- Right: Prominent High-Capacity Preview Stage -->
             <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
               
-              <!-- Toolbar above the stage -->
+              <!-- Toolbar above the stage: File info, Zoom controls, Reset button, Big Screen -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
                 <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
                   <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
@@ -502,26 +497,26 @@
                   </div>
 
                   <!-- RESET TO ORIGINAL BUTTON -->
-                  <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 border border-sky-500/30 text-xs font-bold items-center gap-1 transition cursor-pointer" title="Reset image zoom and position back to center">
+                  <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold items-center gap-1.5 transition cursor-pointer" title="Reset image zoom back to 100% original center">
                     <span>↺</span>
                     <span class="hidden sm:inline">Reset to Original</span>
                   </button>
 
                   <!-- Big Screen Button -->
-                  <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 border border-sky-500/30 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="Toggle Fullscreen View">
+                  <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Toggle Fullscreen View">
                     <span id="fsIcon">⛶</span>
                     <span class="hidden sm:inline">Big Screen</span>
                   </button>
                 </div>
               </div>
 
-              <!-- High-Resolution Full-Stage Box -->
+              <!-- High-Resolution Full-Stage Box (Locked Center, No Moving/Drifting) -->
               <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#050811] border border-sky-500/20 min-h-[480px] p-2 sm:p-4">
                 
                 <!-- Read-Only Code Viewer -->
                 <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
 
-                <!-- Media Viewer (Centered, Bigger Size, Hand Pan on Zoom) -->
+                <!-- Media Viewer (Firmly Centered, Non-Movable Position, Zoom On-Scroll) -->
                 <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
               </div>
 
@@ -827,24 +822,19 @@
     let packageFiles = [];
     let activeFileIdx = 0;
     
-    // Centered Pan & Zoom Engine
+    // Zoom Engine (Pure scale; zero offset drifting)
     let currentZoom = 1.0;
-    let panX = 0;
-    let panY = 0;
-    let isPanning = false;
-    let startMouseX = 0;
-    let startMouseY = 0;
 
     const TEXT_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
     const AUDIO_EXTS = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac'];
 
-    function applyZoomAndPan() {
+    function applyZoom() {
       const img = document.getElementById("workspaceImageEl");
       const zoomText = document.getElementById("zoomPercentDisplay");
       if (img) {
-        img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+        img.style.transform = `scale(${currentZoom})`;
       }
       if (zoomText) {
         zoomText.innerText = `${Math.round(currentZoom * 100)}%`;
@@ -853,48 +843,24 @@
 
     function zoomImage(delta) {
       currentZoom = Math.min(4.0, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
-      if (currentZoom <= 1.0) {
-        panX = 0;
-        panY = 0;
-      }
-      applyZoomAndPan();
+      applyZoom();
     }
 
+    // RESET TO ORIGINAL FUNCTION (Snaps cleanly to 100% scale)
     function resetToOriginal() {
       currentZoom = 1.0;
-      panX = 0;
-      panY = 0;
-      applyZoomAndPan();
+      applyZoom();
     }
 
-    function attachPanHandlers(img) {
+    function attachScrollZoom(img) {
       if (!img) return;
-      img.classList.add("pan-grab");
+      img.classList.add("image-zoom-hand");
 
-      img.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        isPanning = true;
-        startMouseX = e.clientX - panX;
-        startMouseY = e.clientY - panY;
-        img.classList.remove("pan-grab");
-        img.classList.add("pan-grabbing");
-      });
+      // Prevent default drag events so image is never dragged out of place
+      img.addEventListener("dragstart", (e) => e.preventDefault());
+      img.addEventListener("mousedown", (e) => e.preventDefault());
 
-      window.addEventListener("mousemove", (e) => {
-        if (!isPanning) return;
-        panX = e.clientX - startMouseX;
-        panY = e.clientY - startMouseY;
-        applyZoomAndPan();
-      });
-
-      window.addEventListener("mouseup", () => {
-        if (isPanning) {
-          isPanning = false;
-          img.classList.remove("pan-grabbing");
-          img.classList.add("pan-grab");
-        }
-      });
-
+      // Zoom cleanly centered on mouse wheel scroll
       img.addEventListener("wheel", (e) => {
         e.preventDefault();
         const delta = e.deltaY < 0 ? 0.2 : -0.2;
@@ -1010,7 +976,7 @@
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // 1. High-Resolution Visual Image (PROPER BIGGER SIZE, ANCHORED, ZOOMABLE)
+      // 1. High-Resolution Visual Image (PROPER BIGGER SIZE, LOCKED CENTER, NO MOVING)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
@@ -1022,15 +988,15 @@
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
             <img id="workspaceImageEl" src="${streamUrl}" alt="${f.filename}" 
-                 style="transform-origin: center center;"
-                 class="max-h-[94%] max-w-[96%] w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40 transition-transform duration-75 select-none">
+                 style="transform-origin: center center; transform: scale(1);"
+                 class="w-full h-full max-h-[540px] sm:max-h-[580px] object-contain rounded-xl shadow-2xl transition-transform duration-150 ease-out select-none">
           </div>
         `;
         
         const imgEl = document.getElementById("workspaceImageEl");
-        attachPanHandlers(imgEl);
+        attachScrollZoom(imgEl);
         
-        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Drag to Pan • Scroll to Zoom";
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Center Locked • Scroll to Zoom";
         return;
       }
 
@@ -1045,7 +1011,7 @@
         media.classList.remove("hidden");
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2">
-            <video src="${streamUrl}" controls playsinline class="max-h-[94%] max-w-[96%] w-auto h-auto rounded-xl shadow-2xl border border-white/10 bg-black"></video>
+            <video src="${streamUrl}" controls playsinline class="w-full h-full max-h-[540px] sm:max-h-[580px] object-contain rounded-xl shadow-2xl bg-black"></video>
           </div>
         `;
         if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206 Range";
