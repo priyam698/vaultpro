@@ -196,6 +196,13 @@
       -webkit-user-drag: none;
     }
 
+    /* Super Ultra HD Convolution Sharpening */
+    .super-ultra-hd-active {
+      filter: url(#superHdSharpenFilter) contrast(1.08) saturate(1.12) brightness(1.02) !important;
+      image-rendering: -webkit-optimize-contrast !important;
+      image-rendering: crisp-edges !important;
+    }
+
     /* Full Big Screen Mode Styles */
     #contentStageBox:fullscreen,
     #contentStageBox:-webkit-full-screen {
@@ -272,6 +279,13 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white relative">
 
   <div id="backdropBg" class="site-mountain-backdrop"></div>
+
+  <!-- SVG FILTER PIPELINE FOR SUPER ULTRA HD CONVOLUTION SHARPENING -->
+  <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
+    <filter id="superHdSharpenFilter">
+      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -0.55 0  -0.55 3.2 -0.55  0 -0.55 0"/>
+    </filter>
+  </svg>
 
   <!-- Server Configuration Dataset -->
   <div id="serverConfig"
@@ -482,7 +496,7 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom into any point of interest or generate Real-ESRGAN 4K Super HD.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom into images/videos or download unsupported formats directly.</p>
             </div>
 
             <!-- PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
@@ -517,7 +531,7 @@
             <!-- Right: Prominent High-Capacity Preview Stage -->
             <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
               
-              <!-- Toolbar above the stage: File info, Zoom, Super HD Enhance, Reset, Big Screen -->
+              <!-- Toolbar above the stage -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
                 <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
                   <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
@@ -593,7 +607,7 @@
                 <!-- Read-Only Code Viewer -->
                 <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
 
-                <!-- Media Viewer (Focal Zoom on Any Point) -->
+                <!-- Media Viewer (Restricted Previews & Flash Message) -->
                 <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
               </div>
 
@@ -906,10 +920,9 @@
     let superHdImageSrc = "";
     let isShowingSuperHd = false;
 
-    const TEXT_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
+    const TEXT_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
-    const AUDIO_EXTS = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac'];
 
     function getActiveMediaEl() {
       return document.getElementById("workspaceImageEl") || document.getElementById("workspaceVideoEl");
@@ -1133,7 +1146,7 @@
       const listEl = document.getElementById("sidebarFileList");
       listEl.innerHTML = packageFiles.map((f, idx) => {
         const ext = f.filename.split('.').pop().toLowerCase();
-        const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : AUDIO_EXTS.includes(ext) ? '🎵' : ext === 'pdf' ? '📑' : ['xlsx', 'xls', 'csv'].includes(ext) ? '📊' : TEXT_EXTS.includes(ext) ? '💻' : '📦';
+        const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : ext === 'pdf' ? '📑' : TEXT_EXTS.includes(ext) ? '📝' : '📦';
         const isActive = idx === activeFileIdx;
 
         return `
@@ -1176,6 +1189,31 @@
 
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
+
+      // Check if file type is supported for preview (Images, Videos, PDF, Notes/Text)
+      const isSupportedPreview = IMAGE_EXTS.includes(ext) || VIDEO_EXTS.includes(ext) || ext === 'pdf' || TEXT_EXTS.includes(ext);
+
+      if (!isSupportedPreview) {
+        // PREVIEW NOT AVAILABLE MESSAGE FOR UNSUPPORTED FORMATS
+        codeViewer.classList.add("hidden");
+        media.classList.remove("hidden");
+        zoomBar.classList.add("hidden");
+        zoomBar.classList.remove("flex");
+        enhanceBtn.classList.add("hidden");
+        enhanceBtn.classList.remove("flex");
+        resetBtn.classList.add("hidden");
+        resetBtn.classList.remove("flex");
+
+        media.innerHTML = `
+          <div class="text-center space-y-3 p-8 max-w-sm mx-auto">
+            <div class="w-16 h-16 rounded-2xl bg-sky-500/10 text-sky-400 mx-auto flex items-center justify-center text-3xl font-bold border border-sky-500/20 shadow-lg">⚠️</div>
+            <strong class="text-sm font-bold text-white block truncate">${f.filename}</strong>
+            <p class="text-xs text-slate-400 leading-relaxed font-medium">Preview not available for this file type. Please click <strong>"Download This File"</strong> above to view.</p>
+          </div>
+        `;
+        if (footerStatus) footerStatus.innerText = "Preview Not Available • Download Required";
+        return;
+      }
 
       // 1. High-Resolution Visual Image (FOCAL POINT ZOOM + REAL AI 4K CAPABLE)
       if (IMAGE_EXTS.includes(ext)) {
@@ -1235,23 +1273,7 @@
       resetBtn.classList.add("hidden");
       resetBtn.classList.remove("flex");
 
-      // 3. Audio Files
-      if (AUDIO_EXTS.includes(ext)) {
-        codeViewer.classList.add("hidden");
-        media.classList.remove("hidden");
-        media.innerHTML = `
-          <div class="text-center space-y-4 p-8">
-            <div class="w-20 h-20 rounded-2xl bg-sky-500/20 text-sky-400 mx-auto flex items-center justify-center text-4xl font-bold border border-sky-500/30">🎵</div>
-            <strong class="text-base font-bold text-white block truncate max-w-md mx-auto">${f.filename}</strong>
-            <p class="text-xs text-slate-400 font-mono">${f.filesize_mb} MB</p>
-            <audio controls src="${streamUrl}" class="w-full max-w-sm mx-auto"></audio>
-          </div>
-        `;
-        if (footerStatus) footerStatus.innerText = "Lossless Audio Stream";
-        return;
-      }
-
-      // 4. PDF Documents
+      // 3. PDF Documents
       if (ext === 'pdf') {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
@@ -1262,36 +1284,23 @@
         return;
       }
 
-      // 5. Plaintext & Code (Read-Only Viewer)
+      // 4. Plaintext & Notes/Code Viewer
       if (TEXT_EXTS.includes(ext)) {
         media.classList.add("hidden");
         codeViewer.classList.remove("hidden");
-        codeViewer.textContent = "Loading file buffer...";
+        codeViewer.textContent = "Loading note buffer...";
 
         try {
           const res = await fetch(streamUrl);
           if (!res.ok) throw new Error("Could not read stream");
           const text = await res.text();
-          codeViewer.textContent = text || "// Empty file";
-          if (footerStatus) footerStatus.innerText = "Source Code (Read-Only Inspection)";
+          codeViewer.textContent = text || "// Empty note";
+          if (footerStatus) footerStatus.innerText = "Notes / Document Viewport (Read-Only)";
         } catch(e) {
           codeViewer.textContent = `// Preview unavailable: ${e.message}`;
         }
         return;
       }
-
-      // 6. Spreadsheets and Binary Archives Card
-      codeViewer.classList.add("hidden");
-      media.classList.remove("hidden");
-      const icon = ['xlsx', 'xls'].includes(ext) ? '📊' : ['docx', 'doc'].includes(ext) ? '📑' : ['zip', 'rar', 'tar', 'gz'].includes(ext) ? '📦' : '💾';
-      media.innerHTML = `
-        <div class="text-center space-y-3 p-8 max-w-sm">
-          <span class="text-6xl block animate-bounce">${icon}</span>
-          <strong class="text-base font-bold text-white block truncate">${f.filename}</strong>
-          <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" above to download.</p>
-        </div>
-      `;
-      if (footerStatus) footerStatus.innerText = "Binary Container";
     }
 
     // 1. DOWNLOAD THIS FILE
