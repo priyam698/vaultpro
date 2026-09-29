@@ -96,7 +96,7 @@
       box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.6) !important;
     }
 
-    /* Day Mode: White & Soft Sky Blue Palette */
+    /* Day Mode: Pure White with Soft Ice/Sky Blue */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -196,8 +196,15 @@
     }
 
     /* ========================================================================= */
-    /* FULL BIG SCREEN EXPANSIVE MODE (ADAPTIVE SCALE - NOT CAPPED)             */
+    /* SUPER ULTRA HD ENHANCEMENT ENGINE STYLES                                 */
     /* ========================================================================= */
+    .super-ultra-hd-active {
+      filter: url(#superHdSharpenFilter) contrast(1.08) saturate(1.12) brightness(1.02) !important;
+      image-rendering: -webkit-optimize-contrast !important;
+      image-rendering: crisp-edges !important;
+    }
+
+    /* Full Big Screen Mode Styles */
     #contentStageBox:fullscreen,
     #contentStageBox:-webkit-full-screen {
       background-color: #030509 !important;
@@ -273,6 +280,14 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white relative">
 
   <div id="backdropBg" class="site-mountain-backdrop"></div>
+
+  <!-- SVG FILTER PIPELINE FOR SUPER ULTRA HD CONVOLUTION SHARPENING -->
+  <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
+    <filter id="superHdSharpenFilter">
+      <!-- High-Pass Unsharp Detail Amplification Matrix Kernel -->
+      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -0.55 0  -0.55 3.2 -0.55  0 -0.55 0"/>
+    </filter>
+  </svg>
 
   <!-- Server Configuration Dataset -->
   <div id="serverConfig"
@@ -490,7 +505,7 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom with wheel or controls below.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom with wheel or toggle Super Ultra HD.</p>
             </div>
 
             <!-- PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
@@ -509,7 +524,7 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             
-            <!-- Left: File Explorer Sidebar -->
+            <!-- Left: File Explorer Sidebar (No white border in dark mode) -->
             <div class="lg:col-span-4 rounded-2xl bg-black/40 light-subpanel border border-sky-500/20 p-3.5 flex flex-col justify-between space-y-3 max-h-[640px]">
               <div>
                 <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-sky-500/20 pb-2 mb-2">
@@ -525,7 +540,7 @@
             <!-- Right: Prominent High-Capacity Preview Stage -->
             <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
               
-              <!-- Toolbar above the stage: File info, Zoom controls, Reset button, Big Screen -->
+              <!-- Toolbar above the stage: File info, Zoom, Super HD Enhance, Reset, Big Screen -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
                 <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
                   <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
@@ -540,10 +555,16 @@
                     <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold" title="Zoom In">+</button>
                   </div>
 
+                  <!-- ENHANCE TO SUPER ULTRA HD BUTTON -->
+                  <button id="enhanceHdBtn" type="button" onclick="toggleSuperUltraHD()" class="hidden px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-500/15 via-indigo-500/15 to-purple-500/15 hover:from-sky-500/25 hover:to-indigo-500/25 text-sky-500 border border-sky-500/30 text-xs font-extrabold items-center gap-1.5 transition cursor-pointer shadow-sm" title="Enhance image sharpness, clarity, and micro-details to Super Ultra HD">
+                    <span id="enhanceIcon">✨</span>
+                    <span id="enhanceBtnText" class="hidden sm:inline">Enhance to Super HD</span>
+                  </button>
+
                   <!-- RESET TO ORIGINAL BUTTON -->
                   <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold items-center gap-1.5 transition cursor-pointer" title="Reset image zoom back to 100% original center">
                     <span>↺</span>
-                    <span class="hidden sm:inline">Reset to Original</span>
+                    <span class="hidden sm:inline">Reset</span>
                   </button>
 
                   <!-- Big Screen Button -->
@@ -554,7 +575,7 @@
                 </div>
               </div>
 
-              <!-- High-Resolution Full-Stage Box (Locked Center, No Drifting) -->
+              <!-- High-Resolution Full-Stage Box (Locked Center, No Moving/Drifting) -->
               <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#050811] border border-sky-500/20 min-h-[480px] p-2 sm:p-4">
                 
                 <!-- Floating Controls Overlay for Fullscreen Mode -->
@@ -562,8 +583,15 @@
                   <button type="button" onclick="zoomImage(-0.25)" class="px-2 py-1 text-slate-200 hover:text-white font-bold text-xs cursor-pointer">-</button>
                   <span id="fsZoomPercent" class="text-xs font-mono font-bold text-sky-400 min-w-[46px] text-center">100%</span>
                   <button type="button" onclick="zoomImage(0.25)" class="px-2 py-1 text-slate-200 hover:text-white font-bold text-xs cursor-pointer">+</button>
+                  <button type="button" onclick="toggleSuperUltraHD()" class="px-2.5 py-1 text-xs font-bold text-sky-400 hover:bg-white/10 rounded-xl transition cursor-pointer">✨ Super HD</button>
                   <button type="button" onclick="resetToOriginal()" class="px-2.5 py-1 text-xs font-bold text-sky-400 hover:bg-white/10 rounded-xl transition cursor-pointer">↺ Reset</button>
                   <button type="button" onclick="toggleFullScreen()" class="px-2.5 py-1 text-xs font-bold text-rose-400 hover:bg-white/10 rounded-xl transition cursor-pointer">✕ Exit</button>
+                </div>
+
+                <!-- Super Ultra HD Active Badge Indicator on Image Corner -->
+                <div id="hdEnhancedBadge" class="hidden absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-sky-950/85 border border-sky-400/50 backdrop-blur-md text-[10px] font-mono font-bold text-sky-300 flex items-center gap-1.5 shadow-2xl animate-pulse">
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                  <span>SUPER ULTRA HD (4K CLARITY)</span>
                 </div>
 
                 <!-- Read-Only Code Viewer -->
@@ -874,7 +902,10 @@
     // ==========================================
     let packageFiles = [];
     let activeFileIdx = 0;
+    
+    // Zoom Engine (Anchored Center Scale)
     let currentZoom = 1.0;
+    let isSuperHdActive = false;
 
     const TEXT_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
@@ -898,9 +929,45 @@
       applyZoom();
     }
 
+    // TOGGLE SUPER ULTRA HD ENHANCEMENT
+    function toggleSuperUltraHD() {
+      const img = document.getElementById("workspaceImageEl");
+      if (!img) return;
+
+      isSuperHdActive = !isSuperHdActive;
+      const badge = document.getElementById("hdEnhancedBadge");
+      const btn = document.getElementById("enhanceHdBtn");
+      const btnText = document.getElementById("enhanceBtnText");
+      const footerStatus = document.getElementById("footerStatusText");
+
+      if (isSuperHdActive) {
+        img.classList.add("super-ultra-hd-active");
+        if (badge) badge.classList.remove("hidden");
+        if (btn) {
+          btn.classList.add("bg-emerald-500/20", "text-emerald-400", "border-emerald-400/50");
+          btn.classList.remove("text-sky-500", "border-sky-500/30");
+        }
+        if (btnText) btnText.innerText = "✓ Super Ultra HD Active";
+        if (footerStatus) footerStatus.innerText = "Super Ultra HD Active • Micro-Contrast & Detail Sharpening (4K Clarity)";
+      } else {
+        img.classList.remove("super-ultra-hd-active");
+        if (badge) badge.classList.add("hidden");
+        if (btn) {
+          btn.classList.remove("bg-emerald-500/20", "text-emerald-400", "border-emerald-400/50");
+          btn.classList.add("text-sky-500", "border-sky-500/30");
+        }
+        if (btnText) btnText.innerText = "Enhance to Super HD";
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Center Locked • Scroll to Zoom";
+      }
+    }
+
+    // RESET TO ORIGINAL (Snaps cleanly to 100% scale and resets enhancement)
     function resetToOriginal() {
       currentZoom = 1.0;
       applyZoom();
+      if (isSuperHdActive) {
+        toggleSuperUltraHD();
+      }
     }
 
     function attachScrollZoom(img) {
@@ -1014,6 +1081,7 @@
       const codeViewer = document.getElementById("workspaceCodeViewer");
       const media = document.getElementById("workspaceMediaViewer");
       const zoomBar = document.getElementById("workspaceZoomBar");
+      const enhanceBtn = document.getElementById("enhanceHdBtn");
       const resetBtn = document.getElementById("resetOriginalBtn");
       const footerStatus = document.getElementById("footerStatusText");
       const formatBadge = document.getElementById("formatTagBadge");
@@ -1024,12 +1092,14 @@
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // 1. High-Resolution Visual Image (EXPANSIVE, CENTERED, SCROLL-ZOOMABLE)
+      // 1. High-Resolution Visual Image (PROPER BIGGER SIZE, LOCKED CENTER, SUPER HD OPTION)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         zoomBar.classList.remove("hidden");
         zoomBar.classList.add("flex");
+        enhanceBtn.classList.remove("hidden");
+        enhanceBtn.classList.add("flex");
         resetBtn.classList.remove("hidden");
         resetBtn.classList.add("flex");
         
@@ -1044,12 +1114,14 @@
         const imgEl = document.getElementById("workspaceImageEl");
         attachScrollZoom(imgEl);
         
-        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Center Locked • Scroll to Zoom";
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Center Locked • Scroll to Zoom • Super HD Ready";
         return;
       }
 
       zoomBar.classList.add("hidden");
       zoomBar.classList.remove("flex");
+      enhanceBtn.classList.add("hidden");
+      enhanceBtn.classList.remove("flex");
       resetBtn.classList.add("hidden");
       resetBtn.classList.remove("flex");
 
