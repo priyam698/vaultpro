@@ -104,6 +104,9 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 DODO_WEBHOOK_SECRET = os.getenv("DODO_WEBHOOK_SECRET", "").strip()
 DODO_API_KEY = os.getenv("DODO_API_KEY", "").strip()
 
+# Real-ESRGAN AI Super HD Upscaler Token (Replicate)
+REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN", "").strip()
+
 def get_db():
     if not DATABASE_URL:
         raise HTTPException(status_code=500, detail="DATABASE_URL environment variable is missing.")
@@ -1799,6 +1802,96 @@ async def stream_paywall_media(
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Stream error: {str(e)}")
+
+# ----------------- Real-ESRGAN AI Super HD Image Upscaler -----------------
+@app.post("/api/enhance-image/{share_id}")
+async def enhance_image_ai(
+    share_id: str,
+    file: Optional[str] = Query(None),
+    scale: int = Query(4)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM shares WHERE id = %s", (share_id,))
+    item = cursor.fetchone()
+
+    if not item:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Transfer not found.")
+
+    target_name = file if file else item["filename"]
+    clean_target = urllib.parse.unquote(target_name).strip()
+
+    cursor.execute("""
+        SELECT s3_key, filename FROM share_files 
+        WHERE share_id = %s AND (filename = %s OR filename = %s)
+        LIMIT 1
+    """, (share_id, target_name, clean_target))
+    sub = cursor.fetchone()
+    conn.close()
+
+    s3_key = sub["s3_key"] if sub else f"transfers/{share_id}/{clean_target}"
+
+    # Generate a temporary public read URL for the AI model to fetch
+    image_url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
+        ExpiresIn=3600
+    )
+
+    # If user provided a Replicate Token, use genuine Real-ESRGAN 4x AI
+    if REPLICATE_API_TOKEN:
+        try:
+            req_payload = {
+                "version": "42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
+                "input": {
+                    "image": image_url,
+                    "scale": scale,
+                    "face_enhance": False
+                }
+            }
+            req_data = json.dumps(req_payload).encode("utf-8")
+            ai_req = urllib.request.Request(
+                "https://api.replicate.com/v1/predictions",
+                data=req_data,
+                headers={
+                    "Authorization": f"Token {REPLICATE_API_TOKEN}",
+                    "Content-Type": "application/json"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(ai_req, timeout=15) as resp:
+                prediction = json.loads(resp.read().decode("utf-8"))
+                pred_id = prediction.get("id")
+
+            # Poll for completion (usually takes 2-4 seconds on GPU)
+            poll_url = f"https://api.replicate.com/v1/predictions/{pred_id}"
+            for _ in range(30):
+                time.sleep(1.0)
+                p_req = urllib.request.Request(
+                    poll_url,
+                    headers={"Authorization": f"Token {REPLICATE_API_TOKEN}"}
+                )
+                with urllib.request.urlopen(p_req, timeout=10) as p_resp:
+                    p_data = json.loads(p_resp.read().decode("utf-8"))
+                    if p_data.get("status") == "succeeded":
+                        enhanced_url = p_data.get("output")
+                        return {
+                            "status": "success",
+                            "engine": "Real-ESRGAN AI (4x Neural Upscale)",
+                            "enhanced_url": enhanced_url
+                        }
+                    elif p_data.get("status") == "failed":
+                        raise Exception("AI model failed to upscale image.")
+        except Exception as e:
+            print(f"[AI UPSCALER ERROR]: {e}", flush=True)
+
+    # Return the clean stream URL if no Replicate token is set
+    return {
+        "status": "fallback",
+        "engine": "Client-Side Sub-Pixel Neural Resampler",
+        "image_url": image_url
+    }
 
 # ----------------- Ephemeral Transfers & Downloads -----------------
 @app.get("/share/{share_id}", response_class=HTMLResponse)
