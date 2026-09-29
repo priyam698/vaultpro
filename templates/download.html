@@ -13,7 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
-    /* THEME SYSTEM & CANVAS BACKGROUND ENGINE */
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #06070b;
@@ -22,7 +21,6 @@
       transition: background-color 0.35s ease, color 0.35s ease;
     }
 
-    /* Dark Mode Ambient Studio Canvas */
     .site-mountain-backdrop {
       position: fixed;
       top: 0;
@@ -41,7 +39,6 @@
       transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
-    /* Dark Mode Obsidian Panel */
     .obsidian-card {
       background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
       backdrop-filter: blur(40px);
@@ -51,7 +48,6 @@
       transition: all 0.3s ease;
     }
 
-    /* Light Theme (Day Mode) Overrides */
     body.light-theme {
       background-color: #dbe4f0;
       color: #0f172a;
@@ -69,51 +65,18 @@
       background: rgba(225, 233, 245, 0.90) !important;
       border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.08) !important;
-    }
-
-    body.light-theme .brand-logo-box {
-      background: rgba(241, 245, 249, 0.95) !important;
-      border: 1px solid rgba(195, 206, 222, 0.85) !important;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
-    }
-
-    body.light-theme header a,
-    body.light-theme header span {
-      color: #0f172a !important;
-    }
-
-    body.light-theme #themeToggleBtn {
-      background: rgba(241, 245, 249, 0.92) !important;
-      border: 1px solid rgba(195, 206, 222, 0.85) !important;
-      color: #4338ca !important;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
-    }
-
-    body.light-theme .delivery-badge {
-      background: rgba(99, 102, 241, 0.12) !important;
-      border: 1px solid rgba(99, 102, 241, 0.25) !important;
-      color: #4338ca !important;
     }
 
     body.light-theme .obsidian-card {
       background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
-      backdrop-filter: blur(35px);
-      -webkit-backdrop-filter: blur(35px);
       border: 1px solid rgba(190, 202, 219, 0.85) !important;
-      box-shadow: 
-        0 25px 65px -15px rgba(15, 23, 42, 0.14),
-        0 8px 24px -8px rgba(15, 23, 42, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
       color: #0f172a !important;
     }
 
     body.light-theme .obsidian-card h1,
     body.light-theme .obsidian-card h2,
     body.light-theme .obsidian-card h3,
-    body.light-theme .obsidian-card h4,
-    body.light-theme .obsidian-card .card-heading {
+    body.light-theme .obsidian-card h4 {
       color: #0f172a !important;
     }
 
@@ -123,41 +86,11 @@
       color: #334155 !important;
     }
 
-    body.light-theme #iconBox {
-      background: rgba(99, 102, 241, 0.15) !important;
-      border-color: rgba(99, 102, 241, 0.3) !important;
-      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2) !important;
-    }
-
-    body.light-theme .paywall-banner {
-      background: linear-gradient(to right, rgba(238, 242, 250, 0.95), rgba(228, 234, 245, 0.95)) !important;
-      border: 1px solid rgba(190, 202, 219, 0.85) !important;
-    }
-
     body.light-theme input,
     body.light-theme textarea {
       background-color: rgba(248, 250, 253, 0.95) !important;
       border: 1px solid rgba(195, 206, 222, 0.9) !important;
       color: #0f172a !important;
-      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05) !important;
-    }
-
-    body.light-theme input:focus,
-    body.light-theme textarea:focus {
-      background-color: #ffffff !important;
-      border-color: #6366f1 !important;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18) !important;
-    }
-
-    body.light-theme input::placeholder,
-    body.light-theme textarea::placeholder {
-      color: #64748b !important;
-    }
-
-    body.light-theme footer {
-      background-color: rgba(220, 228, 238, 0.92) !important;
-      border-color: rgba(195, 206, 222, 0.8) !important;
-      color: #475569 !important;
     }
 
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -170,7 +103,7 @@
 
   <div id="backdropBg" class="site-mountain-backdrop"></div>
 
-  <!-- Server Metadata Transport -->
+  <!-- Server Configuration Dataset -->
   <div id="serverConfig"
        class="hidden"
        data-share-id="{{ share_id }}"
@@ -235,7 +168,6 @@
   <!-- Main Container -->
   <main class="relative z-20 {% if is_paywalled %}max-w-xl{% else %}max-w-5xl{% endif %} mx-auto px-4 py-8 flex-1 flex flex-col items-center justify-center text-center w-full">
     
-    <!-- CARD CONTAINER -->
     <div id="mainTransferCard" class="obsidian-card rounded-3xl p-6 sm:p-8 w-full relative shadow-2xl space-y-6">
       
       <!-- Top Overview Header -->
@@ -260,12 +192,12 @@
       </div>
 
       <!-- ========================================================================= -->
-      <!-- 1. ZEPHYR ESCROW FLOW (PROTECTED PAID TRANSFERS)                          -->
+      <!-- 1. ZEPHYR ESCROW FLOW (PAYMENT PROTECTED TRANSFERS)                       -->
       <!-- ========================================================================= -->
       {% if is_paywalled %}
       <div id="paywallContainer" class="space-y-4 max-w-md mx-auto text-left">
         
-        <!-- STEP 1: POST-PAYMENT CONFIRM/DISPATCH EMAIL BOX -->
+        <!-- Confirm Email Box (Only shown after Stripe redirect) -->
         <div id="confirmEmailBox" class="hidden p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 space-y-3 text-left shadow-xl">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -284,25 +216,25 @@
           </button>
         </div>
 
-        <!-- STEP 2: GREEN NOTIFICATION BANNER -->
+        <!-- Green Password Sent Notification -->
         <div id="greenNotificationBanner" class="hidden p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-left space-y-1.5 shadow-xl">
           <div class="flex items-center gap-2">
             <span class="text-emerald-400 font-black text-xs tracking-wider">✓ PASSWORD DISPATCHED</span>
           </div>
           <p class="text-xs text-slate-300 leading-relaxed">
-            We have emailed your permanent password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono">your email</strong>. Please check your Gmail Inbox and Spam folder, then enter the password below to access the protected viewer.
+            We have emailed your permanent password to <strong id="verifiedEmailDisplay" class="text-emerald-300 font-mono">your email</strong>. Please check your Gmail Inbox, then enter the password below to unlock.
           </p>
           <a href="https://mail.google.com" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline mt-1">
             <span>Open Gmail Inbox</span> ↗
           </a>
         </div>
 
-        <!-- Notification: User Already Purchased Lifetime Access -->
+        <!-- Already Purchased Notification -->
         <div id="alreadyPaidNotice" class="hidden p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold text-center">
           ✓ Lifetime access already purchased. Enter your permanent password to unlock.
         </div>
 
-        <!-- Escrow Pricing Bar (Hidden permanently once paid) -->
+        <!-- Price Banner (Hidden once user has paid) -->
         <div id="paywallBanner" class="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/30 to-slate-900/50 border border-emerald-500/30 space-y-1.5 transition-all">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-white flex items-center gap-1.5">
@@ -316,7 +248,7 @@
           </p>
         </div>
 
-        <!-- Inputs Group Container -->
+        <!-- Checkout & Input Area -->
         <div id="checkoutInputGroup" class="space-y-3">
           <div id="buyerEmailSection">
             <label class="block text-xs font-semibold opacity-80 mb-1">Your Email Address</label>
@@ -324,7 +256,6 @@
                    class="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition">
           </div>
 
-          <!-- Permanent Password Field -->
           <div id="buyerPasswordSection" class="hidden space-y-1.5">
             <div class="flex items-center justify-between">
               <label class="block text-xs font-semibold opacity-80">Enter Permanent Password</label>
@@ -337,20 +268,18 @@
 
           <div id="paywallErrorMsg" class="hidden rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-400 text-center font-medium"></div>
 
-          <!-- Pay Button: Strictly hidden once user is verified as paid -->
           <button id="paywallCheckoutBtn" onclick="handlePaywallCheckout()" 
                   class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 hover:from-emerald-500 to-teal-600 text-white font-black text-sm shadow-lg shadow-emerald-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
             Pay ${{ "%.2f"|format(unlock_price) }} & Unlock Personal Access
           </button>
 
-          <!-- Unlock Button -->
           <button id="paywallUnlockBtn" onclick="handleUnlockWithPassword()" 
                   class="hidden w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 to-purple-800 text-white font-black text-sm shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
             Unlock & View Deliverables
           </button>
         </div>
 
-        <!-- State C: File Unlocked Area (Protected Viewer Access) -->
+        <!-- Protected Anti-Screenshot Viewer Action Button -->
         <div id="unlockedActionSection" class="hidden space-y-2.5 pt-2">
           <div class="rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3 text-emerald-300 flex items-center justify-between">
             <span class="font-bold text-xs">Lifetime Personal Access Active</span>
@@ -364,12 +293,12 @@
       </div>
 
       <!-- ========================================================================= -->
-      <!-- 2. NON-PAYMENT TRANSFERS: INTERACTIVE STUDIO WORKSPACE TAB                -->
+      <!-- 2. NON-PAYMENT TRANSFERS: INTERACTIVE STUDIO WORKSPACE                    -->
       <!-- ========================================================================= -->
       {% else %}
 
         {% if has_password %}
-        <!-- Passcode Gate for Protected Non-Paywalled Transfers -->
+        <!-- Passcode Required Gate -->
         <div id="passcodeSection" class="space-y-3 max-w-sm mx-auto text-left">
           <label class="block text-xs font-semibold opacity-80">Enter Recipient Passcode</label>
           <input id="passwordInput" type="password" placeholder="Passcode..." onkeydown="if(event.key==='Enter') unlockWorkspaceWithPasscode()"
@@ -381,7 +310,7 @@
         </div>
         {% endif %}
 
-        <!-- Interactive Workspace Container -->
+        <!-- Interactive Studio Workspace Area -->
         <div id="workspaceContainer" class="{% if has_password %}hidden{% endif %} space-y-5 text-left border-t border-white/10 pt-5">
           
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
@@ -417,29 +346,30 @@
             <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[380px]">
               <div class="flex items-center justify-between border-b border-white/10 pb-2">
                 <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-xs">Select a file</span>
-                <button onclick="discardActiveFileChanges()" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 transition cursor-pointer">
+                <button id="resetOriginalBtn" onclick="discardActiveFileChanges()" class="hidden text-[10px] font-bold px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 transition cursor-pointer">
                   Reset Original
                 </button>
               </div>
 
-              <div class="flex-1 relative flex flex-col rounded-xl overflow-hidden bg-black/60 border border-white/5">
-                <textarea id="workspaceCodeEditor" oninput="handleCodeModification()" class="w-full flex-1 p-3.5 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed" placeholder="Select a text, code, or markdown file to inspect or edit..."></textarea>
-                <div id="workspaceMediaViewer" class="absolute inset-0 bg-slate-950 flex items-center justify-center p-3 hidden"></div>
+              <!-- Content Stage -->
+              <div class="flex-1 relative flex flex-col rounded-xl overflow-hidden bg-black/60 border border-white/5 min-h-[280px]">
+                <textarea id="workspaceCodeEditor" oninput="handleCodeModification()" class="hidden w-full flex-1 p-3.5 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed" placeholder="Select a text, code, or markdown file to inspect or edit..."></textarea>
+                <div id="workspaceMediaViewer" class="w-full flex-1 flex flex-col items-center justify-center p-4"></div>
               </div>
 
               <div class="flex items-center justify-between text-[10px] opacity-65 font-mono pt-1">
-                <span>Live modification enabled</span>
-                <span>Cloudflare R2 Direct</span>
+                <span id="footerStatusText">Cloudflare R2 Direct Pipe</span>
+                <span>Protected Pipeline</span>
               </div>
             </div>
 
           </div>
 
-          <!-- THE 2 ACTION BUTTONS FOR NON-PAYMENT TRANSFERS -->
+          <!-- Action Buttons -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
             <button id="downloadThisFileBtn" onclick="downloadActiveFile()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
               <span>📥</span>
-              <span>Download This File</span>
+              <span id="downloadBtnText">Download This File</span>
             </button>
 
             <button id="downloadAllFilesZipBtn" onclick="downloadAllFilesAsZip()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:opacity-95 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
@@ -465,7 +395,6 @@
   </footer>
 
   <script>
-    // Theme Engine
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
@@ -487,7 +416,6 @@
 
     initTheme();
 
-    // Context & Parameter Parsing
     const urlParams = new URLSearchParams(window.location.search);
     const serverConfig = document.getElementById("serverConfig");
     const shareId = serverConfig.dataset.shareId;
@@ -499,7 +427,6 @@
     let currentToken = urlParams.get("token") || localStorage.getItem(`buyer_token_${shareId}`) || "";
     let validatedPasscode = "";
 
-    // Branding Parser
     let brandingData = null;
     try {
       const rawBranding = document.getElementById("brandingConfig").textContent;
@@ -538,9 +465,9 @@
       }
     }
 
-    // =========================================================================
-    // ZEPHYR ESCROW METHODS (STRICT ONCE-PAID GATING)
-    // =========================================================================
+    // ==========================================
+    // ZEPHYR ESCROW METHODS
+    // ==========================================
     let typingTimer = null;
     function handleEmailTyping() {
       clearTimeout(typingTimer);
@@ -607,17 +534,13 @@
         localStorage.setItem(`paid_${shareId}`, "true");
         localStorage.setItem(`buyer_email_${shareId}`, email);
 
-        // Hide confirmation box
         document.getElementById("confirmEmailBox").classList.add("hidden");
-
-        // Show green notification banner
         const greenBanner = document.getElementById("greenNotificationBanner");
         if (greenBanner) {
           greenBanner.classList.remove("hidden");
           document.getElementById("verifiedEmailDisplay").innerText = email;
         }
 
-        // Show inputs group with permanent password only (No Pay Button!)
         document.getElementById("checkoutInputGroup").classList.remove("hidden");
         document.getElementById("buyerEmailInput").value = email;
         switchPaymentMode(true);
@@ -750,13 +673,23 @@
       }
     }
 
-    // =========================================================================
-    // NON-PAYMENT TRANSFERS: INTERACTIVE STUDIO WORKSPACE
-    // =========================================================================
+    // ==========================================
+    // NON-PAYMENT TRANSFERS: STUDIO WORKSPACE
+    // ==========================================
     let packageFiles = [];
     let activeFileIdx = 0;
     let fileOriginalCache = {};
     let fileContentsCache = {};
+
+    const EDITABLE_EXTS = ['txt', 'py', 'js', 'ts', 'jsx', 'tsx', 'json', 'html', 'css', 'scss', 'md', 'csv', 'tsv', 'xml', 'yaml', 'yml', 'sql', 'sh', 'env', 'log', 'c', 'cpp', 'h', 'java', 'php', 'rb'];
+    const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
+    const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
+    const AUDIO_EXTS = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac'];
+
+    function isFileEditable(fname) {
+      const ext = fname.split('.').pop().toLowerCase();
+      return EDITABLE_EXTS.includes(ext);
+    }
 
     function unlockWorkspaceWithPasscode() {
       const input = document.getElementById("passwordInput");
@@ -797,18 +730,23 @@
 
     function renderSidebarFiles() {
       const listEl = document.getElementById("sidebarFileList");
-      listEl.innerHTML = packageFiles.map((f, idx) => `
-        <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
-          <div class="flex items-center gap-2 truncate">
-            <span class="text-sm">📄</span>
-            <div class="truncate">
-              <span class="text-xs font-bold block truncate">${f.filename}</span>
-              <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
+      listEl.innerHTML = packageFiles.map((f, idx) => {
+        const ext = f.filename.split('.').pop().toLowerCase();
+        const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : AUDIO_EXTS.includes(ext) ? '🎵' : ext === 'pdf' ? '📑' : ['xlsx', 'xls', 'csv'].includes(ext) ? '📊' : isFileEditable(f.filename) ? '💻' : '📦';
+
+        return `
+          <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
+            <div class="flex items-center gap-2 truncate">
+              <span class="text-sm">${icon}</span>
+              <div class="truncate">
+                <span class="text-xs font-bold block truncate">${f.filename}</span>
+                <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
+              </div>
             </div>
+            <span id="modDot-${idx}" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 hidden"></span>
           </div>
-          <span id="modDot-${idx}" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 hidden"></span>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function selectWorkspaceFile(idx) {
@@ -821,66 +759,120 @@
       const editor = document.getElementById("workspaceCodeEditor");
       const media = document.getElementById("workspaceMediaViewer");
       const badge = document.getElementById("modifiedStatusBadge");
+      const resetBtn = document.getElementById("resetOriginalBtn");
+      const footerStatus = document.getElementById("footerStatusText");
+      const ext = f.filename.split('.').pop().toLowerCase();
 
+      // Reset indicators
+      badge.classList.add("hidden");
+      resetBtn.classList.add("hidden");
+
+      const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+      const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
+
+      // 1. Image Files
+      if (IMAGE_EXTS.includes(ext)) {
+        editor.classList.add("hidden");
+        media.classList.remove("hidden");
+        media.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-2">
+            <img src="${streamUrl}" alt="${f.filename}" class="max-h-[340px] max-w-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40">
+          </div>
+        `;
+        if (footerStatus) footerStatus.innerText = "Native Image Viewport • Original Scale";
+        return;
+      }
+
+      // 2. Video Files
+      if (VIDEO_EXTS.includes(ext)) {
+        editor.classList.add("hidden");
+        media.classList.remove("hidden");
+        media.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-2">
+            <video src="${streamUrl}" controls playsinline class="max-h-[340px] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black"></video>
+          </div>
+        `;
+        if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206";
+        return;
+      }
+
+      // 3. Audio Files
+      if (AUDIO_EXTS.includes(ext)) {
+        editor.classList.add("hidden");
+        media.classList.remove("hidden");
+        media.innerHTML = `
+          <div class="text-center space-y-3 p-6">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-3xl font-bold border border-indigo-500/30">🎵</div>
+            <strong class="text-sm font-bold text-white block truncate max-w-xs">${f.filename}</strong>
+            <audio controls src="${streamUrl}" class="w-full max-w-xs mx-auto"></audio>
+          </div>
+        `;
+        if (footerStatus) footerStatus.innerText = "Lossless Audio Stream";
+        return;
+      }
+
+      // 4. PDF Documents
+      if (ext === 'pdf') {
+        editor.classList.add("hidden");
+        media.classList.remove("hidden");
+        media.innerHTML = `
+          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[340px] rounded-xl border-0"></iframe>
+        `;
+        if (footerStatus) footerStatus.innerText = "Document Viewport";
+        return;
+      }
+
+      // 5. Spreadsheets and Binary Archives
+      if (!isFileEditable(f.filename)) {
+        editor.classList.add("hidden");
+        media.classList.remove("hidden");
+        const icon = ['xlsx', 'xls'].includes(ext) ? '📊' : ['docx', 'doc'].includes(ext) ? '📑' : ['zip', 'rar', 'tar', 'gz'].includes(ext) ? '📦' : '💾';
+        media.innerHTML = `
+          <div class="text-center space-y-3 p-6 max-w-sm">
+            <span class="text-5xl block animate-bounce">${icon}</span>
+            <strong class="text-sm font-bold text-white block truncate">${f.filename}</strong>
+            <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" to download.</p>
+          </div>
+        `;
+        if (footerStatus) footerStatus.innerText = "Binary Container";
+        return;
+      }
+
+      // 6. Plaintext & Code (Live Editable!)
       media.classList.add("hidden");
-      media.innerHTML = "";
       editor.classList.remove("hidden");
+      resetBtn.classList.remove("hidden");
 
       if (fileContentsCache[f.filename] !== undefined) {
         editor.value = fileContentsCache[f.filename];
         if (fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
           badge.classList.remove("hidden");
-        } else {
-          badge.classList.add("hidden");
         }
         return;
       }
 
-      editor.value = "Loading file content for editing...";
+      editor.value = "Loading source code...";
       editor.disabled = true;
 
       try {
-        const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
-        const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`);
-        if (!res.ok) throw new Error("Stream unreachable");
-
-        const ext = f.filename.split('.').pop().toLowerCase();
-
-        if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
-          const blob = await res.blob();
-          const imgUrl = URL.createObjectURL(blob);
-          editor.classList.add("hidden");
-          media.classList.remove("hidden");
-          media.innerHTML = `<img src="${imgUrl}" class="max-h-full max-w-full object-contain rounded-lg">`;
-          editor.disabled = false;
-          return;
-        }
-
-        if (['mp4', 'mov', 'webm', 'mkv'].includes(ext)) {
-          const blob = await res.blob();
-          const vUrl = URL.createObjectURL(blob);
-          editor.classList.add("hidden");
-          media.classList.remove("hidden");
-          media.innerHTML = `<video src="${vUrl}" controls class="max-h-full max-w-full rounded-lg"></video>`;
-          editor.disabled = false;
-          return;
-        }
-
+        const res = await fetch(streamUrl);
+        if (!res.ok) throw new Error("Could not read text buffer");
         const text = await res.text();
         fileOriginalCache[f.filename] = text;
         fileContentsCache[f.filename] = text;
         editor.value = text;
         editor.disabled = false;
-        badge.classList.add("hidden");
-
-      } catch(err) {
-        editor.value = "// Binary file or preview unavailable. Click 'Download This File' to save directly.";
+        if (footerStatus) footerStatus.innerText = "Live Code Editor Active";
+      } catch(e) {
+        editor.value = "// Error loading file content.";
         editor.disabled = false;
       }
     }
 
     function handleCodeModification() {
       const f = packageFiles[activeFileIdx];
+      if (!isFileEditable(f.filename)) return;
+
       const editor = document.getElementById("workspaceCodeEditor");
       fileContentsCache[f.filename] = editor.value;
 
@@ -907,13 +899,14 @@
       }
     }
 
-    // 1. DOWNLOAD THIS FILE
-    async function downloadActiveFile() {
+    // 1. DOWNLOAD THIS FILE (Direct Browser Download)
+    function downloadActiveFile() {
       const f = packageFiles[activeFileIdx];
-      const modifiedContent = fileContentsCache[f.filename];
+      if (!f) return;
 
-      if (modifiedContent !== undefined && modifiedContent !== fileOriginalCache[f.filename]) {
-        const blob = new Blob([modifiedContent], { type: "text/plain;charset=utf-8" });
+      // Only download as edited text if it's an editable code/text file that was actually modified
+      if (isFileEditable(f.filename) && fileContentsCache[f.filename] !== undefined && fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
+        const blob = new Blob([fileContentsCache[f.filename]], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -925,58 +918,62 @@
         return;
       }
 
-      try {
-        const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
-        const res = await fetch(`/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`);
-        const data = await res.json();
-        
-        if (data.download_url) {
-          window.location.href = data.download_url;
-        } else if (data.download_urls) {
-          const match = data.download_urls.find(d => d.filename === f.filename);
-          if (match) window.location.href = match.download_url;
-        }
-      } catch(err) {
-        alert("Download error.");
-      }
+      // For all images, excel, audio, video, pdfs & unmodified files, download genuine binary directly
+      const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+      const tokenParam = currentToken ? `&access_token=${encodeURIComponent(currentToken)}` : "";
+      window.location.href = `/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}${tokenParam}`;
     }
 
     // 2. DOWNLOAD ALL FILES (.ZIP VIA JSZip)
     async function downloadAllFilesAsZip() {
+      if (!packageFiles || !packageFiles.length) {
+        alert("No files to bundle.");
+        return;
+      }
+
       const zip = new JSZip();
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+      const btn = document.getElementById("downloadAllFilesZipBtn");
+      const originalText = btn.innerHTML;
 
-      alert("📦 Bundling all files into a .zip archive...");
+      btn.disabled = true;
 
-      for (let i = 0; i < packageFiles.length; i++) {
-        const f = packageFiles[i];
-        if (fileContentsCache[f.filename] !== undefined) {
-          zip.file(f.filename, fileContentsCache[f.filename]);
-        } else {
-          try {
-            const res = await fetch(`/api/paywall/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`);
+      try {
+        for (let i = 0; i < packageFiles.length; i++) {
+          const f = packageFiles[i];
+          btn.innerHTML = `<span>⏳</span><span>Packing ${i + 1}/${packageFiles.length}: ${f.filename}...</span>`;
+
+          if (isFileEditable(f.filename) && fileContentsCache[f.filename] !== undefined && fileContentsCache[f.filename] !== fileOriginalCache[f.filename]) {
+            zip.file(f.filename, fileContentsCache[f.filename]);
+          } else {
+            const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
+            const res = await fetch(streamUrl);
             if (res.ok) {
               const blob = await res.blob();
               zip.file(f.filename, blob);
             }
-          } catch(e) {}
+          }
         }
-      }
 
-      const content = await zip.generateAsync({ type: "blob" });
-      const url = URL.createObjectURL(content);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Zephyr_Transfer_${shareId}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+        btn.innerHTML = `<span>⏳</span><span>Compressing ZIP...</span>`;
+        const content = await zip.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(content);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Zephyr_Transfer_${shareId}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch(err) {
+        alert("Failed to create ZIP: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
     }
 
-    // =========================================================================
-    // DOM READY INITIALIZER (LIFETIME ACCESS MEMORY & STRIPE RETURN HANDLING)
-    // =========================================================================
+    // DOM Ready Checker
     window.addEventListener("DOMContentLoaded", async () => {
       const isPaidReturn = urlParams.get("paid") === "true";
       const emailParam = urlParams.get("email");
@@ -984,26 +981,22 @@
       const tokenParam = urlParams.get("token");
 
       if (isPaywalled) {
-        // Return from Stripe Checkout
         if (isPaidReturn) {
           localStorage.setItem(`paid_${shareId}`, "true");
           if (emailParam) localStorage.setItem(`buyer_email_${shareId}`, emailParam);
           if (tokenParam) localStorage.setItem(`buyer_token_${shareId}`, tokenParam);
 
-          // Verify session immediately in background
           if (sessionParam) {
             fetch(`/api/paywall/verify-session?session_id=${encodeURIComponent(sessionParam)}&share_id=${encodeURIComponent(shareId)}&email=${encodeURIComponent(emailParam || "")}&token=${encodeURIComponent(tokenParam || "")}`, {
               method: "POST"
             }).catch(() => {});
           }
 
-          // STRICT CLEANUP: Hide price banner and the entire checkout button group
           const paywallBanner = document.getElementById("paywallBanner");
           if (paywallBanner) paywallBanner.classList.add("hidden");
           const checkoutGroup = document.getElementById("checkoutInputGroup");
           if (checkoutGroup) checkoutGroup.classList.add("hidden");
 
-          // Display only the confirm email delivery box
           const confirmBox = document.getElementById("confirmEmailBox");
           const confirmInput = document.getElementById("confirmEmailInput");
           if (confirmBox && confirmInput) {
@@ -1014,7 +1007,6 @@
           return;
         }
 
-        // Return from previous purchase (Revisiting user)
         const isPreviouslyPaid = localStorage.getItem(`paid_${shareId}`) === "true";
         const rememberedEmail = localStorage.getItem(`buyer_email_${shareId}`);
         const rememberedToken = localStorage.getItem(`buyer_token_${shareId}`) || currentToken;
@@ -1038,7 +1030,6 @@
           }
         }
       } else {
-        // Free non-payment transfer: auto load workspace if no passcode required
         if (!hasPassword) {
           initWorkspaceView();
         }
