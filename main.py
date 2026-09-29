@@ -600,7 +600,7 @@ class ToggleAutoRenewRequest(BaseModel):
     subscription_id: int
     auto_renew: bool
 
-# ----------------- Transaction-Time FX Rates Engine with 24h Fluctuation -----------------
+# ----------------- Transaction-Time FX Rates Engine -----------------
 CURRENCY_METADATA = {
     "INR": {"name": "Indian Rupee", "symbol": "₹", "flag": "🇮🇳", "fallback": 83.50},
     "EUR": {"name": "Euro", "symbol": "€", "flag": "🇪🇺", "fallback": 0.89},
@@ -2956,7 +2956,6 @@ async def delete_drive_file(file_id: str, user_id: str):
     file = cursor.fetchone()
 
     if not file:
-        conn.close()
         raise HTTPException(status_code=404, detail="File not found.")
 
     try:
@@ -2995,6 +2994,99 @@ async def rename_drive_file(payload: RenameFileRequest):
         return {"status": "success", "new_filename": new_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
+
+# ----------------- Drive Studio Media Stream & Save -----------------
+@app.get("/api/drive/stream/{file_id}")
+async def stream_drive_file(file_id: str, user_id: str, request: Request):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM drive_files WHERE id = %s AND user_id = %s", (file_id, user_id))
+    file = cursor.fetchone()
+    conn.close()
+
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    s3_key = file["s3_key"]
+    filename = file["filename"]
+    ext = filename.split(".")[-1].lower() if "." in filename else ""
+    
+    mime_map = {
+        "mp4": "video/mp4", "mov": "video/quicktime", "webm": "video/webm", "mkv": "video/x-matroska", "avi": "video/x-msvideo",
+        "mp3": "audio/mpeg", "wav": "audio/wav", "m4a": "audio/mp4", "flac": "audio/flac", "ogg": "audio/ogg",
+        "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "webp": "image/webp", "gif": "image/gif", "svg": "image/svg+xml",
+        "pdf": "application/pdf", "txt": "text/plain; charset=utf-8", "json": "application/json", "py": "text/plain; charset=utf-8",
+        "js": "text/javascript", "html": "text/html; charset=utf-8", "css": "text/css; charset=utf-8", "md": "text/plain; charset=utf-8"
+    }
+    content_type = mime_map.get(ext) or file.get("file_type") or "application/octet-stream"
+
+    try:
+        head = s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
+        total_size = head["ContentLength"]
+        range_header = request.headers.get("range")
+
+        if range_header:
+            range_val = range_header.strip().lower().replace("bytes=", "")
+            parts = range_val.split("-")
+            start = int(parts[0]) if parts[0] else 0
+            end = int(parts[1]) if len(parts) > 1 and parts[1] else total_size - 1
+            if end >= total_size: end = total_size - 1
+            content_length = end - start + 1
+
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key, Range=f"bytes={start}-{end}")
+            return StreamingResponse(
+                obj["Body"].iter_chunks(chunk_size=1024 * 512),
+                status_code=206,
+                media_type=content_type,
+                headers={
+                    "Content-Range": f"bytes {start}-{end}/{total_size}",
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(content_length),
+                    "Content-Disposition": f'inline; filename="{filename}"'
+                }
+            )
+        else:
+            obj = s3_client.get_object(Bucket=R2_BUCKET_NAME, Key=s3_key)
+            return StreamingResponse(
+                obj["Body"].iter_chunks(chunk_size=1024 * 512),
+                media_type=content_type,
+                headers={
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(total_size),
+                    "Content-Disposition": f'inline; filename="{filename}"'
+                }
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stream error: {str(e)}")
+
+@app.post("/api/drive/save-file/{file_id}")
+async def save_drive_file_edits(file_id: str, user_id: str, request: Request):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM drive_files WHERE id = %s AND user_id = %s", (file_id, user_id))
+    file = cursor.fetchone()
+
+    if not file:
+        conn.close()
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    new_bytes = await request.body()
+    new_size = len(new_bytes)
+    size_diff = new_size - file["size_bytes"]
+
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=file["s3_key"],
+        Body=new_bytes,
+        ContentType=request.headers.get("content-type") or file.get("file_type") or "application/octet-stream"
+    )
+
+    cursor.execute("UPDATE drive_files SET size_bytes = %s WHERE id = %s", (new_size, file_id))
+    cursor.execute("UPDATE users SET storage_used_bytes = GREATEST(0, storage_used_bytes + %s) WHERE user_id = %s", (size_diff, user_id))
+    conn.commit()
+    conn.close()
+
+    return {"status": "success", "new_size_bytes": new_size}
 
 # ----------------- Mid-Cycle Cumulative Upgrades (Max 600 GB) -----------------
 @app.post("/api/drive/upgrade-quote")
@@ -3158,7 +3250,7 @@ async def get_user_profile(user_id: str):
         "grace_period_end_at": str(row.get("grace_period_end_at"))[:19] if row.get("grace_period_end_at") else None
     }
 
-# ----------------- Dodo Payments Webhook (Test & Live Mode Svix Support) -----------------
+# ----------------- Dodo Payments Webhook -----------------
 @app.post("/api/webhook/dodo")
 async def dodo_webhook(request: Request):
     try:
