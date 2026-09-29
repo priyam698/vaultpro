@@ -1832,66 +1832,81 @@ async def enhance_image_ai(
 
     s3_key = sub["s3_key"] if sub else f"transfers/{share_id}/{clean_target}"
 
-    # Generate a temporary public read URL for the AI model to fetch
     image_url = s3_client.generate_presigned_url(
         "get_object",
         Params={"Bucket": R2_BUCKET_NAME, "Key": s3_key},
         ExpiresIn=3600
     )
 
-    # If user provided a Replicate Token, use genuine Real-ESRGAN 4x AI
-    if REPLICATE_API_TOKEN:
-        try:
-            req_payload = {
-                "version": "42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
-                "input": {
-                    "image": image_url,
-                    "scale": scale,
-                    "face_enhance": False
-                }
+    if not REPLICATE_API_TOKEN:
+        raise HTTPException(status_code=400, detail="REPLICATE_API_TOKEN environment variable is missing on server.")
+
+    try:
+        model_payload = {
+            "input": {
+                "image": image_url,
+                "scale": scale,
+                "face_enhance": False
             }
-            req_data = json.dumps(req_payload).encode("utf-8")
-            ai_req = urllib.request.Request(
-                "https://api.replicate.com/v1/predictions",
-                data=req_data,
-                headers={
-                    "Authorization": f"Token {REPLICATE_API_TOKEN}",
-                    "Content-Type": "application/json"
-                },
-                method="POST"
+        }
+        req_data = json.dumps(model_payload).encode("utf-8")
+        ai_req = urllib.request.Request(
+            "https://api.replicate.com/v1/models/nightmareai/real-esrgan/predictions",
+            data=req_data,
+            headers={
+                "Authorization": f"Bearer {REPLICATE_API_TOKEN}",
+                "Content-Type": "application/json",
+                "Prefer": "wait"
+            },
+            method="POST"
+        )
+        
+        with urllib.request.urlopen(ai_req, timeout=45) as resp:
+            prediction = json.loads(resp.read().decode("utf-8"))
+            
+        status = prediction.get("status")
+        output = prediction.get("output")
+        
+        if status == "succeeded" and output:
+            enhanced_url = output if isinstance(output, str) else output[0]
+            return {
+                "status": "success",
+                "engine": "Real-ESRGAN AI (4K Neural Upscale)",
+                "enhanced_url": enhanced_url
+            }
+
+        pred_id = prediction.get("id")
+        poll_url = f"https://api.replicate.com/v1/predictions/{pred_id}"
+        
+        for _ in range(40):
+            time.sleep(1.5)
+            p_req = urllib.request.Request(
+                poll_url,
+                headers={"Authorization": f"Bearer {REPLICATE_API_TOKEN}"}
             )
-            with urllib.request.urlopen(ai_req, timeout=15) as resp:
-                prediction = json.loads(resp.read().decode("utf-8"))
-                pred_id = prediction.get("id")
+            with urllib.request.urlopen(p_req, timeout=15) as p_resp:
+                p_data = json.loads(p_resp.read().decode("utf-8"))
+                p_status = p_data.get("status")
+                
+                if p_status == "succeeded":
+                    out = p_data.get("output")
+                    enhanced_url = out if isinstance(out, str) else out[0]
+                    return {
+                        "status": "success",
+                        "engine": "Real-ESRGAN AI (4K Neural Upscale)",
+                        "enhanced_url": enhanced_url
+                    }
+                elif p_status in ["failed", "canceled"]:
+                    error_detail = p_data.get("error") or "Prediction execution failed."
+                    raise HTTPException(status_code=500, detail=f"Replicate AI Error: {error_detail}")
 
-            # Poll for completion (usually takes 2-4 seconds on GPU)
-            poll_url = f"https://api.replicate.com/v1/predictions/{pred_id}"
-            for _ in range(30):
-                time.sleep(1.0)
-                p_req = urllib.request.Request(
-                    poll_url,
-                    headers={"Authorization": f"Token {REPLICATE_API_TOKEN}"}
-                )
-                with urllib.request.urlopen(p_req, timeout=10) as p_resp:
-                    p_data = json.loads(p_resp.read().decode("utf-8"))
-                    if p_data.get("status") == "succeeded":
-                        enhanced_url = p_data.get("output")
-                        return {
-                            "status": "success",
-                            "engine": "Real-ESRGAN AI (4x Neural Upscale)",
-                            "enhanced_url": enhanced_url
-                        }
-                    elif p_data.get("status") == "failed":
-                        raise Exception("AI model failed to upscale image.")
-        except Exception as e:
-            print(f"[AI UPSCALER ERROR]: {e}", flush=True)
+        raise HTTPException(status_code=504, detail="AI Upscaling timed out.")
 
-    # Return the clean stream URL if no Replicate token is set
-    return {
-        "status": "fallback",
-        "engine": "Client-Side Sub-Pixel Neural Resampler",
-        "image_url": image_url
-    }
+    except urllib.error.HTTPError as he:
+        err_msg = he.read().decode("utf-8", errors="ignore")
+        raise HTTPException(status_code=he.code, detail=f"Replicate HTTP Error: {err_msg}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Upscale Error: {str(e)}")
 
 # ----------------- Ephemeral Transfers & Downloads -----------------
 @app.get("/share/{share_id}", response_class=HTMLResponse)

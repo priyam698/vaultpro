@@ -96,7 +96,7 @@
       box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.6) !important;
     }
 
-    /* Day Mode: Pure White with Soft Ice/Sky Blue */
+    /* Day Mode */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -196,13 +196,6 @@
       -webkit-user-drag: none;
     }
 
-    /* Super Ultra HD Convolution Sharpening */
-    .super-ultra-hd-active {
-      filter: url(#superHdSharpenFilter) contrast(1.08) saturate(1.12) brightness(1.02) !important;
-      image-rendering: -webkit-optimize-contrast !important;
-      image-rendering: crisp-edges !important;
-    }
-
     /* Full Big Screen Mode Styles */
     #contentStageBox:fullscreen,
     #contentStageBox:-webkit-full-screen {
@@ -279,13 +272,6 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white relative">
 
   <div id="backdropBg" class="site-mountain-backdrop"></div>
-
-  <!-- SVG FILTER PIPELINE FOR SUPER ULTRA HD CONVOLUTION SHARPENING -->
-  <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
-    <filter id="superHdSharpenFilter">
-      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -0.55 0  -0.55 3.2 -0.55  0 -0.55 0"/>
-    </filter>
-  </svg>
 
   <!-- Server Configuration Dataset -->
   <div id="serverConfig"
@@ -601,7 +587,7 @@
                 <!-- Active 4K Badge -->
                 <div id="hdEnhancedBadge" class="hidden absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-sky-950/85 border border-sky-400/50 backdrop-blur-md text-[10px] font-mono font-bold text-sky-300 flex items-center gap-1.5 shadow-2xl">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span id="hdBadgeLabel">REAL-ESRGAN 4X NEURAL 4K ACTIVE</span>
+                  <span id="hdBadgeLabel">REAL-ESRGAN 4K SUPER HD ACTIVE</span>
                 </div>
 
                 <!-- Read-Only Code Viewer -->
@@ -986,10 +972,7 @@
           isShowingSuperHd = true;
           document.getElementById("hdBadgeLabel").innerText = "REAL-ESRGAN 4X NEURAL 4K ACTIVE";
         } else {
-          superHdImageSrc = await generateClientSideNeural4x(img);
-          img.src = superHdImageSrc;
-          isShowingSuperHd = true;
-          document.getElementById("hdBadgeLabel").innerText = "SUPER ULTRA HD (4K RESOLUTION)";
+          throw new Error(data.detail || "AI model upscaling failed.");
         }
 
         badge.classList.remove("hidden");
@@ -1002,36 +985,6 @@
       } finally {
         loader.classList.add("hidden");
       }
-    }
-
-    // Client-Side 4K Sub-Pixel Reconstructor
-    function generateClientSideNeural4x(sourceImg) {
-      return new Promise((resolve) => {
-        const offCanvas = document.createElement("canvas");
-        const naturalW = sourceImg.naturalWidth || sourceImg.width || 800;
-        const naturalH = sourceImg.naturalHeight || sourceImg.height || 600;
-
-        offCanvas.width = naturalW * 4;
-        offCanvas.height = naturalH * 4;
-        const ctx = offCanvas.getContext("2d", { alpha: false, desynchronized: true });
-
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(sourceImg, 0, 0, offCanvas.width, offCanvas.height);
-
-        const imgData = ctx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-        const d = imgData.data;
-        const contrast = 1.10;
-        const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-        for (let i = 0; i < d.length; i += 4) {
-          d[i] = factor * (d[i] - 128) + 128;
-          d[i + 1] = factor * (d[i + 1] - 128) + 128;
-          d[i + 2] = factor * (d[i + 2] - 128) + 128;
-        }
-        ctx.putImageData(imgData, 0, 0);
-
-        resolve(offCanvas.toDataURL("image/png"));
-      });
     }
 
     // Before / After Comparison Switcher
