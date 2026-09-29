@@ -18,7 +18,7 @@
       background-color: #06070b;
       color: #f8fafc;
       overflow-x: hidden;
-      transition: background-color 0.35s ease, color 0.35s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .site-mountain-backdrop {
@@ -40,7 +40,7 @@
     }
 
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.96) 100%);
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.92) 0%, rgba(9, 12, 22, 0.98) 100%);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -48,28 +48,38 @@
       transition: all 0.3s ease;
     }
 
+    /* ========================================================================= */
+    /* CLEAN, MODERN DAY MODE (PURE WHITE & CRISP SLATE CONTRAST — NO DULL GREY) */
+    /* ========================================================================= */
     body.light-theme {
-      background-color: #dbe4f0;
+      background-color: #f8fafc;
       color: #0f172a;
     }
 
     body.light-theme .site-mountain-backdrop {
-      background-color: #dbe4f0;
+      background-color: #f8fafc;
       background-image: 
-        radial-gradient(ellipse 70% 80% at 8% 28%, rgba(56, 189, 248, 0.45) 0%, transparent 65%),
-        radial-gradient(ellipse 75% 85% at 92% 32%, rgba(99, 102, 241, 0.40) 0%, transparent 65%),
-        linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
+        radial-gradient(ellipse 70% 60% at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 55% at 85% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
     }
 
     body.light-theme header {
-      background: rgba(225, 233, 245, 0.90) !important;
-      border-bottom: 1px solid rgba(195, 206, 222, 0.8) !important;
-      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.90) !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme .brand-logo-box {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
     }
 
     body.light-theme .obsidian-card {
-      background: linear-gradient(180deg, rgba(234, 240, 248, 0.95) 0%, rgba(223, 230, 240, 0.98) 100%) !important;
-      border: 1px solid rgba(190, 202, 219, 0.85) !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(15, 23, 42, 0.04) !important;
       color: #0f172a !important;
     }
 
@@ -83,17 +93,35 @@
     body.light-theme .obsidian-card p,
     body.light-theme .obsidian-card span,
     body.light-theme .obsidian-card label {
-      color: #334155 !important;
+      color: #475569 !important;
+    }
+
+    body.light-theme .light-subpanel {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
     }
 
     body.light-theme input,
     body.light-theme textarea {
-      background-color: rgba(248, 250, 253, 0.95) !important;
-      border: 1px solid rgba(195, 206, 222, 0.9) !important;
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
       color: #0f172a !important;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
     }
 
-    /* Hand Grabbing & Panning Engine */
+    body.light-theme input:focus,
+    body.light-theme textarea:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    }
+
+    body.light-theme footer {
+      background: #ffffff !important;
+      border-top: 1px solid #e2e8f0 !important;
+      color: #64748b !important;
+    }
+
+    /* Hand Grabbing and Panning */
     .pan-grab {
       cursor: grab !important;
       user-select: none;
@@ -105,19 +133,10 @@
       -webkit-user-drag: none;
     }
 
-    /* Fullscreen Stage Styling */
-    #contentStageBox:fullscreen {
-      background-color: #06070b;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 100vw;
-      height: 100vh;
-    }
+    /* Fullscreen Theater Mode */
+    #contentStageBox:fullscreen,
     #contentStageBox:-webkit-full-screen {
-      background-color: #06070b;
+      background-color: #04060a !important;
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -128,7 +147,7 @@
     }
 
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 8px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
   </style>
@@ -188,7 +207,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer bg-white/[0.05]">
           <span id="themeIcon">☀️</span>
         </button>
         <div class="delivery-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 text-xs font-semibold backdrop-blur-md">
@@ -347,27 +366,25 @@
         <!-- Interactive Studio Workspace Area -->
         <div id="workspaceContainer" class="{% if has_password %}hidden{% endif %} space-y-5 text-left border-t border-white/10 pt-5">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+          <!-- TOP ROW: TITLE & RELOCATED PROMINENT DOWNLOAD BUTTONS -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4">
             <div>
-              <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-indigo-500 flex items-center gap-1.5">
                 <span>✨</span> Interactive Studio Workspace
               </h3>
-              <p class="text-[11px] opacity-70 mt-0.5">Inspect media in high resolution. Click and drag with hand cursor to pan while zoomed.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom and drag to inspect content.</p>
             </div>
-            
-            <!-- Controls Bar (Zoom + Fullscreen Mode) -->
-            <div id="workspaceControlBar" class="flex items-center gap-2">
-              <div id="workspaceZoomBar" class="hidden items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
-                <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
-                <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
-                <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom In">+</button>
-                <button type="button" onclick="resetZoom()" class="px-2.5 py-1 text-[10px] font-bold text-indigo-400 hover:bg-white/10 rounded-lg transition">Fit</button>
-              </div>
 
-              <!-- Full Big Screen Toggle Button -->
-              <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Toggle Fullscreen Theater View">
-                <span id="fsIcon">⛶</span>
-                <span class="hidden sm:inline">Big Screen</span>
+            <!-- PROMINENT DOWNLOAD BUTTONS (MOVED TO TOP SO THEY ARE NEVER HIDDEN) -->
+            <div class="flex items-center gap-2.5 shrink-0 w-full lg:w-auto">
+              <button id="downloadThisFileBtn" onclick="downloadActiveFile()" class="flex-1 lg:flex-none px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+                <span>📥</span>
+                <span id="downloadBtnText">Download This File</span>
+              </button>
+
+              <button id="downloadAllFilesZipBtn" onclick="downloadAllFilesAsZip()" class="flex-1 lg:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:opacity-95 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                <span>📦</span>
+                <span>Download All (.zip)</span>
               </button>
             </div>
           </div>
@@ -375,32 +392,57 @@
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             
             <!-- Left: File Explorer Sidebar -->
-            <div class="lg:col-span-4 rounded-2xl bg-black/40 border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[620px]">
+            <div class="lg:col-span-4 rounded-2xl bg-black/40 light-subpanel border border-white/10 p-3.5 flex flex-col justify-between space-y-3 max-h-[640px]">
               <div>
                 <div class="flex items-center justify-between text-[11px] font-bold opacity-75 border-b border-white/10 pb-2 mb-2">
                   <span>Package Files</span>
                   <span id="sidebarFileCount" class="font-mono">--</span>
                 </div>
-                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[530px]">
+                <div id="sidebarFileList" class="space-y-1.5 overflow-y-auto custom-scroll pr-1 max-h-[550px]">
                   <div class="p-3 text-xs opacity-60 text-center">Loading files...</div>
                 </div>
               </div>
             </div>
 
             <!-- Right: Prominent High-Capacity Preview Stage -->
-            <div class="lg:col-span-8 rounded-2xl bg-black/50 border border-white/10 p-4 flex flex-col space-y-3 min-h-[560px] sm:min-h-[620px]">
-              <div class="flex items-center justify-between border-b border-white/10 pb-2">
-                <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold text-slate-200 truncate max-w-md">Select a file</span>
-                <span id="formatTagBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-400 uppercase font-semibold">VIEWER</span>
+            <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-white/10 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
+              
+              <!-- Toolbar above the stage: File info, Zoom controls, Reset button, Big Screen -->
+              <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-2.5 gap-2">
+                <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
+                  <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
+                  <span id="formatTagBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-400 uppercase font-semibold">VIEWER</span>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <!-- Zoom Controls for Images -->
+                  <div id="workspaceZoomBar" class="hidden items-center bg-black/50 border border-white/10 rounded-xl p-0.5 text-xs font-mono">
+                    <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-white/10 rounded-lg transition font-bold" title="Zoom Out">-</button>
+                    <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold min-w-[46px] text-center">100%</span>
+                    <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-white/10 rounded-lg transition font-bold" title="Zoom In">+</button>
+                  </div>
+
+                  <!-- RESET TO ORIGINAL BUTTON -->
+                  <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-indigo-400 border border-white/10 text-xs font-bold items-center gap-1 transition cursor-pointer" title="Reset image zoom and position back to center">
+                    <span>↺</span>
+                    <span class="hidden sm:inline">Reset to Original</span>
+                  </button>
+
+                  <!-- Big Screen Button -->
+                  <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="Toggle Fullscreen View">
+                    <span id="fsIcon">⛶</span>
+                    <span class="hidden sm:inline">Big Screen</span>
+                  </button>
+                </div>
               </div>
 
               <!-- High-Resolution Full-Stage Box -->
-              <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-black/80 border border-white/5 min-h-[460px] p-2 sm:p-4">
+              <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#07090f] border border-white/5 min-h-[480px] p-2 sm:p-4">
                 
                 <!-- Read-Only Code Viewer -->
-                <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[520px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
+                <pre id="workspaceCodeViewer" class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono text-slate-200 overflow-auto custom-scroll leading-relaxed select-text m-0"></pre>
 
-                <!-- Media Viewer (For Images with Pan & Grab Hand, Videos, Audio, PDFs, and Fallbacks) -->
+                <!-- Media Viewer (Centered, Bigger Size, Hand Pan on Zoom) -->
                 <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
               </div>
 
@@ -410,19 +452,6 @@
               </div>
             </div>
 
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-            <button id="downloadThisFileBtn" onclick="downloadActiveFile()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
-              <span>📥</span>
-              <span id="downloadBtnText">Download This File</span>
-            </button>
-
-            <button id="downloadAllFilesZipBtn" onclick="downloadAllFilesAsZip()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:opacity-95 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-              <span>📦</span>
-              <span>Download All Files (.zip)</span>
-            </button>
           </div>
 
         </div>
@@ -726,7 +755,7 @@
     let packageFiles = [];
     let activeFileIdx = 0;
     
-    // Pan & Zoom Engine Variables
+    // Centered Pan & Zoom Engine
     let currentZoom = 1.0;
     let panX = 0;
     let panY = 0;
@@ -752,10 +781,16 @@
 
     function zoomImage(delta) {
       currentZoom = Math.min(4.0, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
+      // If returning to 1.0 or smaller, reset offset so it sticks centered
+      if (currentZoom <= 1.0) {
+        panX = 0;
+        panY = 0;
+      }
       applyZoomAndPan();
     }
 
-    function resetZoom() {
+    // RESET TO ORIGINAL FUNCTION
+    function resetToOriginal() {
       currentZoom = 1.0;
       panX = 0;
       panY = 0;
@@ -767,6 +802,7 @@
       img.classList.add("pan-grab");
 
       img.addEventListener("mousedown", (e) => {
+        // Only pan if zoomed in, or drag to inspect
         e.preventDefault();
         isPanning = true;
         startMouseX = e.clientX - panX;
@@ -871,7 +907,7 @@
         const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : AUDIO_EXTS.includes(ext) ? '🎵' : ext === 'pdf' ? '📑' : ['xlsx', 'xls', 'csv'].includes(ext) ? '📊' : TEXT_EXTS.includes(ext) ? '💻' : '📦';
 
         return `
-          <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] text-slate-300'}">
+          <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${idx === activeFileIdx ? 'bg-indigo-600/25 border-indigo-500/50 text-white font-semibold' : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.08] text-slate-300'}">
             <div class="flex items-center gap-2 truncate">
               <span class="text-sm">${icon}</span>
               <div class="truncate">
@@ -887,7 +923,7 @@
     async function selectWorkspaceFile(idx) {
       activeFileIdx = idx;
       renderSidebarFiles();
-      resetZoom();
+      resetToOriginal();
 
       const f = packageFiles[idx];
       document.getElementById("activeWorkspaceFileName").innerText = f.filename;
@@ -895,6 +931,7 @@
       const codeViewer = document.getElementById("workspaceCodeViewer");
       const media = document.getElementById("workspaceMediaViewer");
       const zoomBar = document.getElementById("workspaceZoomBar");
+      const resetBtn = document.getElementById("resetOriginalBtn");
       const footerStatus = document.getElementById("footerStatusText");
       const formatBadge = document.getElementById("formatTagBadge");
       const ext = f.filename.split('.').pop().toLowerCase();
@@ -904,37 +941,42 @@
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // 1. High-Resolution Visual Image (With Hand Pan & Zoom Controls)
+      // 1. High-Resolution Visual Image (PROPER BIGGER SIZE, ANCHORED, ZOOMABLE)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         zoomBar.classList.remove("hidden");
         zoomBar.classList.add("flex");
+        resetBtn.classList.remove("hidden");
+        resetBtn.classList.add("flex");
         
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
             <img id="workspaceImageEl" src="${streamUrl}" alt="${f.filename}" 
-                 class="max-h-[500px] sm:max-h-[560px] max-w-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40 transition-transform duration-75 select-none">
+                 style="transform-origin: center center;"
+                 class="max-h-[94%] max-w-[96%] w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 bg-black/40 transition-transform duration-75 select-none">
           </div>
         `;
         
         const imgEl = document.getElementById("workspaceImageEl");
         attachPanHandlers(imgEl);
         
-        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Drag with Hand to Pan • Scroll to Zoom";
+        if (footerStatus) footerStatus.innerText = "Interactive Viewport • Drag to Pan • Scroll to Zoom";
         return;
       }
 
       zoomBar.classList.add("hidden");
       zoomBar.classList.remove("flex");
+      resetBtn.classList.add("hidden");
+      resetBtn.classList.remove("flex");
 
-      // 2. Video Player
+      // 2. Video Player (Bigger Size)
       if (VIDEO_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2">
-            <video src="${streamUrl}" controls playsinline class="max-h-[500px] sm:max-h-[560px] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black"></video>
+            <video src="${streamUrl}" controls playsinline class="max-h-[94%] max-w-[96%] w-auto h-auto rounded-xl shadow-2xl border border-white/10 bg-black"></video>
           </div>
         `;
         if (footerStatus) footerStatus.innerText = "High-Quality Media Stream • HTTP 206 Range";
@@ -962,7 +1004,7 @@
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
-          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[500px] rounded-xl border-0"></iframe>
+          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[520px] rounded-xl border-0"></iframe>
         `;
         if (footerStatus) footerStatus.innerText = "Document Viewport";
         return;
@@ -994,7 +1036,7 @@
         <div class="text-center space-y-3 p-8 max-w-sm">
           <span class="text-6xl block animate-bounce">${icon}</span>
           <strong class="text-base font-bold text-white block truncate">${f.filename}</strong>
-          <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" to download.</p>
+          <p class="text-xs text-slate-400">Binary format (${f.filesize_mb} MB). Click "Download This File" above to download.</p>
         </div>
       `;
       if (footerStatus) footerStatus.innerText = "Binary Container";
