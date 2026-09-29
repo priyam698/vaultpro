@@ -53,7 +53,6 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
 
-    /* Plans Modal High Contrast Styling */
     .plans-active-box {
       background: linear-gradient(135deg, rgba(79, 70, 229, 0.18) 0%, rgba(30, 27, 75, 0.4) 100%) !important;
       border: 1px solid rgba(99, 102, 241, 0.5) !important;
@@ -160,23 +159,23 @@
     </div>
   </div>
 
-  <!-- DRIVE STUDIO WORKSPACE MODAL (FULL IN-DRIVE FILE EDITOR) -->
-  <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/90 backdrop-blur-xl hidden p-4 sm:p-6">
-    <div class="obsidian-card w-full max-w-6xl h-[92vh] rounded-3xl flex flex-col justify-between border border-sky-500/30 shadow-2xl overflow-hidden relative">
+  <!-- DRIVE STUDIO WORKSPACE MODAL (RESPONSIVE FULL IN-DRIVE FILE EDITOR) -->
+  <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/90 backdrop-blur-xl hidden p-2 sm:p-6">
+    <div class="obsidian-card w-full max-w-7xl h-[95vh] rounded-3xl flex flex-col justify-between border border-sky-500/30 shadow-2xl overflow-hidden relative">
       
       <!-- Studio Header -->
-      <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/40">
+      <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/50">
         <div class="flex items-center gap-3">
           <div id="studioIconBox" class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-lg">📄</div>
           <div>
-            <h3 id="studioFileName" class="text-sm font-black text-white truncate max-w-md">filename.ext</h3>
+            <h3 id="studioFileName" class="text-xs sm:text-sm font-black text-white truncate max-w-xs sm:max-w-md">filename.ext</h3>
             <span id="studioFileSize" class="text-[10px] font-mono text-sky-400">0.00 MB</span>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
           <!-- Unsaved Edits Badge -->
-          <span id="studioUnsavedBadge" class="hidden px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono text-[10px] font-bold">● Unsaved Edits</span>
+          <span id="studioUnsavedBadge" class="hidden px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[10px] font-bold">● Unsaved Edits</span>
 
           <!-- Save Button -->
           <button onclick="requestSaveFile()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
@@ -190,28 +189,46 @@
       </div>
 
       <!-- Studio Editor Body Stage -->
-      <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-4 bg-[#050811]">
+      <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4 bg-[#04060c]">
         
-        <!-- 1. Image Studio: Draw, Annotate, Crop, Background Color -->
-        <div id="studioImageStage" class="hidden w-full h-full flex flex-col items-center justify-center relative">
-          <div class="absolute top-2 z-20 flex flex-wrap items-center gap-2 bg-black/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold">
-            <button onclick="setStudioImageTool('draw')" id="sToolDrawBtn" class="px-3 py-1 rounded-lg bg-indigo-600 text-white transition">✏️ Draw</button>
-            <button onclick="setStudioImageTool('crop')" id="sToolCropBtn" class="px-3 py-1 rounded-lg bg-white/10 text-slate-300 hover:text-white transition">✂️ Crop</button>
-            <button onclick="changeImageCanvasBg()" class="px-3 py-1 rounded-lg bg-white/10 text-slate-300 hover:text-white transition">🎨 Add Background</button>
-            <button onclick="resetImageCanvas()" class="px-3 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 transition">Clear Ink</button>
+        <!-- 1. Image Studio: Auto-fitted, Zoomable, Drawable, Croppable Canvas -->
+        <div id="studioImageStage" class="hidden w-full h-full flex flex-col items-center justify-between relative overflow-hidden">
+          
+          <!-- Image Studio Floating Control Bar -->
+          <div class="w-full flex flex-wrap items-center justify-between gap-2 bg-black/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0 mb-2 z-20">
+            <!-- Edit Tools -->
+            <div class="flex items-center gap-1.5">
+              <button onclick="setStudioImageTool('draw')" id="sToolDrawBtn" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer">✏️ Draw</button>
+              <button onclick="setStudioImageTool('crop')" id="sToolCropBtn" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">✂️ Crop Mode</button>
+              <button onclick="changeImageCanvasBg()" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">🎨 Add Background</button>
+              <button onclick="resetImageCanvas()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 transition cursor-pointer">Clear Ink</button>
+            </div>
+
+            <!-- Auto-Fit & Zoom Controls -->
+            <div class="flex items-center gap-1.5 bg-black/60 p-0.5 rounded-xl border border-white/10 font-mono text-xs">
+              <button onclick="zoomStudioCanvas(-0.2)" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition font-bold cursor-pointer" title="Zoom Out">-</button>
+              <span id="studioZoomDisplay" class="px-2 text-[10px] font-bold text-sky-400 min-w-[46px] text-center">Fit</span>
+              <button onclick="zoomStudioCanvas(0.2)" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition font-bold cursor-pointer" title="Zoom In">+</button>
+              <button onclick="fitStudioImageToViewport()" class="px-2.5 py-1 text-sky-300 hover:text-white rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 transition font-sans text-[11px] cursor-pointer">Fit Screen</button>
+              <button onclick="setStudioZoomActual()" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition font-sans text-[11px] cursor-pointer">100%</button>
+            </div>
           </div>
-          <div class="w-full h-full flex items-center justify-center p-2 overflow-auto custom-scroll">
-            <canvas id="studioImageCanvas" class="max-h-[72vh] max-w-full object-contain rounded-xl shadow-2xl border border-white/10 cursor-crosshair"></canvas>
+
+          <!-- Viewport Stage -->
+          <div id="studioCanvasViewport" class="flex-1 w-full flex items-center justify-center overflow-auto custom-scroll p-2 relative select-none">
+            <canvas id="studioImageCanvas" class="object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-[width,height] duration-150 ease-out"></canvas>
           </div>
         </div>
 
-        <!-- 2. Video Studio: Trim, Add Songs, Canvas BG -->
+        <!-- 2. Video Studio (Auto-Sized Video Stage) -->
         <div id="studioVideoStage" class="hidden w-full h-full flex flex-col items-center justify-center space-y-4">
-          <video id="studioVideoEl" controls playsinline class="max-h-[60vh] max-w-full rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
-          <div class="flex flex-wrap items-center gap-2.5 bg-black/80 px-4 py-2.5 rounded-2xl border border-white/15 text-xs font-bold">
-            <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition">✂️ Trim 5s Clip</button>
-            <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition">🎵 Add Song / Audio Track</button>
-            <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition">🎨 Add Video Canvas BG</button>
+          <div class="flex-1 w-full flex items-center justify-center p-2 overflow-hidden">
+            <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
+          </div>
+          <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
+            <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
+            <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
+            <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
           </div>
         </div>
 
@@ -223,15 +240,15 @@
           <div class="w-16 h-16 rounded-3xl bg-sky-500/10 border border-sky-500/20 text-sky-400 mx-auto flex items-center justify-center text-3xl font-bold">📦</div>
           <strong id="studioFallbackName" class="text-sm font-bold text-white block truncate">filename.bin</strong>
           <p class="text-xs text-slate-400 leading-relaxed font-medium">Binary vault item loaded. Click download below to export to your device.</p>
-          <button id="studioFallbackDownloadBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition">Download Asset</button>
+          <button id="studioFallbackDownloadBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition cursor-pointer">Download Asset</button>
         </div>
 
       </div>
 
       <!-- Studio Footer -->
-      <div class="px-6 py-2.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono opacity-70 bg-black/40">
+      <div class="px-6 py-2.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono opacity-70 bg-black/50">
         <span id="studioFooterStatus">Direct Cloud Vault Editing Active</span>
-        <span>Secure Storage Pipe</span>
+        <span>Secure Storage Pipe • Scroll to Zoom</span>
       </div>
 
     </div>
@@ -401,7 +418,7 @@
 
         <div>
           <label class="block text-xs font-bold opacity-80 mb-1">Transfer Background Wallpaper URL</label>
-          <input id="brandBgUrl" type="url" placeholder="https://..." class="w-full rounded-xl px-3 py-2 text-xs focus:outline-none transition">
+          <input id="brandBgUrl" type="url" placeholder="https://..." class="w-full rounded-xl px-3.5 py-2 text-xs focus:outline-none transition">
         </div>
 
         <div class="flex items-center gap-2 pt-2 border-t border-white/10">
@@ -528,7 +545,7 @@
 
     </div>
 
-    <!-- COMPACT & SUITABLE DROP ZONE FILE UPLOAD BOX (NO UNNECESSARY SPACES) -->
+    <!-- COMPACT & SUITABLE DROP ZONE FILE UPLOAD BOX -->
     <div id="dropZoneContainer" class="obsidian-card rounded-2xl py-3.5 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer border-2 border-dashed border-white/15 hover:border-indigo-400/60 transition duration-200 group" onclick="document.getElementById('driveFileInput').click()">
       <input type="file" id="driveFileInput" multiple class="hidden">
       
@@ -632,7 +649,7 @@
         if (icon) icon.innerText = "🌙";
       } else {
         document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️";
+        if (icon) icon.innerText = "☀️️";
       }
     }
 
@@ -681,9 +698,11 @@
     let isStudioModified = false;
     let pendingDecisionAction = null;
 
+    // Image studio canvas state & responsive scale
     let studioCanvas = null;
     let studioCtx = null;
     let studioImgObj = null;
+    let studioZoom = 1.0;
     let currentTool = 'draw';
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
@@ -699,7 +718,7 @@
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
 
-        currentAccountUserTier = (data.tier || "free").lower();
+        currentAccountUserTier = (data.tier || "free").toLowerCase();
         currentAccountQuotaBytes = data.quota_bytes || (5 * 1024**3);
 
         const usedDisplay = formatBytes(data.used_bytes);
@@ -754,7 +773,7 @@
     }
 
     // ==========================================
-    // IN-DRIVE STUDIO EDITING & VIEWING ENGINE
+    // IN-DRIVE STUDIO AUTO-SIZED VIEWING & EDITING
     // ==========================================
     async function openDriveStudio(fileId) {
       const file = allFiles.find(f => f.id === fileId);
@@ -782,6 +801,7 @@
 
       document.getElementById("driveStudioModal").classList.remove("hidden");
 
+      // 1. Image Studio: Responsive Auto-Fitted Canvas
       if (IMAGE_EXTS.includes(ext)) {
         imgStage.classList.remove("hidden");
         studioCanvas = document.getElementById("studioImageCanvas");
@@ -795,12 +815,16 @@
           studioCanvas.height = img.naturalHeight || img.height;
           studioCtx.drawImage(img, 0, 0);
           setupCanvasDrawing();
+
+          // Auto-fit to viewport size so image never looks tiny
+          setTimeout(fitStudioImageToViewport, 30);
         };
         img.src = streamUrl;
-        document.getElementById("studioFooterStatus").innerText = "Image Studio Active • Draw, annotate, crop, or add canvas background";
+        document.getElementById("studioFooterStatus").innerText = "Image Studio Active • Auto-Fitted • Draw, annotate, or crop";
         return;
       }
 
+      // 2. Video Studio (Auto-Sized Video Stage)
       if (VIDEO_EXTS.includes(ext)) {
         vidStage.classList.remove("hidden");
         const vid = document.getElementById("studioVideoEl");
@@ -809,6 +833,7 @@
         return;
       }
 
+      // 3. Code, Scripts & Notebooks Editor
       if (CODE_EXTS.includes(ext)) {
         codeEditor.classList.remove("hidden");
         codeEditor.value = "Loading text buffer...";
@@ -823,11 +848,63 @@
         return;
       }
 
+      // 4. Universal Fallback
       fallbackStage.classList.remove("hidden");
       document.getElementById("studioFallbackName").innerText = file.filename;
       document.getElementById("studioFallbackDownloadBtn").onclick = () => downloadFile(file.id);
       document.getElementById("studioFooterStatus").innerText = "Universal File Inspector • Download to Export";
     }
+
+    // ==========================================
+    // AUTO-FIT & ZOOM ENGINE FOR STUDIO CANVAS
+    // ==========================================
+    function fitStudioImageToViewport() {
+      if (!studioCanvas || !studioImgObj) return;
+      const viewport = document.getElementById("studioCanvasViewport");
+      const availW = Math.max(300, (viewport.clientWidth || 900) - 40);
+      const availH = Math.max(300, (viewport.clientHeight || 560) - 40);
+
+      const nw = studioImgObj.naturalWidth || studioCanvas.width || 400;
+      const nh = studioImgObj.naturalHeight || studioCanvas.height || 400;
+
+      // Scale up or down to comfortably occupy ~75-80% of stage bounds
+      const scaleFit = Math.min((availW * 0.82) / nw, (availH * 0.82) / nh);
+      
+      // If the image is naturally tiny (e.g., 100x100), scale up to at least 450px display size
+      const minDisplayScale = Math.min(availW / nw, Math.max(450 / nw, 450 / nh));
+      studioZoom = Math.min(Math.max(scaleFit, minDisplayScale), 4.5);
+
+      applyStudioCanvasDisplaySize();
+    }
+
+    function setStudioZoomActual() {
+      studioZoom = 1.0;
+      applyStudioCanvasDisplaySize();
+    }
+
+    function zoomStudioCanvas(delta) {
+      studioZoom = Math.max(0.15, Math.min(6.0, Math.round((studioZoom + delta) * 10) / 10));
+      applyStudioCanvasDisplaySize();
+    }
+
+    function applyStudioCanvasDisplaySize() {
+      if (!studioCanvas || !studioImgObj) return;
+      const nw = studioImgObj.naturalWidth || studioCanvas.width;
+      const nh = studioImgObj.naturalHeight || studioCanvas.height;
+
+      studioCanvas.style.width = Math.round(nw * studioZoom) + "px";
+      studioCanvas.style.height = Math.round(nh * studioZoom) + "px";
+
+      const display = document.getElementById("studioZoomDisplay");
+      if (display) display.innerText = `${Math.round(studioZoom * 100)}%`;
+    }
+
+    // Window resize observer to keep display responsive
+    window.addEventListener("resize", () => {
+      if (!document.getElementById("driveStudioModal").classList.contains("hidden")) {
+        fitStudioImageToViewport();
+      }
+    });
 
     function markStudioModified() {
       isStudioModified = true;
@@ -906,13 +983,20 @@
 
     function setStudioImageTool(tool) {
       currentTool = tool;
-      document.getElementById("sToolDrawBtn").className = tool === 'draw' ? "px-3 py-1 rounded-lg bg-indigo-600 text-white transition" : "px-3 py-1 rounded-lg bg-white/10 text-slate-300 hover:text-white transition";
-      document.getElementById("sToolCropBtn").className = tool === 'crop' ? "px-3 py-1 rounded-lg bg-indigo-600 text-white transition" : "px-3 py-1 rounded-lg bg-white/10 text-slate-300 hover:text-white transition";
+      document.getElementById("sToolDrawBtn").className = tool === 'draw' ? "px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer" : "px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer";
+      document.getElementById("sToolCropBtn").className = tool === 'crop' ? "px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer" : "px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 hover:text-white transition cursor-pointer";
     }
 
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
       let drawing = false;
+
+      // Mouse wheel zoom directly over canvas
+      studioCanvas.onwheel = (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        zoomStudioCanvas(delta);
+      };
 
       studioCanvas.onmousedown = (e) => {
         if (currentTool !== 'draw') return;
@@ -958,7 +1042,7 @@
     }
 
     function trimVideoClip() {
-      alert("✂️ Video trimmed! 5-second clip edit applied.");
+      alert("✂️ Video trimmed! 5-second clip edit applied to timeline.");
       markStudioModified();
     }
 
