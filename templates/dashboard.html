@@ -469,6 +469,46 @@
     </div>
   </div>
 
+  <!-- BRANDING SUITE MODAL -->
+  <div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 relative border border-purple-500/30 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 class="text-sm font-black text-white flex items-center gap-2">
+          <span>🎨</span>
+          <span>Studio Branding Preferences</span>
+        </h3>
+        <button onclick="closeBrandingModal()" class="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">✕</button>
+      </div>
+      
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold mb-1 opacity-80">Custom Studio Title</label>
+          <input id="brandTitle" type="text" placeholder="e.g. Skyline Productions" class="w-full rounded-xl px-3.5 py-2 font-medium focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1 opacity-80">Brand Accent Color</label>
+          <div class="flex items-center gap-2">
+            <input id="brandColorPicker" type="color" value="#6366f1" onchange="document.getElementById('brandColorText').value = this.value" class="w-9 h-9 rounded-xl border border-white/20 bg-transparent cursor-pointer">
+            <input id="brandColorText" type="text" value="#6366f1" class="flex-1 rounded-xl px-3.5 py-2 font-mono uppercase focus:outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold mb-1 opacity-80">Custom Logo Image URL</label>
+          <input id="brandLogoUrl" type="url" placeholder="https://domain.com/logo.png" class="w-full rounded-xl px-3.5 py-2 font-mono focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1 opacity-80">Custom Background Wallpaper URL</label>
+          <input id="brandBgUrl" type="url" placeholder="https://domain.com/wallpaper.jpg" class="w-full rounded-xl px-3.5 py-2 font-mono focus:outline-none">
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-white/10 flex items-center gap-2">
+        <button type="button" onclick="closeBrandingModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold transition">Cancel</button>
+        <button type="button" onclick="saveBrandingPreferences()" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-md transition">Save Branding</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FIXED HEADER NAVBAR -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -620,10 +660,86 @@
   </footer>
 
   <script>
+    // -------------------------------------------------------------
+    // 1. THEME SWITCHER CONTROLLER (Defined First)
+    // -------------------------------------------------------------
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
+    // Execute immediately on script parse
+    initTheme();
+
+    // -------------------------------------------------------------
+    // 2. CORE SESSION & UTILITIES
+    // -------------------------------------------------------------
+    function formatBytes(bytes, decimals = 2) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function getStoredUserId() {
+      const sessionId = sessionStorage.getItem("user_id") || sessionStorage.getItem("vp_user_id");
+      if (sessionId) return sessionId;
+      const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
+      if (direct) return direct;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(k));
+            if (parsed?.user?.id) return parsed.user.id;
+          } catch(e) {}
+        }
+      }
+      return null;
+    }
+
     const currentUserId = getStoredUserId();
     if (!currentUserId) {
       window.location.href = "/auth";
     }
+
+    const ACTIVE_PAYMENT_ENV = "test";
+    const DODO_CONFIG = {
+      test: {
+        domain: "https://test.checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_0NoSL8gp9fUEk5GKwdB1O",
+          lite:  "pdt_0NoSLFQFIcnqD2weSbr0d",
+          plus:  "pdt_0NoSKxDY49vabp3lshvdI",
+          pro:   "pdt_0NoSL3f1qb5yIZTPzv71H"
+        }
+      },
+      live: {
+        domain: "https://checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_LIVE_MICRO_ID_HERE",
+          lite:  "pdt_LIVE_LITE_ID_HERE",
+          plus:  "pdt_LIVE_PLUS_ID_HERE",
+          pro:   "pdt_LIVE_PRO_ID_HERE"
+        }
+      }
+    };
 
     let allFiles = [];
     let activeStudioFile = null;
@@ -1572,49 +1688,6 @@
           body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
         });
       } catch(e) {}
-    }
-
-    function openUpgradeModal() {
-      selectUpgradeTarget("pro");
-      document.getElementById("upgradeModal").classList.remove("hidden");
-    }
-
-    function closeUpgradeModal() { document.getElementById("upgradeModal").classList.add("hidden"); }
-
-    async function selectUpgradeTarget(tier) {
-      selectedUpgradeTarget = tier;
-      ['micro', 'lite', 'plus', 'pro'].forEach(t => {
-        const card = document.getElementById(`planCard-${t}`);
-        if (card) {
-          if (t === tier) {
-            card.classList.add("border-indigo-500", "bg-indigo-500/10");
-          } else {
-            card.classList.remove("border-indigo-500", "bg-indigo-500/10");
-          }
-        }
-      });
-
-      try {
-        const res = await fetch("/api/drive/upgrade-quote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: currentUserId, target_tier: tier })
-        });
-        const quote = await res.json();
-
-        document.getElementById("quoteTargetText").innerText = `${quote.target_name}`;
-        document.getElementById("quoteNetCapacity").innerText = `${formatBytes(quote.target_quota_bytes)}`;
-        document.getElementById("quoteDaysLeft").innerText = `${quote.days_remaining} days`;
-        document.getElementById("quoteSurcharge").innerText = `$${quote.surcharge.toFixed(2)}`;
-        document.getElementById("quoteTotalDue").innerText = `$${quote.charge_amount.toFixed(2)}`;
-      } catch(e) {}
-    }
-
-    function executePlanUpgrade() {
-      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
-      const productId = envConfig.products[selectedUpgradeTarget] || envConfig.products["pro"];
-      let targetUrl = `${envConfig.domain}/${productId}`;
-      window.location.href = targetUrl;
     }
 
     function openBrandingModal() {
