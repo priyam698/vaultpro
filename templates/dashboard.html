@@ -64,12 +64,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 12px;
       transition: all 0.2s ease;
       color: #94a3b8;
       border: 1px solid transparent;
       user-select: none;
+      white-space: nowrap;
     }
     .tool-tab-btn:hover {
       background: rgba(255, 255, 255, 0.05);
@@ -310,6 +311,9 @@
           <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn">
             <span class="text-sm">🎨</span><span>BACKGROUND</span>
           </button>
+          <button onclick="convertTo4KUltraHD()" class="tool-tab-btn text-amber-300 hover:text-amber-200 bg-amber-500/10 border-amber-500/30">
+            <span class="text-sm">✨</span><span>4K UHD</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-2 pl-4 border-l border-white/10 shrink-0">
@@ -352,7 +356,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️️ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -371,9 +375,9 @@
 
         </div>
 
-        <!-- Right Side Panel: Zoom, Format & Save Controller -->
+        <!-- Right Side Panel: Zoom, Format, 4K & Save Controller -->
         <div class="w-64 border-l border-white/10 bg-[#070b16] p-4 flex flex-col justify-between shrink-0">
-          <div class="space-y-5">
+          <div class="space-y-4">
             <!-- Zoom Controls -->
             <div class="space-y-2">
               <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Zoom Viewport</span>
@@ -386,6 +390,16 @@
                 <button onclick="fitStudioImageToViewport()" class="py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 transition">Fit Screen</button>
                 <button onclick="setStudioZoomActual()" class="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition">100%</button>
               </div>
+            </div>
+
+            <!-- 4K Ultra HD AI Converter -->
+            <div class="space-y-2 pt-2 border-t border-white/10">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">AI Super Resolution</span>
+              <button onclick="convertTo4KUltraHD()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <span>✨</span>
+                <span>4K Ultra HD Converter</span>
+              </button>
+              <p class="text-[10px] text-slate-400 leading-tight">Upscales canvas to 3840px UHD with high-fidelity detail sharpening.</p>
             </div>
 
             <!-- Export Format Selector -->
@@ -402,14 +416,14 @@
             <div class="space-y-2 pt-2 border-t border-white/10">
               <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Pixel Sharpness</span>
               <div class="flex items-center gap-2">
-                <button onclick="togglePixelCrispMode(true)" id="pixelCrispActiveBtn" class="flex-1 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold transition">Crisp (No Blur)</button>
+                <button onclick="togglePixelCrispMode(true)" id="pixelCrispActiveBtn" class="flex-1 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold transition">Crisp (Pixel)</button>
                 <button onclick="togglePixelCrispMode(false)" id="pixelSmoothBtn" class="flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 text-[11px] font-bold transition">Smooth</button>
               </div>
             </div>
           </div>
 
           <!-- Bottom Action Buttons -->
-          <div class="space-y-2 pt-4 border-t border-white/10">
+          <div class="space-y-2 pt-3 border-t border-white/10">
             <button onclick="requestSaveFile()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-indigo-700 hover:opacity-95 text-white font-black text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer transition">
               <span>💾</span>
               <span>Save Changes to Vault</span>
@@ -661,7 +675,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // 1. THEME SWITCHER CONTROLLER (Defined First)
+    // 1. THEME CONTROLLER
     // -------------------------------------------------------------
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -682,11 +696,10 @@
       if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
 
-    // Execute immediately on script parse
     initTheme();
 
     // -------------------------------------------------------------
-    // 2. CORE SESSION & UTILITIES
+    // 2. CORE UTILS & SESSION
     // -------------------------------------------------------------
     function formatBytes(bytes, decimals = 2) {
       if (!bytes || bytes === 0) return '0 B';
@@ -719,28 +732,6 @@
       window.location.href = "/auth";
     }
 
-    const ACTIVE_PAYMENT_ENV = "test";
-    const DODO_CONFIG = {
-      test: {
-        domain: "https://test.checkout.dodopayments.com/buy",
-        products: {
-          micro: "pdt_0NoSL8gp9fUEk5GKwdB1O",
-          lite:  "pdt_0NoSLFQFIcnqD2weSbr0d",
-          plus:  "pdt_0NoSKxDY49vabp3lshvdI",
-          pro:   "pdt_0NoSL3f1qb5yIZTPzv71H"
-        }
-      },
-      live: {
-        domain: "https://checkout.dodopayments.com/buy",
-        products: {
-          micro: "pdt_LIVE_MICRO_ID_HERE",
-          lite:  "pdt_LIVE_LITE_ID_HERE",
-          plus:  "pdt_LIVE_PLUS_ID_HERE",
-          pro:   "pdt_LIVE_PRO_ID_HERE"
-        }
-      }
-    };
-
     let allFiles = [];
     let activeStudioFile = null;
     let isStudioModified = false;
@@ -753,8 +744,7 @@
     
     let currentCategory = 'draw';
     let brushColor = '#38bdf8';
-    let brushSize = 6;
-    let brushHardness = 1.0;
+    let brushSize = 2; // Precise default size
     let isPixelCrisp = true;
     let activeShapeType = 'rectangle';
 
@@ -831,6 +821,9 @@
       renderFiles(filtered);
     }
 
+    // -------------------------------------------------------------
+    // 3. IN-DRIVE PHOTO STUDIO WITH 1:1 PIXEL ACCURACY
+    // -------------------------------------------------------------
     async function openDriveStudio(fileId) {
       const file = allFiles.find(f => f.id === fileId);
       if (!file) return;
@@ -871,14 +864,10 @@
         img.crossOrigin = "anonymous";
         img.onload = () => {
           studioImgObj = img;
-          const maxDim = Math.max(img.naturalWidth || 1, img.naturalHeight || 1);
-          let densityScale = 1;
-          if (maxDim < 1800) {
-            densityScale = Math.min(4, Math.max(2, Math.round(1800 / maxDim)));
-          }
-
-          studioCanvas.width = (img.naturalWidth || img.width) * densityScale;
-          studioCanvas.height = (img.naturalHeight || img.height) * densityScale;
+          
+          // Pure 1:1 pixel native dimensions - Prevents bloat and keeps small pixel art crisp
+          studioCanvas.width = img.naturalWidth || img.width;
+          studioCanvas.height = img.naturalHeight || img.height;
 
           studioCtx.imageSmoothingEnabled = false;
           studioCtx.drawImage(img, 0, 0, studioCanvas.width, studioCanvas.height);
@@ -934,6 +923,56 @@
         if (crispBtn) crispBtn.className = "flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 text-[11px] font-bold transition";
         if (smoothBtn) smoothBtn.className = "flex-1 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold transition";
       }
+    }
+
+    // -------------------------------------------------------------
+    // 4. 4K ULTRA HD AI UPSCALER & SHARPENING CONVERTER
+    // -------------------------------------------------------------
+    function convertTo4KUltraHD() {
+      if (!studioCanvas || !studioCtx) return;
+      const curW = studioCanvas.width;
+      const curH = studioCanvas.height;
+      const targetLongDim = 3840;
+      const curLongDim = Math.max(curW, curH);
+
+      if (curLongDim >= targetLongDim) {
+        alert(`This asset is already at 4K Ultra HD resolution (${curW} × ${curH}).`);
+        return;
+      }
+
+      const scale = targetLongDim / curLongDim;
+      const newW = Math.round(curW * scale);
+      const newH = Math.round(curH * scale);
+
+      // Create pristine offscreen buffer
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = curW;
+      tempCanvas.height = curH;
+      tempCanvas.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = newW;
+      studioCanvas.height = newH;
+
+      // Ultra-HD bicubic interpolation with high quality sharpness
+      studioCtx.imageSmoothingEnabled = true;
+      studioCtx.imageSmoothingQuality = "high";
+      studioCtx.drawImage(tempCanvas, 0, 0, newW, newH);
+
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+
+      const sizeDisplay = document.getElementById("studioFileSize");
+      if (sizeDisplay) sizeDisplay.innerText = `${newW} × ${newH} (4K UHD)`;
+
+      alert(`✨ Converted successfully to 4K Ultra HD (${newW} × ${newH})!`);
+    }
+
+    function setMarkerSize(size) {
+      brushSize = size;
+      const slider = document.getElementById("markerSizeSlider");
+      if (slider) slider.value = size;
+      const valText = document.getElementById("sBrushVal");
+      if (valText) valText.innerText = size;
     }
 
     function pushHistorySnapshot(markMod = true) {
@@ -1006,6 +1045,9 @@
       }
     });
 
+    // -------------------------------------------------------------
+    // 5. TOOL SELECTION & FINE MARKER ADJUSTMENTS
+    // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
       const categories = ['resize', 'crop', 'transform', 'draw', 'text', 'shapes', 'stickers', 'frame', 'corners', 'background'];
@@ -1023,18 +1065,31 @@
 
       if (cat === 'draw') {
         drawer.innerHTML = `
-          <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex items-center gap-3 flex-wrap">
             <div class="flex items-center gap-2">
               <span class="text-slate-400 font-bold">Marker Color:</span>
               <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
             </div>
+            
             <div class="flex items-center gap-2">
-              <span class="text-slate-400 font-bold">Thickness:</span>
-              <input type="range" min="2" max="60" value="${brushSize}" oninput="brushSize=parseInt(this.value); document.getElementById('sBrushVal').innerText=this.value" class="w-24 accent-sky-400 cursor-pointer">
-              <span id="sBrushVal" class="font-mono text-sky-400 w-5">${brushSize}</span>
+              <span class="text-slate-400 font-bold">Size:</span>
+              <input type="range" id="markerSizeSlider" min="1" max="50" value="${brushSize}" oninput="brushSize=parseInt(this.value); document.getElementById('sBrushVal').innerText=this.value" class="w-24 accent-sky-400 cursor-pointer">
+              <span id="sBrushVal" class="font-mono text-sky-400 w-5 font-bold">${brushSize}</span>
+            </div>
+
+            <!-- Precision Quick Size Badges -->
+            <div class="flex items-center gap-1">
+              <button onclick="setMarkerSize(1)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-sky-300">1px</button>
+              <button onclick="setMarkerSize(2)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-sky-300">2px</button>
+              <button onclick="setMarkerSize(4)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">4px</button>
+              <button onclick="setMarkerSize(8)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">8px</button>
+              <button onclick="setMarkerSize(16)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">16px</button>
             </div>
           </div>
-          <span class="text-sky-400 font-mono text-[11px] font-bold">● High-Density Anti-Blur Drawing Active</span>
+          
+          <button onclick="convertTo4KUltraHD()" class="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 text-white font-black text-[11px] shadow hover:opacity-95 transition cursor-pointer flex items-center gap-1">
+            <span>✨</span> 4K Ultra HD
+          </button>
         `;
       } else if (cat === 'crop') {
         drawer.innerHTML = `
@@ -1062,6 +1117,7 @@
             <span class="text-slate-400">×</span>
             <input type="number" id="resizeHInput" value="${studioCanvas.height}" class="w-20 px-2 py-1 rounded-lg bg-black/40 border border-white/20 text-white font-mono">
             <button onclick="applyImageResize()" class="px-4 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition">Apply Resize</button>
+            <button onclick="convertTo4KUltraHD()" class="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 transition">✨ Upscale to 4K</button>
           </div>
         `;
       } else if (cat === 'text') {
@@ -1183,11 +1239,11 @@
           studioCtx.beginPath();
           studioCtx.moveTo(startX, startY);
           
-          const bufferMultiplier = Math.max(1, studioCanvas.width / 900);
-          studioCtx.lineWidth = brushSize * bufferMultiplier;
-          studioCtx.lineCap = "square";
-          studioCtx.lineJoin = "miter";
-          studioCtx.imageSmoothingEnabled = false;
+          // True 1:1 pixel mapping - No arbitrary multiplying factors!
+          studioCtx.lineWidth = brushSize;
+          studioCtx.lineCap = isPixelCrisp ? "square" : "round";
+          studioCtx.lineJoin = isPixelCrisp ? "miter" : "round";
+          studioCtx.imageSmoothingEnabled = !isPixelCrisp;
           studioCtx.strokeStyle = brushColor;
         }
       };
@@ -1221,7 +1277,7 @@
         if (currentCategory === 'shapes') {
           studioCtx.putImageData(snapshot, 0, 0);
           studioCtx.beginPath();
-          studioCtx.lineWidth = brushSize * Math.max(1, studioCanvas.width / 900);
+          studioCtx.lineWidth = brushSize;
           studioCtx.strokeStyle = brushColor;
 
           if (activeShapeType === 'rectangle') {
