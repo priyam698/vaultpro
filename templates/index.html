@@ -64,7 +64,7 @@
       transition: all 0.3s ease;
     }
 
-    /* Floating Studio Artifact Cards */
+    /* Floating Studio Artifact Cards (Adaptive) */
     .editorial-card {
       background: rgba(18, 24, 42, 0.88);
       backdrop-filter: blur(25px);
@@ -80,24 +80,28 @@
       background: rgba(255, 159, 125, 0.25);
       border: 1px solid rgba(255, 159, 125, 0.5);
       color: #ffcaa6;
+      transition: all 0.3s ease;
     }
     .editorial-tag-psd {
       background: rgba(14, 165, 233, 0.25);
       border: 1px solid rgba(56, 189, 248, 0.45);
       color: #7dd3fc;
+      transition: all 0.3s ease;
     }
     .editorial-tag-fig {
       background: rgba(168, 85, 247, 0.25);
       border: 1px solid rgba(192, 132, 252, 0.45);
       color: #d8b4fe;
+      transition: all 0.3s ease;
     }
     .editorial-folder {
       background: rgba(16, 27, 56, 0.92);
       border: 1px solid rgba(59, 130, 246, 0.45);
       color: #f1f5f9;
+      transition: all 0.3s ease;
     }
 
-    /* Floating Keyframe Animations */
+    /* Floating Animations */
     @keyframes floatEditorialA {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-12px) rotate(1.2deg); }
@@ -162,7 +166,7 @@
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
 
-    /* FX Widget Card Styles */
+    /* Ultra-Premium FX Card Styles */
     .fx-tile {
       background: rgba(15, 23, 42, 0.65);
       border: 1px solid rgba(255, 255, 255, 0.10);
@@ -215,14 +219,14 @@
 
     body.light-theme #worldLangSelect,
     body.light-theme #themeToggleBtn,
-    body.light-theme header .header-pill {
+    body.light-theme header .header-pill,
+    body.light-theme #userEmailBadge {
       background: #ffffff !important;
       border: 1px solid #bfdbfe !important;
       color: #0f172a !important;
       box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
       backdrop-filter: blur(12px);
     }
-
     body.light-theme #themeToggleBtn {
       color: #d97706 !important;
     }
@@ -246,13 +250,6 @@
       color: #0284c7 !important;
     }
 
-    body.light-theme #userEmailBadge {
-      background: #ffffff !important;
-      border: 1px solid #bfdbfe !important;
-      color: #0f172a !important;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
-    }
-
     /* FIX FOR HERO BADGE PILL IN DAY MODE */
     body.light-theme .hero-badge-pill {
       background: #e0f2fe !important;
@@ -260,9 +257,15 @@
       color: #0369a1 !important;
     }
 
-    /* FIX FOR PRO PRICING TIER 5 CONTRAST */
-    body.light-theme #pricing .pro-price-val,
-    body.light-theme #pricing .pro-price-val span,
+    /* FIX FOR ZEPHYR PRO PRICE CONTRAST & ROYAL INDIGO COLOR IN DAY MODE */
+    body.light-theme #pricing .pro-price-val {
+      color: #4f46e5 !important;
+    }
+
+    body.light-theme #pricing .pro-price-val span {
+      color: #64748b !important;
+    }
+
     body.light-theme #pricing .text-white {
       color: #0f172a !important;
     }
@@ -394,6 +397,7 @@
     }
     body.light-theme .feature-badge span { color: #0f172a !important; }
 
+    /* Themed Color Tabs for Quick Buttons in Day Mode */
     body.light-theme .quick-btn {
       background: #ffffff !important;
       border: 1px solid #bae6fd !important;
@@ -464,6 +468,7 @@
       color: #0f172a !important;
     }
 
+    /* Light Theme FX Card Overrides */
     body.light-theme #currencyConversionBox {
       background: #ffffff !important;
       border-color: #bae6fd !important;
@@ -1475,7 +1480,7 @@
 
             <div class="flex items-start gap-4">
               <div class="w-11 h-11 rounded-2xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30 shadow-inner">
-                🛡️
+                🛡️️
               </div>
               <div>
                 <h4 class="text-sm font-black">Anti-Screenshot Shield & Lifetime Unlock</h4>
@@ -2085,7 +2090,7 @@
             <span class="text-[9px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-black border border-indigo-500/30">Pro Member</span>
           </div>
           <p class="text-[11px] opacity-75 mb-4">Complete professional studio setup with full edge capabilities.</p>
-          <div class="pro-price-val text-3xl font-black mb-4 text-white">
+          <div class="pro-price-val text-3xl font-black mb-4 text-indigo-400">
             $7.00 <span class="text-[10px] font-normal opacity-60 text-slate-400">/ month</span>
           </div>
 
@@ -2316,7 +2321,7 @@
 
     initTheme();
 
-    const ACTIVE_PAYMENT_ENV = "test";
+    const ACTIVE_PAYMENT_ENV = "test"; // <--- CHANGE TO "live" WHEN GOING LIVE
 
     const DODO_CONFIG = {
       test: {
@@ -2394,7 +2399,7 @@
                 </div>
               </div>
               <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md border ${changeBadgeClass}">
-                ${arrow} ${Math.abs(item.change_pct).toFixed(2)}%
+                ${arrow}${Math.abs(item.change_pct).toFixed(2)}%
               </span>
             </div>
 
@@ -2538,7 +2543,7 @@
 
             userSingleLimitMb = singleCaps[userTier] || 2048;
 
-            if (capBadge) capBadge.innerText = `${userTier.toUpperCase()}: ${userSingleLimitMb / 1000} GB limit`;
+            if (capBadge) capBadge.innerText = `${userTier.toUpperCase()}:${userSingleLimitMb / 1000} GB limit`;
             if (headerCap) headerCap.innerText = vaultCaps[userTier] || "Drive";
           }
         })
@@ -3000,13 +3005,13 @@
         if (totalSizeMb > userSingleLimitMb) {
           progressBox.classList.add("hidden");
           transferBtn.disabled = false;
-          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of ${userSingleLimitMb} MB. Please upgrade your plan.`;
+          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of${userSingleLimitMb} MB. Please upgrade your plan.`;
           document.getElementById("limitModal").classList.remove("hidden");
           return;
         }
 
         progressStatus.innerText = "Reserving cryptographic vault...";
-        progressBar.style.width = "10%";
+        progressBar.style.width = "10%`";
         progressPercent.innerText = "10%";
 
         const isPaywalled = document.getElementById("paywallToggle") ? document.getElementById("paywallToggle").checked : false;
