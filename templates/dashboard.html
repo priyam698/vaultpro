@@ -88,7 +88,9 @@
       image-rendering: pixelated !important;
     }
 
-    /* Light Theme */
+    /* ========================================================================= */
+    /* LIGHT THEME (DAY MODE) OVERRIDES                                          */
+    /* ========================================================================= */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -100,6 +102,89 @@
         radial-gradient(ellipse 70% 60% at 10% 12%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
         radial-gradient(ellipse 65% 55% at 90% 18%, rgba(99, 102, 241, 0.12) 0%, transparent 55%),
         linear-gradient(180deg, #f8fbff 0%, #e6f2fb 100%);
+    }
+
+    body.light-theme header {
+      background: rgba(255, 255, 255, 0.92) !important;
+      border-bottom: 1px solid #bfdbfe !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px -5px rgba(2, 132, 199, 0.06) !important;
+    }
+
+    body.light-theme .brand-logo-box {
+      background: #ffffff !important;
+      border: 1px solid #bfdbfe !important;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
+    }
+
+    body.light-theme header a,
+    body.light-theme header span {
+      color: #0f172a !important;
+    }
+
+    /* Day Mode Header Navbar Badges & Buttons */
+    body.light-theme header .badge-drive {
+      background: #e0f2fe !important;
+      border: 1px solid #bae6fd !important;
+      color: #0284c7 !important;
+    }
+
+    body.light-theme header .badge-pro {
+      background: #fef3c7 !important;
+      border: 1px solid #fde68a !important;
+      color: #b45309 !important;
+    }
+
+    body.light-theme header .btn-plans {
+      background: #ffffff !important;
+      border: 1px solid #c7d2fe !important;
+      color: #4338ca !important;
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.08) !important;
+    }
+    body.light-theme header .btn-plans:hover {
+      background: #eef2ff !important;
+      border-color: #818cf8 !important;
+    }
+
+    body.light-theme header .btn-branding {
+      background: #ffffff !important;
+      border: 1px solid #e9d5ff !important;
+      color: #7e22ce !important;
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.08) !important;
+    }
+    body.light-theme header .btn-branding:hover {
+      background: #faf5ff !important;
+      border-color: #c084fc !important;
+    }
+
+    body.light-theme header .btn-pipeline {
+      background: #ffffff !important;
+      border: 1px solid #bae6fd !important;
+      color: #0284c7 !important;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08) !important;
+    }
+    body.light-theme header .btn-pipeline:hover {
+      background: #f0f9ff !important;
+      border-color: #38bdf8 !important;
+    }
+
+    body.light-theme header #themeToggleBtn {
+      background: #ffffff !important;
+      border: 1px solid #fed7aa !important;
+      color: #d97706 !important;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.08) !important;
+    }
+
+    body.light-theme header .btn-signout {
+      background: #ffffff !important;
+      border: 1px solid #fecdd3 !important;
+      color: #e11d48 !important;
+      box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08) !important;
+    }
+    body.light-theme header .btn-signout:hover {
+      background: #fff1f2 !important;
+      border-color: #fda4af !important;
     }
 
     body.light-theme .obsidian-card {
@@ -123,10 +208,28 @@
     }
 
     body.light-theme input,
-    body.light-theme textarea {
+    body.light-theme textarea,
+    body.light-theme select {
       background-color: #ffffff !important;
       border: 1px solid #93c5fd !important;
       color: #0f172a !important;
+    }
+
+    body.light-theme #dropZoneContainer {
+      background: #f8fbff !important;
+      border-color: #93c5fd !important;
+    }
+
+    body.light-theme #dropZoneContainer:hover {
+      background: #ffffff !important;
+      border-color: #0284c7 !important;
+    }
+
+    body.light-theme #filesTableBody tr:hover {
+      background: rgba(224, 242, 254, 0.3) !important;
+    }
+    body.light-theme #filesTableBody td {
+      color: #1e293b !important;
     }
 
     .crop-selection-box {
@@ -141,7 +244,7 @@
 
   <div class="site-mountain-backdrop"></div>
 
-  <!-- SAVE CHANGES CONFIRMATION MODAL -->
+  <!-- CONFIRM SAVE CHANGES PROMPT MODAL -->
   <div id="saveChangesModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4 border border-indigo-500/40 shadow-2xl">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">⚠️</div>
@@ -199,7 +302,7 @@
             <span class="text-sm">😀</span><span>STICKERS</span>
           </button>
           <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn">
-            <span class="text-sm">🖼</span><span>FRAME</span>
+            <span class="text-sm">🖼️</span><span>FRAME</span>
           </button>
           <button onclick="selectStudioCategory('corners')" id="tabBtn-corners" class="tool-tab-btn">
             <span class="text-sm">🔲</span><span>CORNERS</span>
@@ -374,12 +477,8 @@
           <div class="brand-logo-box w-9 h-9 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
               <defs>
-                <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#38bdf8"/><stop offset="60%" stop-color="#6366f1"/><stop offset="100%" stop-color="#4338ca"/>
-                </linearGradient>
-                <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#c084fc"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06b6d4"/>
-                </linearGradient>
+                <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="60%" stop-color="#6366f1"/><stop offset="100%" stop-color="#4338ca"/></linearGradient>
+                <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c084fc"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient>
               </defs>
               <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
               <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
@@ -388,21 +487,28 @@
           </div>
           <span class="font-black text-2xl tracking-tight">Zephyr</span>
         </a>
-        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Drive</span>
-        <span id="tierBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">★ PRO</span>
+        <span class="badge-drive text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Drive</span>
+        <span id="tierBadge" class="badge-pro text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">★ PRO</span>
       </div>
 
       <div class="flex items-center gap-2.5">
-        <button onclick="openPlansModal()" class="header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
+        <button onclick="openPlansModal()" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
           <span>⚡</span><span>Your Plans</span>
         </button>
-        <a href="/" class="header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-sky-500/10 text-sky-300 border-sky-500/25 hover:border-sky-400/50">
+
+        <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
+          <span>🎨</span><span>Branding</span>
+        </button>
+
+        <a href="/" class="btn-pipeline header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-sky-500/10 text-sky-300 border-sky-500/25 hover:border-sky-400/50">
           <span>Transfer Pipeline</span>
         </a>
+
         <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-8 h-8 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <button onclick="signOut()" class="text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/25 px-3.5 py-1.5 rounded-full font-bold transition cursor-pointer">
+
+        <button onclick="signOut()" class="btn-signout text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/25 px-3.5 py-1.5 rounded-full font-bold transition cursor-pointer">
           Sign Out
         </button>
       </div>
@@ -514,53 +620,6 @@
   </footer>
 
   <script>
-    function initTheme() {
-      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
-      const icon = document.getElementById("themeIcon");
-      if (savedTheme === "light") {
-        document.body.classList.add("light-theme");
-        if (icon) icon.innerText = "🌙";
-      } else {
-        document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️";
-      }
-    }
-
-    function toggleTheme() {
-      const isLight = document.body.classList.toggle("light-theme");
-      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
-      const icon = document.getElementById("themeIcon");
-      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
-    }
-
-    initTheme();
-
-    function formatBytes(bytes, decimals = 2) {
-      if (!bytes || bytes === 0) return '0 B';
-      const k = 1024;
-      const dm = decimals < 0 ? 0 : decimals;
-      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
-
-    function getStoredUserId() {
-      const sessionId = sessionStorage.getItem("user_id") || sessionStorage.getItem("vp_user_id");
-      if (sessionId) return sessionId;
-      const direct = localStorage.getItem("user_id") || localStorage.getItem("vp_user_id");
-      if (direct) return direct;
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(k));
-            if (parsed?.user?.id) return parsed.user.id;
-          } catch(e) {}
-        }
-      }
-      return null;
-    }
-
     const currentUserId = getStoredUserId();
     if (!currentUserId) {
       window.location.href = "/auth";
@@ -1141,6 +1200,12 @@
       fitStudioImageToViewport();
     }
 
+    function cancelCropMode() {
+      const box = document.getElementById("cropSelectionBox");
+      if (box) box.classList.add("hidden");
+      selectStudioCategory('draw');
+    }
+
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
       const tempCanvas = document.createElement("canvas");
@@ -1506,6 +1571,89 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
         });
+      } catch(e) {}
+    }
+
+    function openUpgradeModal() {
+      selectUpgradeTarget("pro");
+      document.getElementById("upgradeModal").classList.remove("hidden");
+    }
+
+    function closeUpgradeModal() { document.getElementById("upgradeModal").classList.add("hidden"); }
+
+    async function selectUpgradeTarget(tier) {
+      selectedUpgradeTarget = tier;
+      ['micro', 'lite', 'plus', 'pro'].forEach(t => {
+        const card = document.getElementById(`planCard-${t}`);
+        if (card) {
+          if (t === tier) {
+            card.classList.add("border-indigo-500", "bg-indigo-500/10");
+          } else {
+            card.classList.remove("border-indigo-500", "bg-indigo-500/10");
+          }
+        }
+      });
+
+      try {
+        const res = await fetch("/api/drive/upgrade-quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: currentUserId, target_tier: tier })
+        });
+        const quote = await res.json();
+
+        document.getElementById("quoteTargetText").innerText = `${quote.target_name}`;
+        document.getElementById("quoteNetCapacity").innerText = `${formatBytes(quote.target_quota_bytes)}`;
+        document.getElementById("quoteDaysLeft").innerText = `${quote.days_remaining} days`;
+        document.getElementById("quoteSurcharge").innerText = `$${quote.surcharge.toFixed(2)}`;
+        document.getElementById("quoteTotalDue").innerText = `$${quote.charge_amount.toFixed(2)}`;
+      } catch(e) {}
+    }
+
+    function executePlanUpgrade() {
+      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
+      const productId = envConfig.products[selectedUpgradeTarget] || envConfig.products["pro"];
+      let targetUrl = `${envConfig.domain}/${productId}`;
+      window.location.href = targetUrl;
+    }
+
+    function openBrandingModal() {
+      fetch(`/api/branding/${currentUserId}`)
+        .then(r => r.json())
+        .then(b => {
+          document.getElementById("brandTitle").value = b.brand_title || "";
+          document.getElementById("brandColorPicker").value = b.brand_accent_color || "#6366f1";
+          document.getElementById("brandColorText").value = b.brand_accent_color || "#6366f1";
+          document.getElementById("brandLogoUrl").value = b.brand_logo_url || "";
+          document.getElementById("brandBgUrl").value = b.brand_bg_url || "";
+        });
+
+      document.getElementById("brandingModal").classList.remove("hidden");
+    }
+
+    function closeBrandingModal() { document.getElementById("brandingModal").classList.add("hidden"); }
+
+    async function saveBrandingPreferences() {
+      const payload = {
+        user_id: currentUserId,
+        brand_title: document.getElementById("brandTitle").value.trim(),
+        brand_accent_color: document.getElementById("brandColorText").value.trim(),
+        brand_logo_url: document.getElementById("brandLogoUrl").value.trim() || null,
+        brand_bg_url: document.getElementById("brandBgUrl").value.trim() || null
+      };
+
+      try {
+        const res = await fetch("/api/branding/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert("Branding preferences saved successfully!");
+          closeBrandingModal();
+        } else {
+          alert("Branding features require a Plus or Pro subscription.");
+        }
       } catch(e) {}
     }
 
