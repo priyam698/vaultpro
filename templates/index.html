@@ -227,8 +227,35 @@
       box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
       backdrop-filter: blur(12px);
     }
+
     body.light-theme #themeToggleBtn {
       color: #d97706 !important;
+    }
+
+    /* FIX FOR DRIVE BUTTON & TIER BADGE IN DAY MODE */
+    body.light-theme header a[href="/dashboard"],
+    body.light-theme header a[href="/dashboard"].header-pill {
+      background: #ffffff !important;
+      border: 1px solid #bfdbfe !important;
+      color: #0369a1 !important;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
+    }
+
+    body.light-theme header a[href="/dashboard"] span:first-child {
+      color: #0369a1 !important;
+    }
+
+    body.light-theme #headerTierBadge {
+      background: #e0f2fe !important;
+      border: 1px solid #7dd3fc !important;
+      color: #0284c7 !important;
+    }
+
+    /* FIX FOR ZERO-KNOWLEDGE HERO BADGE IN DAY MODE */
+    body.light-theme .hero-badge-pill {
+      background: #e0f2fe !important;
+      border: 1px solid #bae6fd !important;
+      color: #0369a1 !important;
     }
 
     body.light-theme .hero-headline {
@@ -742,8 +769,8 @@
         <a href="#control" class="text-xs font-bold hover:opacity-80 transition hidden lg:inline-block">Features</a>
         <a href="#pricing" class="text-xs font-bold hover:opacity-80 transition hidden sm:inline-block">Pricing</a>
         
-        <!-- Branding Quick Access Link (Themed Color Tab) -->
-        <a href="/dashboard" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/25 hover:border-indigo-400/50 text-xs font-semibold transition-all shadow-sm cursor-pointer">
+        <!-- Branding Quick Access Link -->
+        <a href="/dashboard" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/25 hover:border-indigo-400/50 text-xs font-semibold transition-all shadow-sm cursor-pointer">
           <span>🎨</span>
           <span>Branding</span>
         </a>
@@ -779,22 +806,22 @@
           <span id="themeIcon">☀️</span>
         </button>
 
-        <!-- Request Button (Cyan Color Tab) -->
-        <button onclick="openRequestModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 hover:border-cyan-400/50 text-xs font-semibold transition cursor-pointer">
+        <!-- Request Button -->
+        <button onclick="openRequestModal()" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 hover:border-cyan-400/50 text-xs font-semibold transition cursor-pointer">
           <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           <span>Request</span>
         </button>
 
-        <!-- Drive Vault Pill (Deep Indigo Vault Tab) -->
-        <a href="/dashboard" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0d1428] hover:bg-indigo-950/40 border border-indigo-500/30 text-xs font-medium transition">
+        <!-- Drive Vault Pill (Equipped with .header-pill for automatic Day Mode styling) -->
+        <a href="/dashboard" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-500/30 text-xs font-medium transition">
           <span>Drive</span>
           <span id="headerTierBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-600/30 text-indigo-300 border border-indigo-500/20">5 GB</span>
         </a>
 
         <!-- User Email Badge -->
-        <span id="userEmailBadge" class="hidden text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border border-slate-700/40 bg-slate-900/60 text-slate-300 shadow-sm"></span>
+        <span id="userEmailBadge" class="header-pill hidden text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border border-slate-700/40 bg-slate-900/60 text-slate-300 shadow-sm"></span>
 
-        <!-- Sign In / Sign Out Button (Rose Color Tab) -->
+        <!-- Sign In / Sign Out Button -->
         <a id="navAuthBtn" href="/auth" class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
           Sign In
         </a>
@@ -810,7 +837,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
       
       <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 text-xs font-bold shadow-lg backdrop-blur-md">
+        <div class="hero-badge-pill inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 text-indigo-400 text-xs font-bold shadow-lg backdrop-blur-md">
           <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
           Zero-Knowledge Transfers & Encrypted Cloud Drive
         </div>
@@ -842,24 +869,21 @@
           </div>
         </div>
 
-        <!-- Quick Actions with Themed Color Tabs (No White Borders) -->
+        <!-- Quick Actions with Themed Color Tabs -->
         <div class="pt-2 flex flex-wrap items-center gap-2.5 text-xs font-semibold">
           <span class="opacity-70 font-bold mr-1">Quick Actions:</span>
 
-          <!-- Receive Client Files (Sky / Cyan Color Tab) -->
-          <button onclick="openRequestModal()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/25 hover:border-sky-400/50 shadow-sm transition-all duration-200 cursor-pointer">
+          <button onclick="openRequestModal()" class="quick-btn inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/25 hover:border-sky-400/50 shadow-sm transition-all duration-200 cursor-pointer">
             <span>📥</span>
             <span>Receive Client Files</span>
           </button>
 
-          <!-- Cloud Drive Vault (Amber / Gold Color Tab) -->
-          <a href="/dashboard" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/25 hover:border-amber-400/50 shadow-sm transition-all duration-200 cursor-pointer">
+          <a href="/dashboard" class="quick-btn inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/25 hover:border-amber-400/50 shadow-sm transition-all duration-200 cursor-pointer">
             <span>📁</span>
             <span>Cloud Drive Vault</span>
           </a>
 
-          <!-- E-Sign Studio (Purple / Violet Color Tab) -->
-          <a href="/sign" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/25 hover:border-purple-400/50 shadow-sm transition-all duration-200 cursor-pointer">
+          <a href="/sign" class="quick-btn inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/25 hover:border-purple-400/50 shadow-sm transition-all duration-200 cursor-pointer">
             <span>✨</span>
             <span>E-Sign Studio</span>
           </a>
@@ -2285,9 +2309,6 @@
 
     initTheme();
 
-    // ==========================================
-    // PAYMENT ENVIRONMENT CONFIGURATION
-    // ==========================================
     const ACTIVE_PAYMENT_ENV = "test"; // <--- CHANGE TO "live" WHEN GOING LIVE
 
     const DODO_CONFIG = {
@@ -2658,7 +2679,7 @@
         for (let i = 0; i < selectedFiles.length; i++) {
           const file = selectedFiles[i];
           const safeName = (file.webkitRelativePath || file.name).replace(/[^a-zA-Z0-9_\-\.]/g, "_");
-          progressStatus.innerText = `Depositing file ${i + 1} of${selectedFiles.length}...`;
+          progressStatus.innerText = `Depositing file ${i + 1} of ${selectedFiles.length}...`;
 
           const emailOwnerParam = clientDropOwnerEmail ? `&owner_email=${encodeURIComponent(clientDropOwnerEmail)}` : "";
           const url = `/api/drive/upload-client?owner_id=${clientDropOwnerId}${emailOwnerParam}&filename=${encodeURIComponent(safeName)}&project_title=${encodeURIComponent(clientDropTitle)}&client_name=${encodeURIComponent(clientName)}&client_email=${encodeURIComponent(clientEmail)}`;
@@ -2972,13 +2993,13 @@
         if (totalSizeMb > userSingleLimitMb) {
           progressBox.classList.add("hidden");
           transferBtn.disabled = false;
-          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of${userSingleLimitMb} MB. Please upgrade your plan.`;
+          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of ${userSingleLimitMb} MB. Please upgrade your plan.`;
           document.getElementById("limitModal").classList.remove("hidden");
           return;
         }
 
         progressStatus.innerText = "Reserving cryptographic vault...";
-        progressBar.style.width = "10%`";
+        progressBar.style.width = "10%";
         progressPercent.innerText = "10%";
 
         const isPaywalled = document.getElementById("paywallToggle") ? document.getElementById("paywallToggle").checked : false;
