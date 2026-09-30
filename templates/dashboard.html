@@ -356,7 +356,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️️ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -865,7 +865,7 @@
         img.onload = () => {
           studioImgObj = img;
           
-          // Pure 1:1 pixel native dimensions - Prevents bloat and keeps small pixel art crisp
+          // Pure 1:1 pixel native dimensions
           studioCanvas.width = img.naturalWidth || img.width;
           studioCanvas.height = img.naturalHeight || img.height;
 
@@ -944,7 +944,6 @@
       const newW = Math.round(curW * scale);
       const newH = Math.round(curH * scale);
 
-      // Create pristine offscreen buffer
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = curW;
       tempCanvas.height = curH;
@@ -953,7 +952,6 @@
       studioCanvas.width = newW;
       studioCanvas.height = newH;
 
-      // Ultra-HD bicubic interpolation with high quality sharpness
       studioCtx.imageSmoothingEnabled = true;
       studioCtx.imageSmoothingQuality = "high";
       studioCtx.drawImage(tempCanvas, 0, 0, newW, newH);
@@ -1239,7 +1237,7 @@
           studioCtx.beginPath();
           studioCtx.moveTo(startX, startY);
           
-          // True 1:1 pixel mapping - No arbitrary multiplying factors!
+          // Pure 1:1 pixel mapping - No arbitrary multiplying factors!
           studioCtx.lineWidth = brushSize;
           studioCtx.lineCap = isPixelCrisp ? "square" : "round";
           studioCtx.lineJoin = isPixelCrisp ? "miter" : "round";
