@@ -588,7 +588,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -741,6 +741,12 @@
     let panDragStartY = 0;
     let isSpacePressed = false;
 
+    // Advanced Live Framing State
+    let frameBaseCanvas = null;
+    let activeFrameStyle = 'border'; // 'border', 'macos', 'polaroid', 'gallery', 'neon'
+    let activeFrameWidth = 36;
+    let activeFrameColor = '#ffffff';
+
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
@@ -850,6 +856,7 @@
         isFlippedV = false;
         panX = 0;
         panY = 0;
+        frameBaseCanvas = null;
         updatePanTransform();
         dismissFloatingPill();
 
@@ -1042,6 +1049,7 @@
         studioCanvas.height = state.height;
         studioCtx.clearRect(0, 0, state.width, state.height);
         studioCtx.drawImage(img, 0, 0);
+        frameBaseCanvas = null;
         applyStudioCanvasDisplaySize();
       };
       img.src = state.dataUrl;
@@ -1209,7 +1217,227 @@
     }
 
     // -------------------------------------------------------------
-    // 8. BACKGROUND ENGINE: STAGE BACKDROP & MATTE CANVAS BORDER
+    // 8. RELIABLE NON-DESTRUCTIVE FRAME ENGINE
+    // -------------------------------------------------------------
+    function captureFrameBase() {
+      if (!studioCanvas) return;
+      if (!frameBaseCanvas) {
+        frameBaseCanvas = document.createElement("canvas");
+        frameBaseCanvas.width = studioCanvas.width;
+        frameBaseCanvas.height = studioCanvas.height;
+        frameBaseCanvas.getContext("2d").drawImage(studioCanvas, 0, 0);
+      }
+    }
+
+    function setFrameStyle(style) {
+      captureFrameBase();
+      activeFrameStyle = style;
+      renderLiveFrame();
+      updateFrameUI();
+    }
+
+    function updateFrameWidth(w) {
+      captureFrameBase();
+      activeFrameWidth = parseInt(w) || 24;
+      const valBadge = document.getElementById("sFrameVal");
+      if (valBadge) valBadge.innerText = `${activeFrameWidth}px`;
+      renderLiveFrame();
+    }
+
+    function updateFrameColor(c) {
+      captureFrameBase();
+      activeFrameColor = c;
+      renderLiveFrame();
+    }
+
+    function renderLiveFrame() {
+      if (!studioCanvas || !studioCtx || !frameBaseCanvas) return;
+      const baseW = frameBaseCanvas.width;
+      const baseH = frameBaseCanvas.height;
+      const w = activeFrameWidth;
+      const col = activeFrameColor;
+
+      let newW = baseW;
+      let newH = baseH;
+      let imgX = 0;
+      let imgY = 0;
+
+      if (activeFrameStyle === 'border') {
+        newW = baseW + (w * 2);
+        newH = baseH + (w * 2);
+        imgX = w;
+        imgY = w;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        studioCtx.fillStyle = col;
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        studioCtx.save();
+        studioCtx.shadowColor = "rgba(0,0,0,0.45)";
+        studioCtx.shadowBlur = Math.round(w * 0.4);
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+        studioCtx.restore();
+
+      } else if (activeFrameStyle === 'macos') {
+        const headerH = Math.max(36, Math.round(w * 1.1));
+        const sidePad = Math.max(14, Math.round(w * 0.35));
+        const bottomPad = sidePad;
+
+        newW = baseW + (sidePad * 2);
+        newH = baseH + headerH + bottomPad;
+        imgX = sidePad;
+        imgY = headerH;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Window Background & Frame
+        studioCtx.fillStyle = col;
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // macOS Header Bar
+        studioCtx.fillStyle = "rgba(0,0,0,0.12)";
+        studioCtx.fillRect(0, 0, newW, headerH);
+
+        // Traffic Light Controls
+        const btnY = Math.round(headerH / 2);
+        const radius = Math.max(5, Math.min(8, Math.round(headerH * 0.18)));
+        const colors = ["#ff5f56", "#ffbd2e", "#27c93f"];
+        colors.forEach((c, idx) => {
+          studioCtx.beginPath();
+          studioCtx.arc(sidePad + (idx * 22) + 6, btnY, radius, 0, Math.PI * 2);
+          studioCtx.fillStyle = c;
+          studioCtx.fill();
+        });
+
+        // App Title
+        studioCtx.fillStyle = "rgba(0,0,0,0.55)";
+        studioCtx.font = `bold ${Math.max(11, Math.round(headerH * 0.35))}px 'Plus Jakarta Sans', sans-serif`;
+        studioCtx.textAlign = "center";
+        studioCtx.fillText(activeStudioFile ? activeStudioFile.filename : "Untitled Preview", newW / 2, btnY + 4);
+
+        // Inner Artwork
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+      } else if (activeFrameStyle === 'polaroid') {
+        const padSide = Math.max(20, w);
+        const padTop = padSide;
+        const padBottom = Math.round(padSide * 2.8);
+
+        newW = baseW + (padSide * 2);
+        newH = baseH + padTop + padBottom;
+        imgX = padSide;
+        imgY = padTop;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Polaroid Card Matte
+        studioCtx.fillStyle = col === "#ffffff" ? "#fbfaf8" : col;
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Artwork
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+        // Subtle inner image bevel
+        studioCtx.strokeStyle = "rgba(0,0,0,0.15)";
+        studioCtx.lineWidth = 1;
+        studioCtx.strokeRect(imgX, imgY, baseW, baseH);
+
+      } else if (activeFrameStyle === 'gallery') {
+        const outerFrame = Math.max(16, Math.round(w * 0.6));
+        const matte = Math.max(20, Math.round(w * 0.8));
+        const totalBorder = outerFrame + matte;
+
+        newW = baseW + (totalBorder * 2);
+        newH = baseH + (totalBorder * 2);
+        imgX = totalBorder;
+        imgY = totalBorder;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Outer Wood/Metal moulding
+        studioCtx.fillStyle = col;
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Inner Passe-Partout Archival Matte
+        studioCtx.fillStyle = "#fdfdfc";
+        studioCtx.fillRect(outerFrame, outerFrame, newW - (outerFrame * 2), newH - (outerFrame * 2));
+
+        // Bevel core shadow
+        studioCtx.strokeStyle = "rgba(0,0,0,0.25)";
+        studioCtx.lineWidth = 2;
+        studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
+
+        // Artwork
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+      } else if (activeFrameStyle === 'neon') {
+        const glowPad = Math.max(24, w);
+        newW = baseW + (glowPad * 2);
+        newH = baseH + (glowPad * 2);
+        imgX = glowPad;
+        imgY = glowPad;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        studioCtx.fillStyle = "#070a13";
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Radiant Outer Glow Line
+        studioCtx.save();
+        studioCtx.shadowColor = col;
+        studioCtx.shadowBlur = Math.round(glowPad * 0.9);
+        studioCtx.strokeStyle = col;
+        studioCtx.lineWidth = 4;
+        studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
+        studioCtx.restore();
+
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+      }
+
+      applyStudioCanvasDisplaySize();
+    }
+
+    function commitFrameChanges() {
+      if (!studioCanvas || !frameBaseCanvas) return;
+      pushHistorySnapshot();
+      frameBaseCanvas = null; // Reset frame base after committing
+      alert("✓ Frame applied and committed to canvas!");
+      selectStudioCategory('draw');
+    }
+
+    function resetFrameToOriginal() {
+      if (!frameBaseCanvas || !studioCanvas || !studioCtx) return;
+      studioCanvas.width = frameBaseCanvas.width;
+      studioCanvas.height = frameBaseCanvas.height;
+      studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+      studioCtx.drawImage(frameBaseCanvas, 0, 0);
+      frameBaseCanvas = null;
+      fitStudioImageToViewport();
+      updateFrameUI();
+    }
+
+    function updateFrameUI() {
+      const styles = ['border', 'macos', 'polaroid', 'gallery', 'neon'];
+      styles.forEach(s => {
+        const btn = document.getElementById(`fBtn-${s}`);
+        if (btn) {
+          if (s === activeFrameStyle) {
+            btn.className = "px-3 py-1 rounded-xl bg-sky-600 text-white font-black shadow transition";
+          } else {
+            btn.className = "px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition";
+          }
+        }
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 9. BACKGROUND ENGINE (STAGE BACKDROP & MATTE BORDERS)
     // -------------------------------------------------------------
     function setStageBackground(color, isChecker = false) {
       const stage = document.getElementById("studioBodyStage");
@@ -1273,12 +1501,11 @@
     }
 
     function setCanvasBackground(color) {
-      // Backwards-compatible alias: shifts the stage background immediately
       setStageBackground(color, false);
     }
 
     // -------------------------------------------------------------
-    // 9. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
+    // 10. CATEGORY ROUTER (DRAWER RENDERING)
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
@@ -1297,7 +1524,40 @@
       dismissFloatingPill();
       updateCursorForCategory();
 
-      if (cat === 'background') {
+      if (cat === 'frame') {
+        captureFrameBase();
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-slate-400">Frame Style:</span>
+              <button onclick="setFrameStyle('border')" id="fBtn-border" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'border' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Classic Border</button>
+              <button onclick="setFrameStyle('macos')" id="fBtn-macos" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'macos' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">macOS Window</button>
+              <button onclick="setFrameStyle('polaroid')" id="fBtn-polaroid" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'polaroid' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Polaroid</button>
+              <button onclick="setFrameStyle('gallery')" id="fBtn-gallery" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'gallery' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Gallery Matte</button>
+              <button onclick="setFrameStyle('neon')" id="fBtn-neon" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'neon' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Neon Glow</button>
+            </div>
+
+            <div class="flex items-center gap-3 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400">Thickness:</span>
+                <input type="range" min="10" max="120" value="${activeFrameWidth}" oninput="updateFrameWidth(this.value)" class="w-24 accent-sky-400 cursor-pointer">
+                <span id="sFrameVal" class="font-mono text-sky-400 w-10">${activeFrameWidth}px</span>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400">Color:</span>
+                <input type="color" value="${activeFrameColor}" onchange="updateFrameColor(this.value)" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+              </div>
+
+              <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
+
+              <button onclick="commitFrameChanges()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-md transition font-black">✓ Apply Frame</button>
+              <button onclick="resetFrameToOriginal()" class="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-slate-300 rounded-xl transition">Cancel</button>
+            </div>
+          </div>
+        `;
+        renderLiveFrame();
+      } else if (cat === 'background') {
         drawer.innerHTML = `
           <div class="flex items-center gap-4 flex-wrap text-xs font-bold w-full justify-between">
             <div class="flex items-center gap-2 flex-wrap">
@@ -1503,14 +1763,6 @@
             `).join('')}
           </div>
         `;
-      } else if (cat === 'frame') {
-        drawer.innerHTML = `
-          <div class="flex items-center gap-3 flex-wrap font-bold">
-            <span class="text-slate-400">Frame Width:</span>
-            <input type="range" min="0" max="60" value="0" oninput="applyFrame(brushColor, parseInt(this.value))" class="w-28 accent-sky-400 cursor-pointer">
-            <button onclick="applyPolaroidFrame()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200">Polaroid Preset</button>
-          </div>
-        `;
       } else if (cat === 'corners') {
         drawer.innerHTML = `
           <div class="flex items-center gap-3 font-bold">
@@ -1532,7 +1784,7 @@
     }
 
     // -------------------------------------------------------------
-    // 10. DRAWING & INTERACTIVE CONTENT ACTIONS
+    // 11. DRAWING & INTERACTIVE CONTENT ACTIONS
     // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
@@ -1713,7 +1965,7 @@
     }
 
     // -------------------------------------------------------------
-    // 11. APPLY INTERACTIVE CROP
+    // 12. APPLY INTERACTIVE CROP
     // -------------------------------------------------------------
     function applyInteractiveCrop() {
       if (!studioCanvas || !studioCtx) return;
@@ -1854,7 +2106,7 @@
     }
 
     // -------------------------------------------------------------
-    // 12. TRANSFORMS & ORIGINAL POSITION RESET
+    // 13. TRANSFORMS & ORIGINAL POSITION RESET
     // -------------------------------------------------------------
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
@@ -1982,34 +2234,6 @@
       fitStudioImageToViewport();
     }
 
-    function applyFrame(color, w) {
-      if (!studioCanvas || !studioCtx || w <= 0) return;
-      studioCtx.save();
-      studioCtx.lineWidth = w;
-      studioCtx.strokeStyle = color;
-      studioCtx.strokeRect(w/2, w/2, studioCanvas.width - w, studioCanvas.height - w);
-      studioCtx.restore();
-      pushHistorySnapshot();
-    }
-
-    function applyPolaroidFrame() {
-      if (!studioCanvas || !studioCtx) return;
-      const padTop = 30, padSide = 30, padBottom = 90;
-      const temp = document.createElement("canvas");
-      temp.width = studioCanvas.width;
-      temp.height = studioCanvas.height;
-      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
-
-      studioCanvas.width = temp.width + padSide * 2;
-      studioCanvas.height = temp.height + padTop + padBottom;
-
-      studioCtx.fillStyle = "#ffffff";
-      studioCtx.fillRect(0, 0, studioCanvas.width, studioCanvas.height);
-      studioCtx.drawImage(temp, padSide, padTop);
-      pushHistorySnapshot();
-      fitStudioImageToViewport();
-    }
-
     function resetImageCanvas() {
       if (!studioImgObj || !studioCtx || !studioCanvas) return;
       studioCanvas.width = studioImgObj.naturalWidth || studioImgObj.width;
@@ -2021,6 +2245,7 @@
       isFlippedV = false;
       panX = 0;
       panY = 0;
+      frameBaseCanvas = null;
       updatePanTransform();
       dismissFloatingPill();
       pushHistorySnapshot();
