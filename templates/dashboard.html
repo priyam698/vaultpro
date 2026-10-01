@@ -139,6 +139,12 @@
       animation: flashPillAnim 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
+    #canvasPositionWrapper {
+      will-change: transform;
+      user-select: none;
+      touch-action: none;
+    }
+
     /* ========================================================================= */
     /* LIGHT THEME (DAY MODE) OVERRIDES                                          */
     /* ========================================================================= */
@@ -335,12 +341,12 @@
       <!-- Main Stage Grid -->
       <div class="flex-1 flex overflow-hidden relative">
         
-        <!-- Center Viewport -->
+        <!-- Center Viewport (Pan Area) -->
         <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-3 artboard-checker">
           
-          <!-- 1. IMAGE EDITOR VIEWPORT -->
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
-            <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4 relative">
+            <!-- Panning Container: Uses 2D matrix translate offset instead of scroll limits -->
+            <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-hidden p-4 relative select-none">
               <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
                 <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
@@ -362,7 +368,7 @@
             </div>
           </div>
 
-          <!-- 2. VIDEO STUDIO -->
+          <!-- Video Studio Stage -->
           <div id="studioVideoStage" class="hidden w-full h-full flex flex-col items-center justify-center space-y-4">
             <div class="flex-1 w-full flex items-center justify-center p-2 overflow-hidden">
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
@@ -374,10 +380,10 @@
             </div>
           </div>
 
-          <!-- 3. CODE & NOTEBOOKS EDITOR -->
+          <!-- Code & Notebooks Editor Stage -->
           <textarea id="studioCodeEditor" oninput="markStudioModified()" class="hidden w-full h-full p-6 text-xs font-mono bg-[#050811] text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text" placeholder="Edit scripts, notebooks, or text..."></textarea>
 
-          <!-- 4. UNIVERSAL FALLBACK -->
+          <!-- Fallback Stage -->
           <div id="studioFallbackStage" class="hidden text-center space-y-3 p-8 max-w-sm mx-auto">
             <div class="w-16 h-16 rounded-3xl bg-sky-500/10 border border-sky-500/20 text-sky-400 mx-auto flex items-center justify-center text-3xl font-bold">📦</div>
             <strong id="studioFallbackName" class="text-sm font-bold text-white block truncate">filename.bin</strong>
@@ -789,10 +795,12 @@
     let dragEndX = 0, dragEndY = 0;
     let drawingPoints = [];
 
-    // Hand / Pan Tool States
+    // 2D Matrix Translation Pan Engine
+    let panX = 0;
+    let panY = 0;
     let isPanning = false;
-    let panStartX = 0, panStartY = 0;
-    let scrollStartLeft = 0, scrollStartTop = 0;
+    let panDragStartX = 0;
+    let panDragStartY = 0;
     let isSpacePressed = false;
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
@@ -902,6 +910,9 @@
         currentRotationDeg = 0;
         isFlippedH = false;
         isFlippedV = false;
+        panX = 0;
+        panY = 0;
+        updatePanTransform();
         dismissFloatingPill();
 
         const img = new Image();
@@ -1166,7 +1177,7 @@
     function deleteActiveContent(e) {
       if (e) e.stopPropagation();
       if (isContentLocked) {
-        alert("⚠️ This content is currently locked! Please click 'Unlock' first to delete it.");
+        alert("⚠️️ This content is currently locked! Please click 'Unlock' first to delete it.");
         return;
       }
       undoStudioCanvas();
@@ -1174,8 +1185,15 @@
     }
 
     // -------------------------------------------------------------
-    // 7. HAND / PAN ENGINE (CATCHING & SLIDING)
+    // 7. 2D TRANSLATE PAN ENGINE (FREE 360-DEGREE DRAGGING)
     // -------------------------------------------------------------
+    function updatePanTransform() {
+      const wrapper = document.getElementById("canvasPositionWrapper");
+      if (wrapper) {
+        wrapper.style.transform = `translate3d(${panX}px, ${panY}px, 0)`;
+      }
+    }
+
     function setupHandPanEngine() {
       const viewport = document.getElementById("studioCanvasViewport");
       if (!viewport) return;
@@ -1183,10 +1201,8 @@
       viewport.addEventListener("mousedown", (e) => {
         if (currentCategory === 'hand' || isSpacePressed) {
           isPanning = true;
-          panStartX = e.clientX;
-          panStartY = e.clientY;
-          scrollStartLeft = viewport.scrollLeft;
-          scrollStartTop = viewport.scrollTop;
+          panDragStartX = e.clientX - panX;
+          panDragStartY = e.clientY - panY;
           viewport.style.cursor = "grabbing";
           if (studioCanvas) studioCanvas.style.cursor = "grabbing";
           e.preventDefault();
@@ -1195,10 +1211,9 @@
 
       window.addEventListener("mousemove", (e) => {
         if (isPanning) {
-          const dx = e.clientX - panStartX;
-          const dy = e.clientY - panStartY;
-          viewport.scrollLeft = scrollStartLeft - dx;
-          viewport.scrollTop = scrollStartTop - dy;
+          panX = e.clientX - panDragStartX;
+          panY = e.clientY - panDragStartY;
+          updatePanTransform();
           e.preventDefault();
         }
       });
@@ -1215,7 +1230,7 @@
         }
       });
 
-      // Spacebar hold to temporarily catch & slide from any tool (Figma/Canva style)
+      // Spacebar quick-grab shortcut (Photoshop/Canva/Figma workflow)
       window.addEventListener("keydown", (e) => {
         if (e.code === "Space" && !isSpacePressed && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
           const modal = document.getElementById("driveStudioModal");
@@ -1281,13 +1296,13 @@
           <div class="flex items-center gap-3 flex-wrap font-bold text-xs">
             <span class="text-sky-300 flex items-center gap-1.5">
               <span>🖐️</span>
-              <span>Hand Pan Tool Active: Click & drag anywhere to catch, slide and pan around the image.</span>
+              <span>Hand Pan Tool: Click & drag anywhere in 360° to slide across the artboard.</span>
             </span>
-            <button onclick="fitStudioImageToViewport()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">Fit to Screen</button>
-            <button onclick="setStudioZoomActual()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">100% Actual Size</button>
+            <button onclick="fitStudioImageToViewport()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">Fit Screen</button>
+            <button onclick="setStudioZoomActual()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">100% Zoom</button>
             <button onclick="resetOrientationToOriginal()" class="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 transition">🎯 Center Canvas</button>
           </div>
-          <span class="text-slate-400 font-mono text-[11px]">Pro-tip: Hold [Spacebar] anytime to grab and pan</span>
+          <span class="text-slate-400 font-mono text-[11px]">Tip: Hold [Spacebar] anytime to catch and drag</span>
         `;
       } else if (cat === 'draw') {
         drawer.innerHTML = `
@@ -1366,7 +1381,7 @@
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap">
             <span class="text-sky-300 font-bold flex items-center gap-1.5">
-              <span>✂️️</span>
+              <span>✂</span>
               <span>Click & drag across the image to select the crop box</span>
             </span>
             <button onclick="applyInteractiveCrop()" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition flex items-center gap-1">
@@ -1513,7 +1528,6 @@
         zoomStudioCanvas(delta);
       };
 
-      // Right-click or normal click on canvas content flashes the Lock and Delete pill
       studioCanvas.oncontextmenu = (e) => {
         e.preventDefault();
         flashFloatingPill(e.clientX, e.clientY);
@@ -1521,7 +1535,7 @@
 
       studioCanvas.onmousedown = (e) => {
         if (currentCategory === 'hand' || isSpacePressed) {
-          return; // Let the Hand / Pan engine handle this event
+          return;
         }
 
         const rect = studioCanvas.getBoundingClientRect();
@@ -1891,6 +1905,9 @@
         currentRotationDeg = 0;
       }
 
+      panX = 0;
+      panY = 0;
+      updatePanTransform();
       fitStudioImageToViewport();
     }
 
@@ -1997,6 +2014,9 @@
       currentRotationDeg = 0;
       isFlippedH = false;
       isFlippedV = false;
+      panX = 0;
+      panY = 0;
+      updatePanTransform();
       dismissFloatingPill();
       pushHistorySnapshot();
       fitStudioImageToViewport();
@@ -2015,6 +2035,9 @@
       const minDisplayScale = Math.min(availW / nw, Math.max(480 / nw, 480 / nh));
       studioZoom = Math.min(Math.max(scaleFit, minDisplayScale), 4.5);
 
+      panX = 0;
+      panY = 0;
+      updatePanTransform();
       applyStudioCanvasDisplaySize();
     }
 
