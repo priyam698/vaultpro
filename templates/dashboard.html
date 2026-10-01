@@ -116,6 +116,29 @@
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
     }
 
+    /* Flashing Pill Popup Animation */
+    @keyframes flashPillAnim {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(0.75);
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.8);
+      }
+      45% {
+        opacity: 1;
+        transform: translate(-50%, -125%) scale(1.08);
+        box-shadow: 0 0 25px 6px rgba(99, 102, 241, 0.6), 0 0 45px rgba(56, 189, 248, 0.4);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -120%) scale(1);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 18px rgba(99, 102, 241, 0.35);
+      }
+    }
+
+    .pill-flash-active {
+      animation: flashPillAnim 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
     /* ========================================================================= */
     /* LIGHT THEME (DAY MODE) OVERRIDES                                          */
     /* ========================================================================= */
@@ -317,9 +340,23 @@
           <!-- 1. IMAGE EDITOR VIEWPORT -->
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
             <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4 relative">
-              <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl overflow-hidden">
+              <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
                 <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
+
+                <!-- FLASHING QUICK-ACTION PILL (LOCK & DELETE) -->
+                <div id="floatingActionPill" class="hidden absolute z-30 flex items-center gap-1.5 p-1 rounded-2xl bg-[#090e1a]/95 border border-indigo-500/60 shadow-2xl backdrop-blur-xl">
+                  <button id="pillLockBtn" onclick="toggleLockActiveContent(event)" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <span id="pillLockIcon">🔒</span>
+                    <span id="pillLockLabel">Lock</span>
+                  </button>
+                  <button id="pillDeleteBtn" onclick="deleteActiveContent(event)" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <span>🗑️</span>
+                    <span>Delete</span>
+                  </button>
+                  <button onclick="dismissFloatingPill()" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white text-xs font-bold rounded-lg hover:bg-white/10 ml-0.5">✕</button>
+                </div>
+
               </div>
             </div>
           </div>
@@ -330,7 +367,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️️ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -742,6 +779,9 @@
     let canvasHistory = [];
     let historyStep = -1;
 
+    // Lock Status of Active Content
+    let isContentLocked = false;
+
     // Interactive Drag Coordinate Buffer
     let isDragToolActive = false;
     let dragStartX = 0, dragStartY = 0;
@@ -855,6 +895,7 @@
         currentRotationDeg = 0;
         isFlippedH = false;
         isFlippedV = false;
+        dismissFloatingPill();
 
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -1021,6 +1062,7 @@
         renderHistoryStep(historyStep);
         updateHistoryButtons();
         markStudioModified();
+        dismissFloatingPill();
       }
     }
 
@@ -1030,6 +1072,7 @@
         renderHistoryStep(historyStep);
         updateHistoryButtons();
         markStudioModified();
+        dismissFloatingPill();
       }
     }
 
@@ -1067,7 +1110,63 @@
     });
 
     // -------------------------------------------------------------
-    // 6. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
+    // 6. FLASHING QUICK-ACTION PILL (LOCK & DELETE)
+    // -------------------------------------------------------------
+    function flashFloatingPill(clientX, clientY) {
+      const pill = document.getElementById("floatingActionPill");
+      const wrapper = document.getElementById("canvasPositionWrapper");
+      if (!pill || !wrapper) return;
+
+      const rect = wrapper.getBoundingClientRect();
+      const posX = Math.max(80, Math.min(rect.width - 80, clientX - rect.left));
+      const posY = Math.max(30, Math.min(rect.height - 20, clientY - rect.top));
+
+      pill.style.left = `${posX}px`;
+      pill.style.top = `${posY}px`;
+
+      pill.classList.remove("hidden");
+      pill.classList.remove("pill-flash-active");
+      void pill.offsetWidth; // Force CSS repaint to re-trigger flash animation
+      pill.classList.add("pill-flash-active");
+    }
+
+    function dismissFloatingPill() {
+      const pill = document.getElementById("floatingActionPill");
+      if (pill) pill.classList.add("hidden");
+    }
+
+    function toggleLockActiveContent(e) {
+      if (e) e.stopPropagation();
+      isContentLocked = !isContentLocked;
+      const icon = document.getElementById("pillLockIcon");
+      const label = document.getElementById("pillLockLabel");
+      const btn = document.getElementById("pillLockBtn");
+
+      if (isContentLocked) {
+        icon.innerText = "🔓";
+        label.innerText = "Unlock";
+        btn.className = "px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer";
+        alert("🔒 Content locked! Modifications are protected.");
+      } else {
+        icon.innerText = "🔒";
+        label.innerText = "Lock";
+        btn.className = "px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer";
+        alert("🔓 Content unlocked!");
+      }
+    }
+
+    function deleteActiveContent(e) {
+      if (e) e.stopPropagation();
+      if (isContentLocked) {
+        alert("⚠️ This content is currently locked! Please click 'Unlock' first to delete it.");
+        return;
+      }
+      undoStudioCanvas();
+      dismissFloatingPill();
+    }
+
+    // -------------------------------------------------------------
+    // 7. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
@@ -1106,7 +1205,7 @@
               <button onclick="setMarkerSize(16)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">16px</button>
             </div>
           </div>
-          <span class="text-sky-400 font-mono text-[11px] font-bold">● Freehand Smooth Vector Inking Active</span>
+          <span class="text-sky-400 font-mono text-[11px] font-bold">● Freehand Smooth Vector Inking Active (Click content for Lock/Delete)</span>
         `;
       } else if (cat === 'lines') {
         drawer.innerHTML = `
@@ -1294,7 +1393,7 @@
     }
 
     // -------------------------------------------------------------
-    // 7. SMOOTH INKING & UNIFIED DRAG HANDLER WITH HORIZONTAL / VERTICAL LINES
+    // 8. DRAWING & INTERACTIVE CONTENT ACTIONS
     // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
@@ -1306,6 +1405,12 @@
         e.preventDefault();
         const delta = e.deltaY < 0 ? 0.15 : -0.15;
         zoomStudioCanvas(delta);
+      };
+
+      // Right-click or normal click on canvas content flashes the Lock and Delete pill
+      studioCanvas.oncontextmenu = (e) => {
+        e.preventDefault();
+        flashFloatingPill(e.clientX, e.clientY);
       };
 
       studioCanvas.onmousedown = (e) => {
@@ -1328,6 +1433,7 @@
             studioCtx.fillText(txt, startX, startY);
             studioCtx.restore();
             pushHistorySnapshot();
+            flashFloatingPill(e.clientX, e.clientY);
           }
           return;
         }
@@ -1447,7 +1553,7 @@
         }
       };
 
-      window.onmouseup = () => {
+      window.onmouseup = (e) => {
         if (isDragToolActive) {
           isDragToolActive = false;
         }
@@ -1455,12 +1561,13 @@
           isDrawing = false;
           if (studioCtx) studioCtx.globalAlpha = 1.0;
           pushHistorySnapshot();
+          if (e) flashFloatingPill(e.clientX, e.clientY);
         }
       };
     }
 
     // -------------------------------------------------------------
-    // 8. APPLY INTERACTIVE CROP
+    // 9. APPLY INTERACTIVE CROP
     // -------------------------------------------------------------
     function applyInteractiveCrop() {
       if (!studioCanvas || !studioCtx) return;
@@ -1601,7 +1708,7 @@
     }
 
     // -------------------------------------------------------------
-    // 9. ORIENTATION, TRANSFORMS & ORIGINAL POSITION RESET
+    // 10. TRANSFORMS & ORIGINAL POSITION RESET
     // -------------------------------------------------------------
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
@@ -1776,6 +1883,7 @@
       currentRotationDeg = 0;
       isFlippedH = false;
       isFlippedV = false;
+      dismissFloatingPill();
       pushHistorySnapshot();
       fitStudioImageToViewport();
     }
