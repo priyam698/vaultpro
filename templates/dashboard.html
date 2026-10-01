@@ -56,7 +56,7 @@
       border: 1px solid rgba(99, 102, 241, 0.45) !important;
     }
 
-    /* Top Photo-Editor Segmented Ribbon Tabs */
+    /* Top Photo-Editor Ribbon Tabs */
     .tool-tab-btn {
       display: flex;
       flex-direction: column;
@@ -106,6 +106,16 @@
       background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
 
+    /* Figma-style Interactive Crop Selection Box */
+    .crop-selection-box {
+      border: 2px dashed #38bdf8;
+      background: rgba(56, 189, 248, 0.18);
+      position: absolute;
+      pointer-events: none;
+      z-index: 30;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+    }
+
     /* ========================================================================= */
     /* LIGHT THEME (DAY MODE) OVERRIDES                                          */
     /* ========================================================================= */
@@ -140,7 +150,6 @@
       color: #0f172a !important;
     }
 
-    /* Day Mode Header Navbar Badges & Buttons */
     body.light-theme header .badge-drive {
       background: #e0f2fe !important;
       border: 1px solid #bae6fd !important;
@@ -158,10 +167,6 @@
       border: 1px solid #c7d2fe !important;
       color: #4338ca !important;
       box-shadow: 0 2px 6px rgba(99, 102, 241, 0.08) !important;
-    }
-    body.light-theme header .btn-plans:hover {
-      background: #eef2ff !important;
-      border-color: #818cf8 !important;
     }
 
     body.light-theme header .btn-branding {
@@ -243,7 +248,7 @@
     </div>
   </div>
 
-  <!-- DRIVE STUDIO ADVANCED WORKSPACE MODAL (PREMIUM FIGMA/CANVA ARCHITECTURE) -->
+  <!-- DRIVE STUDIO ADVANCED WORKSPACE MODAL -->
   <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/95 backdrop-blur-2xl hidden p-2 sm:p-4">
     <div class="obsidian-card w-full max-w-[1480px] h-[97vh] rounded-3xl flex flex-col justify-between border border-white/15 shadow-2xl overflow-hidden relative">
       
@@ -270,7 +275,7 @@
           <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn"><span class="text-sm">✂️</span><span>CROP</span></button>
           <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn"><span class="text-sm">🔄</span><span>TRANSFORM</span></button>
           <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active"><span class="text-sm">✏️</span><span>DRAW</span></button>
-          <button onclick="selectStudioCategory('highlighter')" id="tabBtn-highlighter" class="tool-tab-btn"><span class="text-sm">🖍️️</span><span>HIGHLIGHT</span></button>
+          <button onclick="selectStudioCategory('highlighter')" id="tabBtn-highlighter" class="tool-tab-btn"><span class="text-sm">🖍</span><span>HIGHLIGHT</span></button>
           <button onclick="selectStudioCategory('redact')" id="tabBtn-redact" class="tool-tab-btn"><span class="text-sm">🔒</span><span>REDACT</span></button>
           <button onclick="selectStudioCategory('text')" id="tabBtn-text" class="tool-tab-btn"><span class="text-sm">🔤</span><span>TEXT</span></button>
           <button onclick="selectStudioCategory('shapes')" id="tabBtn-shapes" class="tool-tab-btn"><span class="text-sm">🔷</span><span>SHAPES</span></button>
@@ -308,7 +313,7 @@
           <!-- 1. IMAGE EDITOR VIEWPORT -->
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
             <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4 relative">
-              <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
+              <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl overflow-hidden">
                 <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
               </div>
@@ -366,7 +371,6 @@
                 <button onclick="setSharpnessMode('smooth')" id="modeBtn-smooth" class="py-1.5 rounded-lg border border-white/10 text-slate-400 text-[10px] font-bold transition hover:bg-white/5">Smooth</button>
                 <button onclick="setSharpnessMode('ultra')" id="modeBtn-ultra" class="py-1.5 rounded-lg bg-gradient-to-r from-sky-500/25 to-indigo-600/35 border border-sky-400/60 text-sky-300 text-[10px] font-extrabold shadow-sm transition">✨ Ultra Super</button>
               </div>
-              <p class="text-[9px] text-slate-400 leading-tight">Ultra Super Smooth runs sub-pixel antialiasing with tone equalization to make screenshot text clear.</p>
             </div>
 
             <!-- AI Super Resolution -->
@@ -728,6 +732,7 @@
     let canvasHistory = [];
     let historyStep = -1;
 
+    // Interactive Drag Coordinate Buffer
     let isDragToolActive = false;
     let dragStartX = 0, dragStartY = 0;
     let dragEndX = 0, dragEndY = 0;
@@ -912,7 +917,6 @@
         }
         if (btnSmooth) btnSmooth.className = "py-1.5 rounded-lg bg-indigo-500/20 border border-indigo-400/60 text-indigo-300 text-[10px] font-black shadow";
       } else if (mode === 'ultra') {
-        // High-end Subpixel interpolation with micro-contrast equalized clarity
         canvas.className = "canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
         if (studioCtx) {
           studioCtx.imageSmoothingEnabled = true;
@@ -1090,8 +1094,22 @@
               <button onclick="setMarkerSize(16)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">16px</button>
             </div>
           </div>
-          
           <span class="text-sky-400 font-mono text-[11px] font-bold">● Freehand Smooth Vector Inking Active</span>
+        `;
+      } else if (cat === 'crop') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="text-sky-300 font-bold flex items-center gap-1.5">
+              <span>✂️</span>
+              <span>Click & drag across the image to select the crop box</span>
+            </span>
+            <button onclick="applyInteractiveCrop()" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition flex items-center gap-1">
+              <span>✓</span> Apply Crop
+            </button>
+            <button onclick="cancelCropMode()" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 font-bold cursor-pointer transition">
+              Cancel
+            </button>
+          </div>
         `;
       } else if (cat === 'highlighter') {
         drawer.innerHTML = `
@@ -1108,9 +1126,9 @@
         `;
       } else if (cat === 'redact') {
         drawer.innerHTML = `
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 flex-wrap">
             <span class="text-rose-400 font-bold">🔒 Drag over sensitive information to redact / blur</span>
-            <button onclick="applyRedaction('blur')" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition">Apply Gaussian Blur</button>
+            <button onclick="applyRedaction('blur')" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition">Apply Blur</button>
             <button onclick="applyRedaction('blackout')" class="px-3 py-1 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition">Blackout Box</button>
             <button onclick="cancelCropMode()" class="px-3 py-1 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
           </div>
@@ -1131,14 +1149,6 @@
               <input type="range" min="0" max="200" value="${adjustSaturation}" oninput="adjustSaturation=this.value; applyCanvasAdjustments();" class="w-20 accent-sky-400">
             </div>
             <button onclick="resetAdjustments()" class="px-2 py-0.5 rounded bg-white/10 text-slate-300">Reset</button>
-          </div>
-        `;
-      } else if (cat === 'crop') {
-        drawer.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="text-sky-300 font-bold">Drag over image to select crop box</span>
-            <button onclick="applyInteractiveCrop()" class="px-3.5 py-1 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition">Apply Crop</button>
-            <button onclick="cancelCropMode()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 cursor-pointer transition">Cancel</button>
           </div>
         `;
       } else if (cat === 'transform') {
@@ -1226,7 +1236,7 @@
     }
 
     // -------------------------------------------------------------
-    // 7. SMOOTH BEZIER INKING & DRAWING HANDLERS
+    // 7. SMOOTH INKING & UNIFIED DRAG HANDLER (FIXED CROP LOGIC)
     // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
@@ -1264,16 +1274,22 @@
           return;
         }
 
+        // UNIFIED CROP & REDACT SELECTION START
         if (currentCategory === 'crop' || currentCategory === 'redact') {
           isDragToolActive = true;
-          dragStartX = e.clientX - rect.left;
-          dragStartY = e.clientY - rect.top;
+          dragStartX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+          dragStartY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+          dragEndX = dragStartX;
+          dragEndY = dragStartY;
+
           const box = document.getElementById("cropSelectionBox");
-          box.style.left = `${dragStartX}px`;
-          box.style.top = `${dragStartY}px`;
-          box.style.width = '0px';
-          box.style.height = '0px';
-          box.classList.remove("hidden");
+          if (box) {
+            box.style.left = `${dragStartX}px`;
+            box.style.top = `${dragStartY}px`;
+            box.style.width = '0px';
+            box.style.height = '0px';
+            box.classList.remove("hidden");
+          }
           return;
         }
 
@@ -1305,20 +1321,25 @@
         const currX = (e.clientX - rect.left) * scaleX;
         const currY = (e.clientY - rect.top) * scaleY;
 
+        // UNIFIED CROP & REDACT SELECTION DRAG
         if ((currentCategory === 'crop' || currentCategory === 'redact') && isDragToolActive) {
-          const mouseX = e.clientX - rect.left;
-          const mouseY = e.clientY - rect.top;
-          const left = Math.min(dragStartX, mouseX);
-          const top = Math.min(dragStartY, mouseY);
-          const w = Math.abs(mouseX - dragStartX);
-          const h = Math.abs(mouseY - dragStartY);
-          const box = document.getElementById("cropSelectionBox");
-          box.style.left = `${left}px`;
-          box.style.top = `${top}px`;
-          box.style.width = `${w}px`;
-          box.style.height = `${h}px`;
+          const mouseX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+          const mouseY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
           dragEndX = mouseX;
           dragEndY = mouseY;
+
+          const left = Math.min(dragStartX, dragEndX);
+          const top = Math.min(dragStartY, dragEndY);
+          const w = Math.abs(dragEndX - dragStartX);
+          const h = Math.abs(dragEndY - dragStartY);
+
+          const box = document.getElementById("cropSelectionBox");
+          if (box) {
+            box.style.left = `${left}px`;
+            box.style.top = `${top}px`;
+            box.style.width = `${w}px`;
+            box.style.height = `${h}px`;
+          }
           return;
         }
 
@@ -1358,13 +1379,62 @@
       };
 
       window.onmouseup = () => {
-        if (isDragToolActive) isDragToolActive = false;
+        if (isDragToolActive) {
+          isDragToolActive = false;
+        }
         if (isDrawing) {
           isDrawing = false;
-          studioCtx.globalAlpha = 1.0;
+          if (studioCtx) studioCtx.globalAlpha = 1.0;
           pushHistorySnapshot();
         }
       };
+    }
+
+    // -------------------------------------------------------------
+    // 8. APPLY INTERACTIVE CROP (ROBUST CANVASS SLICING)
+    // -------------------------------------------------------------
+    function applyInteractiveCrop() {
+      if (!studioCanvas || !studioCtx) return;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
+      const sx = Math.round(Math.min(dragStartX, dragEndX) * scaleX);
+      const sy = Math.round(Math.min(dragStartY, dragEndY) * scaleY);
+      const sw = Math.round(Math.abs(dragEndX - dragStartX) * scaleX);
+      const sh = Math.round(Math.abs(dragEndY - dragStartY) * scaleY);
+
+      if (sw < 10 || sh < 10) {
+        alert("Please click and drag across the image to select the region to crop.");
+        return;
+      }
+
+      // Safe slice offscreen to prevent canvas resize destruction
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = studioCanvas.width;
+      tempCanvas.height = studioCanvas.height;
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCtx.drawImage(studioCanvas, 0, 0);
+
+      // Resize active viewport canvas
+      studioCanvas.width = sw;
+      studioCanvas.height = sh;
+
+      // Render cropped quadrant
+      studioCtx.clearRect(0, 0, sw, sh);
+      studioCtx.drawImage(tempCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+
+      cancelCropMode();
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function cancelCropMode() {
+      const box = document.getElementById("cropSelectionBox");
+      if (box) box.classList.add("hidden");
+      isDragToolActive = false;
+      dragStartX = 0; dragStartY = 0; dragEndX = 0; dragEndY = 0;
+      selectStudioCategory('draw');
     }
 
     function applyRedaction(type) {
@@ -1387,7 +1457,6 @@
         studioCtx.fillStyle = "#000000";
         studioCtx.fillRect(x, y, w, h);
       } else {
-        // Fast blur pixelation for privacy
         const pixelSize = Math.max(6, Math.round(w / 18));
         const imgData = studioCtx.getImageData(x, y, w, h);
         const data = imgData.data;
@@ -1463,38 +1532,6 @@
       studioCtx.fillText("ZEPHYR PROTECTED DELIVERABLE", 0, 0);
       studioCtx.restore();
       pushHistorySnapshot();
-    }
-
-    function applyInteractiveCrop() {
-      if (!studioCanvas || !studioCtx) return;
-      const rect = studioCanvas.getBoundingClientRect();
-      const scaleX = studioCanvas.width / rect.width;
-      const scaleY = studioCanvas.height / rect.height;
-
-      const x = Math.min(dragStartX, dragEndX) * scaleX;
-      const y = Math.min(dragStartY, dragEndY) * scaleY;
-      const w = Math.abs(dragEndX - dragStartX) * scaleX;
-      const h = Math.abs(dragEndY - dragStartY) * scaleY;
-
-      if (w < 20 || h < 20) {
-        alert("Please drag a larger box to crop.");
-        return;
-      }
-
-      const croppedData = studioCtx.getImageData(x, y, w, h);
-      studioCanvas.width = w;
-      studioCanvas.height = h;
-      studioCtx.putImageData(croppedData, 0, 0);
-
-      cancelCropMode();
-      pushHistorySnapshot();
-      fitStudioImageToViewport();
-    }
-
-    function cancelCropMode() {
-      const box = document.getElementById("cropSelectionBox");
-      if (box) box.classList.add("hidden");
-      selectStudioCategory('draw');
     }
 
     function rotateCanvas(deg) {
