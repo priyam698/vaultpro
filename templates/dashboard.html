@@ -62,7 +62,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 12px;
+      padding: 6px 11px;
       border-radius: 12px;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       color: #94a3b8;
@@ -275,6 +275,7 @@
           <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn"><span class="text-sm">✂️</span><span>CROP</span></button>
           <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn"><span class="text-sm">🔄</span><span>TRANSFORM</span></button>
           <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active"><span class="text-sm">✏️</span><span>DRAW</span></button>
+          <button onclick="selectStudioCategory('lines')" id="tabBtn-lines" class="tool-tab-btn"><span class="text-sm">📏</span><span>LINES</span></button>
           <button onclick="selectStudioCategory('highlighter')" id="tabBtn-highlighter" class="tool-tab-btn"><span class="text-sm">🖍</span><span>HIGHLIGHT</span></button>
           <button onclick="selectStudioCategory('redact')" id="tabBtn-redact" class="tool-tab-btn"><span class="text-sm">🔒</span><span>REDACT</span></button>
           <button onclick="selectStudioCategory('text')" id="tabBtn-text" class="tool-tab-btn"><span class="text-sm">🔤</span><span>TEXT</span></button>
@@ -286,12 +287,15 @@
           <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn"><span class="text-sm">🎨</span><span>BACKGROUND</span></button>
         </div>
 
-        <div class="flex items-center gap-2 pl-3 border-l border-white/10 shrink-0">
-          <button onclick="undoStudioCanvas()" id="sUndoBtn" title="Undo (Ctrl+Z)" class="px-2.5 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
+        <div class="flex items-center gap-1.5 pl-3 border-l border-white/10 shrink-0">
+          <button onclick="undoStudioCanvas()" id="sUndoBtn" title="Undo (Ctrl+Z)" class="px-2 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
             <span>↩</span><span class="hidden md:inline text-[10px]">Undo</span>
           </button>
-          <button onclick="redoStudioCanvas()" id="sRedoBtn" title="Redo (Ctrl+Y)" class="px-2.5 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
+          <button onclick="redoStudioCanvas()" id="sRedoBtn" title="Redo (Ctrl+Y)" class="px-2 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
             <span>↪</span><span class="hidden md:inline text-[10px]">Redo</span>
+          </button>
+          <button onclick="resetOrientationToOriginal()" title="Reset Rotation, Flip & View" class="px-2.5 py-1 text-amber-300 hover:text-amber-200 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-lg transition text-[10px] font-bold flex items-center gap-1 cursor-pointer">
+            <span>🎯</span> Original Position
           </button>
           <button onclick="resetImageCanvas()" title="Reset to Original" class="px-2 py-1 text-rose-300 hover:text-white rounded-lg hover:bg-rose-500/20 transition text-[10px] font-bold cursor-pointer">
             <span>↺</span> Reset
@@ -357,9 +361,10 @@
                 <span id="studioZoomDisplay" class="font-bold text-sky-400 text-xs">Fit</span>
                 <button onclick="zoomStudioCanvas(0.15)" class="w-8 h-8 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer transition">+</button>
               </div>
-              <div class="grid grid-cols-2 gap-1.5 pt-0.5 text-[11px] font-bold">
+              <div class="grid grid-cols-3 gap-1 pt-0.5 text-[10px] font-bold">
                 <button onclick="fitStudioImageToViewport()" class="py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 transition">Fit Screen</button>
                 <button onclick="setStudioZoomActual()" class="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition">100%</button>
+                <button onclick="resetOrientationToOriginal()" class="py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 transition truncate" title="Reset View & Orientation">🎯 Center</button>
               </div>
             </div>
 
@@ -669,7 +674,7 @@
       const isLight = document.body.classList.toggle("light-theme");
       localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
       const icon = document.getElementById("themeIcon");
-      if (icon) icon.innerText = isLight ? "🌙" : "☀️️";
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
 
     initTheme();
@@ -724,7 +729,7 @@
     let sharpnessMode = 'ultra';
     let activeShapeType = 'hline';
 
-    // Rotation & Flip Transform Tracking for Instant Original Reset
+    // Rotation & Flip Transform Tracking
     let currentRotationDeg = 0;
     let isFlippedH = false;
     let isFlippedV = false;
@@ -1066,7 +1071,7 @@
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
-      const categories = ['resize', 'crop', 'transform', 'draw', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
+      const categories = ['resize', 'crop', 'transform', 'draw', 'lines', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
       categories.forEach(c => {
         const btn = document.getElementById(`tabBtn-${c}`);
         if (btn) {
@@ -1103,16 +1108,39 @@
           </div>
           <span class="text-sky-400 font-mono text-[11px] font-bold">● Freehand Smooth Vector Inking Active</span>
         `;
+      } else if (cat === 'lines') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-2.5 flex-wrap font-bold text-xs">
+            <span class="text-sky-400">Line Tool:</span>
+            <button onclick="setShapeMode('hline')" class="px-3 py-1 rounded-xl transition ${activeShapeType === 'hline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">― Horizontal Line</button>
+            <button onclick="setShapeMode('vline')" class="px-3 py-1 rounded-xl transition ${activeShapeType === 'vline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">| Vertical Line</button>
+            <button onclick="setShapeMode('line')" class="px-3 py-1 rounded-xl transition ${activeShapeType === 'line' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">╱ Straight Line</button>
+            <button onclick="setShapeMode('arrow')" class="px-3 py-1 rounded-xl transition ${activeShapeType === 'arrow' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">↗ Arrow Line</button>
+
+            <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400 font-bold">Color:</span>
+              <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-6 h-6 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400 font-bold">Thickness:</span>
+              <input type="range" min="1" max="40" value="${brushSize}" oninput="brushSize=parseInt(this.value); document.getElementById('sLineThicknessVal').innerText=this.value" class="w-20 accent-sky-400 cursor-pointer">
+              <span id="sLineThicknessVal" class="font-mono text-sky-400 w-4 font-bold">${brushSize}</span>
+            </div>
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Click & drag on image to draw line</span>
+        `;
       } else if (cat === 'shapes') {
         drawer.innerHTML = `
           <div class="flex items-center gap-2 flex-wrap font-bold text-xs">
-            <span class="text-slate-400">Shapes & Lines:</span>
-            <button onclick="setShapeMode('hline')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'hline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">― Horizontal Line</button>
-            <button onclick="setShapeMode('vline')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'vline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">| Vertical Line</button>
-            <button onclick="setShapeMode('line')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'line' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">╱ Straight Line</button>
-            <button onclick="setShapeMode('arrow')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'arrow' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">↗ Arrow</button>
+            <span class="text-slate-400">Shapes:</span>
             <button onclick="setShapeMode('rectangle')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'rectangle' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">🔲 Box</button>
             <button onclick="setShapeMode('circle')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'circle' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">⚪ Circle</button>
+            <button onclick="setShapeMode('arrow')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'arrow' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">↗ Arrow</button>
+            <button onclick="setShapeMode('hline')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'hline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">― H-Line</button>
+            <button onclick="setShapeMode('vline')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'vline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">| V-Line</button>
 
             <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
 
@@ -1127,7 +1155,7 @@
               <span id="sShapeThicknessVal" class="font-mono text-sky-400 w-4 font-bold">${brushSize}</span>
             </div>
           </div>
-          <span class="text-slate-400 font-mono text-[11px]">Click & drag on image to place line or shape</span>
+          <span class="text-slate-400 font-mono text-[11px]">Click & drag on image to place shape</span>
         `;
       } else if (cat === 'crop') {
         drawer.innerHTML = `
@@ -1258,7 +1286,11 @@
 
     function setShapeMode(type) {
       activeShapeType = type;
-      selectStudioCategory('shapes');
+      if (type === 'hline' || type === 'vline' || type === 'line') {
+        selectStudioCategory('lines');
+      } else {
+        selectStudioCategory('shapes');
+      }
     }
 
     // -------------------------------------------------------------
@@ -1318,7 +1350,7 @@
           return;
         }
 
-        if (currentCategory === 'draw' || currentCategory === 'highlighter' || currentCategory === 'shapes') {
+        if (currentCategory === 'draw' || currentCategory === 'lines' || currentCategory === 'highlighter' || currentCategory === 'shapes') {
           isDrawing = true;
           snapshot = studioCtx.getImageData(0, 0, studioCanvas.width, studioCanvas.height);
           drawingPoints = [{ x: startX, y: startY }];
@@ -1369,7 +1401,7 @@
 
         if (!isDrawing) return;
 
-        if (currentCategory === 'shapes') {
+        if (currentCategory === 'shapes' || currentCategory === 'lines') {
           studioCtx.putImageData(snapshot, 0, 0);
           studioCtx.beginPath();
           studioCtx.lineWidth = brushSize;
@@ -1624,7 +1656,6 @@
     function resetOrientationToOriginal() {
       if (!studioCanvas || !studioCtx) return;
 
-      // Reverse any active horizontal or vertical flips
       if (isFlippedH) {
         flipCanvas('h');
         isFlippedH = false;
@@ -1634,7 +1665,6 @@
         isFlippedV = false;
       }
 
-      // Rotate back to 0 degrees if orientation was altered
       if (currentRotationDeg !== 0) {
         rotateCanvas(-currentRotationDeg);
         currentRotationDeg = 0;
