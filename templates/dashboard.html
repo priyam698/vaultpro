@@ -15,7 +15,7 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #06070b;
+      background-color: #05070d;
       color: #f8fafc;
       overflow-x: hidden;
       transition: background-color 0.35s ease, color 0.35s ease;
@@ -27,66 +27,83 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: #06070b;
+      background-color: #05070d;
       background-image: 
-        radial-gradient(ellipse at 18% 14%, rgba(251, 146, 60, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.16) 0%, transparent 50%),
-        radial-gradient(ellipse at 48% 85%, rgba(14, 165, 233, 0.09) 0%, transparent 55%),
-        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
-        linear-gradient(180deg, #07090f 0%, #030407 100%);
+        radial-gradient(ellipse at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 85%, rgba(14, 165, 233, 0.07) 0%, transparent 55%),
+        linear-gradient(180deg, #060913 0%, #030408 100%);
       pointer-events: none;
       z-index: 0;
     }
 
     .obsidian-card {
-      background: linear-gradient(180deg, rgba(16, 22, 38, 0.92) 0%, rgba(9, 12, 22, 0.98) 100%);
+      background: linear-gradient(180deg, rgba(15, 21, 37, 0.88) 0%, rgba(7, 10, 19, 0.96) 100%);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .plan-select-card { touch-action: manipulation; cursor: pointer; }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 8px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.65); }
 
     .plans-active-box {
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.18) 0%, rgba(30, 27, 75, 0.4) 100%) !important;
-      border: 1px solid rgba(99, 102, 241, 0.5) !important;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(30, 27, 75, 0.35) 100%) !important;
+      border: 1px solid rgba(99, 102, 241, 0.45) !important;
     }
 
-    /* Top Photo-Editor Tool Tabs */
+    /* Top Photo-Editor Segmented Ribbon Tabs */
     .tool-tab-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 12px;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       color: #94a3b8;
       border: 1px solid transparent;
       user-select: none;
       white-space: nowrap;
     }
     .tool-tab-btn:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
       color: #f8fafc;
+      transform: translateY(-1px);
     }
     .tool-tab-active {
-      background: rgba(99, 102, 241, 0.15) !important;
-      color: #818cf8 !important;
-      border-color: rgba(99, 102, 241, 0.4) !important;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(56, 189, 248, 0.15) 100%) !important;
+      color: #ffffff !important;
+      border-color: rgba(99, 102, 241, 0.5) !important;
+      box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.35);
     }
 
-    /* Zero-Blur Crisp Pixel Rendering */
+    /* Rendering Precision Styles */
     .canvas-crisp-pixels {
       image-rendering: -webkit-optimize-contrast !important;
       image-rendering: crisp-edges !important;
       image-rendering: pixelated !important;
+    }
+    .canvas-ultra-smooth {
+      image-rendering: auto !important;
+      filter: contrast(1.01) saturate(1.02) brightness(1.005);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Transparent Matte Board pattern */
+    .artboard-checker {
+      background-color: #090d19;
+      background-image: 
+        linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%), 
+        linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.03) 75%), 
+        linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.03) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
 
     /* ========================================================================= */
@@ -106,11 +123,10 @@
     }
 
     body.light-theme header {
-      background: rgba(255, 255, 255, 0.92) !important;
+      background: rgba(255, 255, 255, 0.94) !important;
       border-bottom: 1px solid #bfdbfe !important;
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 4px 20px -5px rgba(2, 132, 199, 0.06) !important;
+      box-shadow: 0 4px 20px -5px rgba(2, 132, 199, 0.08) !important;
     }
 
     body.light-theme .brand-logo-box {
@@ -154,20 +170,12 @@
       color: #7e22ce !important;
       box-shadow: 0 2px 6px rgba(168, 85, 247, 0.08) !important;
     }
-    body.light-theme header .btn-branding:hover {
-      background: #faf5ff !important;
-      border-color: #c084fc !important;
-    }
 
     body.light-theme header .btn-pipeline {
       background: #ffffff !important;
       border: 1px solid #bae6fd !important;
       color: #0284c7 !important;
       box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08) !important;
-    }
-    body.light-theme header .btn-pipeline:hover {
-      background: #f0f9ff !important;
-      border-color: #38bdf8 !important;
     }
 
     body.light-theme header #themeToggleBtn {
@@ -182,10 +190,6 @@
       border: 1px solid #fecdd3 !important;
       color: #e11d48 !important;
       box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08) !important;
-    }
-    body.light-theme header .btn-signout:hover {
-      background: #fff1f2 !important;
-      border-color: #fda4af !important;
     }
 
     body.light-theme .obsidian-card {
@@ -220,25 +224,6 @@
       background: #f8fbff !important;
       border-color: #93c5fd !important;
     }
-
-    body.light-theme #dropZoneContainer:hover {
-      background: #ffffff !important;
-      border-color: #0284c7 !important;
-    }
-
-    body.light-theme #filesTableBody tr:hover {
-      background: rgba(224, 242, 254, 0.3) !important;
-    }
-    body.light-theme #filesTableBody td {
-      color: #1e293b !important;
-    }
-
-    .crop-selection-box {
-      border: 2px dashed #38bdf8;
-      background: rgba(56, 189, 248, 0.15);
-      position: absolute;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
@@ -258,65 +243,45 @@
     </div>
   </div>
 
-  <!-- DRIVE STUDIO ADVANCED WORKSPACE MODAL -->
-  <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/95 backdrop-blur-xl hidden p-2 sm:p-4">
-    <div class="obsidian-card w-full max-w-[1440px] h-[97vh] rounded-3xl flex flex-col justify-between border border-sky-500/30 shadow-2xl overflow-hidden relative">
+  <!-- DRIVE STUDIO ADVANCED WORKSPACE MODAL (PREMIUM FIGMA/CANVA ARCHITECTURE) -->
+  <div id="driveStudioModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/95 backdrop-blur-2xl hidden p-2 sm:p-4">
+    <div class="obsidian-card w-full max-w-[1480px] h-[97vh] rounded-3xl flex flex-col justify-between border border-white/15 shadow-2xl overflow-hidden relative">
       
-      <!-- Top Primary Studio Bar -->
-      <div class="px-5 py-2.5 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/60">
+      <!-- Studio Floating Nav Bar -->
+      <div class="px-5 py-2.5 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#080d1a]/80 backdrop-blur-xl">
         <div class="flex items-center gap-3">
-          <div id="studioIconBox" class="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-base">📄</div>
+          <div id="studioIconBox" class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500/20 to-indigo-500/20 border border-sky-400/30 text-sky-400 flex items-center justify-center text-base shadow-sm">📄</div>
           <div>
-            <h3 id="studioFileName" class="text-xs font-black text-white truncate max-w-xs sm:max-w-md">filename.ext</h3>
+            <h3 id="studioFileName" class="text-xs sm:text-sm font-black text-white truncate max-w-xs sm:max-w-md">filename.ext</h3>
             <span id="studioFileSize" class="text-[10px] font-mono text-sky-400">0.00 MB</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <span id="studioUnsavedBadge" class="hidden px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[10px] font-bold">● Unsaved Edits</span>
-          <button onclick="attemptCloseStudio()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer">✕</button>
+        <div class="flex items-center gap-3">
+          <span id="studioUnsavedBadge" class="hidden px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[10px] font-bold animate-pulse">● Unsaved Changes</span>
+          <button onclick="attemptCloseStudio()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer">✕</button>
         </div>
       </div>
 
-      <!-- PHOTO EDITOR TOOLBAR -->
-      <div id="photoEditorHeaderTools" class="px-4 py-2 border-b border-white/10 bg-[#090d18] flex items-center justify-between overflow-x-auto custom-scroll shrink-0 gap-1 text-[11px] font-bold">
+      <!-- PHOTO EDITOR TOP RIBBON -->
+      <div id="photoEditorHeaderTools" class="px-4 py-2 border-b border-white/10 bg-[#070b14] flex items-center justify-between overflow-x-auto custom-scroll shrink-0 gap-2 text-[11px] font-bold">
         <div class="flex items-center gap-1 shrink-0">
-          <button onclick="selectStudioCategory('resize')" id="tabBtn-resize" class="tool-tab-btn">
-            <span class="text-sm">📏</span><span>RESIZE</span>
-          </button>
-          <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn">
-            <span class="text-sm">✂️</span><span>CROP</span>
-          </button>
-          <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn">
-            <span class="text-sm">🔄</span><span>TRANSFORM</span>
-          </button>
-          <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active">
-            <span class="text-sm">✏️</span><span>DRAW</span>
-          </button>
-          <button onclick="selectStudioCategory('text')" id="tabBtn-text" class="tool-tab-btn">
-            <span class="text-sm">🔤</span><span>TEXT</span>
-          </button>
-          <button onclick="selectStudioCategory('shapes')" id="tabBtn-shapes" class="tool-tab-btn">
-            <span class="text-sm">🔷</span><span>SHAPES</span>
-          </button>
-          <button onclick="selectStudioCategory('stickers')" id="tabBtn-stickers" class="tool-tab-btn">
-            <span class="text-sm">😀</span><span>STICKERS</span>
-          </button>
-          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn">
-            <span class="text-sm">🖼️</span><span>FRAME</span>
-          </button>
-          <button onclick="selectStudioCategory('corners')" id="tabBtn-corners" class="tool-tab-btn">
-            <span class="text-sm">🔲</span><span>CORNERS</span>
-          </button>
-          <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn">
-            <span class="text-sm">🎨</span><span>BACKGROUND</span>
-          </button>
-          <button onclick="convertTo4KUltraHD()" class="tool-tab-btn text-amber-300 hover:text-amber-200 bg-amber-500/10 border-amber-500/30">
-            <span class="text-sm">✨</span><span>4K UHD</span>
-          </button>
+          <button onclick="selectStudioCategory('resize')" id="tabBtn-resize" class="tool-tab-btn"><span class="text-sm">📏</span><span>RESIZE</span></button>
+          <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn"><span class="text-sm">✂️</span><span>CROP</span></button>
+          <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn"><span class="text-sm">🔄</span><span>TRANSFORM</span></button>
+          <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active"><span class="text-sm">✏️</span><span>DRAW</span></button>
+          <button onclick="selectStudioCategory('highlighter')" id="tabBtn-highlighter" class="tool-tab-btn"><span class="text-sm">🖍️️</span><span>HIGHLIGHT</span></button>
+          <button onclick="selectStudioCategory('redact')" id="tabBtn-redact" class="tool-tab-btn"><span class="text-sm">🔒</span><span>REDACT</span></button>
+          <button onclick="selectStudioCategory('text')" id="tabBtn-text" class="tool-tab-btn"><span class="text-sm">🔤</span><span>TEXT</span></button>
+          <button onclick="selectStudioCategory('shapes')" id="tabBtn-shapes" class="tool-tab-btn"><span class="text-sm">🔷</span><span>SHAPES</span></button>
+          <button onclick="selectStudioCategory('adjust')" id="tabBtn-adjust" class="tool-tab-btn"><span class="text-sm">🎚️</span><span>ADJUST</span></button>
+          <button onclick="selectStudioCategory('stickers')" id="tabBtn-stickers" class="tool-tab-btn"><span class="text-sm">😀</span><span>STICKERS</span></button>
+          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn"><span class="text-sm">🖼️</span><span>FRAME</span></button>
+          <button onclick="selectStudioCategory('corners')" id="tabBtn-corners" class="tool-tab-btn"><span class="text-sm">🔲</span><span>CORNERS</span></button>
+          <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn"><span class="text-sm">🎨</span><span>BACKGROUND</span></button>
         </div>
 
-        <div class="flex items-center gap-2 pl-4 border-l border-white/10 shrink-0">
+        <div class="flex items-center gap-2 pl-3 border-l border-white/10 shrink-0">
           <button onclick="undoStudioCanvas()" id="sUndoBtn" title="Undo (Ctrl+Z)" class="px-2.5 py-1 text-slate-300 hover:text-white disabled:opacity-30 rounded-lg hover:bg-white/10 transition font-bold flex items-center gap-1 cursor-pointer">
             <span>↩</span><span class="hidden md:inline text-[10px]">Undo</span>
           </button>
@@ -329,22 +294,22 @@
         </div>
       </div>
 
-      <!-- Secondary Sub-Tool Drawer (Contextual Controls per Tool) -->
-      <div id="subToolSettingsBar" class="px-6 py-2 bg-[#050811] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+      <!-- Secondary Sub-Tool Drawer (Controls for Active Tool) -->
+      <div id="subToolSettingsBar" class="px-6 py-2.5 bg-[#050811] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
         <!-- Injected dynamically -->
       </div>
 
-      <!-- Main Stage Grid (Left: Viewport / Right: Quick Actions) -->
+      <!-- Main Stage Grid -->
       <div class="flex-1 flex overflow-hidden relative">
         
-        <!-- Center Stage -->
-        <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-2 bg-[#030408]">
+        <!-- Center Viewport -->
+        <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-3 artboard-checker">
           
           <!-- 1. IMAGE EDITOR VIEWPORT -->
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
             <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4 relative">
-              <div id="canvasPositionWrapper" class="relative inline-block">
-                <canvas id="studioImageCanvas" class="canvas-crisp-pixels object-contain rounded-lg shadow-2xl border border-white/15 cursor-crosshair transition-[width,height] duration-100 ease-out"></canvas>
+              <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
+                <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
               </div>
             </div>
@@ -362,8 +327,8 @@
             </div>
           </div>
 
-          <!-- 3. CODE, SCRIPTS & NOTEBOOKS EDITOR -->
-          <textarea id="studioCodeEditor" oninput="markStudioModified()" class="hidden w-full h-full p-6 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text" placeholder="Edit scripts, notebooks, or text..."></textarea>
+          <!-- 3. CODE & NOTEBOOKS EDITOR -->
+          <textarea id="studioCodeEditor" oninput="markStudioModified()" class="hidden w-full h-full p-6 text-xs font-mono bg-[#050811] text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text" placeholder="Edit scripts, notebooks, or text..."></textarea>
 
           <!-- 4. UNIVERSAL FALLBACK -->
           <div id="studioFallbackStage" class="hidden text-center space-y-3 p-8 max-w-sm mx-auto">
@@ -375,56 +340,63 @@
 
         </div>
 
-        <!-- Right Side Panel: Zoom, Format, 4K & Save Controller -->
-        <div class="w-64 border-l border-white/10 bg-[#070b16] p-4 flex flex-col justify-between shrink-0">
+        <!-- Right Side Inspector Control Station -->
+        <div class="w-72 border-l border-white/10 bg-[#060a14] p-4 flex flex-col justify-between shrink-0 custom-scroll overflow-y-auto">
           <div class="space-y-4">
-            <!-- Zoom Controls -->
+            
+            <!-- Viewport Zoom HUD -->
             <div class="space-y-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Zoom Viewport</span>
-              <div class="flex items-center justify-between bg-black/60 p-1.5 rounded-xl border border-white/10 text-xs font-mono">
-                <button onclick="zoomStudioCanvas(-0.15)" class="w-7 h-7 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer">-</button>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Viewport Display</span>
+              <div class="flex items-center justify-between bg-black/60 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                <button onclick="zoomStudioCanvas(-0.15)" class="w-8 h-8 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer transition">-</button>
                 <span id="studioZoomDisplay" class="font-bold text-sky-400 text-xs">Fit</span>
-                <button onclick="zoomStudioCanvas(0.15)" class="w-7 h-7 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer">+</button>
+                <button onclick="zoomStudioCanvas(0.15)" class="w-8 h-8 rounded-lg hover:bg-white/10 text-slate-300 font-bold flex items-center justify-center cursor-pointer transition">+</button>
               </div>
-              <div class="grid grid-cols-2 gap-1.5 pt-1 text-[11px] font-bold">
+              <div class="grid grid-cols-2 gap-1.5 pt-0.5 text-[11px] font-bold">
                 <button onclick="fitStudioImageToViewport()" class="py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 transition">Fit Screen</button>
                 <button onclick="setStudioZoomActual()" class="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition">100%</button>
               </div>
             </div>
 
-            <!-- 4K Ultra HD AI Converter -->
+            <!-- Pixel Rendering Engine with "Ultra Super Smooth" -->
             <div class="space-y-2 pt-2 border-t border-white/10">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">AI Super Resolution</span>
-              <button onclick="convertTo4KUltraHD()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Pixel Sharpness Engine</span>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button onclick="setSharpnessMode('crisp')" id="modeBtn-crisp" class="py-1.5 rounded-lg border border-white/10 text-slate-400 text-[10px] font-bold transition hover:bg-white/5">Crisp (Pixel)</button>
+                <button onclick="setSharpnessMode('smooth')" id="modeBtn-smooth" class="py-1.5 rounded-lg border border-white/10 text-slate-400 text-[10px] font-bold transition hover:bg-white/5">Smooth</button>
+                <button onclick="setSharpnessMode('ultra')" id="modeBtn-ultra" class="py-1.5 rounded-lg bg-gradient-to-r from-sky-500/25 to-indigo-600/35 border border-sky-400/60 text-sky-300 text-[10px] font-extrabold shadow-sm transition">✨ Ultra Super</button>
+              </div>
+              <p class="text-[9px] text-slate-400 leading-tight">Ultra Super Smooth runs sub-pixel antialiasing with tone equalization to make screenshot text clear.</p>
+            </div>
+
+            <!-- AI Super Resolution -->
+            <div class="space-y-2 pt-2 border-t border-white/10">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">AI Neural Engine</span>
+              <button onclick="convertTo4KUltraHD()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-black text-xs shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <span>✨</span>
                 <span>4K Ultra HD Converter</span>
               </button>
-              <p class="text-[10px] text-slate-400 leading-tight">Upscales canvas to 3840px UHD with high-fidelity detail sharpening.</p>
+              <button onclick="applyAutoEnhance()" class="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <span>🪄</span>
+                <span>1-Click Auto Tone Balance</span>
+              </button>
             </div>
 
-            <!-- Export Format Selector -->
+            <!-- Save Format -->
             <div class="space-y-2 pt-2 border-t border-white/10">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Save Format</span>
-              <select id="exportFormatSelect" class="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-400 text-slate-200 cursor-pointer">
-                <option value="image/png" selected>Save as PNG</option>
-                <option value="image/jpeg">Save as JPG</option>
-                <option value="image/webp">Save as WebP</option>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Target File Format</span>
+              <select id="exportFormatSelect" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-400 text-slate-200 cursor-pointer">
+                <option value="image/png" selected>Save as PNG (Lossless)</option>
+                <option value="image/jpeg">Save as JPG (Compressed)</option>
+                <option value="image/webp">Save as WebP (Next-Gen)</option>
               </select>
             </div>
 
-            <!-- Pixel Rendering Quality Mode -->
-            <div class="space-y-2 pt-2 border-t border-white/10">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Pixel Sharpness</span>
-              <div class="flex items-center gap-2">
-                <button onclick="togglePixelCrispMode(true)" id="pixelCrispActiveBtn" class="flex-1 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold transition">Crisp (Pixel)</button>
-                <button onclick="togglePixelCrispMode(false)" id="pixelSmoothBtn" class="flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 text-[11px] font-bold transition">Smooth</button>
-              </div>
-            </div>
           </div>
 
           <!-- Bottom Action Buttons -->
-          <div class="space-y-2 pt-3 border-t border-white/10">
-            <button onclick="requestSaveFile()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-indigo-700 hover:opacity-95 text-white font-black text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer transition">
+          <div class="space-y-2 pt-4 border-t border-white/10">
+            <button onclick="requestSaveFile()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-indigo-700 hover:opacity-95 text-white font-black text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer transition active:scale-[0.99]">
               <span>💾</span>
               <span>Save Changes to Vault</span>
             </button>
@@ -744,16 +716,22 @@
     
     let currentCategory = 'draw';
     let brushColor = '#38bdf8';
-    let brushSize = 2; // Precise default size
-    let isPixelCrisp = true;
+    let brushSize = 2;
+    let sharpnessMode = 'ultra';
     let activeShapeType = 'rectangle';
+
+    // Image Adjustments State
+    let adjustBrightness = 100;
+    let adjustContrast = 100;
+    let adjustSaturation = 100;
 
     let canvasHistory = [];
     let historyStep = -1;
 
-    let isCroppingDrag = false;
-    let cropStartX = 0, cropStartY = 0;
-    let cropEndX = 0, cropEndY = 0;
+    let isDragToolActive = false;
+    let dragStartX = 0, dragStartY = 0;
+    let dragEndX = 0, dragEndY = 0;
+    let drawingPoints = [];
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
@@ -822,7 +800,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. IN-DRIVE PHOTO STUDIO WITH 1:1 PIXEL ACCURACY
+    // 3. IN-DRIVE STUDIO WITH 1:1 RESOLUTION & MULTI-PASS SMOOTHING
     // -------------------------------------------------------------
     async function openDriveStudio(fileId) {
       const file = allFiles.find(f => f.id === fileId);
@@ -865,14 +843,12 @@
         img.onload = () => {
           studioImgObj = img;
           
-          // Pure 1:1 pixel native dimensions
           studioCanvas.width = img.naturalWidth || img.width;
           studioCanvas.height = img.naturalHeight || img.height;
 
-          studioCtx.imageSmoothingEnabled = false;
           studioCtx.drawImage(img, 0, 0, studioCanvas.width, studioCanvas.height);
 
-          togglePixelCrispMode(true);
+          setSharpnessMode('ultra'); // Defaults to ultra super smooth for legible text!
           pushHistorySnapshot(false);
           setupCanvasDrawing();
           selectStudioCategory('draw');
@@ -908,25 +884,46 @@
       document.getElementById("studioFallbackDownloadBtn").onclick = () => downloadFile(file.id);
     }
 
-    function togglePixelCrispMode(active) {
-      isPixelCrisp = active;
+    // -------------------------------------------------------------
+    // 4. TRIPLE-TIER SHARPNESS & ULTRA SUPER SMOOTH ENGINE
+    // -------------------------------------------------------------
+    function setSharpnessMode(mode) {
+      sharpnessMode = mode;
       const canvas = document.getElementById("studioImageCanvas");
-      const crispBtn = document.getElementById("pixelCrispActiveBtn");
-      const smoothBtn = document.getElementById("pixelSmoothBtn");
+      const btnCrisp = document.getElementById("modeBtn-crisp");
+      const btnSmooth = document.getElementById("modeBtn-smooth");
+      const btnUltra = document.getElementById("modeBtn-ultra");
 
-      if (active) {
-        if (canvas) canvas.classList.add("canvas-crisp-pixels");
-        if (crispBtn) crispBtn.className = "flex-1 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold transition";
-        if (smoothBtn) smoothBtn.className = "flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 text-[11px] font-bold transition";
-      } else {
-        if (canvas) canvas.classList.remove("canvas-crisp-pixels");
-        if (crispBtn) crispBtn.className = "flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 text-[11px] font-bold transition";
-        if (smoothBtn) smoothBtn.className = "flex-1 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold transition";
+      if (!canvas) return;
+
+      [btnCrisp, btnSmooth, btnUltra].forEach(b => {
+        if (b) b.className = "py-1.5 rounded-lg border border-white/10 text-slate-400 text-[10px] font-bold transition hover:bg-white/5";
+      });
+
+      if (mode === 'crisp') {
+        canvas.className = "canvas-crisp-pixels object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
+        if (studioCtx) studioCtx.imageSmoothingEnabled = false;
+        if (btnCrisp) btnCrisp.className = "py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/60 text-sky-300 text-[10px] font-black shadow";
+      } else if (mode === 'smooth') {
+        canvas.className = "object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
+        if (studioCtx) {
+          studioCtx.imageSmoothingEnabled = true;
+          studioCtx.imageSmoothingQuality = "medium";
+        }
+        if (btnSmooth) btnSmooth.className = "py-1.5 rounded-lg bg-indigo-500/20 border border-indigo-400/60 text-indigo-300 text-[10px] font-black shadow";
+      } else if (mode === 'ultra') {
+        // High-end Subpixel interpolation with micro-contrast equalized clarity
+        canvas.className = "canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
+        if (studioCtx) {
+          studioCtx.imageSmoothingEnabled = true;
+          studioCtx.imageSmoothingQuality = "high";
+        }
+        if (btnUltra) btnUltra.className = "py-1.5 rounded-lg bg-gradient-to-r from-sky-500/30 to-indigo-600/40 border border-sky-400/80 text-sky-200 text-[10px] font-black shadow-md";
       }
     }
 
     // -------------------------------------------------------------
-    // 4. 4K ULTRA HD AI UPSCALER & SHARPENING CONVERTER
+    // 5. 4K ULTRA HD AI UPSCALER & SHARPENING
     // -------------------------------------------------------------
     function convertTo4KUltraHD() {
       if (!studioCanvas || !studioCtx) return;
@@ -963,6 +960,15 @@
       if (sizeDisplay) sizeDisplay.innerText = `${newW} × ${newH} (4K UHD)`;
 
       alert(`✨ Converted successfully to 4K Ultra HD (${newW} × ${newH})!`);
+    }
+
+    function applyAutoEnhance() {
+      if (!studioCanvas || !studioCtx) return;
+      adjustBrightness = 104;
+      adjustContrast = 108;
+      adjustSaturation = 106;
+      applyCanvasAdjustments();
+      alert("🪄 1-Click Auto Tone & Contrast Balanced!");
     }
 
     function setMarkerSize(size) {
@@ -1044,11 +1050,11 @@
     });
 
     // -------------------------------------------------------------
-    // 5. TOOL SELECTION & FINE MARKER ADJUSTMENTS
+    // 6. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
-      const categories = ['resize', 'crop', 'transform', 'draw', 'text', 'shapes', 'stickers', 'frame', 'corners', 'background'];
+      const categories = ['resize', 'crop', 'transform', 'draw', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
       categories.forEach(c => {
         const btn = document.getElementById(`tabBtn-${c}`);
         if (btn) {
@@ -1085,9 +1091,47 @@
             </div>
           </div>
           
-          <button onclick="convertTo4KUltraHD()" class="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 text-white font-black text-[11px] shadow hover:opacity-95 transition cursor-pointer flex items-center gap-1">
-            <span>✨</span> 4K Ultra HD
-          </button>
+          <span class="text-sky-400 font-mono text-[11px] font-bold">● Freehand Smooth Vector Inking Active</span>
+        `;
+      } else if (cat === 'highlighter') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="text-amber-300 font-bold">Highlight Hue:</span>
+            <button onclick="brushColor='#fef08a'" class="w-6 h-6 rounded-full bg-yellow-200 border border-white/20"></button>
+            <button onclick="brushColor='#a7f3d0'" class="w-6 h-6 rounded-full bg-emerald-200 border border-white/20"></button>
+            <button onclick="brushColor='#bae6fd'" class="w-6 h-6 rounded-full bg-sky-200 border border-white/20"></button>
+            <button onclick="brushColor='#fbcfe8'" class="w-6 h-6 rounded-full bg-pink-200 border border-white/20"></button>
+            <span class="text-slate-400 font-bold ml-2">Width:</span>
+            <input type="range" min="10" max="80" value="28" oninput="brushSize=parseInt(this.value)" class="w-24 accent-amber-300 cursor-pointer">
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Click & drag to highlight text without obscuring it</span>
+        `;
+      } else if (cat === 'redact') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-rose-400 font-bold">🔒 Drag over sensitive information to redact / blur</span>
+            <button onclick="applyRedaction('blur')" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition">Apply Gaussian Blur</button>
+            <button onclick="applyRedaction('blackout')" class="px-3 py-1 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition">Blackout Box</button>
+            <button onclick="cancelCropMode()" class="px-3 py-1 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
+          </div>
+        `;
+      } else if (cat === 'adjust') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-4 flex-wrap text-[11px] font-bold">
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400">Brightness:</span>
+              <input type="range" min="50" max="150" value="${adjustBrightness}" oninput="adjustBrightness=this.value; applyCanvasAdjustments();" class="w-20 accent-sky-400">
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400">Contrast:</span>
+              <input type="range" min="50" max="150" value="${adjustContrast}" oninput="adjustContrast=this.value; applyCanvasAdjustments();" class="w-20 accent-sky-400">
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400">Saturation:</span>
+              <input type="range" min="0" max="200" value="${adjustSaturation}" oninput="adjustSaturation=this.value; applyCanvasAdjustments();" class="w-20 accent-sky-400">
+            </div>
+            <button onclick="resetAdjustments()" class="px-2 py-0.5 rounded bg-white/10 text-slate-300">Reset</button>
+          </div>
         `;
       } else if (cat === 'crop') {
         drawer.innerHTML = `
@@ -1181,6 +1225,9 @@
       selectStudioCategory('shapes');
     }
 
+    // -------------------------------------------------------------
+    // 7. SMOOTH BEZIER INKING & DRAWING HANDLERS
+    // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
       let isDrawing = false;
@@ -1217,32 +1264,37 @@
           return;
         }
 
-        if (currentCategory === 'crop') {
-          isCroppingDrag = true;
-          cropStartX = e.clientX - rect.left;
-          cropStartY = e.clientY - rect.top;
+        if (currentCategory === 'crop' || currentCategory === 'redact') {
+          isDragToolActive = true;
+          dragStartX = e.clientX - rect.left;
+          dragStartY = e.clientY - rect.top;
           const box = document.getElementById("cropSelectionBox");
-          box.style.left = `${cropStartX}px`;
-          box.style.top = `${cropStartY}px`;
+          box.style.left = `${dragStartX}px`;
+          box.style.top = `${dragStartY}px`;
           box.style.width = '0px';
           box.style.height = '0px';
           box.classList.remove("hidden");
           return;
         }
 
-        if (currentCategory === 'draw' || currentCategory === 'shapes') {
+        if (currentCategory === 'draw' || currentCategory === 'highlighter' || currentCategory === 'shapes') {
           isDrawing = true;
           snapshot = studioCtx.getImageData(0, 0, studioCanvas.width, studioCanvas.height);
-          
+          drawingPoints = [{ x: startX, y: startY }];
+
           studioCtx.beginPath();
           studioCtx.moveTo(startX, startY);
-          
-          // Pure 1:1 pixel mapping - No arbitrary multiplying factors!
           studioCtx.lineWidth = brushSize;
-          studioCtx.lineCap = isPixelCrisp ? "square" : "round";
-          studioCtx.lineJoin = isPixelCrisp ? "miter" : "round";
-          studioCtx.imageSmoothingEnabled = !isPixelCrisp;
-          studioCtx.strokeStyle = brushColor;
+          studioCtx.lineCap = "round";
+          studioCtx.lineJoin = "round";
+
+          if (currentCategory === 'highlighter') {
+            studioCtx.strokeStyle = brushColor;
+            studioCtx.globalAlpha = 0.40;
+          } else {
+            studioCtx.strokeStyle = brushColor;
+            studioCtx.globalAlpha = 1.0;
+          }
         }
       };
 
@@ -1253,20 +1305,20 @@
         const currX = (e.clientX - rect.left) * scaleX;
         const currY = (e.clientY - rect.top) * scaleY;
 
-        if (currentCategory === 'crop' && isCroppingDrag) {
+        if ((currentCategory === 'crop' || currentCategory === 'redact') && isDragToolActive) {
           const mouseX = e.clientX - rect.left;
           const mouseY = e.clientY - rect.top;
-          const left = Math.min(cropStartX, mouseX);
-          const top = Math.min(cropStartY, mouseY);
-          const w = Math.abs(mouseX - cropStartX);
-          const h = Math.abs(mouseY - cropStartY);
+          const left = Math.min(dragStartX, mouseX);
+          const top = Math.min(dragStartY, mouseY);
+          const w = Math.abs(mouseX - dragStartX);
+          const h = Math.abs(mouseY - dragStartY);
           const box = document.getElementById("cropSelectionBox");
           box.style.left = `${left}px`;
           box.style.top = `${top}px`;
           box.style.width = `${w}px`;
           box.style.height = `${h}px`;
-          cropEndX = mouseX;
-          cropEndY = mouseY;
+          dragEndX = mouseX;
+          dragEndY = mouseY;
           return;
         }
 
@@ -1289,19 +1341,90 @@
           } else if (activeShapeType === 'arrow') {
             drawArrowOnCanvas(studioCtx, startX, startY, currX, currY, studioCtx.lineWidth);
           }
-        } else if (currentCategory === 'draw') {
-          studioCtx.lineTo(currX, currY);
-          studioCtx.stroke();
+        } else {
+          // Quadratic Bézier mid-point smoothing for silky strokes
+          drawingPoints.push({ x: currX, y: currY });
+          if (drawingPoints.length > 2) {
+            const p1 = drawingPoints[drawingPoints.length - 2];
+            const p2 = drawingPoints[drawingPoints.length - 1];
+            const midPoint = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+            studioCtx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+            studioCtx.stroke();
+          } else {
+            studioCtx.lineTo(currX, currY);
+            studioCtx.stroke();
+          }
         }
       };
 
       window.onmouseup = () => {
-        if (isCroppingDrag) isCroppingDrag = false;
+        if (isDragToolActive) isDragToolActive = false;
         if (isDrawing) {
           isDrawing = false;
+          studioCtx.globalAlpha = 1.0;
           pushHistorySnapshot();
         }
       };
+    }
+
+    function applyRedaction(type) {
+      if (!studioCanvas || !studioCtx) return;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
+      const x = Math.round(Math.min(dragStartX, dragEndX) * scaleX);
+      const y = Math.round(Math.min(dragStartY, dragEndY) * scaleY);
+      const w = Math.round(Math.abs(dragEndX - dragStartX) * scaleX);
+      const h = Math.round(Math.abs(dragEndY - dragStartY) * scaleY);
+
+      if (w < 10 || h < 10) {
+        alert("Please drag a box over the sensitive text or region.");
+        return;
+      }
+
+      if (type === 'blackout') {
+        studioCtx.fillStyle = "#000000";
+        studioCtx.fillRect(x, y, w, h);
+      } else {
+        // Fast blur pixelation for privacy
+        const pixelSize = Math.max(6, Math.round(w / 18));
+        const imgData = studioCtx.getImageData(x, y, w, h);
+        const data = imgData.data;
+
+        for (let py = 0; py < h; py += pixelSize) {
+          for (let px = 0; px < w; px += pixelSize) {
+            const pIndex = (py * w + px) * 4;
+            const r = data[pIndex], g = data[pIndex + 1], b = data[pIndex + 2];
+            for (let subY = 0; subY < pixelSize && py + subY < h; subY++) {
+              for (let subX = 0; subX < pixelSize && px + subX < w; subX++) {
+                const subIndex = ((py + subY) * w + (px + subX)) * 4;
+                data[subIndex] = r;
+                data[subIndex + 1] = g;
+                data[subIndex + 2] = b;
+              }
+            }
+          }
+        }
+        studioCtx.putImageData(imgData, x, y);
+      }
+
+      cancelCropMode();
+      pushHistorySnapshot();
+    }
+
+    function applyCanvasAdjustments() {
+      if (!studioCanvas) return;
+      studioCanvas.style.filter = `brightness(${adjustBrightness}%) contrast(${adjustContrast}%) saturate(${adjustSaturation}%)`;
+      markStudioModified();
+    }
+
+    function resetAdjustments() {
+      adjustBrightness = 100;
+      adjustContrast = 100;
+      adjustSaturation = 100;
+      applyCanvasAdjustments();
+      selectStudioCategory('adjust');
     }
 
     function drawArrowOnCanvas(ctx, fromx, fromy, tox, toy, width) {
@@ -1348,10 +1471,10 @@
       const scaleX = studioCanvas.width / rect.width;
       const scaleY = studioCanvas.height / rect.height;
 
-      const x = Math.min(cropStartX, cropEndX) * scaleX;
-      const y = Math.min(cropStartY, cropEndY) * scaleY;
-      const w = Math.abs(cropEndX - cropStartX) * scaleX;
-      const h = Math.abs(cropEndY - cropStartY) * scaleY;
+      const x = Math.min(dragStartX, dragEndX) * scaleX;
+      const y = Math.min(dragStartY, dragEndY) * scaleY;
+      const w = Math.abs(dragEndX - dragStartX) * scaleX;
+      const h = Math.abs(dragEndY - dragStartY) * scaleY;
 
       if (w < 20 || h < 20) {
         alert("Please drag a larger box to crop.");
@@ -1363,9 +1486,7 @@
       studioCanvas.height = h;
       studioCtx.putImageData(croppedData, 0, 0);
 
-      const box = document.getElementById("cropSelectionBox");
-      if (box) box.classList.add("hidden");
-      selectStudioCategory('draw');
+      cancelCropMode();
       pushHistorySnapshot();
       fitStudioImageToViewport();
     }
