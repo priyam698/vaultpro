@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Cloud Storage & Advanced Studio Workspace</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34 Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22 L78 26 C66 21 34 21 18 26 Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76 L46 76 L86 34 Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78 Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3ClinearGradient id='rv' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23c084fc'/%3E%3Cstop offset='50%25' stop-color='%23818cf8'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3ClinearGradient id='gs' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34 Z' fill='url(%23rc)'/%3E%3Cpath d='M18 22C36 16 74 16 86 22 L78 26 C66 21 34 21 18 26 Z' fill='url(%23gs)'/%3E%3Cpath d='M86 22L30 76 L46 76 L86 34 Z' fill='url(%23rv)'/%3E%3Cpath d='M14 78C26 68 58 66 82 76 C66 84 32 84 14 78 Z' fill='url(%23rc)'/%3E%3Cpath d='M14 78 C28 72 60 72 82 76 L76 80 C58 76 28 76 14 81 Z' fill='url(%23gs)'/></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,7 +56,6 @@
       border: 1px solid rgba(99, 102, 241, 0.45) !important;
     }
 
-    /* Top Photo-Editor Ribbon Tabs */
     .tool-tab-btn {
       display: flex;
       flex-direction: column;
@@ -82,7 +81,6 @@
       box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.35);
     }
 
-    /* Rendering Precision Styles */
     .canvas-crisp-pixels {
       image-rendering: -webkit-optimize-contrast !important;
       image-rendering: crisp-edges !important;
@@ -94,7 +92,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Transparent Matte Board pattern */
     .artboard-checker {
       background-color: #090d19;
       background-image: 
@@ -106,7 +103,6 @@
       background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
 
-    /* Interactive Crop Selection Box */
     .crop-selection-box {
       border: 2px dashed #38bdf8;
       background: rgba(56, 189, 248, 0.18);
@@ -116,7 +112,6 @@
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
     }
 
-    /* Flashing Pill Popup Animation */
     @keyframes flashPillAnim {
       0% {
         opacity: 0;
@@ -145,9 +140,6 @@
       touch-action: none;
     }
 
-    /* ========================================================================= */
-    /* LIGHT THEME (DAY MODE) OVERRIDES                                          */
-    /* ========================================================================= */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -177,53 +169,6 @@
     body.light-theme header a,
     body.light-theme header span {
       color: #0f172a !important;
-    }
-
-    body.light-theme header .badge-drive {
-      background: #e0f2fe !important;
-      border: 1px solid #bae6fd !important;
-      color: #0284c7 !important;
-    }
-
-    body.light-theme header .badge-pro {
-      background: #fef3c7 !important;
-      border: 1px solid #fde68a !important;
-      color: #b45309 !important;
-    }
-
-    body.light-theme header .btn-plans {
-      background: #ffffff !important;
-      border: 1px solid #c7d2fe !important;
-      color: #4338ca !important;
-      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.08) !important;
-    }
-
-    body.light-theme header .btn-branding {
-      background: #ffffff !important;
-      border: 1px solid #e9d5ff !important;
-      color: #7e22ce !important;
-      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.08) !important;
-    }
-
-    body.light-theme header .btn-pipeline {
-      background: #ffffff !important;
-      border: 1px solid #bae6fd !important;
-      color: #0284c7 !important;
-      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08) !important;
-    }
-
-    body.light-theme header #themeToggleBtn {
-      background: #ffffff !important;
-      border: 1px solid #fed7aa !important;
-      color: #d97706 !important;
-      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.08) !important;
-    }
-
-    body.light-theme header .btn-signout {
-      background: #ffffff !important;
-      border: 1px solid #fecdd3 !important;
-      color: #e11d48 !important;
-      box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08) !important;
     }
 
     body.light-theme .obsidian-card {
@@ -264,7 +209,7 @@
 
   <div class="site-mountain-backdrop"></div>
 
-  <!-- CONFIRM SAVE CHANGES PROMPT MODAL -->
+  <!-- CONFIRM SAVE CHANGES MODAL -->
   <div id="saveChangesModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
     <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4 border border-indigo-500/40 shadow-2xl">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">⚠️</div>
@@ -333,7 +278,7 @@
         </div>
       </div>
 
-      <!-- Secondary Sub-Tool Drawer (Controls for Active Tool) -->
+      <!-- Secondary Sub-Tool Drawer (Contextual Controls per Tool) -->
       <div id="subToolSettingsBar" class="px-6 py-2.5 bg-[#050811] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
         <!-- Injected dynamically -->
       </div>
@@ -342,11 +287,10 @@
       <div class="flex-1 flex overflow-hidden relative">
         
         <!-- Center Viewport (Pan Area) -->
-        <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-3 artboard-checker">
+        <div id="studioBodyStage" class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-3 artboard-checker transition-colors duration-200">
           
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
-            <!-- Panning Container: Uses 2D matrix translate offset instead of scroll limits -->
-            <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-hidden p-4 relative select-none">
+            <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-hidden p-4 relative select-none transition-colors duration-200">
               <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
                 <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
@@ -597,7 +541,6 @@
   <!-- Main Content -->
   <main class="relative z-20 max-w-7xl mx-auto px-6 py-8 flex-1 space-y-6 w-full">
     
-    <!-- Top Widgets Row -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
       <div class="md:col-span-4 obsidian-card rounded-3xl p-6 flex flex-col justify-between space-y-4">
         <div>
@@ -645,7 +588,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -773,12 +716,10 @@
     let sharpnessMode = 'ultra';
     let activeShapeType = 'hline';
 
-    // Rotation & Flip Transform Tracking
     let currentRotationDeg = 0;
     let isFlippedH = false;
     let isFlippedV = false;
 
-    // Image Adjustments State
     let adjustBrightness = 100;
     let adjustContrast = 100;
     let adjustSaturation = 100;
@@ -786,16 +727,13 @@
     let canvasHistory = [];
     let historyStep = -1;
 
-    // Lock Status of Active Content
     let isContentLocked = false;
 
-    // Interactive Drag Coordinate Buffer
     let isDragToolActive = false;
     let dragStartX = 0, dragStartY = 0;
     let dragEndX = 0, dragEndY = 0;
     let drawingPoints = [];
 
-    // 2D Matrix Translation Pan Engine
     let panX = 0;
     let panY = 0;
     let isPanning = false;
@@ -1177,7 +1115,7 @@
     function deleteActiveContent(e) {
       if (e) e.stopPropagation();
       if (isContentLocked) {
-        alert("⚠️️ This content is currently locked! Please click 'Unlock' first to delete it.");
+        alert("⚠️ This content is currently locked! Please click 'Unlock' first to delete it.");
         return;
       }
       undoStudioCanvas();
@@ -1230,7 +1168,6 @@
         }
       });
 
-      // Spacebar quick-grab shortcut (Photoshop/Canva/Figma workflow)
       window.addEventListener("keydown", (e) => {
         if (e.code === "Space" && !isSpacePressed && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
           const modal = document.getElementById("driveStudioModal");
@@ -1272,7 +1209,76 @@
     }
 
     // -------------------------------------------------------------
-    // 8. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
+    // 8. BACKGROUND ENGINE: STAGE BACKDROP & MATTE CANVAS BORDER
+    // -------------------------------------------------------------
+    function setStageBackground(color, isChecker = false) {
+      const stage = document.getElementById("studioBodyStage");
+      const viewport = document.getElementById("studioCanvasViewport");
+      if (!stage || !viewport) return;
+
+      if (isChecker) {
+        stage.classList.add("artboard-checker");
+        stage.style.backgroundColor = "";
+        viewport.style.backgroundColor = "";
+      } else {
+        stage.classList.remove("artboard-checker");
+        stage.style.backgroundColor = color;
+        viewport.style.backgroundColor = color;
+      }
+    }
+
+    function applyMattePadding(color, padding = 40) {
+      if (!studioCanvas || !studioCtx) return;
+      const oldW = studioCanvas.width;
+      const oldH = studioCanvas.height;
+      const newW = oldW + (padding * 2);
+      const newH = oldH + (padding * 2);
+
+      const temp = document.createElement("canvas");
+      temp.width = oldW;
+      temp.height = oldH;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = newW;
+      studioCanvas.height = newH;
+
+      studioCtx.fillStyle = color;
+      studioCtx.fillRect(0, 0, newW, newH);
+      studioCtx.drawImage(temp, padding, padding);
+
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function applySquareMatte(color) {
+      if (!studioCanvas || !studioCtx) return;
+      const dim = Math.max(studioCanvas.width, studioCanvas.height) + 60;
+      const padX = Math.round((dim - studioCanvas.width) / 2);
+      const padY = Math.round((dim - studioCanvas.height) / 2);
+
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = dim;
+      studioCanvas.height = dim;
+
+      studioCtx.fillStyle = color;
+      studioCtx.fillRect(0, 0, dim, dim);
+      studioCtx.drawImage(temp, padX, padY);
+
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function setCanvasBackground(color) {
+      // Backwards-compatible alias: shifts the stage background immediately
+      setStageBackground(color, false);
+    }
+
+    // -------------------------------------------------------------
+    // 9. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
@@ -1291,7 +1297,28 @@
       dismissFloatingPill();
       updateCursorForCategory();
 
-      if (cat === 'hand') {
+      if (cat === 'background') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-4 flex-wrap text-xs font-bold w-full justify-between">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-slate-400">Workspace Backdrop:</span>
+              <button onclick="setStageBackground('', true)" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 transition">🏁 Grid</button>
+              <button onclick="setStageBackground('#0b0f19')" class="px-2.5 py-1 rounded-lg bg-[#0b0f19] border border-white/20 text-white transition">🌙 Midnight</button>
+              <button onclick="setStageBackground('#ffffff')" class="px-2.5 py-1 rounded-lg bg-white border border-white/20 text-black transition">☀️ Pure White</button>
+              <button onclick="setStageBackground('#000000')" class="px-2.5 py-1 rounded-lg bg-black border border-white/20 text-white transition">⬛ OLED Black</button>
+              <input type="color" onchange="setStageBackground(this.value)" class="w-6 h-6 rounded-lg border border-white/20 bg-transparent cursor-pointer" title="Custom Backdrop Color">
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-slate-400">Add Matte Border:</span>
+              <button onclick="applyMattePadding(brushColor, 30)" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition shadow">+30px</button>
+              <button onclick="applyMattePadding(brushColor, 60)" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition shadow">+60px</button>
+              <button onclick="applySquareMatte(brushColor)" class="px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition shadow">Square 1:1</button>
+              <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-6 h-6 rounded-lg border border-white/20 bg-transparent cursor-pointer ml-1" title="Border Color">
+            </div>
+          </div>
+        `;
+      } else if (cat === 'hand') {
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap font-bold text-xs">
             <span class="text-sky-300 flex items-center gap-1.5">
@@ -1492,15 +1519,6 @@
             <button onclick="applyCircularAvatar()" class="px-3 py-1 rounded-xl bg-indigo-600 text-white">Full Circle</button>
           </div>
         `;
-      } else if (cat === 'background') {
-        drawer.innerHTML = `
-          <div class="flex items-center gap-3 font-bold">
-            <span class="text-slate-400">Matte Canvas Background:</span>
-            <button onclick="setCanvasBackground('#0b0f19')" class="px-2.5 py-1 rounded-lg bg-[#0b0f19] border border-white/20 text-white">Midnight</button>
-            <button onclick="setCanvasBackground('#ffffff')" class="px-2.5 py-1 rounded-lg bg-white border border-white/20 text-black">Pure White</button>
-            <button onclick="setCanvasBackground('#000000')" class="px-2.5 py-1 rounded-lg bg-black border border-white/20 text-white">OLED Black</button>
-          </div>
-        `;
       }
     }
 
@@ -1514,7 +1532,7 @@
     }
 
     // -------------------------------------------------------------
-    // 9. DRAWING & INTERACTIVE CONTENT ACTIONS
+    // 10. DRAWING & INTERACTIVE CONTENT ACTIONS
     // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
@@ -1695,7 +1713,7 @@
     }
 
     // -------------------------------------------------------------
-    // 10. APPLY INTERACTIVE CROP
+    // 11. APPLY INTERACTIVE CROP
     // -------------------------------------------------------------
     function applyInteractiveCrop() {
       if (!studioCanvas || !studioCtx) return;
@@ -1836,7 +1854,7 @@
     }
 
     // -------------------------------------------------------------
-    // 11. TRANSFORMS & ORIGINAL POSITION RESET
+    // 12. TRANSFORMS & ORIGINAL POSITION RESET
     // -------------------------------------------------------------
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
@@ -1990,19 +2008,6 @@
       studioCtx.drawImage(temp, padSide, padTop);
       pushHistorySnapshot();
       fitStudioImageToViewport();
-    }
-
-    function setCanvasBackground(color) {
-      if (!studioCanvas || !studioCtx) return;
-      const temp = document.createElement("canvas");
-      temp.width = studioCanvas.width;
-      temp.height = studioCanvas.height;
-      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
-
-      studioCtx.fillStyle = color;
-      studioCtx.fillRect(0, 0, studioCanvas.width, studioCanvas.height);
-      studioCtx.drawImage(temp, 0, 0);
-      pushHistorySnapshot();
     }
 
     function resetImageCanvas() {
