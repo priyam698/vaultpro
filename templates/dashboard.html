@@ -106,7 +106,7 @@
       background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
 
-    /* Figma-style Interactive Crop Selection Box */
+    /* Interactive Crop Selection Box */
     .crop-selection-box {
       border: 2px dashed #38bdf8;
       background: rgba(56, 189, 248, 0.18);
@@ -669,7 +669,7 @@
       const isLight = document.body.classList.toggle("light-theme");
       localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
       const icon = document.getElementById("themeIcon");
-      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️️";
     }
 
     initTheme();
@@ -722,7 +722,12 @@
     let brushColor = '#38bdf8';
     let brushSize = 2;
     let sharpnessMode = 'ultra';
-    let activeShapeType = 'rectangle';
+    let activeShapeType = 'hline';
+
+    // Rotation & Flip Transform Tracking for Instant Original Reset
+    let currentRotationDeg = 0;
+    let isFlippedH = false;
+    let isFlippedV = false;
 
     // Image Adjustments State
     let adjustBrightness = 100;
@@ -805,7 +810,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. IN-DRIVE STUDIO WITH 1:1 RESOLUTION & MULTI-PASS SMOOTHING
+    // 3. IN-DRIVE STUDIO INITIALIZATION
     // -------------------------------------------------------------
     async function openDriveStudio(fileId) {
       const file = allFiles.find(f => f.id === fileId);
@@ -842,6 +847,9 @@
 
         canvasHistory = [];
         historyStep = -1;
+        currentRotationDeg = 0;
+        isFlippedH = false;
+        isFlippedV = false;
 
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -853,7 +861,7 @@
 
           studioCtx.drawImage(img, 0, 0, studioCanvas.width, studioCanvas.height);
 
-          setSharpnessMode('ultra'); // Defaults to ultra super smooth for legible text!
+          setSharpnessMode('ultra');
           pushHistorySnapshot(false);
           setupCanvasDrawing();
           selectStudioCategory('draw');
@@ -890,7 +898,7 @@
     }
 
     // -------------------------------------------------------------
-    // 4. TRIPLE-TIER SHARPNESS & ULTRA SUPER SMOOTH ENGINE
+    // 4. SHARPNESS & ULTRA SUPER SMOOTH ENGINE
     // -------------------------------------------------------------
     function setSharpnessMode(mode) {
       sharpnessMode = mode;
@@ -1085,7 +1093,6 @@
               <span id="sBrushVal" class="font-mono text-sky-400 w-5 font-bold">${brushSize}</span>
             </div>
 
-            <!-- Precision Quick Size Badges -->
             <div class="flex items-center gap-1">
               <button onclick="setMarkerSize(1)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-sky-300">1px</button>
               <button onclick="setMarkerSize(2)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-sky-300">2px</button>
@@ -1095,6 +1102,32 @@
             </div>
           </div>
           <span class="text-sky-400 font-mono text-[11px] font-bold">● Freehand Smooth Vector Inking Active</span>
+        `;
+      } else if (cat === 'shapes') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-2 flex-wrap font-bold text-xs">
+            <span class="text-slate-400">Shapes & Lines:</span>
+            <button onclick="setShapeMode('hline')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'hline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">― Horizontal Line</button>
+            <button onclick="setShapeMode('vline')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'vline' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">| Vertical Line</button>
+            <button onclick="setShapeMode('line')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'line' ? 'bg-sky-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">╱ Straight Line</button>
+            <button onclick="setShapeMode('arrow')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'arrow' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">↗ Arrow</button>
+            <button onclick="setShapeMode('rectangle')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'rectangle' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">🔲 Box</button>
+            <button onclick="setShapeMode('circle')" class="px-2.5 py-1 rounded-lg transition ${activeShapeType === 'circle' ? 'bg-indigo-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/15'}">⚪ Circle</button>
+
+            <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400 font-bold">Color:</span>
+              <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-6 h-6 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400 font-bold">Thickness:</span>
+              <input type="range" min="1" max="40" value="${brushSize}" oninput="brushSize=parseInt(this.value); document.getElementById('sShapeThicknessVal').innerText=this.value" class="w-20 accent-sky-400 cursor-pointer">
+              <span id="sShapeThicknessVal" class="font-mono text-sky-400 w-4 font-bold">${brushSize}</span>
+            </div>
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Click & drag on image to place line or shape</span>
         `;
       } else if (cat === 'crop') {
         drawer.innerHTML = `
@@ -1154,11 +1187,14 @@
       } else if (cat === 'transform') {
         drawer.innerHTML = `
           <div class="flex items-center gap-2 flex-wrap font-bold">
-            <span class="text-slate-400">Orientation:</span>
+            <span class="text-slate-400">Orientation & Position:</span>
             <button onclick="rotateCanvas(90)" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">↻ 90° Clockwise</button>
             <button onclick="rotateCanvas(-90)" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">↺ 90° Counter</button>
             <button onclick="flipCanvas('h')" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">⇆ Flip Horizontal</button>
             <button onclick="flipCanvas('v')" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">⇅ Flip Vertical</button>
+            <button onclick="resetOrientationToOriginal()" class="px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition flex items-center gap-1.5 cursor-pointer">
+              <span>🎯</span> Original Position
+            </button>
           </div>
         `;
       } else if (cat === 'resize') {
@@ -1182,16 +1218,6 @@
             <button onclick="stampWatermark()" class="px-3 py-1 rounded-xl bg-indigo-600 text-white">Stamp Center Watermark</button>
           </div>
           <span class="text-slate-400 font-mono text-[11px]">Click anywhere on image to add text</span>
-        `;
-      } else if (cat === 'shapes') {
-        drawer.innerHTML = `
-          <div class="flex items-center gap-2 flex-wrap font-bold">
-            <span class="text-slate-400">Shape:</span>
-            <button onclick="setShapeMode('rectangle')" id="sBtnRect" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white">🔲 Box</button>
-            <button onclick="setShapeMode('circle')" id="sBtnCircle" class="px-2.5 py-1 rounded-lg bg-white/10 text-slate-300">⚪ Circle</button>
-            <button onclick="setShapeMode('arrow')" id="sBtnArrow" class="px-2.5 py-1 rounded-lg bg-white/10 text-slate-300">↗ Arrow</button>
-            <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer ml-2">
-          </div>
         `;
       } else if (cat === 'stickers') {
         drawer.innerHTML = `
@@ -1236,7 +1262,7 @@
     }
 
     // -------------------------------------------------------------
-    // 7. SMOOTH INKING & UNIFIED DRAG HANDLER (FIXED CROP LOGIC)
+    // 7. SMOOTH INKING & UNIFIED DRAG HANDLER WITH HORIZONTAL / VERTICAL LINES
     // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
@@ -1274,7 +1300,6 @@
           return;
         }
 
-        // UNIFIED CROP & REDACT SELECTION START
         if (currentCategory === 'crop' || currentCategory === 'redact') {
           isDragToolActive = true;
           dragStartX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
@@ -1321,7 +1346,6 @@
         const currX = (e.clientX - rect.left) * scaleX;
         const currY = (e.clientY - rect.top) * scaleY;
 
-        // UNIFIED CROP & REDACT SELECTION DRAG
         if ((currentCategory === 'crop' || currentCategory === 'redact') && isDragToolActive) {
           const mouseX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
           const mouseY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
@@ -1350,8 +1374,22 @@
           studioCtx.beginPath();
           studioCtx.lineWidth = brushSize;
           studioCtx.strokeStyle = brushColor;
+          studioCtx.lineCap = "round";
+          studioCtx.lineJoin = "round";
 
-          if (activeShapeType === 'rectangle') {
+          if (activeShapeType === 'hline') {
+            studioCtx.moveTo(startX, startY);
+            studioCtx.lineTo(currX, startY);
+            studioCtx.stroke();
+          } else if (activeShapeType === 'vline') {
+            studioCtx.moveTo(startX, startY);
+            studioCtx.lineTo(startX, currY);
+            studioCtx.stroke();
+          } else if (activeShapeType === 'line') {
+            studioCtx.moveTo(startX, startY);
+            studioCtx.lineTo(currX, currY);
+            studioCtx.stroke();
+          } else if (activeShapeType === 'rectangle') {
             studioCtx.rect(startX, startY, currX - startX, currY - startY);
             studioCtx.stroke();
           } else if (activeShapeType === 'circle') {
@@ -1363,7 +1401,6 @@
             drawArrowOnCanvas(studioCtx, startX, startY, currX, currY, studioCtx.lineWidth);
           }
         } else {
-          // Quadratic Bézier mid-point smoothing for silky strokes
           drawingPoints.push({ x: currX, y: currY });
           if (drawingPoints.length > 2) {
             const p1 = drawingPoints[drawingPoints.length - 2];
@@ -1391,7 +1428,7 @@
     }
 
     // -------------------------------------------------------------
-    // 8. APPLY INTERACTIVE CROP (ROBUST CANVASS SLICING)
+    // 8. APPLY INTERACTIVE CROP
     // -------------------------------------------------------------
     function applyInteractiveCrop() {
       if (!studioCanvas || !studioCtx) return;
@@ -1409,18 +1446,15 @@
         return;
       }
 
-      // Safe slice offscreen to prevent canvas resize destruction
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = studioCanvas.width;
       tempCanvas.height = studioCanvas.height;
       const tempCtx = tempCanvas.getContext("2d");
       tempCtx.drawImage(studioCanvas, 0, 0);
 
-      // Resize active viewport canvas
       studioCanvas.width = sw;
       studioCanvas.height = sh;
 
-      // Render cropped quadrant
       studioCtx.clearRect(0, 0, sw, sh);
       studioCtx.drawImage(tempCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
 
@@ -1534,8 +1568,13 @@
       pushHistorySnapshot();
     }
 
+    // -------------------------------------------------------------
+    // 9. ORIENTATION, TRANSFORMS & ORIGINAL POSITION RESET
+    // -------------------------------------------------------------
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
+      currentRotationDeg = (currentRotationDeg + deg) % 360;
+
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = studioCanvas.width;
       tempCanvas.height = studioCanvas.height;
@@ -1561,6 +1600,9 @@
 
     function flipCanvas(dir) {
       if (!studioCanvas || !studioCtx) return;
+      if (dir === 'h') isFlippedH = !isFlippedH;
+      if (dir === 'v') isFlippedV = !isFlippedV;
+
       const temp = document.createElement("canvas");
       temp.width = studioCanvas.width;
       temp.height = studioCanvas.height;
@@ -1577,6 +1619,28 @@
       studioCtx.drawImage(temp, 0, 0);
       studioCtx.restore();
       pushHistorySnapshot();
+    }
+
+    function resetOrientationToOriginal() {
+      if (!studioCanvas || !studioCtx) return;
+
+      // Reverse any active horizontal or vertical flips
+      if (isFlippedH) {
+        flipCanvas('h');
+        isFlippedH = false;
+      }
+      if (isFlippedV) {
+        flipCanvas('v');
+        isFlippedV = false;
+      }
+
+      // Rotate back to 0 degrees if orientation was altered
+      if (currentRotationDeg !== 0) {
+        rotateCanvas(-currentRotationDeg);
+        currentRotationDeg = 0;
+      }
+
+      fitStudioImageToViewport();
     }
 
     function applyImageResize() {
@@ -1679,6 +1743,9 @@
       studioCanvas.height = studioImgObj.naturalHeight || studioImgObj.height;
       studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
       studioCtx.drawImage(studioImgObj, 0, 0);
+      currentRotationDeg = 0;
+      isFlippedH = false;
+      isFlippedV = false;
       pushHistorySnapshot();
       fitStudioImageToViewport();
     }
