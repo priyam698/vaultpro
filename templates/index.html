@@ -231,7 +231,6 @@
       color: #d97706 !important;
     }
 
-    /* FIX FOR DRIVE BUTTON IN DAY MODE */
     body.light-theme header a[href="/dashboard"],
     body.light-theme header a[href="/dashboard"].header-pill {
       background: #ffffff !important;
@@ -250,14 +249,12 @@
       color: #0284c7 !important;
     }
 
-    /* FIX FOR HERO BADGE PILL IN DAY MODE */
     body.light-theme .hero-badge-pill {
       background: #e0f2fe !important;
       border: 1px solid #bae6fd !important;
       color: #0369a1 !important;
     }
 
-    /* FIX FOR ZEPHYR PRO PRICE CONTRAST & ROYAL INDIGO COLOR IN DAY MODE */
     body.light-theme #pricing .pro-price-val {
       color: #4f46e5 !important;
     }
@@ -397,7 +394,6 @@
     }
     body.light-theme .feature-badge span { color: #0f172a !important; }
 
-    /* Themed Color Tabs for Quick Buttons in Day Mode */
     body.light-theme .quick-btn {
       background: #ffffff !important;
       border: 1px solid #bae6fd !important;
@@ -701,7 +697,6 @@
         <div id="reqResultBox" class="hidden pt-3 border-t border-white/10 space-y-3">
           <div>
             <label class="block text-[11px] font-bold text-emerald-500 mb-1">✓ Share this link with your client:</label>
-            <!-- Vanishing Link Warning Alert -->
             <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium leading-relaxed mb-2">
               <span class="text-xs shrink-0">⚠️</span>
               <span><strong>Copy this link now!</strong> Save or copy this deposit link before closing this modal.</span>
@@ -824,7 +819,7 @@
           <span>Request</span>
         </button>
 
-        <!-- Drive Vault Pill (Equipped with .header-pill for clean Day Mode styling) -->
+        <!-- Drive Vault Pill -->
         <a href="/dashboard" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-500/30 text-xs font-medium transition">
           <span>Drive</span>
           <span id="headerTierBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-600/30 text-indigo-300 border border-indigo-500/20">5 GB</span>
@@ -1200,7 +1195,7 @@
     <div id="currencyConversionBox" class="obsidian-panel rounded-3xl p-6 space-y-5 border border-indigo-500/30 shadow-2xl">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div class="space-y-1">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <span class="relative flex h-2.5 w-2.5">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -1211,7 +1206,9 @@
             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
               Dodo / Gateway Spread Included
             </span>
-
+            <span id="fxUpdatedTimeBadge" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+              Live Daily Feed
+            </span>
           </div>
           <p class="text-[11px] opacity-70">
             Live transaction settlement conversion including processor spread. Rates update daily with market volatility.
@@ -1480,7 +1477,7 @@
 
             <div class="flex items-start gap-4">
               <div class="w-11 h-11 rounded-2xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-xl shrink-0 border border-cyan-500/30 shadow-inner">
-                🛡️️
+                🛡
               </div>
               <div>
                 <h4 class="text-sm font-black">Anti-Screenshot Shield & Lifetime Unlock</h4>
@@ -2321,7 +2318,7 @@
 
     initTheme();
 
-    const ACTIVE_PAYMENT_ENV = "test"; // <--- CHANGE TO "live" WHEN GOING LIVE
+    const ACTIVE_PAYMENT_ENV = "test"; // Change to "live" when deploying to production
 
     const DODO_CONFIG = {
       test: {
@@ -2352,6 +2349,12 @@
         const data = await res.json();
         if (data && data.rates) {
           globalFxRates = data.rates;
+          
+          if (data.updated_at) {
+            const badge = document.getElementById("fxUpdatedTimeBadge");
+            if (badge) badge.innerText = `Updated: ${data.updated_at}`;
+          }
+
           const initialInput = document.getElementById("fxTestAmountInput");
           const initialVal = initialInput ? (parseFloat(initialInput.value) || 1.00) : 1.00;
           updateCurrencyPreview(initialVal);
@@ -2543,7 +2546,7 @@
 
             userSingleLimitMb = singleCaps[userTier] || 2048;
 
-            if (capBadge) capBadge.innerText = `${userTier.toUpperCase()}:${userSingleLimitMb / 1000} GB limit`;
+            if (capBadge) capBadge.innerText = `${userTier.toUpperCase()}: ${userSingleLimitMb / 1000} GB limit`;
             if (headerCap) headerCap.innerText = vaultCaps[userTier] || "Drive";
           }
         })
@@ -3005,13 +3008,13 @@
         if (totalSizeMb > userSingleLimitMb) {
           progressBox.classList.add("hidden");
           transferBtn.disabled = false;
-          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of${userSingleLimitMb} MB. Please upgrade your plan.`;
+          document.getElementById("limitModalMsg").innerText = `Your files (${totalSizeMb.toFixed(2)} MB) exceed your ${userTier.toUpperCase()} limit of ${userSingleLimitMb} MB. Please upgrade your plan.`;
           document.getElementById("limitModal").classList.remove("hidden");
           return;
         }
 
         progressStatus.innerText = "Reserving cryptographic vault...";
-        progressBar.style.width = "10%`";
+        progressBar.style.width = "10%";
         progressPercent.innerText = "10%";
 
         const isPaywalled = document.getElementById("paywallToggle") ? document.getElementById("paywallToggle").checked : false;
