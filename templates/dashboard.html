@@ -297,6 +297,7 @@
           <button onclick="selectStudioCategory('resize')" id="tabBtn-resize" class="tool-tab-btn"><span class="text-sm">📏</span><span>RESIZE</span></button>
           <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn"><span class="text-sm">✂️</span><span>CROP</span></button>
           <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn"><span class="text-sm">🔄</span><span>TRANSFORM</span></button>
+          <button onclick="selectStudioCategory('hand')" id="tabBtn-hand" class="tool-tab-btn"><span class="text-sm">🖐️</span><span>HAND</span></button>
           <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active"><span class="text-sm">✏️</span><span>DRAW</span></button>
           <button onclick="selectStudioCategory('lines')" id="tabBtn-lines" class="tool-tab-btn"><span class="text-sm">📏</span><span>LINES</span></button>
           <button onclick="selectStudioCategory('highlighter')" id="tabBtn-highlighter" class="tool-tab-btn"><span class="text-sm">🖍</span><span>HIGHLIGHT</span></button>
@@ -341,7 +342,7 @@
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
             <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4 relative">
               <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
-                <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out"></canvas>
+                <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
 
                 <!-- FLASHING QUICK-ACTION PILL (LOCK & DELETE) -->
@@ -367,7 +368,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️️ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -788,6 +789,12 @@
     let dragEndX = 0, dragEndY = 0;
     let drawingPoints = [];
 
+    // Hand / Pan Tool States
+    let isPanning = false;
+    let panStartX = 0, panStartY = 0;
+    let scrollStartLeft = 0, scrollStartTop = 0;
+    let isSpacePressed = false;
+
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
@@ -910,6 +917,7 @@
           setSharpnessMode('ultra');
           pushHistorySnapshot(false);
           setupCanvasDrawing();
+          setupHandPanEngine();
           selectStudioCategory('draw');
           setTimeout(fitStudioImageToViewport, 30);
         };
@@ -1126,7 +1134,7 @@
 
       pill.classList.remove("hidden");
       pill.classList.remove("pill-flash-active");
-      void pill.offsetWidth; // Force CSS repaint to re-trigger flash animation
+      void pill.offsetWidth;
       pill.classList.add("pill-flash-active");
     }
 
@@ -1166,11 +1174,94 @@
     }
 
     // -------------------------------------------------------------
-    // 7. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
+    // 7. HAND / PAN ENGINE (CATCHING & SLIDING)
+    // -------------------------------------------------------------
+    function setupHandPanEngine() {
+      const viewport = document.getElementById("studioCanvasViewport");
+      if (!viewport) return;
+
+      viewport.addEventListener("mousedown", (e) => {
+        if (currentCategory === 'hand' || isSpacePressed) {
+          isPanning = true;
+          panStartX = e.clientX;
+          panStartY = e.clientY;
+          scrollStartLeft = viewport.scrollLeft;
+          scrollStartTop = viewport.scrollTop;
+          viewport.style.cursor = "grabbing";
+          if (studioCanvas) studioCanvas.style.cursor = "grabbing";
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (isPanning) {
+          const dx = e.clientX - panStartX;
+          const dy = e.clientY - panStartY;
+          viewport.scrollLeft = scrollStartLeft - dx;
+          viewport.scrollTop = scrollStartTop - dy;
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (isPanning) {
+          isPanning = false;
+          if (currentCategory === 'hand' || isSpacePressed) {
+            viewport.style.cursor = "grab";
+            if (studioCanvas) studioCanvas.style.cursor = "grab";
+          } else {
+            updateCursorForCategory();
+          }
+        }
+      });
+
+      // Spacebar hold to temporarily catch & slide from any tool (Figma/Canva style)
+      window.addEventListener("keydown", (e) => {
+        if (e.code === "Space" && !isSpacePressed && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+          const modal = document.getElementById("driveStudioModal");
+          if (modal && !modal.classList.contains("hidden")) {
+            isSpacePressed = true;
+            viewport.style.cursor = "grab";
+            if (studioCanvas) studioCanvas.style.cursor = "grab";
+            e.preventDefault();
+          }
+        }
+      });
+
+      window.addEventListener("keyup", (e) => {
+        if (e.code === "Space") {
+          isSpacePressed = false;
+          isPanning = false;
+          updateCursorForCategory();
+        }
+      });
+    }
+
+    function updateCursorForCategory() {
+      const viewport = document.getElementById("studioCanvasViewport");
+      if (!viewport || !studioCanvas) return;
+
+      if (currentCategory === 'hand') {
+        viewport.style.cursor = "grab";
+        studioCanvas.style.cursor = "grab";
+      } else if (currentCategory === 'crop' || currentCategory === 'redact') {
+        viewport.style.cursor = "crosshair";
+        studioCanvas.style.cursor = "crosshair";
+      } else if (currentCategory === 'draw' || currentCategory === 'lines' || currentCategory === 'highlighter' || currentCategory === 'shapes') {
+        viewport.style.cursor = "crosshair";
+        studioCanvas.style.cursor = "crosshair";
+      } else {
+        viewport.style.cursor = "default";
+        studioCanvas.style.cursor = "default";
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 8. PRO EDITING TOOLS & SUBDRAWER CONTROLLER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
-      const categories = ['resize', 'crop', 'transform', 'draw', 'lines', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
+      const categories = ['resize', 'crop', 'transform', 'hand', 'draw', 'lines', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
       categories.forEach(c => {
         const btn = document.getElementById(`tabBtn-${c}`);
         if (btn) {
@@ -1182,8 +1273,23 @@
       const drawer = document.getElementById("subToolSettingsBar");
       const cropBox = document.getElementById("cropSelectionBox");
       if (cropBox) cropBox.classList.add("hidden");
+      dismissFloatingPill();
+      updateCursorForCategory();
 
-      if (cat === 'draw') {
+      if (cat === 'hand') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap font-bold text-xs">
+            <span class="text-sky-300 flex items-center gap-1.5">
+              <span>🖐️</span>
+              <span>Hand Pan Tool Active: Click & drag anywhere to catch, slide and pan around the image.</span>
+            </span>
+            <button onclick="fitStudioImageToViewport()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">Fit to Screen</button>
+            <button onclick="setStudioZoomActual()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition">100% Actual Size</button>
+            <button onclick="resetOrientationToOriginal()" class="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 transition">🎯 Center Canvas</button>
+          </div>
+          <span class="text-slate-400 font-mono text-[11px]">Pro-tip: Hold [Spacebar] anytime to grab and pan</span>
+        `;
+      } else if (cat === 'draw') {
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap">
             <div class="flex items-center gap-2">
@@ -1260,7 +1366,7 @@
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap">
             <span class="text-sky-300 font-bold flex items-center gap-1.5">
-              <span>✂️</span>
+              <span>✂️️</span>
               <span>Click & drag across the image to select the crop box</span>
             </span>
             <button onclick="applyInteractiveCrop()" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition flex items-center gap-1">
@@ -1393,7 +1499,7 @@
     }
 
     // -------------------------------------------------------------
-    // 8. DRAWING & INTERACTIVE CONTENT ACTIONS
+    // 9. DRAWING & INTERACTIVE CONTENT ACTIONS
     // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
@@ -1414,6 +1520,10 @@
       };
 
       studioCanvas.onmousedown = (e) => {
+        if (currentCategory === 'hand' || isSpacePressed) {
+          return; // Let the Hand / Pan engine handle this event
+        }
+
         const rect = studioCanvas.getBoundingClientRect();
         const scaleX = studioCanvas.width / rect.width;
         const scaleY = studioCanvas.height / rect.height;
@@ -1478,6 +1588,10 @@
       };
 
       studioCanvas.onmousemove = (e) => {
+        if (currentCategory === 'hand' || isSpacePressed) {
+          return;
+        }
+
         const rect = studioCanvas.getBoundingClientRect();
         const scaleX = studioCanvas.width / rect.width;
         const scaleY = studioCanvas.height / rect.height;
@@ -1561,13 +1675,13 @@
           isDrawing = false;
           if (studioCtx) studioCtx.globalAlpha = 1.0;
           pushHistorySnapshot();
-          if (e) flashFloatingPill(e.clientX, e.clientY);
+          if (e && currentCategory !== 'hand') flashFloatingPill(e.clientX, e.clientY);
         }
       };
     }
 
     // -------------------------------------------------------------
-    // 9. APPLY INTERACTIVE CROP
+    // 10. APPLY INTERACTIVE CROP
     // -------------------------------------------------------------
     function applyInteractiveCrop() {
       if (!studioCanvas || !studioCtx) return;
@@ -1708,7 +1822,7 @@
     }
 
     // -------------------------------------------------------------
-    // 10. TRANSFORMS & ORIGINAL POSITION RESET
+    // 11. TRANSFORMS & ORIGINAL POSITION RESET
     // -------------------------------------------------------------
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
