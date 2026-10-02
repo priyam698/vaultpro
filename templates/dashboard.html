@@ -372,7 +372,7 @@
                   <button id="pillSizeDownBtn" onclick="stepSelectedTextSize(-4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Smaller font">A-</button>
                   <button id="pillSizeUpBtn" onclick="stepSelectedTextSize(4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Bigger font">A+</button>
                   <button id="pillDeleteBtn" onclick="deleteActiveContent(event)" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
-                    <span>🗑️️</span>
+                    <span>🗑️</span>
                     <span>Delete</span>
                   </button>
                   <button onclick="dismissFloatingPill()" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white text-xs font-bold rounded-lg hover:bg-white/10 ml-0.5">✕</button>
@@ -446,6 +446,11 @@
               <button onclick="applyAutoEnhance()" class="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <span>🪄</span>
                 <span>1-Click Auto Tone Balance</span>
+              </button>
+              <!-- 1-CLICK REMOVE AI EFFECTS BUTTON -->
+              <button onclick="removeAIEffects()" class="w-full py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer" title="Instantly revert AI 4K scaling and color balancing">
+                <span>✕</span>
+                <span>Remove AI Effects (1-Click Revert)</span>
               </button>
             </div>
 
@@ -658,7 +663,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -883,6 +888,11 @@
     // Master pristine clean image snapshot preserved for non-destructive edits
     let pristineBaseDataUrl = null;
 
+    // AI Revert State Tracking
+    let preAiCanvasState = null;
+    let isAi4kApplied = false;
+    let isAutoToneApplied = false;
+
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
@@ -993,6 +1003,9 @@
         studioRedactObjects = [];
         activeRedactId = null;
         pristineBaseDataUrl = null;
+        preAiCanvasState = null;
+        isAi4kApplied = false;
+        isAutoToneApplied = false;
         updatePanTransform();
         dismissFloatingPill();
         clearTextOverlayDOM();
@@ -1112,6 +1125,16 @@
         return;
       }
 
+      // Save pre-AI state before 4K upscale so it can be cleanly reverted
+      if (!preAiCanvasState) {
+        preAiCanvasState = {
+          width: curW,
+          height: curH,
+          dataUrl: studioCanvas.toDataURL("image/png")
+        };
+      }
+      isAi4kApplied = true;
+
       const scale = targetLongDim / curLongDim;
       const newW = Math.round(curW * scale);
       const newH = Math.round(curH * scale);
@@ -1142,6 +1165,12 @@
 
       pushHistorySnapshot();
       fitStudioImageToViewport();
+      renderAllRedactObjects();
+      renderAllTextObjects();
+
+      const sizeDisplay = document.getElementById("studioFileSize");
+      if (sizeDisplay) sizeDisplay.innerText = `${newW} × ${newH} (4K UHD)`;
+
       alert(`✨ Converted successfully to 4K Ultra HD (${newW} × ${newH})!`);
     }
 
@@ -1150,8 +1179,72 @@
       adjustBrightness = 104;
       adjustContrast = 108;
       adjustSaturation = 106;
+      isAutoToneApplied = true;
       applyCanvasAdjustments();
       alert("🪄 1-Click Auto Tone & Contrast Balanced!");
+    }
+
+    // -------------------------------------------------------------
+    // 1-CLICK REMOVE AI EFFECTS (REVERTS 4K & COLOR ENHANCEMENTS)
+    // -------------------------------------------------------------
+    function removeAIEffects() {
+      if (!studioCanvas || !studioCtx) return;
+
+      let actionsTaken = [];
+
+      // 1. Reset color tone & contrast adjustments back to neutral
+      if (adjustBrightness !== 100 || adjustContrast !== 100 || adjustSaturation !== 100 || isAutoToneApplied) {
+        adjustBrightness = 100;
+        adjustContrast = 100;
+        adjustSaturation = 100;
+        isAutoToneApplied = false;
+        applyCanvasAdjustments();
+        actionsTaken.push("Auto Tone Balance reverted to 100% neutral");
+      }
+
+      // 2. Revert 4K resolution back to pre-AI state if applied
+      if (isAi4kApplied && preAiCanvasState) {
+        const revScale = preAiCanvasState.width / studioCanvas.width;
+        const restoreImg = new Image();
+        restoreImg.onload = () => {
+          studioCanvas.width = preAiCanvasState.width;
+          studioCanvas.height = preAiCanvasState.height;
+          studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+          studioCtx.drawImage(restoreImg, 0, 0);
+
+          // Rescale objects back proportionally
+          studioTextObjects.forEach(t => {
+            t.x = Math.round(t.x * revScale);
+            t.y = Math.round(t.y * revScale);
+            t.fontSize = Math.max(10, Math.round(t.fontSize * revScale));
+          });
+          studioRedactObjects.forEach(r => {
+            r.x = Math.round(r.x * revScale);
+            r.y = Math.round(r.y * revScale);
+            r.w = Math.max(16, Math.round(r.w * revScale));
+            r.h = Math.max(16, Math.round(r.h * revScale));
+          });
+
+          const sizeDisplay = document.getElementById("studioFileSize");
+          if (sizeDisplay) sizeDisplay.innerText = `${preAiCanvasState.width} × ${preAiCanvasState.height}`;
+
+          preAiCanvasState = null;
+          isAi4kApplied = false;
+
+          pushHistorySnapshot();
+          fitStudioImageToViewport();
+          renderAllRedactObjects();
+          renderAllTextObjects();
+        };
+        restoreImg.src = preAiCanvasState.dataUrl;
+        actionsTaken.push("4K resolution reverted to original dimensions");
+      }
+
+      if (!actionsTaken.length) {
+        alert("No active AI 4K or Tone Balance modifications found to remove.");
+      } else {
+        alert(`✓ 1-Click Revert Successful:\n• ${actionsTaken.join('\n• ')}`);
+      }
     }
 
     function setMarkerSize(size) {
@@ -1850,7 +1943,6 @@
       if (!viewport) return;
 
       viewport.addEventListener("mousedown", (e) => {
-        // Prevent panning if user clicked on any redact box, text box, handle, or action pill
         if (e.target.closest('.studio-redact-box') || e.target.closest('.studio-text-box') || e.target.closest('#floatingActionPill')) {
           return;
         }
