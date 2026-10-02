@@ -175,6 +175,46 @@
       cursor: nwse-resize;
     }
 
+    /* Interactive Redaction & Blur Boxes */
+    .studio-redact-box {
+      position: absolute;
+      cursor: move;
+      user-select: none;
+      border-radius: 6px;
+      transition: outline 0.15s ease;
+      overflow: hidden;
+    }
+    .studio-redact-box.redact-blur {
+      backdrop-filter: blur(14px) brightness(0.96);
+      -webkit-backdrop-filter: blur(14px) brightness(0.96);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    }
+    .studio-redact-box.redact-blackout {
+      background: #000000;
+    }
+    .studio-redact-box:hover {
+      outline: 2px dashed rgba(244, 63, 94, 0.7);
+    }
+    .studio-redact-active {
+      outline: 2px solid #f43f5e !important;
+      box-shadow: 0 0 18px rgba(244, 63, 94, 0.45);
+    }
+    .studio-redact-locked {
+      cursor: default !important;
+      outline: 1.5px solid rgba(234, 179, 8, 0.7) !important;
+    }
+    .redact-resize-handle {
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      background: #f43f5e;
+      border: 2px solid #0f172a;
+      border-radius: 50%;
+      z-index: 25;
+      cursor: nwse-resize;
+    }
+
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -266,7 +306,7 @@
           <button onclick="selectStudioCategory('shapes')" id="tabBtn-shapes" class="tool-tab-btn"><span class="text-sm">🔷</span><span>SHAPES</span></button>
           <button onclick="selectStudioCategory('adjust')" id="tabBtn-adjust" class="tool-tab-btn"><span class="text-sm">🎚️</span><span>ADJUST</span></button>
           <button onclick="selectStudioCategory('stickers')" id="tabBtn-stickers" class="tool-tab-btn"><span class="text-sm">😀</span><span>STICKERS</span></button>
-          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn"><span class="text-sm">🖼️</span><span>FRAME</span></button>
+          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn"><span class="text-sm">🖼️️</span><span>FRAME</span></button>
           <button onclick="selectStudioCategory('corners')" id="tabBtn-corners" class="tool-tab-btn"><span class="text-sm">🔲</span><span>CORNERS</span></button>
           <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn"><span class="text-sm">🎨</span><span>BACKGROUND</span></button>
         </div>
@@ -304,10 +344,13 @@
                 <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
 
+                <!-- DYNAMIC INTERACTIVE REDACTION & BLUR LAYER -->
+                <div id="redactOverlayContainer" class="absolute inset-0 pointer-events-none z-15 overflow-visible"></div>
+
                 <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER -->
                 <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible"></div>
 
-                <!-- FLASHING QUICK-ACTION PILL (EDIT, LOCK, DELETE, COLOR, SIZE) -->
+                <!-- FLASHING QUICK-ACTION PILL -->
                 <div id="floatingActionPill" class="hidden absolute z-30 flex items-center gap-1.5 p-1 rounded-2xl bg-[#090e1a]/95 border border-indigo-500/60 shadow-2xl backdrop-blur-xl">
                   <button id="pillEditBtn" onclick="editSelectedTextContent(event)" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
                     <span>✏️</span> <span>Edit</span>
@@ -316,12 +359,12 @@
                     <span id="pillLockIcon">🔒</span>
                     <span id="pillLockLabel">Lock</span>
                   </button>
-                  <label class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 cursor-pointer" title="Change Color">
+                  <label id="pillColorWrapper" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 cursor-pointer" title="Change Color">
                     <span>🎨</span>
                     <input type="color" id="pillTextColorPicker" class="w-4 h-4 rounded bg-transparent border-0 cursor-pointer" oninput="changeSelectedTextColor(this.value)">
                   </label>
-                  <button onclick="stepSelectedTextSize(-4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Smaller font">A-</button>
-                  <button onclick="stepSelectedTextSize(4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Bigger font">A+</button>
+                  <button id="pillSizeDownBtn" onclick="stepSelectedTextSize(-4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Smaller font">A-</button>
+                  <button id="pillSizeUpBtn" onclick="stepSelectedTextSize(4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Bigger font">A+</button>
                   <button id="pillDeleteBtn" onclick="deleteActiveContent(event)" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
                     <span>🗑️</span>
                     <span>Delete</span>
@@ -339,7 +382,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️️ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -540,7 +583,7 @@
           <span>⚡</span><span>Your Plans</span>
         </button>
 
-        <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
+        <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
           <span>🎨</span><span>Branding</span>
         </button>
 
@@ -609,7 +652,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -763,7 +806,7 @@
     let activeFrameColor = '#2b1810';
 
     // -------------------------------------------------------------
-    // INTERACTIVE TEXT OBJECT STATE & RECT LAYER
+    // INTERACTIVE TEXT OBJECT STATE
     // -------------------------------------------------------------
     let studioTextObjects = [];
     let activeTextId = null;
@@ -772,6 +815,17 @@
     let textDragStartX = 0, textDragStartY = 0;
     let textInitialX = 0, textInitialY = 0;
     let textInitialFontSize = 32;
+
+    // -------------------------------------------------------------
+    // INTERACTIVE REDACT & BLUR OBJECT STATE
+    // -------------------------------------------------------------
+    let studioRedactObjects = [];
+    let activeRedactId = null;
+    let isDraggingRedact = false;
+    let isResizingRedact = false;
+    let redactDragStartX = 0, redactDragStartY = 0;
+    let redactInitialX = 0, redactInitialY = 0;
+    let redactInitialW = 0, redactInitialH = 0;
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
@@ -784,7 +838,6 @@
       try {
         const res = await fetch(`/api/drive/quota?user_id=${currentUserId}`);
         const data = await res.json();
-
         currentAccountUserTier = (data.tier || "free").toLowerCase();
         currentAccountQuotaBytes = data.quota_bytes || (5 * 1024**3);
 
@@ -846,7 +899,6 @@
       activeStudioFile = file;
       isStudioModified = false;
       document.getElementById("studioUnsavedBadge").classList.add("hidden");
-
       document.getElementById("studioFileName").innerText = file.filename;
       document.getElementById("studioFileSize").innerText = `${file.size_mb} MB`;
 
@@ -882,18 +934,19 @@
         frameBaseCanvas = null;
         studioTextObjects = [];
         activeTextId = null;
+        studioRedactObjects = [];
+        activeRedactId = null;
         updatePanTransform();
         dismissFloatingPill();
         clearTextOverlayDOM();
+        clearRedactOverlayDOM();
 
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
           studioImgObj = img;
-          
           studioCanvas.width = img.naturalWidth || img.width;
           studioCanvas.height = img.naturalHeight || img.height;
-
           studioCtx.drawImage(img, 0, 0, studioCanvas.width, studioCanvas.height);
 
           setSharpnessMode('ultra');
@@ -990,24 +1043,25 @@
 
       studioCanvas.width = newW;
       studioCanvas.height = newH;
-
       studioCtx.imageSmoothingEnabled = true;
       studioCtx.imageSmoothingQuality = "high";
       studioCtx.drawImage(tempCanvas, 0, 0, newW, newH);
 
-      // Rescale any existing text objects to match new resolution
       studioTextObjects.forEach(t => {
         t.x = Math.round(t.x * scale);
         t.y = Math.round(t.y * scale);
         t.fontSize = Math.round(t.fontSize * scale);
       });
 
+      studioRedactObjects.forEach(r => {
+        r.x = Math.round(r.x * scale);
+        r.y = Math.round(r.y * scale);
+        r.w = Math.round(r.w * scale);
+        r.h = Math.round(r.h * scale);
+      });
+
       pushHistorySnapshot();
       fitStudioImageToViewport();
-
-      const sizeDisplay = document.getElementById("studioFileSize");
-      if (sizeDisplay) sizeDisplay.innerText = `${newW} × ${newH} (4K UHD)`;
-
       alert(`✨ Converted successfully to 4K Ultra HD (${newW} × ${newH})!`);
     }
 
@@ -1037,7 +1091,8 @@
         dataUrl: studioCanvas.toDataURL("image/png"),
         width: studioCanvas.width,
         height: studioCanvas.height,
-        textObjects: JSON.parse(JSON.stringify(studioTextObjects))
+        textObjects: JSON.parse(JSON.stringify(studioTextObjects)),
+        redactObjects: JSON.parse(JSON.stringify(studioRedactObjects))
       });
       if (canvasHistory.length > 30) {
         canvasHistory.shift();
@@ -1079,8 +1134,11 @@
         studioCtx.drawImage(img, 0, 0);
         frameBaseCanvas = null;
         studioTextObjects = state.textObjects ? JSON.parse(JSON.stringify(state.textObjects)) : [];
+        studioRedactObjects = state.redactObjects ? JSON.parse(JSON.stringify(state.redactObjects)) : [];
         activeTextId = null;
+        activeRedactId = null;
         renderAllTextObjects();
+        renderAllRedactObjects();
         applyStudioCanvasDisplaySize();
       };
       img.src = state.dataUrl;
@@ -1102,17 +1160,34 @@
           e.preventDefault();
           redoStudioCanvas();
         } else if (e.key === "Delete" || e.key === "Backspace") {
-          if (activeTextId && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA" && !e.target.isContentEditable) {
+          if ((activeTextId || activeRedactId) && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA" && !e.target.isContentEditable) {
             deleteActiveContent();
           }
         }
       }
     });
 
-    function flashFloatingPill(clientX, clientY) {
+    function flashFloatingPill(clientX, clientY, contextType = 'general') {
       const pill = document.getElementById("floatingActionPill");
       const wrapper = document.getElementById("canvasPositionWrapper");
       if (!pill || !wrapper) return;
+
+      const editBtn = document.getElementById("pillEditBtn");
+      const colorWrapper = document.getElementById("pillColorWrapper");
+      const sizeDownBtn = document.getElementById("pillSizeDownBtn");
+      const sizeUpBtn = document.getElementById("pillSizeUpBtn");
+
+      if (contextType === 'redact') {
+        if (editBtn) editBtn.classList.add("hidden");
+        if (colorWrapper) colorWrapper.classList.add("hidden");
+        if (sizeDownBtn) sizeDownBtn.classList.add("hidden");
+        if (sizeUpBtn) sizeUpBtn.classList.add("hidden");
+      } else if (contextType === 'text') {
+        if (editBtn) editBtn.classList.remove("hidden");
+        if (colorWrapper) colorWrapper.classList.remove("hidden");
+        if (sizeDownBtn) sizeDownBtn.classList.remove("hidden");
+        if (sizeUpBtn) sizeUpBtn.classList.remove("hidden");
+      }
 
       const rect = wrapper.getBoundingClientRect();
       const posX = Math.max(100, Math.min(rect.width - 100, clientX - rect.left));
@@ -1146,6 +1221,18 @@
         }
       }
 
+      if (activeRedactId) {
+        const redactObj = studioRedactObjects.find(r => r.id === activeRedactId);
+        if (redactObj) {
+          redactObj.isLocked = !redactObj.isLocked;
+          isContentLocked = redactObj.isLocked;
+          renderAllRedactObjects();
+          syncLockUI(isContentLocked);
+          pushHistorySnapshot();
+          return;
+        }
+      }
+
       isContentLocked = !isContentLocked;
       syncLockUI(isContentLocked);
     }
@@ -1169,6 +1256,21 @@
 
     function deleteActiveContent(e) {
       if (e) e.stopPropagation();
+
+      if (activeRedactId) {
+        const redactObj = studioRedactObjects.find(r => r.id === activeRedactId);
+        if (redactObj && redactObj.isLocked) {
+          alert("⚠️ This blur box is locked! Click 'Unlock' first to delete it.");
+          return;
+        }
+        studioRedactObjects = studioRedactObjects.filter(r => r.id !== activeRedactId);
+        activeRedactId = null;
+        renderAllRedactObjects();
+        dismissFloatingPill();
+        pushHistorySnapshot();
+        return;
+      }
+
       if (activeTextId) {
         const textObj = studioTextObjects.find(t => t.id === activeTextId);
         if (textObj && textObj.isLocked) {
@@ -1192,7 +1294,178 @@
     }
 
     // -------------------------------------------------------------
-    // INTERACTIVE TEXT OBJECT ENGINE (DRAG, STRETCH, EDIT, COLOR)
+    // NON-DESTRUCTIVE BLUR & REDACT OBJECT ENGINE
+    // -------------------------------------------------------------
+    function clearRedactOverlayDOM() {
+      const container = document.getElementById("redactOverlayContainer");
+      if (container) container.innerHTML = "";
+    }
+
+    function applyRedaction(type) {
+      if (!studioCanvas) return;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
+      const sx = Math.round(Math.min(dragStartX, dragEndX) * scaleX);
+      const sy = Math.round(Math.min(dragStartY, dragEndY) * scaleY);
+      const sw = Math.round(Math.abs(dragEndX - dragStartX) * scaleX);
+      const sh = Math.round(Math.abs(dragEndY - dragStartY) * scaleY);
+
+      if (sw < 10 || sh < 10) {
+        alert("Please drag a box over the sensitive text or region.");
+        return;
+      }
+
+      const newId = "redact_" + Date.now();
+      const newObj = {
+        id: newId,
+        x: sx,
+        y: sy,
+        w: sw,
+        h: sh,
+        type: type,
+        isLocked: false
+      };
+
+      studioRedactObjects.push(newObj);
+      activeRedactId = newId;
+      activeTextId = null;
+      cancelCropMode();
+      renderAllRedactObjects();
+      pushHistorySnapshot();
+
+      const el = document.getElementById(newId);
+      if (el) {
+        const box = el.getBoundingClientRect();
+        flashFloatingPill(box.left + (box.width / 2), box.top, 'redact');
+      }
+    }
+
+    function renderAllRedactObjects() {
+      const container = document.getElementById("redactOverlayContainer");
+      if (!container || !studioCanvas) return;
+
+      const dispW = studioCanvas.clientWidth || studioCanvas.width;
+      const scaleFactor = dispW / studioCanvas.width;
+
+      container.innerHTML = studioRedactObjects.map(obj => {
+        const leftPx = Math.round(obj.x * scaleFactor);
+        const topPx = Math.round(obj.y * scaleFactor);
+        const widthPx = Math.round(obj.w * scaleFactor);
+        const heightPx = Math.round(obj.h * scaleFactor);
+        const isActive = obj.id === activeRedactId;
+
+        return `
+          <div id="${obj.id}" 
+               class="studio-redact-box pointer-events-auto ${obj.type === 'blackout' ? 'redact-blackout' : 'redact-blur'} ${isActive ? 'studio-redact-active' : ''} ${obj.isLocked ? 'studio-redact-locked' : ''}" 
+               style="left: ${leftPx}px; top: ${topPx}px; width: ${widthPx}px; height: ${heightPx}px;"
+               onmousedown="startRedactDrag(event, '${obj.id}')"
+               onclick="selectRedactObject(event, '${obj.id}')">
+            ${obj.isLocked ? '<span class="absolute top-1 right-1 text-[10px]">🔒</span>' : ''}
+            ${isActive && !obj.isLocked ? `
+              <div class="redact-resize-handle" style="right: -5px; bottom: -5px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
+              <div class="redact-resize-handle" style="left: -5px; top: -5px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectRedactObject(e, id) {
+      if (e) e.stopPropagation();
+      activeRedactId = id;
+      activeTextId = null;
+      renderAllRedactObjects();
+      renderAllTextObjects();
+
+      const redactObj = studioRedactObjects.find(r => r.id === id);
+      if (redactObj) {
+        syncLockUI(redactObj.isLocked);
+      }
+
+      const el = document.getElementById(id);
+      if (el) {
+        const box = el.getBoundingClientRect();
+        flashFloatingPill(box.left + (box.width / 2), box.top, 'redact');
+      }
+    }
+
+    function startRedactDrag(e, id) {
+      e.stopPropagation();
+      selectRedactObject(e, id);
+      const redactObj = studioRedactObjects.find(r => r.id === id);
+      if (!redactObj || redactObj.isLocked) return;
+
+      isDraggingRedact = true;
+      redactDragStartX = e.clientX;
+      redactDragStartY = e.clientY;
+      redactInitialX = redactObj.x;
+      redactInitialY = redactObj.y;
+
+      const scale = studioCanvas.width / studioCanvas.clientWidth;
+
+      function onMove(evt) {
+        if (!isDraggingRedact) return;
+        const dx = (evt.clientX - redactDragStartX) * scale;
+        const dy = (evt.clientY - redactDragStartY) * scale;
+        redactObj.x = Math.round(redactInitialX + dx);
+        redactObj.y = Math.round(redactInitialY + dy);
+        renderAllRedactObjects();
+        evt.preventDefault();
+      }
+
+      function onUp() {
+        if (isDraggingRedact) {
+          isDraggingRedact = false;
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+          pushHistorySnapshot();
+        }
+      }
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    }
+
+    function startRedactResize(e, id) {
+      e.stopPropagation();
+      e.preventDefault();
+      const redactObj = studioRedactObjects.find(r => r.id === id);
+      if (!redactObj || redactObj.isLocked) return;
+
+      isResizingRedact = true;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      redactInitialW = redactObj.w;
+      redactInitialH = redactObj.h;
+      const scale = studioCanvas.width / studioCanvas.clientWidth;
+
+      function onResizeMove(evt) {
+        if (!isResizingRedact) return;
+        const dw = (evt.clientX - startX) * scale;
+        const dh = (evt.clientY - startY) * scale;
+        redactObj.w = Math.max(16, Math.round(redactInitialW + dw));
+        redactObj.h = Math.max(16, Math.round(redactInitialH + dh));
+        renderAllRedactObjects();
+        evt.preventDefault();
+      }
+
+      function onResizeUp() {
+        if (isResizingRedact) {
+          isResizingRedact = false;
+          window.removeEventListener("mousemove", onResizeMove);
+          window.removeEventListener("mouseup", onResizeUp);
+          pushHistorySnapshot();
+        }
+      }
+
+      window.addEventListener("mousemove", onResizeMove);
+      window.addEventListener("mouseup", onResizeUp);
+    }
+
+    // -------------------------------------------------------------
+    // INTERACTIVE TEXT OBJECT ENGINE
     // -------------------------------------------------------------
     function clearTextOverlayDOM() {
       const container = document.getElementById("textOverlayContainer");
@@ -1226,13 +1499,14 @@
 
       studioTextObjects.push(newObj);
       activeTextId = newId;
+      activeRedactId = null;
       renderAllTextObjects();
       pushHistorySnapshot();
 
       const el = document.getElementById(newId);
       if (el) {
         const box = el.getBoundingClientRect();
-        flashFloatingPill(box.left + (box.width / 2), box.top);
+        flashFloatingPill(box.left + (box.width / 2), box.top, 'text');
       }
     }
 
@@ -1241,7 +1515,6 @@
       if (!container || !studioCanvas) return;
 
       const dispW = studioCanvas.clientWidth || studioCanvas.width;
-      const dispH = studioCanvas.clientHeight || studioCanvas.height;
       const scaleFactor = dispW / studioCanvas.width;
 
       container.innerHTML = studioTextObjects.map(obj => {
@@ -1270,16 +1543,18 @@
     function startTextDrag(e, id) {
       e.stopPropagation();
       activeTextId = id;
+      activeRedactId = null;
       const textObj = studioTextObjects.find(t => t.id === id);
       if (!textObj) return;
 
       syncLockUI(textObj.isLocked);
       renderAllTextObjects();
+      renderAllRedactObjects();
 
       const el = document.getElementById(id);
       if (el) {
         const box = el.getBoundingClientRect();
-        flashFloatingPill(box.left + (box.width / 2), box.top);
+        flashFloatingPill(box.left + (box.width / 2), box.top, 'text');
       }
 
       if (textObj.isLocked) return;
@@ -1302,16 +1577,12 @@
         evt.preventDefault();
       }
 
-      function onUp(evt) {
+      function onUp() {
         if (isDraggingText) {
           isDraggingText = false;
           window.removeEventListener("mousemove", onMove);
           window.removeEventListener("mouseup", onUp);
           pushHistorySnapshot();
-          if (el) {
-            const box = el.getBoundingClientRect();
-            flashFloatingPill(box.left + (box.width / 2), box.top);
-          }
         }
       }
 
@@ -1397,21 +1668,72 @@
       pushHistorySnapshot();
     }
 
-    function burnAllTextToCanvas() {
-      if (!studioCanvas || !studioCtx || !studioTextObjects.length) return;
-      studioTextObjects.forEach(t => {
-        studioCtx.save();
-        studioCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
-        studioCtx.fillStyle = t.color;
-        studioCtx.textBaseline = "top";
-        studioCtx.shadowColor = "rgba(0,0,0,0.65)";
-        studioCtx.shadowBlur = 4;
-        studioCtx.fillText(t.text, t.x, t.y);
-        studioCtx.restore();
-      });
-      studioTextObjects = [];
-      activeTextId = null;
-      clearTextOverlayDOM();
+    // -------------------------------------------------------------
+    // BURN ALL OVERLAYS PERMANENTLY INTO CANVAS FOR SAVING
+    // -------------------------------------------------------------
+    function burnAllOverlaysToCanvas() {
+      if (!studioCanvas || !studioCtx) return;
+
+      // 1. Burn Blur and Blackout Redactions
+      if (studioRedactObjects.length) {
+        studioRedactObjects.forEach(r => {
+          if (r.type === 'blackout') {
+            studioCtx.fillStyle = '#000000';
+            studioCtx.fillRect(r.x, r.y, r.w, r.h);
+          } else {
+            try {
+              studioCtx.save();
+              studioCtx.beginPath();
+              studioCtx.rect(r.x, r.y, r.w, r.h);
+              studioCtx.clip();
+              studioCtx.filter = 'blur(16px)';
+              studioCtx.drawImage(studioCanvas, 0, 0);
+              studioCtx.restore();
+              studioCtx.filter = 'none';
+            } catch (e) {
+              const pixelSize = Math.max(6, Math.round(r.w / 18));
+              const imgData = studioCtx.getImageData(r.x, r.y, r.w, r.h);
+              const data = imgData.data;
+              for (let py = 0; py < r.h; py += pixelSize) {
+                for (let px = 0; px < r.w; px += pixelSize) {
+                  const pIndex = (py * r.w + px) * 4;
+                  const red = data[pIndex], g = data[pIndex + 1], b = data[pIndex + 2];
+                  for (let subY = 0; subY < pixelSize && py + subY < r.h; subY++) {
+                    for (let subX = 0; subX < pixelSize && px + subX < r.w; subX++) {
+                      const subIndex = ((py + subY) * r.w + (px + subX)) * 4;
+                      data[subIndex] = red;
+                      data[subIndex + 1] = g;
+                      data[subIndex + 2] = b;
+                    }
+                  }
+                }
+              }
+              studioCtx.putImageData(imgData, r.x, r.y);
+            }
+          }
+        });
+        studioRedactObjects = [];
+        activeRedactId = null;
+        clearRedactOverlayDOM();
+      }
+
+      // 2. Burn Active Texts
+      if (studioTextObjects.length) {
+        studioTextObjects.forEach(t => {
+          studioCtx.save();
+          studioCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
+          studioCtx.fillStyle = t.color;
+          studioCtx.textBaseline = "top";
+          studioCtx.shadowColor = "rgba(0,0,0,0.65)";
+          studioCtx.shadowBlur = 4;
+          studioCtx.fillText(t.text, t.x, t.y);
+          studioCtx.restore();
+        });
+        studioTextObjects = [];
+        activeTextId = null;
+        clearTextOverlayDOM();
+      }
+
       pushHistorySnapshot();
     }
 
@@ -1980,7 +2302,20 @@
       dismissFloatingPill();
       updateCursorForCategory();
 
-      if (cat === 'text') {
+      if (cat === 'redact') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-rose-400 font-bold">🔒 Drag to place blur or blackout box. Click any box to delete, unlock or move.</span>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="applyRedaction('blur')" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow">Apply Blur Box</button>
+              <button onclick="applyRedaction('blackout')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition shadow">Apply Blackout</button>
+              <button onclick="cancelCropMode()" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
+            </div>
+          </div>
+        `;
+      } else if (cat === 'text') {
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
             <div class="flex items-center gap-2 flex-wrap">
@@ -2004,8 +2339,8 @@
 
               <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
 
-              <button onclick="burnAllTextToCanvas()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition cursor-pointer" title="Flatten text into canvas pixels">
-                Flatten All Text
+              <button onclick="burnAllOverlaysToCanvas()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition cursor-pointer" title="Flatten text into canvas pixels">
+                Flatten All Layers
               </button>
             </div>
           </div>
@@ -2188,15 +2523,6 @@
             <input type="range" min="10" max="80" value="28" oninput="brushSize=parseInt(this.value)" class="w-24 accent-amber-300 cursor-pointer">
           </div>
           <span class="text-slate-400 font-mono text-[11px]">Click & drag to highlight text without obscuring it</span>
-        `;
-      } else if (cat === 'redact') {
-        drawer.innerHTML = `
-          <div class="flex items-center gap-3 flex-wrap">
-            <span class="text-rose-400 font-bold">🔒 Drag over sensitive information to redact / blur</span>
-            <button onclick="applyRedaction('blur')" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition">Apply Blur</button>
-            <button onclick="applyRedaction('blackout')" class="px-3 py-1 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition">Blackout Box</button>
-            <button onclick="cancelCropMode()" class="px-3 py-1 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
-          </div>
         `;
       } else if (cat === 'adjust') {
         drawer.innerHTML = `
@@ -2469,10 +2795,14 @@
       studioCtx.clearRect(0, 0, sw, sh);
       studioCtx.drawImage(tempCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
 
-      // Reposition active text objects relative to crop offset
       studioTextObjects.forEach(t => {
         t.x = Math.max(0, t.x - sx);
         t.y = Math.max(0, t.y - sy);
+      });
+
+      studioRedactObjects.forEach(r => {
+        r.x = Math.max(0, r.x - sx);
+        r.y = Math.max(0, r.y - sy);
       });
 
       cancelCropMode();
@@ -2486,51 +2816,6 @@
       isDragToolActive = false;
       dragStartX = 0; dragStartY = 0; dragEndX = 0; dragEndY = 0;
       selectStudioCategory('draw');
-    }
-
-    function applyRedaction(type) {
-      if (!studioCanvas || !studioCtx) return;
-      const rect = studioCanvas.getBoundingClientRect();
-      const scaleX = studioCanvas.width / rect.width;
-      const scaleY = studioCanvas.height / rect.height;
-
-      const x = Math.round(Math.min(dragStartX, dragEndX) * scaleX);
-      const y = Math.round(Math.min(dragStartY, dragEndY) * scaleY);
-      const w = Math.round(Math.abs(dragEndX - dragStartX) * scaleX);
-      const h = Math.round(Math.abs(dragEndY - dragStartY) * scaleY);
-
-      if (w < 10 || h < 10) {
-        alert("Please drag a box over the sensitive text or region.");
-        return;
-      }
-
-      if (type === 'blackout') {
-        studioCtx.fillStyle = "#000000";
-        studioCtx.fillRect(x, y, w, h);
-      } else {
-        const pixelSize = Math.max(6, Math.round(w / 18));
-        const imgData = studioCtx.getImageData(x, y, w, h);
-        const data = imgData.data;
-
-        for (let py = 0; py < h; py += pixelSize) {
-          for (let px = 0; px < w; px += pixelSize) {
-            const pIndex = (py * w + px) * 4;
-            const r = data[pIndex], g = data[pIndex + 1], b = data[pIndex + 2];
-            for (let subY = 0; subY < pixelSize && py + subY < h; subY++) {
-              for (let subX = 0; subX < pixelSize && px + subX < w; subX++) {
-                const subIndex = ((py + subY) * w + (px + subX)) * 4;
-                data[subIndex] = r;
-                data[subIndex + 1] = g;
-                data[subIndex + 2] = b;
-              }
-            }
-          }
-        }
-        studioCtx.putImageData(imgData, x, y);
-      }
-
-      cancelCropMode();
-      pushHistorySnapshot();
     }
 
     function applyCanvasAdjustments() {
@@ -2716,7 +3001,10 @@
       frameBaseCanvas = null;
       studioTextObjects = [];
       activeTextId = null;
+      studioRedactObjects = [];
+      activeRedactId = null;
       clearTextOverlayDOM();
+      clearRedactOverlayDOM();
       updatePanTransform();
       dismissFloatingPill();
       pushHistorySnapshot();
@@ -2764,6 +3052,7 @@
       if (display) display.innerText = `${Math.round(studioZoom * 100)}%`;
 
       renderAllTextObjects();
+      renderAllRedactObjects();
     }
 
     window.addEventListener("resize", () => {
@@ -2778,7 +3067,7 @@
     }
 
     function attemptCloseStudio() {
-      if (isStudioModified) {
+      if (isStudioModified || studioTextObjects.length || studioRedactObjects.length) {
         pendingDecisionAction = () => {
           document.getElementById("driveStudioModal").classList.add("hidden");
         };
@@ -2800,7 +3089,7 @@
     }
 
     function requestSaveFile() {
-      if (!isStudioModified && !studioTextObjects.length) {
+      if (!isStudioModified && !studioTextObjects.length && !studioRedactObjects.length) {
         alert("No unsaved edits found.");
         return;
       }
@@ -2810,10 +3099,8 @@
     async function saveStudioFileChanges() {
       if (!activeStudioFile) return;
 
-      // Burn all active text layers onto the canvas context before saving to R2
-      if (studioTextObjects.length) {
-        burnAllTextToCanvas();
-      }
+      // Burn all active text and blur/redact layers directly onto the canvas before saving
+      burnAllOverlaysToCanvas();
 
       const ext = activeStudioFile.filename.split('.').pop().toLowerCase();
       let payloadBlob = null;
@@ -2828,12 +3115,7 @@
         payloadBlob = new Blob([text], { type: "text/plain;charset=utf-8" });
       }
 
-      if (!payloadBlob) {
-        isStudioModified = false;
-        document.getElementById("studioUnsavedBadge").classList.add("hidden");
-        if (pendingDecisionAction) pendingDecisionAction();
-        return;
-      }
+      if (!payloadBlob) return;
 
       try {
         const saveRes = await fetch(`/api/drive/save-file/${activeStudioFile.id}?user_id=${currentUserId}`, {
@@ -2841,8 +3123,7 @@
           headers: { "Content-Type": payloadBlob.type },
           body: payloadBlob
         });
-        const data = await saveRes.json();
-        if (!saveRes.ok) throw new Error(data.detail || "Save failed");
+        if (!saveRes.ok) throw new Error("Save failed");
 
         alert("✓ Changes saved successfully to your Cloud Drive!");
         isStudioModified = false;
