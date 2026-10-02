@@ -278,7 +278,7 @@
         </div>
       </div>
 
-      <!-- Secondary Sub-Tool Drawer (Contextual Controls per Tool) -->
+      <!-- Secondary Sub-Tool Drawer (Controls for Active Tool) -->
       <div id="subToolSettingsBar" class="px-6 py-2.5 bg-[#050811] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
         <!-- Injected dynamically -->
       </div>
@@ -642,9 +642,6 @@
   </footer>
 
   <script>
-    // -------------------------------------------------------------
-    // 1. THEME CONTROLLER
-    // -------------------------------------------------------------
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
@@ -666,9 +663,6 @@
 
     initTheme();
 
-    // -------------------------------------------------------------
-    // 2. CORE UTILS & SESSION
-    // -------------------------------------------------------------
     function formatBytes(bytes, decimals = 2) {
       if (!bytes || bytes === 0) return '0 B';
       const k = 1024;
@@ -743,9 +737,9 @@
 
     // Advanced Live Framing State
     let frameBaseCanvas = null;
-    let activeFrameStyle = 'border'; // 'border', 'macos', 'polaroid', 'gallery', 'neon'
-    let activeFrameWidth = 36;
-    let activeFrameColor = '#ffffff';
+    let activeFrameStyle = 'gallery';
+    let activeFrameWidth = 40;
+    let activeFrameColor = '#2b1810';
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
@@ -813,9 +807,6 @@
       renderFiles(filtered);
     }
 
-    // -------------------------------------------------------------
-    // 3. IN-DRIVE STUDIO INITIALIZATION
-    // -------------------------------------------------------------
     async function openDriveStudio(fileId) {
       const file = allFiles.find(f => f.id === fileId);
       if (!file) return;
@@ -907,9 +898,6 @@
       document.getElementById("studioFallbackDownloadBtn").onclick = () => downloadFile(file.id);
     }
 
-    // -------------------------------------------------------------
-    // 4. SHARPNESS & ULTRA SUPER SMOOTH ENGINE
-    // -------------------------------------------------------------
     function setSharpnessMode(mode) {
       sharpnessMode = mode;
       const canvas = document.getElementById("studioImageCanvas");
@@ -944,9 +932,6 @@
       }
     }
 
-    // -------------------------------------------------------------
-    // 5. 4K ULTRA HD AI UPSCALER & SHARPENING
-    // -------------------------------------------------------------
     function convertTo4KUltraHD() {
       if (!studioCanvas || !studioCtx) return;
       const curW = studioCanvas.width;
@@ -1074,9 +1059,6 @@
       }
     });
 
-    // -------------------------------------------------------------
-    // 6. FLASHING QUICK-ACTION PILL (LOCK & DELETE)
-    // -------------------------------------------------------------
     function flashFloatingPill(clientX, clientY) {
       const pill = document.getElementById("floatingActionPill");
       const wrapper = document.getElementById("canvasPositionWrapper");
@@ -1130,9 +1112,6 @@
       dismissFloatingPill();
     }
 
-    // -------------------------------------------------------------
-    // 7. 2D TRANSLATE PAN ENGINE (FREE 360-DEGREE DRAGGING)
-    // -------------------------------------------------------------
     function updatePanTransform() {
       const wrapper = document.getElementById("canvasPositionWrapper");
       if (wrapper) {
@@ -1217,7 +1196,7 @@
     }
 
     // -------------------------------------------------------------
-    // 8. RELIABLE NON-DESTRUCTIVE FRAME ENGINE
+    // HIGH-END EXTRAORDINARY NON-DESTRUCTIVE FRAME ENGINE
     // -------------------------------------------------------------
     function captureFrameBase() {
       if (!studioCanvas) return;
@@ -1229,16 +1208,17 @@
       }
     }
 
-    function setFrameStyle(style) {
+    function setFrameStyle(style, defaultColor = null) {
       captureFrameBase();
       activeFrameStyle = style;
+      if (defaultColor) activeFrameColor = defaultColor;
       renderLiveFrame();
       updateFrameUI();
     }
 
     function updateFrameWidth(w) {
       captureFrameBase();
-      activeFrameWidth = parseInt(w) || 24;
+      activeFrameWidth = parseInt(w) || 36;
       const valBadge = document.getElementById("sFrameVal");
       if (valBadge) valBadge.innerText = `${activeFrameWidth}px`;
       renderLiveFrame();
@@ -1262,7 +1242,315 @@
       let imgX = 0;
       let imgY = 0;
 
-      if (activeFrameStyle === 'border') {
+      if (activeFrameStyle === 'gallery') {
+        // 🏛️ LUXURIOUS ART GALLERY FRAME (WOOD MOULDING + IVORY MATTE + CORE BEVEL + PLAQUE)
+        const moulding = Math.max(24, Math.round(w * 0.7));
+        const matte = Math.max(30, Math.round(w * 0.85));
+        const totalPad = moulding + matte;
+
+        newW = baseW + (totalPad * 2);
+        newH = baseH + (totalPad * 2);
+        imgX = totalPad;
+        imgY = totalPad;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // 1. Outer Dark Walnut / Mahogany Moulding with Miters
+        const woodGrad = studioCtx.createLinearGradient(0, 0, newW, newH);
+        woodGrad.addColorStop(0, col);
+        woodGrad.addColorStop(0.5, "#3b2219");
+        woodGrad.addColorStop(1, col);
+        studioCtx.fillStyle = woodGrad;
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Miter Corner Accents
+        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+        studioCtx.lineWidth = 1.5;
+        studioCtx.beginPath();
+        studioCtx.moveTo(0, 0); studioCtx.lineTo(moulding, moulding);
+        studioCtx.moveTo(newW, 0); studioCtx.lineTo(newW - moulding, moulding);
+        studioCtx.moveTo(0, newH); studioCtx.lineTo(moulding, newH - moulding);
+        studioCtx.moveTo(newW, newH); studioCtx.lineTo(newW - moulding, newH - moulding);
+        studioCtx.stroke();
+
+        // 2. Archival Passe-Partout Museum Matte
+        studioCtx.fillStyle = "#f5f3ec"; // Museum warm rag board
+        studioCtx.fillRect(moulding, moulding, newW - (moulding * 2), newH - (moulding * 2));
+
+        // 3. Inner 45° Beveled Core Cut with Cast Shadow
+        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+        studioCtx.lineWidth = 2.5;
+        studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
+
+        // 4. Draw Artwork with Inner Shadow
+        studioCtx.save();
+        studioCtx.shadowColor = "rgba(0, 0, 0, 0.35)";
+        studioCtx.shadowBlur = 12;
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+        studioCtx.restore();
+
+        // 5. Polished Brass Museum Gallery Plaque
+        if (matte > 35) {
+          const plaqueW = Math.min(220, Math.round(newW * 0.35));
+          const plaqueH = 26;
+          const plaqueX = (newW - plaqueW) / 2;
+          const plaqueY = newH - moulding - (matte / 2) - (plaqueH / 2);
+
+          const brassGrad = studioCtx.createLinearGradient(plaqueX, plaqueY, plaqueX, plaqueY + plaqueH);
+          brassGrad.addColorStop(0, "#e8ca65");
+          brassGrad.addColorStop(0.5, "#d4af37");
+          brassGrad.addColorStop(1, "#aa820a");
+          studioCtx.fillStyle = brassGrad;
+          studioCtx.fillRect(plaqueX, plaqueY, plaqueW, plaqueH);
+
+          // Brass Border & Screws
+          studioCtx.strokeStyle = "#805b00";
+          studioCtx.lineWidth = 1;
+          studioCtx.strokeRect(plaqueX, plaqueY, plaqueW, plaqueH);
+
+          studioCtx.fillStyle = "#3a2800";
+          studioCtx.font = "bold 9px 'Plus Jakarta Sans', sans-serif";
+          studioCtx.textAlign = "center";
+          studioCtx.fillText("ZEPHYR MASTER COLLECTION • ARCHIVE", newW / 2, plaqueY + 16);
+        }
+
+      } else if (activeFrameStyle === 'macos') {
+        // 💻 macOS RETINA STUDIO WINDOW (TRAFFIC LIGHTS + URL CAPSULE + FROSTED TOP BAR)
+        const headerH = Math.max(44, Math.round(w * 0.9));
+        const sidePad = Math.max(16, Math.round(w * 0.35));
+        const bottomPad = sidePad;
+
+        newW = baseW + (sidePad * 2);
+        newH = baseH + headerH + bottomPad;
+        imgX = sidePad;
+        imgY = headerH;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Window Chassis Background
+        studioCtx.fillStyle = col === '#ffffff' ? '#181a20' : col;
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Header Titlebar
+        studioCtx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        studioCtx.fillRect(0, 0, newW, headerH);
+
+        // Divider
+        studioCtx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        studioCtx.lineWidth = 1;
+        studioCtx.beginPath();
+        studioCtx.moveTo(0, headerH);
+        studioCtx.lineTo(newW, headerH);
+        studioCtx.stroke();
+
+        // Authentic macOS Window Dots (Close, Minimize, Maximize)
+        const dotY = Math.round(headerH / 2);
+        const dotRadius = 6.5;
+        const dots = [
+          { c: "#ff5f56", border: "#e0443e" },
+          { c: "#ffbd2e", border: "#dea123" },
+          { c: "#27c93f", border: "#1aab29" }
+        ];
+
+        dots.forEach((dot, idx) => {
+          const dotX = sidePad + 6 + (idx * 22);
+          studioCtx.beginPath();
+          studioCtx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+          studioCtx.fillStyle = dot.c;
+          studioCtx.fill();
+          studioCtx.strokeStyle = dot.border;
+          studioCtx.lineWidth = 1;
+          studioCtx.stroke();
+
+          // Subtle inner gloss dot
+          studioCtx.beginPath();
+          studioCtx.arc(dotX - 1.5, dotY - 1.5, 1.8, 0, Math.PI * 2);
+          studioCtx.fillStyle = "rgba(255, 255, 255, 0.45)";
+          studioCtx.fill();
+        });
+
+        // Center URL Capsule
+        const capsuleW = Math.min(380, Math.round(newW * 0.45));
+        const capsuleH = 24;
+        const capsuleX = (newW - capsuleW) / 2;
+        const capsuleY = (headerH - capsuleH) / 2;
+
+        studioCtx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        studioCtx.beginPath();
+        studioCtx.roundRect(capsuleX, capsuleY, capsuleW, capsuleH, 8);
+        studioCtx.fill();
+
+        studioCtx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        studioCtx.font = "bold 10px monospace";
+        studioCtx.textAlign = "center";
+        const docName = activeStudioFile ? activeStudioFile.filename : "document.png";
+        studioCtx.fillText(`🔒 zephyr.app/view/${docName}`, newW / 2, capsuleY + 16);
+
+        // Draw Image Content
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+      } else if (activeFrameStyle === 'polaroid') {
+        // 📷 AUTHENTIC POLAROID SX-70 (WARM CREAM PAPER + CHIN + WASHI TAPE + MARKER DATE)
+        const padSide = Math.max(24, Math.round(w * 0.65));
+        const padTop = padSide;
+        const padBottom = Math.max(90, Math.round(padSide * 3.0));
+
+        newW = baseW + (padSide * 2);
+        newH = baseH + padTop + padBottom;
+        imgX = padSide;
+        imgY = padTop;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Vintage Textured Photographic Cardstock
+        studioCtx.fillStyle = "#faf8f2";
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Inner Recessed Dark Rim
+        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.22)";
+        studioCtx.lineWidth = 1.5;
+        studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
+
+        // Draw Artwork
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+        // Washi Tape Strip at Top (Translucent with Ripped Edges)
+        const tapeW = Math.min(180, Math.round(newW * 0.32));
+        const tapeH = 26;
+        const tapeX = (newW - tapeW) / 2;
+        const tapeY = 0;
+
+        studioCtx.save();
+        studioCtx.fillStyle = "rgba(235, 215, 175, 0.85)";
+        studioCtx.fillRect(tapeX, tapeY, tapeW, tapeH);
+        studioCtx.strokeStyle = "rgba(210, 185, 130, 0.9)";
+        studioCtx.strokeRect(tapeX, tapeY, tapeW, tapeH);
+        studioCtx.restore();
+
+        // Handwritten Marker Style Inscription on the Chin
+        studioCtx.fillStyle = "#1e293b";
+        studioCtx.font = "italic bold 16px 'Plus Jakarta Sans', sans-serif";
+        studioCtx.textAlign = "center";
+        const todayStr = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        studioCtx.fillText(`Zephyr Master • ${todayStr}`, newW / 2, newH - 34);
+
+      } else if (activeFrameStyle === 'neon') {
+        // ⚡ CYBER NEON GLOW (DEEP OBSIDIAN BACKDROP + TRIPLE-LAYER BLOOM + HUD BRACKETS)
+        const glowPad = Math.max(40, w);
+        newW = baseW + (glowPad * 2);
+        newH = baseH + (glowPad * 2);
+        imgX = glowPad;
+        imgY = glowPad;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Obsidian Stage
+        studioCtx.fillStyle = "#04060d";
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Multi-Layer Photonic Bloom
+        studioCtx.save();
+        studioCtx.shadowColor = col;
+        studioCtx.shadowBlur = Math.round(glowPad * 0.9);
+        studioCtx.strokeStyle = col;
+        studioCtx.lineWidth = 4;
+        studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
+
+        studioCtx.shadowBlur = Math.round(glowPad * 0.4);
+        studioCtx.lineWidth = 2.5;
+        studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
+        studioCtx.restore();
+
+        // High-Intensity White Core Tube Line
+        studioCtx.strokeStyle = "#ffffff";
+        studioCtx.lineWidth = 1.5;
+        studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
+
+        // Cyberpunk Corner HUD Brackets
+        const bracketLen = 22;
+        studioCtx.strokeStyle = col;
+        studioCtx.lineWidth = 3.5;
+
+        // Top-Left
+        studioCtx.beginPath();
+        studioCtx.moveTo(imgX - 16, imgY - 16 + bracketLen);
+        studioCtx.lineTo(imgX - 16, imgY - 16);
+        studioCtx.lineTo(imgX - 16 + bracketLen, imgY - 16);
+        studioCtx.stroke();
+
+        // Top-Right
+        studioCtx.beginPath();
+        studioCtx.moveTo(imgX + baseW + 16 - bracketLen, imgY - 16);
+        studioCtx.lineTo(imgX + baseW + 16, imgY - 16);
+        studioCtx.lineTo(imgX + baseW + 16, imgY - 16 + bracketLen);
+        studioCtx.stroke();
+
+        // Bottom-Left
+        studioCtx.beginPath();
+        studioCtx.moveTo(imgX - 16, imgY + baseH + 16 - bracketLen);
+        studioCtx.lineTo(imgX - 16, imgY + baseH + 16);
+        studioCtx.lineTo(imgX - 16 + bracketLen, imgY + baseH + 16);
+        studioCtx.stroke();
+
+        // Bottom-Right
+        studioCtx.beginPath();
+        studioCtx.moveTo(imgX + baseW + 16 - bracketLen, imgY + baseH + 16);
+        studioCtx.lineTo(imgX + baseW + 16, imgY + baseH + 16);
+        studioCtx.lineTo(imgX + baseW + 16, imgY + baseH + 16 - bracketLen);
+        studioCtx.stroke();
+
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+      } else if (activeFrameStyle === 'film') {
+        // 🎞️ 35mm MOTION PICTURE FILM STRIP (PERFORATED SPROCKET HOLES + KODAK VISION CODES)
+        const filmBorderH = Math.max(50, Math.round(w * 1.1));
+        const filmBorderW = Math.max(20, Math.round(w * 0.4));
+
+        newW = baseW + (filmBorderW * 2);
+        newH = baseH + (filmBorderH * 2);
+        imgX = filmBorderW;
+        imgY = filmBorderH;
+
+        studioCanvas.width = newW;
+        studioCanvas.height = newH;
+
+        // Deep Film Base Black
+        studioCtx.fillStyle = "#070707";
+        studioCtx.fillRect(0, 0, newW, newH);
+
+        // Render Sprocket Holes (Rounded Rectangles top and bottom)
+        const holeW = 12;
+        const holeH = 18;
+        const holeSpacing = 32;
+        studioCtx.fillStyle = "#ffffff";
+
+        for (let x = 16; x < newW - 16; x += holeSpacing) {
+          // Top Sprocket
+          studioCtx.beginPath();
+          studioCtx.roundRect(x, 14, holeW, holeH, 3);
+          studioCtx.fill();
+
+          // Bottom Sprocket
+          studioCtx.beginPath();
+          studioCtx.roundRect(x, newH - 14 - holeH, holeW, holeH, 3);
+          studioCtx.fill();
+        }
+
+        // Film Edge Typography
+        studioCtx.fillStyle = "#d4af37";
+        studioCtx.font = "bold 9px monospace";
+        studioCtx.fillText("▶ 24A", 48, filmBorderH - 10);
+        studioCtx.fillText("KODAK VISION3 500T", newW / 2 - 60, filmBorderH - 10);
+        studioCtx.fillText("SAFETY FILM", newW - 120, filmBorderH - 10);
+
+        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
+
+      } else {
+        // 🔲 CLEAN STUDIO BORDER
         newW = baseW + (w * 2);
         newH = baseH + (w * 2);
         imgX = w;
@@ -1279,125 +1567,6 @@
         studioCtx.shadowBlur = Math.round(w * 0.4);
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
         studioCtx.restore();
-
-      } else if (activeFrameStyle === 'macos') {
-        const headerH = Math.max(36, Math.round(w * 1.1));
-        const sidePad = Math.max(14, Math.round(w * 0.35));
-        const bottomPad = sidePad;
-
-        newW = baseW + (sidePad * 2);
-        newH = baseH + headerH + bottomPad;
-        imgX = sidePad;
-        imgY = headerH;
-
-        studioCanvas.width = newW;
-        studioCanvas.height = newH;
-
-        // Window Background & Frame
-        studioCtx.fillStyle = col;
-        studioCtx.fillRect(0, 0, newW, newH);
-
-        // macOS Header Bar
-        studioCtx.fillStyle = "rgba(0,0,0,0.12)";
-        studioCtx.fillRect(0, 0, newW, headerH);
-
-        // Traffic Light Controls
-        const btnY = Math.round(headerH / 2);
-        const radius = Math.max(5, Math.min(8, Math.round(headerH * 0.18)));
-        const colors = ["#ff5f56", "#ffbd2e", "#27c93f"];
-        colors.forEach((c, idx) => {
-          studioCtx.beginPath();
-          studioCtx.arc(sidePad + (idx * 22) + 6, btnY, radius, 0, Math.PI * 2);
-          studioCtx.fillStyle = c;
-          studioCtx.fill();
-        });
-
-        // App Title
-        studioCtx.fillStyle = "rgba(0,0,0,0.55)";
-        studioCtx.font = `bold ${Math.max(11, Math.round(headerH * 0.35))}px 'Plus Jakarta Sans', sans-serif`;
-        studioCtx.textAlign = "center";
-        studioCtx.fillText(activeStudioFile ? activeStudioFile.filename : "Untitled Preview", newW / 2, btnY + 4);
-
-        // Inner Artwork
-        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
-
-      } else if (activeFrameStyle === 'polaroid') {
-        const padSide = Math.max(20, w);
-        const padTop = padSide;
-        const padBottom = Math.round(padSide * 2.8);
-
-        newW = baseW + (padSide * 2);
-        newH = baseH + padTop + padBottom;
-        imgX = padSide;
-        imgY = padTop;
-
-        studioCanvas.width = newW;
-        studioCanvas.height = newH;
-
-        // Polaroid Card Matte
-        studioCtx.fillStyle = col === "#ffffff" ? "#fbfaf8" : col;
-        studioCtx.fillRect(0, 0, newW, newH);
-
-        // Artwork
-        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
-
-        // Subtle inner image bevel
-        studioCtx.strokeStyle = "rgba(0,0,0,0.15)";
-        studioCtx.lineWidth = 1;
-        studioCtx.strokeRect(imgX, imgY, baseW, baseH);
-
-      } else if (activeFrameStyle === 'gallery') {
-        const outerFrame = Math.max(16, Math.round(w * 0.6));
-        const matte = Math.max(20, Math.round(w * 0.8));
-        const totalBorder = outerFrame + matte;
-
-        newW = baseW + (totalBorder * 2);
-        newH = baseH + (totalBorder * 2);
-        imgX = totalBorder;
-        imgY = totalBorder;
-
-        studioCanvas.width = newW;
-        studioCanvas.height = newH;
-
-        // Outer Wood/Metal moulding
-        studioCtx.fillStyle = col;
-        studioCtx.fillRect(0, 0, newW, newH);
-
-        // Inner Passe-Partout Archival Matte
-        studioCtx.fillStyle = "#fdfdfc";
-        studioCtx.fillRect(outerFrame, outerFrame, newW - (outerFrame * 2), newH - (outerFrame * 2));
-
-        // Bevel core shadow
-        studioCtx.strokeStyle = "rgba(0,0,0,0.25)";
-        studioCtx.lineWidth = 2;
-        studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
-
-        // Artwork
-        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
-
-      } else if (activeFrameStyle === 'neon') {
-        const glowPad = Math.max(24, w);
-        newW = baseW + (glowPad * 2);
-        newH = baseH + (glowPad * 2);
-        imgX = glowPad;
-        imgY = glowPad;
-
-        studioCanvas.width = newW;
-        studioCanvas.height = newH;
-
-        studioCtx.fillStyle = "#070a13";
-        studioCtx.fillRect(0, 0, newW, newH);
-
-        // Radiant Outer Glow Line
-        studioCtx.save();
-        studioCtx.shadowColor = col;
-        studioCtx.shadowBlur = Math.round(glowPad * 0.9);
-        studioCtx.strokeStyle = col;
-        studioCtx.lineWidth = 4;
-        studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
-        studioCtx.restore();
-
-        studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
       }
 
       applyStudioCanvasDisplaySize();
@@ -1406,7 +1575,7 @@
     function commitFrameChanges() {
       if (!studioCanvas || !frameBaseCanvas) return;
       pushHistorySnapshot();
-      frameBaseCanvas = null; // Reset frame base after committing
+      frameBaseCanvas = null;
       alert("✓ Frame applied and committed to canvas!");
       selectStudioCategory('draw');
     }
@@ -1423,89 +1592,21 @@
     }
 
     function updateFrameUI() {
-      const styles = ['border', 'macos', 'polaroid', 'gallery', 'neon'];
+      const styles = ['gallery', 'macos', 'polaroid', 'neon', 'film', 'border'];
       styles.forEach(s => {
         const btn = document.getElementById(`fBtn-${s}`);
         if (btn) {
           if (s === activeFrameStyle) {
-            btn.className = "px-3 py-1 rounded-xl bg-sky-600 text-white font-black shadow transition";
+            btn.className = "px-3 py-1.5 rounded-xl bg-sky-600 text-white font-black shadow-md transition";
           } else {
-            btn.className = "px-3 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 transition";
+            btn.className = "px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-bold transition";
           }
         }
       });
     }
 
     // -------------------------------------------------------------
-    // 9. BACKGROUND ENGINE (STAGE BACKDROP & MATTE BORDERS)
-    // -------------------------------------------------------------
-    function setStageBackground(color, isChecker = false) {
-      const stage = document.getElementById("studioBodyStage");
-      const viewport = document.getElementById("studioCanvasViewport");
-      if (!stage || !viewport) return;
-
-      if (isChecker) {
-        stage.classList.add("artboard-checker");
-        stage.style.backgroundColor = "";
-        viewport.style.backgroundColor = "";
-      } else {
-        stage.classList.remove("artboard-checker");
-        stage.style.backgroundColor = color;
-        viewport.style.backgroundColor = color;
-      }
-    }
-
-    function applyMattePadding(color, padding = 40) {
-      if (!studioCanvas || !studioCtx) return;
-      const oldW = studioCanvas.width;
-      const oldH = studioCanvas.height;
-      const newW = oldW + (padding * 2);
-      const newH = oldH + (padding * 2);
-
-      const temp = document.createElement("canvas");
-      temp.width = oldW;
-      temp.height = oldH;
-      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
-
-      studioCanvas.width = newW;
-      studioCanvas.height = newH;
-
-      studioCtx.fillStyle = color;
-      studioCtx.fillRect(0, 0, newW, newH);
-      studioCtx.drawImage(temp, padding, padding);
-
-      pushHistorySnapshot();
-      fitStudioImageToViewport();
-    }
-
-    function applySquareMatte(color) {
-      if (!studioCanvas || !studioCtx) return;
-      const dim = Math.max(studioCanvas.width, studioCanvas.height) + 60;
-      const padX = Math.round((dim - studioCanvas.width) / 2);
-      const padY = Math.round((dim - studioCanvas.height) / 2);
-
-      const temp = document.createElement("canvas");
-      temp.width = studioCanvas.width;
-      temp.height = studioCanvas.height;
-      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
-
-      studioCanvas.width = dim;
-      studioCanvas.height = dim;
-
-      studioCtx.fillStyle = color;
-      studioCtx.fillRect(0, 0, dim, dim);
-      studioCtx.drawImage(temp, padX, padY);
-
-      pushHistorySnapshot();
-      fitStudioImageToViewport();
-    }
-
-    function setCanvasBackground(color) {
-      setStageBackground(color, false);
-    }
-
-    // -------------------------------------------------------------
-    // 10. CATEGORY ROUTER (DRAWER RENDERING)
+    // CATEGORY SWITCHER & FRAME SUBDRAWER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
@@ -1528,24 +1629,25 @@
         captureFrameBase();
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-slate-400">Frame Style:</span>
-              <button onclick="setFrameStyle('border')" id="fBtn-border" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'border' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Classic Border</button>
-              <button onclick="setFrameStyle('macos')" id="fBtn-macos" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'macos' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">macOS Window</button>
-              <button onclick="setFrameStyle('polaroid')" id="fBtn-polaroid" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'polaroid' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Polaroid</button>
-              <button onclick="setFrameStyle('gallery')" id="fBtn-gallery" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'gallery' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Gallery Matte</button>
-              <button onclick="setFrameStyle('neon')" id="fBtn-neon" class="px-3 py-1 rounded-xl transition ${activeFrameStyle === 'neon' ? 'bg-sky-600 text-white font-black shadow' : 'bg-white/10 text-slate-200'}">Neon Glow</button>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-slate-400 mr-1">Choose Frame:</span>
+              <button onclick="setFrameStyle('gallery', '#2b1810')" id="fBtn-gallery" class="px-3 py-1.5 rounded-xl transition ${activeFrameStyle === 'gallery' ? 'bg-sky-600 text-white font-black shadow-md' : 'bg-white/10 text-slate-200'}">🏛️ Art Gallery</button>
+              <button onclick="setFrameStyle('macos', '#1e1e24')" id="fBtn-macos" class="px-3 py-1.5 rounded-xl transition ${activeFrameStyle === 'macos' ? 'bg-sky-600 text-white font-black shadow-md' : 'bg-white/10 text-slate-200'}">💻 macOS Window</button>
+              <button onclick="setFrameStyle('polaroid', '#ffffff')" id="fBtn-polaroid" class="px-3 py-1.5 rounded-xl transition ${activeFrameStyle === 'polaroid' ? 'bg-sky-600 text-white font-black shadow-md' : 'bg-white/10 text-slate-200'}">📷 Polaroid</button>
+              <button onclick="setFrameStyle('neon', '#00f3ff')" id="fBtn-neon" class="px-3 py-1.5 rounded-xl transition ${activeFrameStyle === 'neon' ? 'bg-sky-600 text-white font-black shadow-md' : 'bg-white/10 text-slate-200'}">⚡ Cyber Neon</button>
+              <button onclick="setFrameStyle('film', '#070707')" id="fBtn-film" class="px-3 py-1.5 rounded-xl transition ${activeFrameStyle === 'film' ? 'bg-sky-600 text-white font-black shadow-md' : 'bg-white/10 text-slate-200'}">🎞️ 35mm Film</button>
+              <button onclick="setFrameStyle('border', '#ffffff')" id="fBtn-border" class="px-3 py-1.5 rounded-xl transition ${activeFrameStyle === 'border' ? 'bg-sky-600 text-white font-black shadow-md' : 'bg-white/10 text-slate-200'}">🔲 Clean Border</button>
             </div>
 
             <div class="flex items-center gap-3 flex-wrap">
               <div class="flex items-center gap-1.5">
-                <span class="text-slate-400">Thickness:</span>
-                <input type="range" min="10" max="120" value="${activeFrameWidth}" oninput="updateFrameWidth(this.value)" class="w-24 accent-sky-400 cursor-pointer">
+                <span class="text-slate-400">Scale:</span>
+                <input type="range" min="15" max="100" value="${activeFrameWidth}" oninput="updateFrameWidth(this.value)" class="w-24 accent-sky-400 cursor-pointer">
                 <span id="sFrameVal" class="font-mono text-sky-400 w-10">${activeFrameWidth}px</span>
               </div>
 
               <div class="flex items-center gap-1.5">
-                <span class="text-slate-400">Color:</span>
+                <span class="text-slate-400">Tint:</span>
                 <input type="color" value="${activeFrameColor}" onchange="updateFrameColor(this.value)" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
               </div>
 
@@ -1668,7 +1770,7 @@
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap">
             <span class="text-sky-300 font-bold flex items-center gap-1.5">
-              <span>✂</span>
+              <span>✂️</span>
               <span>Click & drag across the image to select the crop box</span>
             </span>
             <button onclick="applyInteractiveCrop()" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition flex items-center gap-1">
@@ -1783,9 +1885,6 @@
       }
     }
 
-    // -------------------------------------------------------------
-    // 11. DRAWING & INTERACTIVE CONTENT ACTIONS
-    // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
       let isDrawing = false;
@@ -1964,9 +2063,6 @@
       };
     }
 
-    // -------------------------------------------------------------
-    // 12. APPLY INTERACTIVE CROP
-    // -------------------------------------------------------------
     function applyInteractiveCrop() {
       if (!studioCanvas || !studioCtx) return;
       const rect = studioCanvas.getBoundingClientRect();
@@ -2105,9 +2201,6 @@
       pushHistorySnapshot();
     }
 
-    // -------------------------------------------------------------
-    // 13. TRANSFORMS & ORIGINAL POSITION RESET
-    // -------------------------------------------------------------
     function rotateCanvas(deg) {
       if (!studioCanvas || !studioCtx) return;
       currentRotationDeg = (currentRotationDeg + deg) % 360;
