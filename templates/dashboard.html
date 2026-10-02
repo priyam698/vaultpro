@@ -140,7 +140,7 @@
       touch-action: none;
     }
 
-    /* Interactive Text Element Styles */
+    /* Interactive Text Styles */
     .studio-text-box {
       position: absolute;
       cursor: move;
@@ -182,36 +182,37 @@
       user-select: none;
       border-radius: 6px;
       transition: outline 0.15s ease;
-      overflow: hidden;
+      box-sizing: border-box;
     }
     .studio-redact-box.redact-blur {
       backdrop-filter: blur(14px) brightness(0.96);
       -webkit-backdrop-filter: blur(14px) brightness(0.96);
-      background: rgba(255, 255, 255, 0.12);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px dashed rgba(244, 63, 94, 0.5);
     }
     .studio-redact-box.redact-blackout {
       background: #000000;
+      border: 1px dashed rgba(244, 63, 94, 0.5);
     }
     .studio-redact-box:hover {
-      outline: 2px dashed rgba(244, 63, 94, 0.7);
+      outline: 2px dashed #f43f5e;
     }
     .studio-redact-active {
-      outline: 2px solid #f43f5e !important;
-      box-shadow: 0 0 18px rgba(244, 63, 94, 0.45);
+      outline: 2.5px solid #f43f5e !important;
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.55);
     }
     .studio-redact-locked {
       cursor: default !important;
-      outline: 1.5px solid rgba(234, 179, 8, 0.7) !important;
+      outline: 2px solid rgba(234, 179, 8, 0.8) !important;
     }
     .redact-resize-handle {
       position: absolute;
-      width: 11px;
-      height: 11px;
+      width: 12px;
+      height: 12px;
       background: #f43f5e;
       border: 2px solid #0f172a;
       border-radius: 50%;
-      z-index: 25;
+      z-index: 30;
       cursor: nwse-resize;
     }
 
@@ -306,7 +307,7 @@
           <button onclick="selectStudioCategory('shapes')" id="tabBtn-shapes" class="tool-tab-btn"><span class="text-sm">🔷</span><span>SHAPES</span></button>
           <button onclick="selectStudioCategory('adjust')" id="tabBtn-adjust" class="tool-tab-btn"><span class="text-sm">🎚️</span><span>ADJUST</span></button>
           <button onclick="selectStudioCategory('stickers')" id="tabBtn-stickers" class="tool-tab-btn"><span class="text-sm">😀</span><span>STICKERS</span></button>
-          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn"><span class="text-sm">🖼️️</span><span>FRAME</span></button>
+          <button onclick="selectStudioCategory('frame')" id="tabBtn-frame" class="tool-tab-btn"><span class="text-sm">🖼️</span><span>FRAME</span></button>
           <button onclick="selectStudioCategory('corners')" id="tabBtn-corners" class="tool-tab-btn"><span class="text-sm">🔲</span><span>CORNERS</span></button>
           <button onclick="selectStudioCategory('background')" id="tabBtn-background" class="tool-tab-btn"><span class="text-sm">🎨</span><span>BACKGROUND</span></button>
         </div>
@@ -345,12 +346,12 @@
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
 
                 <!-- DYNAMIC INTERACTIVE REDACTION & BLUR LAYER -->
-                <div id="redactOverlayContainer" class="absolute inset-0 pointer-events-none z-15 overflow-visible"></div>
+                <div id="redactOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible"></div>
 
                 <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER -->
-                <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible"></div>
+                <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-25 overflow-visible"></div>
 
-                <!-- FLASHING QUICK-ACTION PILL -->
+                <!-- FLASHING QUICK-ACTION PILL (EDIT, LOCK, DELETE, COLOR, SIZE) -->
                 <div id="floatingActionPill" class="hidden absolute z-30 flex items-center gap-1.5 p-1 rounded-2xl bg-[#090e1a]/95 border border-indigo-500/60 shadow-2xl backdrop-blur-xl">
                   <button id="pillEditBtn" onclick="editSelectedTextContent(event)" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
                     <span>✏️</span> <span>Edit</span>
@@ -382,7 +383,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -652,7 +653,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -1028,7 +1029,7 @@
       const curLongDim = Math.max(curW, curH);
 
       if (curLongDim >= targetLongDim) {
-        alert(`This asset is already at 4K Ultra HD resolution (${curW} × ${curH}).`);
+        alert(`This asset is already at 4K Ultra HD resolution.`);
         return;
       }
 
@@ -1364,8 +1365,8 @@
                onclick="selectRedactObject(event, '${obj.id}')">
             ${obj.isLocked ? '<span class="absolute top-1 right-1 text-[10px]">🔒</span>' : ''}
             ${isActive && !obj.isLocked ? `
-              <div class="redact-resize-handle" style="right: -5px; bottom: -5px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
-              <div class="redact-resize-handle" style="left: -5px; top: -5px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
+              <div class="redact-resize-handle" style="right: -6px; bottom: -6px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
+              <div class="redact-resize-handle" style="left: -6px; top: -6px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
             ` : ''}
           </div>
         `;
@@ -2311,7 +2312,7 @@
             <div class="flex items-center gap-2 flex-wrap">
               <button onclick="applyRedaction('blur')" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow">Apply Blur Box</button>
               <button onclick="applyRedaction('blackout')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition shadow">Apply Blackout</button>
-              <button onclick="cancelCropMode()" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
+              <button onclick="cancelCropMode()" class="px-3.5 py-1.5 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
             </div>
           </div>
         `;
