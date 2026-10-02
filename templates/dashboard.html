@@ -278,7 +278,7 @@
         </div>
       </div>
 
-      <!-- Secondary Sub-Tool Drawer (Controls for Active Tool) -->
+      <!-- Secondary Sub-Tool Drawer (Contextual Controls per Tool) -->
       <div id="subToolSettingsBar" class="px-6 py-2.5 bg-[#050811] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
         <!-- Injected dynamically -->
       </div>
@@ -588,7 +588,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -1227,7 +1227,22 @@
     function updateFrameColor(c) {
       captureFrameBase();
       activeFrameColor = c;
+      const colorInput = document.getElementById("frameColorInput");
+      if (colorInput) colorInput.value = c;
       renderLiveFrame();
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace('#', '');
+      const r = parseInt(clean.substring(0, 2), 16) || 0;
+      const g = parseInt(clean.substring(2, 4), 16) || 0;
+      const b = parseInt(clean.substring(4, 6), 16) || 0;
+      return { r, g, b };
+    }
+
+    function getBrightness(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      return (r * 299 + g * 587 + b * 114) / 1000;
     }
 
     function renderLiveFrame() {
@@ -1236,6 +1251,8 @@
       const baseH = frameBaseCanvas.height;
       const w = activeFrameWidth;
       const col = activeFrameColor;
+      const { r, g, b } = hexToRgb(col);
+      const isLight = getBrightness(col) > 130;
 
       let newW = baseW;
       let newH = baseH;
@@ -1243,7 +1260,7 @@
       let imgY = 0;
 
       if (activeFrameStyle === 'gallery') {
-        // 🏛️ LUXURIOUS ART GALLERY FRAME (WOOD MOULDING + IVORY MATTE + CORE BEVEL + PLAQUE)
+        // 🏛️ LUXURIOUS ART GALLERY (DYNAMIC MOULDING TINT + IVORY MATTE + CORE BEVEL + PLAQUE)
         const moulding = Math.max(24, Math.round(w * 0.7));
         const matte = Math.max(30, Math.round(w * 0.85));
         const totalPad = moulding + matte;
@@ -1256,16 +1273,16 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // 1. Outer Dark Walnut / Mahogany Moulding with Miters
+        // 1. Outer Moulding using activeFrameColor
         const woodGrad = studioCtx.createLinearGradient(0, 0, newW, newH);
         woodGrad.addColorStop(0, col);
-        woodGrad.addColorStop(0.5, "#3b2219");
-        woodGrad.addColorStop(1, col);
+        woodGrad.addColorStop(0.5, `rgb(${Math.min(255, Math.round(r * 1.35))}, ${Math.min(255, Math.round(g * 1.35))}, ${Math.min(255, Math.round(b * 1.35))})`);
+        woodGrad.addColorStop(1, `rgb(${Math.max(0, Math.round(r * 0.65))}, ${Math.max(0, Math.round(g * 0.65))}, ${Math.max(0, Math.round(b * 0.65))})`);
         studioCtx.fillStyle = woodGrad;
         studioCtx.fillRect(0, 0, newW, newH);
 
         // Miter Corner Accents
-        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.45)";
         studioCtx.lineWidth = 1.5;
         studioCtx.beginPath();
         studioCtx.moveTo(0, 0); studioCtx.lineTo(moulding, moulding);
@@ -1275,11 +1292,11 @@
         studioCtx.stroke();
 
         // 2. Archival Passe-Partout Museum Matte
-        studioCtx.fillStyle = "#f5f3ec"; // Museum warm rag board
+        studioCtx.fillStyle = isLight ? "#ffffff" : "#f5f3ec";
         studioCtx.fillRect(moulding, moulding, newW - (moulding * 2), newH - (moulding * 2));
 
         // 3. Inner 45° Beveled Core Cut with Cast Shadow
-        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.35)";
         studioCtx.lineWidth = 2.5;
         studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
 
@@ -1292,31 +1309,30 @@
 
         // 5. Polished Brass Museum Gallery Plaque
         if (matte > 35) {
-          const plaqueW = Math.min(220, Math.round(newW * 0.35));
+          const plaqueW = Math.min(240, Math.round(newW * 0.38));
           const plaqueH = 26;
           const plaqueX = (newW - plaqueW) / 2;
           const plaqueY = newH - moulding - (matte / 2) - (plaqueH / 2);
 
           const brassGrad = studioCtx.createLinearGradient(plaqueX, plaqueY, plaqueX, plaqueY + plaqueH);
-          brassGrad.addColorStop(0, "#e8ca65");
+          brassGrad.addColorStop(0, "#f3df8a");
           brassGrad.addColorStop(0.5, "#d4af37");
-          brassGrad.addColorStop(1, "#aa820a");
+          brassGrad.addColorStop(1, "#997300");
           studioCtx.fillStyle = brassGrad;
           studioCtx.fillRect(plaqueX, plaqueY, plaqueW, plaqueH);
 
-          // Brass Border & Screws
           studioCtx.strokeStyle = "#805b00";
           studioCtx.lineWidth = 1;
           studioCtx.strokeRect(plaqueX, plaqueY, plaqueW, plaqueH);
 
-          studioCtx.fillStyle = "#3a2800";
+          studioCtx.fillStyle = "#2c1c00";
           studioCtx.font = "bold 9px 'Plus Jakarta Sans', sans-serif";
           studioCtx.textAlign = "center";
           studioCtx.fillText("ZEPHYR MASTER COLLECTION • ARCHIVE", newW / 2, plaqueY + 16);
         }
 
       } else if (activeFrameStyle === 'macos') {
-        // 💻 macOS RETINA STUDIO WINDOW (TRAFFIC LIGHTS + URL CAPSULE + FROSTED TOP BAR)
+        // 💻 macOS RETINA STUDIO WINDOW (TINTED CHASSIS + TRAFFIC LIGHTS + URL CAPSULE)
         const headerH = Math.max(44, Math.round(w * 0.9));
         const sidePad = Math.max(16, Math.round(w * 0.35));
         const bottomPad = sidePad;
@@ -1329,23 +1345,23 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Window Chassis Background
-        studioCtx.fillStyle = col === '#ffffff' ? '#181a20' : col;
+        // Window Chassis Background with custom color tint
+        studioCtx.fillStyle = col;
         studioCtx.fillRect(0, 0, newW, newH);
 
         // Header Titlebar
-        studioCtx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        studioCtx.fillStyle = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(0, 0, 0, 0.35)";
         studioCtx.fillRect(0, 0, newW, headerH);
 
         // Divider
-        studioCtx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        studioCtx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)";
         studioCtx.lineWidth = 1;
         studioCtx.beginPath();
         studioCtx.moveTo(0, headerH);
         studioCtx.lineTo(newW, headerH);
         studioCtx.stroke();
 
-        // Authentic macOS Window Dots (Close, Minimize, Maximize)
+        // macOS Window Controls
         const dotY = Math.round(headerH / 2);
         const dotRadius = 6.5;
         const dots = [
@@ -1364,7 +1380,6 @@
           studioCtx.lineWidth = 1;
           studioCtx.stroke();
 
-          // Subtle inner gloss dot
           studioCtx.beginPath();
           studioCtx.arc(dotX - 1.5, dotY - 1.5, 1.8, 0, Math.PI * 2);
           studioCtx.fillStyle = "rgba(255, 255, 255, 0.45)";
@@ -1377,22 +1392,21 @@
         const capsuleX = (newW - capsuleW) / 2;
         const capsuleY = (headerH - capsuleH) / 2;
 
-        studioCtx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        studioCtx.fillStyle = isLight ? "rgba(0, 0, 0, 0.07)" : "rgba(255, 255, 255, 0.09)";
         studioCtx.beginPath();
         studioCtx.roundRect(capsuleX, capsuleY, capsuleW, capsuleH, 8);
         studioCtx.fill();
 
-        studioCtx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        studioCtx.fillStyle = isLight ? "#1e293b" : "#f8fafc";
         studioCtx.font = "bold 10px monospace";
         studioCtx.textAlign = "center";
         const docName = activeStudioFile ? activeStudioFile.filename : "document.png";
         studioCtx.fillText(`🔒 zephyr.app/view/${docName}`, newW / 2, capsuleY + 16);
 
-        // Draw Image Content
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
       } else if (activeFrameStyle === 'polaroid') {
-        // 📷 AUTHENTIC POLAROID SX-70 (WARM CREAM PAPER + CHIN + WASHI TAPE + MARKER DATE)
+        // 📷 POLAROID FRAME (FULL BODY COLOR ADAPTATION + CONTRAST TEXT + WASHI TAPE)
         const padSide = Math.max(24, Math.round(w * 0.65));
         const padTop = padSide;
         const padBottom = Math.max(90, Math.round(padSide * 3.0));
@@ -1405,40 +1419,40 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Vintage Textured Photographic Cardstock
-        studioCtx.fillStyle = "#faf8f2";
+        // Custom Colored Polaroid Body
+        studioCtx.fillStyle = col;
         studioCtx.fillRect(0, 0, newW, newH);
 
         // Inner Recessed Dark Rim
-        studioCtx.strokeStyle = "rgba(0, 0, 0, 0.22)";
+        studioCtx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.22)" : "rgba(255, 255, 255, 0.25)";
         studioCtx.lineWidth = 1.5;
         studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
 
         // Draw Artwork
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
-        // Washi Tape Strip at Top (Translucent with Ripped Edges)
+        // Washi Tape Strip at Top
         const tapeW = Math.min(180, Math.round(newW * 0.32));
         const tapeH = 26;
         const tapeX = (newW - tapeW) / 2;
         const tapeY = 0;
 
         studioCtx.save();
-        studioCtx.fillStyle = "rgba(235, 215, 175, 0.85)";
+        studioCtx.fillStyle = isLight ? "rgba(235, 215, 175, 0.85)" : "rgba(255, 255, 255, 0.18)";
         studioCtx.fillRect(tapeX, tapeY, tapeW, tapeH);
-        studioCtx.strokeStyle = "rgba(210, 185, 130, 0.9)";
+        studioCtx.strokeStyle = isLight ? "rgba(210, 185, 130, 0.9)" : "rgba(255, 255, 255, 0.3)";
         studioCtx.strokeRect(tapeX, tapeY, tapeW, tapeH);
         studioCtx.restore();
 
-        // Handwritten Marker Style Inscription on the Chin
-        studioCtx.fillStyle = "#1e293b";
+        // Contrast-adaptive Handwritten Marker Date
+        studioCtx.fillStyle = isLight ? "#0f172a" : "#ffffff";
         studioCtx.font = "italic bold 16px 'Plus Jakarta Sans', sans-serif";
         studioCtx.textAlign = "center";
         const todayStr = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
         studioCtx.fillText(`Zephyr Master • ${todayStr}`, newW / 2, newH - 34);
 
       } else if (activeFrameStyle === 'neon') {
-        // ⚡ CYBER NEON GLOW (DEEP OBSIDIAN BACKDROP + TRIPLE-LAYER BLOOM + HUD BRACKETS)
+        // ⚡ CYBER NEON GLOW (CHOSEN COLOR FOR GLOW, TUBE & HUD CORNERS)
         const glowPad = Math.max(40, w);
         newW = baseW + (glowPad * 2);
         newH = baseH + (glowPad * 2);
@@ -1448,11 +1462,11 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Obsidian Stage
+        // Dark Stage Background
         studioCtx.fillStyle = "#04060d";
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Multi-Layer Photonic Bloom
+        // Dynamic Color Photonic Bloom
         studioCtx.save();
         studioCtx.shadowColor = col;
         studioCtx.shadowBlur = Math.round(glowPad * 0.9);
@@ -1465,39 +1479,29 @@
         studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
         studioCtx.restore();
 
-        // High-Intensity White Core Tube Line
-        studioCtx.strokeStyle = "#ffffff";
-        studioCtx.lineWidth = 1.5;
+        // High-Intensity Core Line
+        studioCtx.strokeStyle = col;
+        studioCtx.lineWidth = 2;
         studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
 
-        // Cyberpunk Corner HUD Brackets
+        // Corner HUD Brackets
         const bracketLen = 22;
         studioCtx.strokeStyle = col;
         studioCtx.lineWidth = 3.5;
 
-        // Top-Left
         studioCtx.beginPath();
         studioCtx.moveTo(imgX - 16, imgY - 16 + bracketLen);
         studioCtx.lineTo(imgX - 16, imgY - 16);
         studioCtx.lineTo(imgX - 16 + bracketLen, imgY - 16);
-        studioCtx.stroke();
 
-        // Top-Right
-        studioCtx.beginPath();
         studioCtx.moveTo(imgX + baseW + 16 - bracketLen, imgY - 16);
         studioCtx.lineTo(imgX + baseW + 16, imgY - 16);
         studioCtx.lineTo(imgX + baseW + 16, imgY - 16 + bracketLen);
-        studioCtx.stroke();
 
-        // Bottom-Left
-        studioCtx.beginPath();
         studioCtx.moveTo(imgX - 16, imgY + baseH + 16 - bracketLen);
         studioCtx.lineTo(imgX - 16, imgY + baseH + 16);
         studioCtx.lineTo(imgX - 16 + bracketLen, imgY + baseH + 16);
-        studioCtx.stroke();
 
-        // Bottom-Right
-        studioCtx.beginPath();
         studioCtx.moveTo(imgX + baseW + 16 - bracketLen, imgY + baseH + 16);
         studioCtx.lineTo(imgX + baseW + 16, imgY + baseH + 16);
         studioCtx.lineTo(imgX + baseW + 16, imgY + baseH + 16 - bracketLen);
@@ -1506,7 +1510,7 @@
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
       } else if (activeFrameStyle === 'film') {
-        // 🎞️ 35mm MOTION PICTURE FILM STRIP (PERFORATED SPROCKET HOLES + KODAK VISION CODES)
+        // 🎞️ 35mm FILM STRIP (COLORED FILM BORDER + SPROCKET HOLES + EDGE CODES)
         const filmBorderH = Math.max(50, Math.round(w * 1.1));
         const filmBorderW = Math.max(20, Math.round(w * 0.4));
 
@@ -1518,30 +1522,28 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Deep Film Base Black
-        studioCtx.fillStyle = "#070707";
+        // Custom Colored Film Border
+        studioCtx.fillStyle = col;
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Render Sprocket Holes (Rounded Rectangles top and bottom)
+        // Sprocket Holes (Inverted for contrast)
         const holeW = 12;
         const holeH = 18;
         const holeSpacing = 32;
-        studioCtx.fillStyle = "#ffffff";
+        studioCtx.fillStyle = isLight ? "#111827" : "#ffffff";
 
         for (let x = 16; x < newW - 16; x += holeSpacing) {
-          // Top Sprocket
           studioCtx.beginPath();
           studioCtx.roundRect(x, 14, holeW, holeH, 3);
           studioCtx.fill();
 
-          // Bottom Sprocket
           studioCtx.beginPath();
           studioCtx.roundRect(x, newH - 14 - holeH, holeW, holeH, 3);
           studioCtx.fill();
         }
 
         // Film Edge Typography
-        studioCtx.fillStyle = "#d4af37";
+        studioCtx.fillStyle = isLight ? "#b45309" : "#fbbf24";
         studioCtx.font = "bold 9px monospace";
         studioCtx.fillText("▶ 24A", 48, filmBorderH - 10);
         studioCtx.fillText("KODAK VISION3 500T", newW / 2 - 60, filmBorderH - 10);
@@ -1550,7 +1552,7 @@
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
       } else {
-        // 🔲 CLEAN STUDIO BORDER
+        // 🔲 CLEAN STUDIO BORDER (FULL WIDTH MATTE WITH INNER CONTRAST LINE)
         newW = baseW + (w * 2);
         newH = baseH + (w * 2);
         imgX = w;
@@ -1563,10 +1565,14 @@
         studioCtx.fillRect(0, 0, newW, newH);
 
         studioCtx.save();
-        studioCtx.shadowColor = "rgba(0,0,0,0.45)";
+        studioCtx.shadowColor = "rgba(0, 0, 0, 0.45)";
         studioCtx.shadowBlur = Math.round(w * 0.4);
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
         studioCtx.restore();
+
+        studioCtx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.25)";
+        studioCtx.lineWidth = 1.5;
+        studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
       }
 
       applyStudioCanvasDisplaySize();
@@ -1640,15 +1646,25 @@
             </div>
 
             <div class="flex items-center gap-3 flex-wrap">
-              <div class="flex items-center gap-1.5">
-                <span class="text-slate-400">Scale:</span>
-                <input type="range" min="15" max="100" value="${activeFrameWidth}" oninput="updateFrameWidth(this.value)" class="w-24 accent-sky-400 cursor-pointer">
-                <span id="sFrameVal" class="font-mono text-sky-400 w-10">${activeFrameWidth}px</span>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400">Border Color:</span>
+                <input type="color" id="frameColorInput" value="${activeFrameColor}" oninput="updateFrameColor(this.value)" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer" title="Custom Border Color">
+                <div class="flex items-center gap-1">
+                  <button onclick="updateFrameColor('#ffffff')" class="w-5 h-5 rounded-full bg-white border border-white/40 hover:scale-110 transition" title="Classic White"></button>
+                  <button onclick="updateFrameColor('#0f172a')" class="w-5 h-5 rounded-full bg-slate-900 border border-white/40 hover:scale-110 transition" title="Obsidian Black"></button>
+                  <button onclick="updateFrameColor('#2b1810')" class="w-5 h-5 rounded-full bg-[#2b1810] border border-white/40 hover:scale-110 transition" title="Dark Walnut"></button>
+                  <button onclick="updateFrameColor('#d4af37')" class="w-5 h-5 rounded-full bg-[#d4af37] border border-white/40 hover:scale-110 transition" title="Royal Gold"></button>
+                  <button onclick="updateFrameColor('#00f3ff')" class="w-5 h-5 rounded-full bg-[#00f3ff] border border-white/40 hover:scale-110 transition" title="Cyber Cyan"></button>
+                  <button onclick="updateFrameColor('#a855f7')" class="w-5 h-5 rounded-full bg-[#a855f7] border border-white/40 hover:scale-110 transition" title="Neon Purple"></button>
+                  <button onclick="updateFrameColor('#f43f5e')" class="w-5 h-5 rounded-full bg-[#f43f5e] border border-white/40 hover:scale-110 transition" title="Crimson Red"></button>
+                  <button onclick="updateFrameColor('#10b981')" class="w-5 h-5 rounded-full bg-[#10b981] border border-white/40 hover:scale-110 transition" title="Emerald Green"></button>
+                </div>
               </div>
 
               <div class="flex items-center gap-1.5">
-                <span class="text-slate-400">Tint:</span>
-                <input type="color" value="${activeFrameColor}" onchange="updateFrameColor(this.value)" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+                <span class="text-slate-400">Scale:</span>
+                <input type="range" min="15" max="100" value="${activeFrameWidth}" oninput="updateFrameWidth(this.value)" class="w-20 accent-sky-400 cursor-pointer">
+                <span id="sFrameVal" class="font-mono text-sky-400 w-10">${activeFrameWidth}px</span>
               </div>
 
               <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
@@ -1770,7 +1786,7 @@
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap">
             <span class="text-sky-300 font-bold flex items-center gap-1.5">
-              <span>✂️</span>
+              <span>✂️️</span>
               <span>Click & drag across the image to select the crop box</span>
             </span>
             <button onclick="applyInteractiveCrop()" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition flex items-center gap-1">
