@@ -152,7 +152,8 @@
       font-weight: 700;
       font-family: 'Plus Jakarta Sans', sans-serif;
       transition: outline 0.15s ease;
-      z-index: 25;
+      z-index: 28;
+      pointer-events: auto !important;
     }
     .studio-text-box:hover {
       outline: 1.5px dashed rgba(56, 189, 248, 0.6);
@@ -160,7 +161,7 @@
     .studio-text-active {
       outline: 2px solid #38bdf8 !important;
       box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
-      z-index: 30 !important;
+      z-index: 32 !important;
     }
     .studio-text-locked {
       cursor: default !important;
@@ -183,27 +184,28 @@
       cursor: move;
       user-select: none;
       border-radius: 6px;
-      transition: outline 0.15s ease;
+      transition: outline 0.15s ease, box-shadow 0.15s ease;
       box-sizing: border-box;
-      z-index: 24;
+      z-index: 26;
       pointer-events: auto !important;
     }
     .studio-redact-box.redact-blur {
       backdrop-filter: blur(16px) brightness(0.95);
       -webkit-backdrop-filter: blur(16px) brightness(0.95);
       background: rgba(255, 255, 255, 0.16);
-      border: 1px dashed rgba(244, 63, 94, 0.45);
+      border: 1.5px dashed rgba(244, 63, 94, 0.55);
     }
     .studio-redact-box.redact-blackout {
       background: #000000;
-      border: 1px dashed rgba(244, 63, 94, 0.45);
+      border: 1.5px dashed rgba(244, 63, 94, 0.55);
     }
     .studio-redact-box:hover {
       outline: 2px dashed #f43f5e;
+      border-color: #f43f5e;
     }
     .studio-redact-active {
       outline: 2.5px solid #f43f5e !important;
-      box-shadow: 0 0 22px rgba(244, 63, 94, 0.6);
+      box-shadow: 0 0 24px rgba(244, 63, 94, 0.65);
       z-index: 31 !important;
     }
     .studio-redact-locked {
@@ -212,8 +214,8 @@
     }
     .redact-resize-handle {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 13px;
+      height: 13px;
       background: #f43f5e;
       border: 2px solid #0f172a;
       border-radius: 50%;
@@ -725,7 +727,7 @@
         if (icon) icon.innerText = "🌙";
       } else {
         document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️";
+        if (icon) icon.innerText = "☀️️";
       }
     }
 
@@ -1125,7 +1127,6 @@
         return;
       }
 
-      // Save pre-AI state before 4K upscale so it can be cleanly reverted
       if (!preAiCanvasState) {
         preAiCanvasState = {
           width: curW,
@@ -1192,7 +1193,6 @@
 
       let actionsTaken = [];
 
-      // 1. Reset color tone & contrast adjustments back to neutral
       if (adjustBrightness !== 100 || adjustContrast !== 100 || adjustSaturation !== 100 || isAutoToneApplied) {
         adjustBrightness = 100;
         adjustContrast = 100;
@@ -1202,7 +1202,6 @@
         actionsTaken.push("Auto Tone Balance reverted to 100% neutral");
       }
 
-      // 2. Revert 4K resolution back to pre-AI state if applied
       if (isAi4kApplied && preAiCanvasState) {
         const revScale = preAiCanvasState.width / studioCanvas.width;
         const restoreImg = new Image();
@@ -1212,7 +1211,6 @@
           studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
           studioCtx.drawImage(restoreImg, 0, 0);
 
-          // Rescale objects back proportionally
           studioTextObjects.forEach(t => {
             t.x = Math.round(t.x * revScale);
             t.y = Math.round(t.y * revScale);
@@ -1943,6 +1941,7 @@
       if (!viewport) return;
 
       viewport.addEventListener("mousedown", (e) => {
+        // Prevent panning if user clicked on any redact box, text box, handle, or action pill
         if (e.target.closest('.studio-redact-box') || e.target.closest('.studio-text-box') || e.target.closest('#floatingActionPill')) {
           return;
         }
