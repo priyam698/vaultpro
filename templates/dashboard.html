@@ -140,7 +140,7 @@
       touch-action: none;
     }
 
-    /* Interactive Text Styles */
+    /* Interactive Text Element Styles */
     .studio-text-box {
       position: absolute;
       cursor: move;
@@ -152,6 +152,7 @@
       font-weight: 700;
       font-family: 'Plus Jakarta Sans', sans-serif;
       transition: outline 0.15s ease;
+      z-index: 25;
     }
     .studio-text-box:hover {
       outline: 1.5px dashed rgba(56, 189, 248, 0.6);
@@ -159,6 +160,7 @@
     .studio-text-active {
       outline: 2px solid #38bdf8 !important;
       box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+      z-index: 30 !important;
     }
     .studio-text-locked {
       cursor: default !important;
@@ -171,7 +173,7 @@
       background: #38bdf8;
       border: 2px solid #0f172a;
       border-radius: 50%;
-      z-index: 25;
+      z-index: 35;
       cursor: nwse-resize;
     }
 
@@ -183,23 +185,26 @@
       border-radius: 6px;
       transition: outline 0.15s ease;
       box-sizing: border-box;
+      z-index: 24;
+      pointer-events: auto !important;
     }
     .studio-redact-box.redact-blur {
-      backdrop-filter: blur(14px) brightness(0.96);
-      -webkit-backdrop-filter: blur(14px) brightness(0.96);
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px dashed rgba(244, 63, 94, 0.5);
+      backdrop-filter: blur(16px) brightness(0.95);
+      -webkit-backdrop-filter: blur(16px) brightness(0.95);
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px dashed rgba(244, 63, 94, 0.45);
     }
     .studio-redact-box.redact-blackout {
       background: #000000;
-      border: 1px dashed rgba(244, 63, 94, 0.5);
+      border: 1px dashed rgba(244, 63, 94, 0.45);
     }
     .studio-redact-box:hover {
       outline: 2px dashed #f43f5e;
     }
     .studio-redact-active {
       outline: 2.5px solid #f43f5e !important;
-      box-shadow: 0 0 20px rgba(244, 63, 94, 0.55);
+      box-shadow: 0 0 22px rgba(244, 63, 94, 0.6);
+      z-index: 31 !important;
     }
     .studio-redact-locked {
       cursor: default !important;
@@ -212,7 +217,7 @@
       background: #f43f5e;
       border: 2px solid #0f172a;
       border-radius: 50%;
-      z-index: 30;
+      z-index: 40;
       cursor: nwse-resize;
     }
 
@@ -351,7 +356,7 @@
                 <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER -->
                 <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-25 overflow-visible"></div>
 
-                <!-- FLASHING QUICK-ACTION PILL (EDIT, LOCK, DELETE, COLOR, SIZE) -->
+                <!-- FLASHING QUICK-ACTION PILL -->
                 <div id="floatingActionPill" class="hidden absolute z-30 flex items-center gap-1.5 p-1 rounded-2xl bg-[#090e1a]/95 border border-indigo-500/60 shadow-2xl backdrop-blur-xl">
                   <button id="pillEditBtn" onclick="editSelectedTextContent(event)" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
                     <span>✏️</span> <span>Edit</span>
@@ -367,7 +372,7 @@
                   <button id="pillSizeDownBtn" onclick="stepSelectedTextSize(-4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Smaller font">A-</button>
                   <button id="pillSizeUpBtn" onclick="stepSelectedTextSize(4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Bigger font">A+</button>
                   <button id="pillDeleteBtn" onclick="deleteActiveContent(event)" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
-                    <span>🗑️</span>
+                    <span>🗑️️</span>
                     <span>Delete</span>
                   </button>
                   <button onclick="dismissFloatingPill()" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white text-xs font-bold rounded-lg hover:bg-white/10 ml-0.5">✕</button>
@@ -653,7 +658,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -759,6 +764,57 @@
       window.location.href = "/auth";
     }
 
+    // -------------------------------------------------------------
+    // INDEXEDDB PERSISTENT NON-DESTRUCTIVE VAULT PROJECT STORAGE
+    // -------------------------------------------------------------
+    const DB_NAME = "ZephyrStudioDB";
+    const DB_VERSION = 1;
+    const STORE_NAME = "studio_projects";
+
+    function openStudioDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: "key" });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function getSavedStudioProject(fileId) {
+      try {
+        const db = await openStudioDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(`${currentUserId}_${fileId}`);
+          req.onsuccess = () => resolve(req.result ? req.result.project : null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function setSavedStudioProject(fileId, projectData) {
+      try {
+        const db = await openStudioDB();
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        store.put({
+          key: `${currentUserId}_${fileId}`,
+          fileId: fileId,
+          userId: currentUserId,
+          project: projectData,
+          savedAt: Date.now()
+        });
+      } catch (e) {}
+    }
+
     let allFiles = [];
     let activeStudioFile = null;
     let isStudioModified = false;
@@ -806,9 +862,7 @@
     let activeFrameWidth = 40;
     let activeFrameColor = '#2b1810';
 
-    // -------------------------------------------------------------
-    // INTERACTIVE TEXT OBJECT STATE
-    // -------------------------------------------------------------
+    // Interactive Text Objects State
     let studioTextObjects = [];
     let activeTextId = null;
     let isDraggingText = false;
@@ -817,9 +871,7 @@
     let textInitialX = 0, textInitialY = 0;
     let textInitialFontSize = 32;
 
-    // -------------------------------------------------------------
-    // INTERACTIVE REDACT & BLUR OBJECT STATE
-    // -------------------------------------------------------------
+    // Interactive Redact & Blur Objects State
     let studioRedactObjects = [];
     let activeRedactId = null;
     let isDraggingRedact = false;
@@ -827,6 +879,9 @@
     let redactDragStartX = 0, redactDragStartY = 0;
     let redactInitialX = 0, redactInitialY = 0;
     let redactInitialW = 0, redactInitialH = 0;
+
+    // Master pristine clean image snapshot preserved for non-destructive edits
+    let pristineBaseDataUrl = null;
 
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
@@ -937,10 +992,14 @@
         activeTextId = null;
         studioRedactObjects = [];
         activeRedactId = null;
+        pristineBaseDataUrl = null;
         updatePanTransform();
         dismissFloatingPill();
         clearTextOverlayDOM();
         clearRedactOverlayDOM();
+
+        // Check if user has a persistent non-destructive project saved in IndexedDB
+        const savedProject = await getSavedStudioProject(file.id);
 
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -950,14 +1009,34 @@
           studioCanvas.height = img.naturalHeight || img.height;
           studioCtx.drawImage(img, 0, 0, studioCanvas.width, studioCanvas.height);
 
+          if (savedProject && savedProject.pristineDataUrl) {
+            pristineBaseDataUrl = savedProject.pristineDataUrl;
+            studioRedactObjects = savedProject.redactObjects || [];
+            studioTextObjects = savedProject.textObjects || [];
+            if (savedProject.frameStyle) {
+              activeFrameStyle = savedProject.frameStyle;
+              activeFrameColor = savedProject.frameColor || activeFrameColor;
+              activeFrameWidth = savedProject.frameWidth || activeFrameWidth;
+            }
+          } else {
+            pristineBaseDataUrl = studioCanvas.toDataURL("image/png");
+          }
+
           setSharpnessMode('ultra');
           pushHistorySnapshot(false);
           setupCanvasDrawing();
           setupHandPanEngine();
           selectStudioCategory('draw');
+          renderAllRedactObjects();
+          renderAllTextObjects();
           setTimeout(fitStudioImageToViewport, 30);
         };
-        img.src = streamUrl;
+
+        if (savedProject && savedProject.pristineDataUrl) {
+          img.src = savedProject.pristineDataUrl;
+        } else {
+          img.src = streamUrl;
+        }
         return;
       }
 
@@ -1261,7 +1340,7 @@
       if (activeRedactId) {
         const redactObj = studioRedactObjects.find(r => r.id === activeRedactId);
         if (redactObj && redactObj.isLocked) {
-          alert("⚠️ This blur box is locked! Click 'Unlock' first to delete it.");
+          alert("⚠️ This blur/redact box is locked! Click 'Unlock' first to delete it.");
           return;
         }
         studioRedactObjects = studioRedactObjects.filter(r => r.id !== activeRedactId);
@@ -1359,12 +1438,14 @@
 
         return `
           <div id="${obj.id}" 
-               class="studio-redact-box pointer-events-auto ${obj.type === 'blackout' ? 'redact-blackout' : 'redact-blur'} ${isActive ? 'studio-redact-active' : ''} ${obj.isLocked ? 'studio-redact-locked' : ''}" 
+               class="studio-redact-box ${obj.type === 'blackout' ? 'redact-blackout' : 'redact-blur'} ${isActive ? 'studio-redact-active' : ''} ${obj.isLocked ? 'studio-redact-locked' : ''}" 
                style="left: ${leftPx}px; top: ${topPx}px; width: ${widthPx}px; height: ${heightPx}px;"
                onmousedown="startRedactDrag(event, '${obj.id}')"
                onclick="selectRedactObject(event, '${obj.id}')">
-            ${obj.isLocked ? '<span class="absolute top-1 right-1 text-[10px]">🔒</span>' : ''}
+            ${obj.isLocked ? '<span class="absolute top-1 right-1 text-[10px] bg-black/60 px-1 rounded text-amber-300 pointer-events-none">🔒</span>' : ''}
             ${isActive && !obj.isLocked ? `
+              <!-- Quick corner delete button on the active box -->
+              <button type="button" onclick="deleteActiveContent(event)" class="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center justify-center shadow-lg border border-white/50 cursor-pointer z-40 transition" title="Delete this box">✕</button>
               <div class="redact-resize-handle" style="right: -6px; bottom: -6px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
               <div class="redact-resize-handle" style="left: -6px; top: -6px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
             ` : ''}
@@ -1670,71 +1751,86 @@
     }
 
     // -------------------------------------------------------------
-    // BURN ALL OVERLAYS PERMANENTLY INTO CANVAS FOR SAVING
+    // GENERATE EXPORT CANVAS (BURN OVERLAYS FOR THE FILE UPLOAD)
     // -------------------------------------------------------------
-    function burnAllOverlaysToCanvas() {
-      if (!studioCanvas || !studioCtx) return;
+    function createFlattenedExportCanvas() {
+      if (!studioCanvas) return null;
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = studioCanvas.width;
+      exportCanvas.height = studioCanvas.height;
+      const expCtx = exportCanvas.getContext("2d");
 
-      // 1. Burn Blur and Blackout Redactions
-      if (studioRedactObjects.length) {
-        studioRedactObjects.forEach(r => {
-          if (r.type === 'blackout') {
-            studioCtx.fillStyle = '#000000';
-            studioCtx.fillRect(r.x, r.y, r.w, r.h);
-          } else {
-            try {
-              studioCtx.save();
-              studioCtx.beginPath();
-              studioCtx.rect(r.x, r.y, r.w, r.h);
-              studioCtx.clip();
-              studioCtx.filter = 'blur(16px)';
-              studioCtx.drawImage(studioCanvas, 0, 0);
-              studioCtx.restore();
-              studioCtx.filter = 'none';
-            } catch (e) {
-              const pixelSize = Math.max(6, Math.round(r.w / 18));
-              const imgData = studioCtx.getImageData(r.x, r.y, r.w, r.h);
-              const data = imgData.data;
-              for (let py = 0; py < r.h; py += pixelSize) {
-                for (let px = 0; px < r.w; px += pixelSize) {
-                  const pIndex = (py * r.w + px) * 4;
-                  const red = data[pIndex], g = data[pIndex + 1], b = data[pIndex + 2];
-                  for (let subY = 0; subY < pixelSize && py + subY < r.h; subY++) {
-                    for (let subX = 0; subX < pixelSize && px + subX < r.w; subX++) {
-                      const subIndex = ((py + subY) * r.w + (px + subX)) * 4;
-                      data[subIndex] = red;
-                      data[subIndex + 1] = g;
-                      data[subIndex + 2] = b;
-                    }
+      // Draw base image
+      expCtx.drawImage(studioCanvas, 0, 0);
+
+      // Burn Redactions
+      studioRedactObjects.forEach(r => {
+        if (r.type === 'blackout') {
+          expCtx.fillStyle = '#000000';
+          expCtx.fillRect(r.x, r.y, r.w, r.h);
+        } else {
+          try {
+            expCtx.save();
+            expCtx.beginPath();
+            expCtx.rect(r.x, r.y, r.w, r.h);
+            expCtx.clip();
+            expCtx.filter = 'blur(16px)';
+            expCtx.drawImage(studioCanvas, 0, 0);
+            expCtx.restore();
+            expCtx.filter = 'none';
+          } catch (e) {
+            const pixelSize = Math.max(6, Math.round(r.w / 18));
+            const imgData = expCtx.getImageData(r.x, r.y, r.w, r.h);
+            const data = imgData.data;
+            for (let py = 0; py < r.h; py += pixelSize) {
+              for (let px = 0; px < r.w; px += pixelSize) {
+                const pIndex = (py * r.w + px) * 4;
+                const red = data[pIndex], g = data[pIndex + 1], b = data[pIndex + 2];
+                for (let subY = 0; subY < pixelSize && py + subY < r.h; subY++) {
+                  for (let subX = 0; subX < pixelSize && px + subX < r.w; subX++) {
+                    const subIndex = ((py + subY) * r.w + (px + subX)) * 4;
+                    data[subIndex] = red;
+                    data[subIndex + 1] = g;
+                    data[subIndex + 2] = b;
                   }
                 }
               }
-              studioCtx.putImageData(imgData, r.x, r.y);
             }
+            expCtx.putImageData(imgData, r.x, r.y);
           }
-        });
-        studioRedactObjects = [];
-        activeRedactId = null;
-        clearRedactOverlayDOM();
-      }
+        }
+      });
 
-      // 2. Burn Active Texts
-      if (studioTextObjects.length) {
-        studioTextObjects.forEach(t => {
-          studioCtx.save();
-          studioCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
-          studioCtx.fillStyle = t.color;
-          studioCtx.textBaseline = "top";
-          studioCtx.shadowColor = "rgba(0,0,0,0.65)";
-          studioCtx.shadowBlur = 4;
-          studioCtx.fillText(t.text, t.x, t.y);
-          studioCtx.restore();
-        });
-        studioTextObjects = [];
-        activeTextId = null;
-        clearTextOverlayDOM();
-      }
+      // Burn Texts
+      studioTextObjects.forEach(t => {
+        expCtx.save();
+        expCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
+        expCtx.fillStyle = t.color;
+        expCtx.textBaseline = "top";
+        expCtx.shadowColor = "rgba(0,0,0,0.65)";
+        expCtx.shadowBlur = 4;
+        expCtx.fillText(t.text, t.x, t.y);
+        expCtx.restore();
+      });
 
+      return exportCanvas;
+    }
+
+    function burnAllTextToCanvas() {
+      if (!studioCanvas || !studioCtx || !studioTextObjects.length) return;
+      studioTextObjects.forEach(t => {
+        studioCtx.save();
+        studioCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
+        studioCtx.fillStyle = t.color;
+        studioCtx.textBaseline = "top";
+        studioCtx.shadowColor = "rgba(0,0,0,0.65)";
+        studioCtx.shadowBlur = 4;
+        studioCtx.fillText(t.text, t.x, t.y);
+        studioCtx.restore();
+      });
+      studioTextObjects = [];
+      activeTextId = null;
+      clearTextOverlayDOM();
       pushHistorySnapshot();
     }
 
@@ -1754,6 +1850,11 @@
       if (!viewport) return;
 
       viewport.addEventListener("mousedown", (e) => {
+        // Prevent panning if user clicked on any redact box, text box, handle, or action pill
+        if (e.target.closest('.studio-redact-box') || e.target.closest('.studio-text-box') || e.target.closest('#floatingActionPill')) {
+          return;
+        }
+
         if (currentCategory === 'hand' || isSpacePressed) {
           isPanning = true;
           panDragStartX = e.clientX - panX;
@@ -2284,7 +2385,7 @@
     }
 
     // -------------------------------------------------------------
-    // CATEGORY SWITCHER & FRAME/TEXT SUBDRAWER
+    // CATEGORY SWITCHER & FRAME/TEXT/REDACT SUBDRAWER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
@@ -2310,9 +2411,9 @@
               <span class="text-rose-400 font-bold">🔒 Drag to place blur or blackout box. Click any box to delete, unlock or move.</span>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <button onclick="applyRedaction('blur')" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow">Apply Blur Box</button>
-              <button onclick="applyRedaction('blackout')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition shadow">Apply Blackout</button>
-              <button onclick="cancelCropMode()" class="px-3.5 py-1.5 rounded-xl bg-white/10 text-slate-300 transition">Cancel</button>
+              <button onclick="applyRedaction('blur')" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow cursor-pointer">Apply Blur Box</button>
+              <button onclick="applyRedaction('blackout')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/20 text-white font-bold transition shadow cursor-pointer">Apply Blackout</button>
+              <button onclick="cancelCropMode()" class="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 transition cursor-pointer">Cancel</button>
             </div>
           </div>
         `;
@@ -2340,8 +2441,8 @@
 
               <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
 
-              <button onclick="burnAllOverlaysToCanvas()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition cursor-pointer" title="Flatten text into canvas pixels">
-                Flatten All Layers
+              <button onclick="burnAllTextToCanvas()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition cursor-pointer" title="Flatten text into canvas pixels">
+                Flatten All Text
               </button>
             </div>
           </div>
@@ -2627,7 +2728,6 @@
         startX = (e.clientX - rect.left) * scaleX;
         startY = (e.clientY - rect.top) * scaleY;
 
-        // If in text mode, create a new interactive text element where clicked
         if (currentCategory === 'text') {
           const defaultText = prompt("Enter text to add to canvas:", "Type here...");
           if (defaultText) {
@@ -3100,17 +3200,26 @@
     async function saveStudioFileChanges() {
       if (!activeStudioFile) return;
 
-      // Burn all active text and blur/redact layers directly onto the canvas before saving
-      burnAllOverlaysToCanvas();
-
       const ext = activeStudioFile.filename.split('.').pop().toLowerCase();
       let payloadBlob = null;
 
       if (IMAGE_EXTS.includes(ext) && studioCanvas) {
+        // 1. Generate flattened export copy for Cloudflare R2 file storage
+        const exportCanvas = createFlattenedExportCanvas();
         const mime = document.getElementById("exportFormatSelect").value || "image/png";
-        const dataUrl = studioCanvas.toDataURL(mime, 0.95);
+        const dataUrl = exportCanvas.toDataURL(mime, 0.95);
         const res = await fetch(dataUrl);
         payloadBlob = await res.blob();
+
+        // 2. Persist pristine master image and live objects into IndexedDB so they can be modified/deleted later
+        await setSavedStudioProject(activeStudioFile.id, {
+          pristineDataUrl: pristineBaseDataUrl || studioCanvas.toDataURL("image/png"),
+          redactObjects: studioRedactObjects,
+          textObjects: studioTextObjects,
+          frameStyle: activeFrameStyle,
+          frameColor: activeFrameColor,
+          frameWidth: activeFrameWidth
+        });
       } else if (CODE_EXTS.includes(ext)) {
         const text = document.getElementById("studioCodeEditor").value;
         payloadBlob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -3126,7 +3235,7 @@
         });
         if (!saveRes.ok) throw new Error("Save failed");
 
-        alert("✓ Changes saved successfully to your Cloud Drive!");
+        alert("✓ Changes saved to vault! You can still click and delete blur/redact boxes or text anytime.");
         isStudioModified = false;
         document.getElementById("studioUnsavedBadge").classList.add("hidden");
         loadDriveData();
