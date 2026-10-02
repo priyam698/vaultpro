@@ -329,7 +329,7 @@
           <button onclick="resetOrientationToOriginal()" title="Reset Rotation, Flip & View" class="px-2.5 py-1 text-amber-300 hover:text-amber-200 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-lg transition text-[10px] font-bold flex items-center gap-1 cursor-pointer">
             <span>🎯</span> Original Position
           </button>
-          <button onclick="resetImageCanvas()" title="Reset to Original" class="px-2 py-1 text-rose-300 hover:text-white rounded-lg hover:bg-rose-500/20 transition text-[10px] font-bold cursor-pointer">
+          <button onclick="resetImageCanvas()" title="Reset to clean base upload" class="px-2 py-1 text-rose-300 hover:text-white rounded-lg hover:bg-rose-500/20 transition text-[10px] font-bold cursor-pointer">
             <span>↺</span> Reset
           </button>
         </div>
@@ -727,7 +727,7 @@
         if (icon) icon.innerText = "🌙";
       } else {
         document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️️";
+        if (icon) icon.innerText = "☀️";
       }
     }
 
@@ -1807,7 +1807,7 @@
       if (!textObj) return;
 
       if (textObj.isLocked) {
-        alert("⚠️ This text is locked. Unlock it before editing text content.");
+        alert("⚠️️ This text is locked. Unlock it before editing text content.");
         return;
       }
 
@@ -3180,27 +3180,47 @@
     }
 
     function resetImageCanvas() {
-      if (!studioImgObj || !studioCtx || !studioCanvas) return;
-      studioCanvas.width = studioImgObj.naturalWidth || studioImgObj.width;
-      studioCanvas.height = studioImgObj.naturalHeight || studioImgObj.height;
-      studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
-      studioCtx.drawImage(studioImgObj, 0, 0);
-      currentRotationDeg = 0;
-      isFlippedH = false;
-      isFlippedV = false;
-      panX = 0;
-      panY = 0;
-      frameBaseCanvas = null;
-      studioTextObjects = [];
-      activeTextId = null;
-      studioRedactObjects = [];
-      activeRedactId = null;
-      clearTextOverlayDOM();
-      clearRedactOverlayDOM();
-      updatePanTransform();
-      dismissFloatingPill();
-      pushHistorySnapshot();
-      fitStudioImageToViewport();
+      if (!studioCtx || !studioCanvas) return;
+      
+      const targetSource = pristineBaseDataUrl || (studioImgObj ? studioImgObj.src : null);
+      if (!targetSource) return;
+
+      const resetImg = new Image();
+      resetImg.crossOrigin = "anonymous";
+      resetImg.onload = () => {
+        studioCanvas.width = resetImg.naturalWidth || resetImg.width;
+        studioCanvas.height = resetImg.naturalHeight || resetImg.height;
+        studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+        studioCtx.drawImage(resetImg, 0, 0);
+        
+        currentRotationDeg = 0;
+        isFlippedH = false;
+        isFlippedV = false;
+        panX = 0;
+        panY = 0;
+        frameBaseCanvas = null;
+        studioTextObjects = [];
+        activeTextId = null;
+        studioRedactObjects = [];
+        activeRedactId = null;
+        adjustBrightness = 100;
+        adjustContrast = 100;
+        adjustSaturation = 100;
+        studioCanvas.style.filter = "none";
+        
+        clearTextOverlayDOM();
+        clearRedactOverlayDOM();
+        updatePanTransform();
+        dismissFloatingPill();
+        
+        isStudioModified = false;
+        const badge = document.getElementById("studioUnsavedBadge");
+        if (badge) badge.classList.add("hidden");
+
+        pushHistorySnapshot(false);
+        fitStudioImageToViewport();
+      };
+      resetImg.src = targetSource;
     }
 
     function fitStudioImageToViewport() {
@@ -3291,18 +3311,22 @@
     async function saveStudioFileChanges() {
       if (!activeStudioFile) return;
 
+      const saveAsCopy = confirm(
+        "Would you like to save this as a NEW COPY to protect your clean original screenshot in the vault?\n\n" +
+        "• Click [OK] = Save as New Copy (Original file stays clean & untouched)\n" +
+        "• Click [Cancel] = Overwrite this vault file directly"
+      );
+
       const ext = activeStudioFile.filename.split('.').pop().toLowerCase();
       let payloadBlob = null;
 
       if (IMAGE_EXTS.includes(ext) && studioCanvas) {
-        // 1. Generate flattened export copy for Cloudflare R2 file storage
         const exportCanvas = createFlattenedExportCanvas();
         const mime = document.getElementById("exportFormatSelect").value || "image/png";
         const dataUrl = exportCanvas.toDataURL(mime, 0.95);
         const res = await fetch(dataUrl);
         payloadBlob = await res.blob();
 
-        // 2. Persist pristine master image and live objects into IndexedDB so they can be modified/deleted later
         await setSavedStudioProject(activeStudioFile.id, {
           pristineDataUrl: pristineBaseDataUrl || studioCanvas.toDataURL("image/png"),
           redactObjects: studioRedactObjects,
@@ -3318,15 +3342,23 @@
 
       if (!payloadBlob) return;
 
+      let targetUrl = `/api/drive/save-file/${activeStudioFile.id}?user_id=${currentUserId}`;
+      if (saveAsCopy) {
+        const nameParts = activeStudioFile.filename.split('.');
+        const fileExt = nameParts.pop();
+        const copyFilename = `${nameParts.join('.')}_edited.${fileExt}`;
+        targetUrl = `/api/drive/upload?filename=${encodeURIComponent(copyFilename)}&user_id=${currentUserId}`;
+      }
+
       try {
-        const saveRes = await fetch(`/api/drive/save-file/${activeStudioFile.id}?user_id=${currentUserId}`, {
+        const saveRes = await fetch(targetUrl, {
           method: "POST",
           headers: { "Content-Type": payloadBlob.type },
           body: payloadBlob
         });
         if (!saveRes.ok) throw new Error("Save failed");
 
-        alert("✓ Changes saved to vault! You can still click and delete blur/redact boxes or text anytime.");
+        alert(saveAsCopy ? "✓ Saved as a NEW COPY! Your clean original file in the vault is 100% safe." : "✓ Changes saved to vault file!");
         isStudioModified = false;
         document.getElementById("studioUnsavedBadge").classList.add("hidden");
         loadDriveData();
