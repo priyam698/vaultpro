@@ -23,10 +23,7 @@
 
     .site-mountain-backdrop {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0; width: 100vw; height: 100vh;
       background-color: #05070d;
       background-image: 
         radial-gradient(ellipse at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
@@ -141,24 +138,30 @@
       position: relative;
     }
 
-    /* Interactive Text Element Styles */
+    /* Tight-wrapping Canva-Style Interactive Text Element */
     .studio-text-box {
       position: absolute;
       cursor: move;
       user-select: none;
-      padding: 4px 8px;
-      border-radius: 6px;
-      white-space: pre;
-      line-height: 1.25;
+      padding: 2px 6px !important;
+      border-radius: 4px;
+      white-space: nowrap !important;
+      line-height: 1.15 !important;
       font-weight: 700;
       font-family: 'Plus Jakarta Sans', sans-serif;
       transition: outline 0.15s ease;
       z-index: 28;
       pointer-events: auto !important;
-      box-sizing: border-box;
+      box-sizing: border-box !important;
+      display: inline-block !important;
+      width: max-content !important;
+      max-width: max-content !important;
+      height: auto !important;
+      min-width: unset !important;
+      min-height: unset !important;
     }
     .studio-text-box:hover {
-      outline: 1.5px dashed rgba(56, 189, 248, 0.6);
+      outline: 1.5px dashed rgba(56, 189, 248, 0.7);
     }
     .studio-text-active {
       outline: 2px solid #38bdf8 !important;
@@ -167,12 +170,12 @@
     }
     .studio-text-locked {
       cursor: default !important;
-      outline: 1.5px solid rgba(234, 179, 8, 0.6) !important;
+      outline: 1.5px solid rgba(234, 179, 8, 0.7) !important;
     }
     .text-resize-handle {
       position: absolute;
-      width: 11px;
-      height: 11px;
+      width: 10px;
+      height: 10px;
       background: #38bdf8;
       border: 2px solid #0f172a;
       border-radius: 50%;
@@ -225,6 +228,9 @@
       cursor: nwse-resize;
     }
 
+    /* ============================================================== */
+    /* COMPREHENSIVE LIGHT / DAY THEME HIGH-CONTRAST OVERRIDES        */
+    /* ============================================================== */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -233,22 +239,20 @@
     body.light-theme .site-mountain-backdrop {
       background-color: #f0f7ff;
       background-image: 
-        radial-gradient(ellipse 70% 60% at 10% 12%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
-        radial-gradient(ellipse 65% 55% at 90% 18%, rgba(99, 102, 241, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 60% at 10% 12%, rgba(56, 189, 248, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 55% at 90% 18%, rgba(99, 102, 241, 0.14) 0%, transparent 55%),
         linear-gradient(180deg, #f8fbff 0%, #e6f2fb 100%);
     }
 
     body.light-theme header {
-      background: rgba(255, 255, 255, 0.94) !important;
-      border-bottom: 1px solid #bfdbfe !important;
-      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-bottom: 1px solid #cbd5e1 !important;
       box-shadow: 0 4px 20px -5px rgba(2, 132, 199, 0.08) !important;
     }
 
     body.light-theme .brand-logo-box {
       background: #ffffff !important;
-      border: 1px solid #bfdbfe !important;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
+      border: 1px solid #cbd5e1 !important;
     }
 
     body.light-theme header a,
@@ -258,9 +262,226 @@
 
     body.light-theme .obsidian-card {
       background: #ffffff !important;
-      border: 1px solid #bae6fd !important;
-      box-shadow: 0 25px 60px -15px rgba(2, 132, 199, 0.12), 0 0 0 1px rgba(186, 230, 253, 0.5) !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(203, 213, 225, 0.4) !important;
       color: #0f172a !important;
+    }
+
+    /* Fix invisible headings, paragraphs, and titles */
+    body.light-theme .text-white,
+    body.light-theme h1,
+    body.light-theme h2,
+    body.light-theme h3,
+    body.light-theme strong {
+      color: #0f172a !important;
+    }
+
+    body.light-theme .text-slate-400,
+    body.light-theme .text-slate-300,
+    body.light-theme .text-slate-200 {
+      color: #334155 !important;
+    }
+
+    body.light-theme .text-slate-500 {
+      color: #64748b !important;
+    }
+
+    body.light-theme .border-white\/10,
+    body.light-theme .border-white\/15,
+    body.light-theme .border-white\/5 {
+      border-color: #e2e8f0 !important;
+    }
+
+    body.light-theme .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+      border-color: #f1f5f9 !important;
+    }
+
+    /* Badges & Pills in Light Mode */
+    body.light-theme .badge-drive {
+      background: #e0e7ff !important;
+      color: #4338ca !important;
+      border-color: #c7d2fe !important;
+    }
+
+    body.light-theme .badge-pro {
+      background: #fef3c7 !important;
+      color: #b45309 !important;
+      border-color: #fde68a !important;
+    }
+
+    body.light-theme #tierPill {
+      background: #e0e7ff !important;
+      color: #4338ca !important;
+      border-color: #c7d2fe !important;
+    }
+
+    /* Header Action Pills in Light Mode */
+    body.light-theme .btn-plans {
+      background: #e0e7ff !important;
+      color: #4338ca !important;
+      border-color: #c7d2fe !important;
+    }
+    body.light-theme .btn-plans:hover {
+      border-color: #818cf8 !important;
+    }
+
+    body.light-theme .btn-branding {
+      background: #f3e8ff !important;
+      color: #7e22ce !important;
+      border-color: #e9d5ff !important;
+    }
+    body.light-theme .btn-branding:hover {
+      border-color: #c084fc !important;
+    }
+
+    body.light-theme .btn-pipeline {
+      background: #e0f2fe !important;
+      color: #0369a1 !important;
+      border-color: #bae6fd !important;
+    }
+    body.light-theme .btn-pipeline:hover {
+      border-color: #38bdf8 !important;
+    }
+
+    body.light-theme .btn-signout {
+      background: #ffe4e6 !important;
+      color: #be123c !important;
+      border-color: #fecdd3 !important;
+    }
+    body.light-theme .btn-signout:hover {
+      background: #fecdd3 !important;
+    }
+
+    body.light-theme #themeToggleBtn {
+      background: #fef3c7 !important;
+      border-color: #fde68a !important;
+      color: #b45309 !important;
+    }
+
+    /* Vault Capacity Card & Progress Track */
+    body.light-theme .bg-black\/60 {
+      background: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    /* Escrow & Bank Payouts Card */
+    body.light-theme .md\:col-span-8.obsidian-card {
+      background: #f8fafc !important;
+      border-color: #86efac !important;
+    }
+    body.light-theme .text-emerald-400 {
+      color: #059669 !important;
+    }
+    body.light-theme .text-emerald-300 {
+      color: #047857 !important;
+    }
+    body.light-theme .bg-emerald-500\/10 {
+      background: #dcfce7 !important;
+      border-color: #bbf7d0 !important;
+    }
+
+    /* Drop Zone in Light Mode */
+    body.light-theme #dropZoneContainer {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+    body.light-theme #dropZoneContainer:hover {
+      background: #f1f5f9 !important;
+      border-color: #6366f1 !important;
+    }
+    body.light-theme #dropZoneContainer .bg-indigo-500\/10 {
+      background: #e0e7ff !important;
+      border-color: #c7d2fe !important;
+      color: #4338ca !important;
+    }
+    body.light-theme #dropZoneContainer .bg-indigo-600\/20 {
+      background: #4f46e5 !important;
+      color: #ffffff !important;
+      border-color: #4f46e5 !important;
+    }
+
+    /* Search Input */
+    body.light-theme #searchInput {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.light-theme #searchInput::placeholder {
+      color: #94a3b8 !important;
+    }
+
+    /* Vault Table in Light Mode */
+    body.light-theme table thead tr {
+      border-bottom: 1px solid #cbd5e1 !important;
+    }
+    body.light-theme table thead th {
+      color: #475569 !important;
+    }
+    body.light-theme #filesTableBody tr:hover {
+      background: #f8fafc !important;
+    }
+    body.light-theme #filesTableBody td {
+      color: #0f172a !important;
+    }
+    body.light-theme #filesTableBody td .opacity-80,
+    body.light-theme #filesTableBody td .opacity-60 {
+      color: #475569 !important;
+      opacity: 1 !important;
+    }
+
+    /* Table Action Buttons in Light Mode */
+    body.light-theme #filesTableBody button.bg-white\/10 {
+      background: #f1f5f9 !important;
+      color: #1e293b !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    body.light-theme #filesTableBody button.bg-white\/10:hover {
+      background: #e2e8f0 !important;
+    }
+
+    body.light-theme #filesTableBody button.bg-rose-500\/10 {
+      background: #ffe4e6 !important;
+      color: #be123c !important;
+      border: 1px solid #fecdd3 !important;
+    }
+    body.light-theme #filesTableBody button.bg-rose-500\/10:hover {
+      background: #fecdd3 !important;
+    }
+
+    /* Modals in Light Mode */
+    body.light-theme #plansModal .obsidian-card,
+    body.light-theme #brandingModal .obsidian-card,
+    body.light-theme #renameModal .obsidian-card,
+    body.light-theme #saveChangesModal .obsidian-card {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.light-theme input[type="text"],
+    body.light-theme input[type="url"],
+    body.light-theme input[type="number"] {
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .plans-active-box {
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    body.light-theme .plans-badge-active {
+      background: #dcfce7 !important;
+      color: #15803d !important;
+    }
+    body.light-theme .plans-badge-inactive {
+      background: #fee2e2 !important;
+      color: #b91c1c !important;
+    }
+
+    /* Footer in Light Mode */
+    body.light-theme footer {
+      background: rgba(255, 255, 255, 0.8) !important;
+      border-top: 1px solid #cbd5e1 !important;
+      color: #475569 !important;
     }
   </style>
 </head>
@@ -305,10 +526,11 @@
       <div id="photoEditorHeaderTools" class="px-4 py-2 border-b border-white/10 bg-[#070b14] flex items-center justify-between overflow-x-auto custom-scroll shrink-0 gap-2 text-[11px] font-bold">
         <div class="flex items-center gap-1 shrink-0">
           <button onclick="selectStudioCategory('resize')" id="tabBtn-resize" class="tool-tab-btn"><span class="text-sm">📏</span><span>RESIZE</span></button>
-          <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn"><span class="text-sm">✂️</span><span>CROP</span></button>
+          <button onclick="selectStudioCategory('crop')" id="tabBtn-crop" class="tool-tab-btn"><span class="text-sm">✂</span><span>CROP</span></button>
           <button onclick="selectStudioCategory('transform')" id="tabBtn-transform" class="tool-tab-btn"><span class="text-sm">🔄</span><span>TRANSFORM</span></button>
           <button onclick="selectStudioCategory('hand')" id="tabBtn-hand" class="tool-tab-btn"><span class="text-sm">🖐️</span><span>HAND</span></button>
           <button onclick="selectStudioCategory('draw')" id="tabBtn-draw" class="tool-tab-btn tool-tab-active"><span class="text-sm">✏️</span><span>DRAW</span></button>
+          <button onclick="selectStudioCategory('eraser')" id="tabBtn-eraser" class="tool-tab-btn"><span class="text-sm">🧹</span><span>ERASER</span></button>
           <button onclick="selectStudioCategory('lines')" id="tabBtn-lines" class="tool-tab-btn"><span class="text-sm">📏</span><span>LINES</span></button>
           <button onclick="selectStudioCategory('highlighter')" id="tabBtn-highlighter" class="tool-tab-btn"><span class="text-sm">🖍</span><span>HIGHLIGHT</span></button>
           <button onclick="selectStudioCategory('redact')" id="tabBtn-redact" class="tool-tab-btn"><span class="text-sm">🔒</span><span>REDACT</span></button>
@@ -357,7 +579,7 @@
                 <!-- DYNAMIC INTERACTIVE REDACTION & BLUR LAYER (PERCENTAGE-LOCKED) -->
                 <div id="redactOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible" style="width:100%; height:100%;"></div>
 
-                <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER (PERCENTAGE-LOCKED) -->
+                <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER (PERCENTAGE-LOCKED & TIGHT-FITTING) -->
                 <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-25 overflow-visible" style="width:100%; height:100%;"></div>
 
                 <!-- FLASHING QUICK-ACTION PILL -->
@@ -451,7 +673,6 @@
                 <span>🪄</span>
                 <span>1-Click Auto Tone Balance</span>
               </button>
-              <!-- 1-CLICK REMOVE AI EFFECTS BUTTON -->
               <button onclick="removeAIEffects()" class="w-full py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer" title="Instantly revert AI 4K scaling and color balancing">
                 <span>✕</span>
                 <span>Remove AI Effects (1-Click Revert)</span>
@@ -729,7 +950,7 @@
         if (icon) icon.innerText = "🌙";
       } else {
         document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️️";
+        if (icon) icon.innerText = "☀️";
       }
     }
 
@@ -832,6 +1053,7 @@
     let studioCanvas = null;
     let studioCtx = null;
     let studioImgObj = null;
+    let cleanBaseCanvas = null;
     let studioZoom = 1.0;
     
     let currentCategory = 'draw';
@@ -1015,7 +1237,6 @@
         clearTextOverlayDOM();
         clearRedactOverlayDOM();
 
-        // Check if user has a persistent non-destructive project saved in IndexedDB
         const savedProject = await getSavedStudioProject(file.id);
 
         const img = new Image();
@@ -1025,6 +1246,11 @@
           studioCanvas.width = img.naturalWidth || img.width;
           studioCanvas.height = img.naturalHeight || img.height;
           studioCtx.drawImage(img, 0, 0, studioCanvas.width, studioCanvas.height);
+
+          cleanBaseCanvas = document.createElement("canvas");
+          cleanBaseCanvas.width = studioCanvas.width;
+          cleanBaseCanvas.height = studioCanvas.height;
+          cleanBaseCanvas.getContext("2d").drawImage(img, 0, 0);
 
           if (savedProject && savedProject.pristineDataUrl) {
             pristineBaseDataUrl = savedProject.pristineDataUrl;
@@ -1253,6 +1479,50 @@
       if (slider) slider.value = size;
       const valText = document.getElementById("sBrushVal");
       if (valText) valText.innerText = size;
+    }
+
+    function setEraserSize(size) {
+      brushSize = Math.max(2, Math.round(size / 2));
+      const slider = document.getElementById("eraserSizeSlider");
+      if (slider) slider.value = size;
+      const valText = document.getElementById("sEraserVal");
+      if (valText) valText.innerText = `${size}px`;
+    }
+
+    // -------------------------------------------------------------
+    // RESTORATIVE ERASER ENGINE
+    // -------------------------------------------------------------
+    function eraseAtPoint(x, y) {
+      if (!studioCanvas || !studioCtx) return;
+      const radius = Math.max(6, brushSize * 2);
+
+      studioCtx.save();
+      studioCtx.beginPath();
+      studioCtx.arc(x, y, radius, 0, Math.PI * 2);
+      studioCtx.clip();
+
+      if (cleanBaseCanvas) {
+        studioCtx.drawImage(cleanBaseCanvas, 0, 0, studioCanvas.width, studioCanvas.height);
+      } else if (studioImgObj && studioImgObj.complete) {
+        studioCtx.drawImage(studioImgObj, 0, 0, studioCanvas.width, studioCanvas.height);
+      } else {
+        studioCtx.clearRect(x - radius, y - radius, radius * 2, radius * 2);
+      }
+      studioCtx.restore();
+      markStudioModified();
+    }
+
+    function clearAllCanvasDrawings() {
+      if (!studioCanvas || !studioCtx) return;
+      if (cleanBaseCanvas) {
+        studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+        studioCtx.drawImage(cleanBaseCanvas, 0, 0, studioCanvas.width, studioCanvas.height);
+      } else if (studioImgObj && studioImgObj.complete) {
+        studioCtx.clearRect(0, 0, studioCanvas.width, studioCanvas.height);
+        studioCtx.drawImage(studioImgObj, 0, 0, studioCanvas.width, studioCanvas.height);
+      }
+      pushHistorySnapshot();
+      alert("✓ All drawings and ink erased back to clean original screenshot!");
     }
 
     function pushHistorySnapshot(markMod = true) {
@@ -1537,7 +1807,6 @@
                onclick="selectRedactObject(event, '${obj.id}')">
             ${obj.isLocked ? '<span class="absolute top-1 right-1 text-[10px] bg-black/60 px-1 rounded text-amber-300 pointer-events-none">🔒</span>' : ''}
             ${isActive && !obj.isLocked ? `
-              <!-- Quick corner delete button on the active box -->
               <button type="button" onclick="deleteActiveContent(event)" class="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center justify-center shadow-lg border border-white/50 cursor-pointer z-40 transition" title="Delete this box">✕</button>
               <div class="redact-resize-handle" style="right: -6px; bottom: -6px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
               <div class="redact-resize-handle" style="left: -6px; top: -6px;" onmousedown="startRedactResize(event, '${obj.id}')" title="Drag to stretch or shrink box"></div>
@@ -1551,6 +1820,12 @@
       if (e) e.stopPropagation();
       activeRedactId = id;
       activeTextId = null;
+
+      if (currentCategory === 'eraser') {
+        deleteActiveContent();
+        return;
+      }
+
       renderAllRedactObjects();
       renderAllTextObjects();
 
@@ -1645,7 +1920,7 @@
     }
 
     // -------------------------------------------------------------
-    // INTERACTIVE TEXT OBJECT ENGINE (PERCENTAGE-BASED)
+    // INTERACTIVE TIGHT-FITTING TEXT ENGINE (PERCENTAGE-BASED)
     // -------------------------------------------------------------
     function clearTextOverlayDOM() {
       const container = document.getElementById("textOverlayContainer");
@@ -1658,21 +1933,22 @@
       const scaleX = studioCanvas.width / rect.width;
       const scaleY = studioCanvas.height / rect.height;
 
-      let cx = Math.round(studioCanvas.width / 2) - 120;
-      let cy = Math.round(studioCanvas.height / 2) - 30;
+      let cx = Math.round(studioCanvas.width / 2) - 80;
+      let cy = Math.round(studioCanvas.height / 2) - 20;
 
       if (clientX !== null && clientY !== null) {
         cx = Math.round((clientX - rect.left) * scaleX);
         cy = Math.round((clientY - rect.top) * scaleY);
       }
 
+      const cleanText = String(text || "Edit Text").replace(/[\r\n]+/g, ' ').trim();
       const newId = "txt_" + Date.now();
       const newObj = {
         id: newId,
-        text: text,
+        text: cleanText,
         x: cx,
         y: cy,
-        fontSize: Math.max(26, Math.round(studioCanvas.width / 32)),
+        fontSize: Math.max(20, Math.round(studioCanvas.width / 36)),
         color: brushColor || "#38bdf8",
         isLocked: false
       };
@@ -1710,36 +1986,50 @@
                class="studio-text-box pointer-events-auto ${isActive ? 'studio-text-active' : ''} ${obj.isLocked ? 'studio-text-locked' : ''}" 
                style="left: ${leftPct}%; top: ${topPct}%; font-size: ${fontPx}px; color: ${obj.color};"
                onmousedown="startTextDrag(event, '${obj.id}')"
+               onclick="selectTextObject(event, '${obj.id}')"
                ondblclick="editSelectedTextContent(event, '${obj.id}')">
-            ${escapeHtml(obj.text)}
+            <span>${escapeHtml(obj.text)}</span>
             ${obj.isLocked ? '<span class="text-[10px] ml-1 opacity-70">🔒</span>' : ''}
             ${isActive && !obj.isLocked ? `
-              <div class="text-resize-handle" style="right: -6px; bottom: -6px;" onmousedown="startTextResize(event, '${obj.id}')" title="Drag to stretch or compress font size"></div>
-              <div class="text-resize-handle" style="left: -6px; top: -6px;" onmousedown="startTextResize(event, '${obj.id}')" title="Drag to stretch or compress font size"></div>
+              <button type="button" onclick="deleteActiveContent(event)" class="absolute -top-3 -right-3 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] flex items-center justify-center shadow-lg border border-white/50 cursor-pointer z-40 transition" title="Delete this text">✕</button>
+              <div class="text-resize-handle" style="right: -5px; bottom: -5px;" onmousedown="startTextResize(event, '${obj.id}')" title="Drag to stretch or compress font size"></div>
+              <div class="text-resize-handle" style="left: -5px; top: -5px;" onmousedown="startTextResize(event, '${obj.id}')" title="Drag to stretch or compress font size"></div>
             ` : ''}
           </div>
         `;
       }).join('');
     }
 
-    function startTextDrag(e, id) {
-      e.stopPropagation();
+    function selectTextObject(e, id) {
+      if (e) e.stopPropagation();
       activeTextId = id;
       activeRedactId = null;
-      const textObj = studioTextObjects.find(t => t.id === id);
-      if (!textObj) return;
 
-      syncLockUI(textObj.isLocked);
+      if (currentCategory === 'eraser') {
+        deleteActiveContent();
+        return;
+      }
+
       renderAllTextObjects();
       renderAllRedactObjects();
+
+      const textObj = studioTextObjects.find(t => t.id === id);
+      if (textObj) {
+        syncLockUI(textObj.isLocked);
+      }
 
       const el = document.getElementById(id);
       if (el) {
         const box = el.getBoundingClientRect();
         flashFloatingPill(box.left + (box.width / 2), box.top, 'text');
       }
+    }
 
-      if (textObj.isLocked) return;
+    function startTextDrag(e, id) {
+      e.stopPropagation();
+      selectTextObject(e, id);
+      const textObj = studioTextObjects.find(t => t.id === id);
+      if (!textObj || textObj.isLocked) return;
 
       isDraggingText = true;
       const rect = studioCanvas.getBoundingClientRect();
@@ -1790,10 +2080,10 @@
 
       function onResizeMove(evt) {
         if (!isResizingText) return;
-        const delta = Math.hypot(evt.clientX - startX, evt.clientY - startY);
-        const isShrinking = (evt.clientX < startX && evt.clientY < startY);
-        const sizeDiff = (isShrinking ? -delta : delta) * scaleX * 0.35;
-        textObj.fontSize = Math.max(10, Math.min(260, Math.round(initialSize + sizeDiff)));
+        const deltaX = evt.clientX - startX;
+        const deltaY = evt.clientY - startY;
+        const delta = (Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY) * scaleX * 0.40;
+        textObj.fontSize = Math.max(10, Math.min(260, Math.round(initialSize + delta)));
         renderAllTextObjects();
         evt.preventDefault();
       }
@@ -1826,7 +2116,7 @@
 
       const updated = prompt("Edit text content:", textObj.text);
       if (updated !== null && updated.trim() !== "") {
-        textObj.text = updated;
+        textObj.text = updated.replace(/[\r\n]+/g, ' ').trim();
         renderAllTextObjects();
         pushHistorySnapshot();
       }
@@ -1864,10 +2154,8 @@
       exportCanvas.height = studioCanvas.height;
       const expCtx = exportCanvas.getContext("2d");
 
-      // Draw base image
       expCtx.drawImage(studioCanvas, 0, 0);
 
-      // Burn Redactions
       studioRedactObjects.forEach(r => {
         if (r.type === 'blackout') {
           expCtx.fillStyle = '#000000';
@@ -1905,7 +2193,6 @@
         }
       });
 
-      // Burn Texts
       studioTextObjects.forEach(t => {
         expCtx.save();
         expCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
@@ -1954,7 +2241,6 @@
       if (!viewport) return;
 
       viewport.addEventListener("mousedown", (e) => {
-        // Prevent panning if user clicked on any redact box, text box, handle, or action pill
         if (e.target.closest('.studio-redact-box') || e.target.closest('.studio-text-box') || e.target.closest('#floatingActionPill')) {
           return;
         }
@@ -2018,6 +2304,9 @@
       if (currentCategory === 'hand') {
         viewport.style.cursor = "grab";
         studioCanvas.style.cursor = "grab";
+      } else if (currentCategory === 'eraser') {
+        viewport.style.cursor = "crosshair";
+        studioCanvas.style.cursor = "crosshair";
       } else if (currentCategory === 'crop' || currentCategory === 'redact') {
         viewport.style.cursor = "crosshair";
         studioCanvas.style.cursor = "crosshair";
@@ -2489,11 +2778,11 @@
     }
 
     // -------------------------------------------------------------
-    // CATEGORY SWITCHER & FRAME/TEXT/REDACT SUBDRAWER
+    // CATEGORY SWITCHER & SUBDRAWER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
-      const categories = ['resize', 'crop', 'transform', 'hand', 'draw', 'lines', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
+      const categories = ['resize', 'crop', 'transform', 'hand', 'draw', 'eraser', 'lines', 'highlighter', 'redact', 'text', 'shapes', 'adjust', 'stickers', 'frame', 'corners', 'background'];
       categories.forEach(c => {
         const btn = document.getElementById(`tabBtn-${c}`);
         if (btn) {
@@ -2508,7 +2797,35 @@
       dismissFloatingPill();
       updateCursorForCategory();
 
-      if (cat === 'redact') {
+      if (cat === 'eraser') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-rose-400 font-bold flex items-center gap-1.5">
+                <span>🧹</span>
+                <span>Eraser Tool: Drag over marker/drawings to erase back to original screenshot, or click any box to delete it.</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400 font-bold">Size:</span>
+                <input type="range" id="eraserSizeSlider" min="4" max="100" value="${brushSize * 2}" oninput="setEraserSize(parseInt(this.value))" class="w-24 accent-rose-400 cursor-pointer">
+                <span id="sEraserVal" class="font-mono text-rose-400 w-8 font-bold">${brushSize * 2}px</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="setEraserSize(10)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">Small</button>
+                <button onclick="setEraserSize(25)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">Medium</button>
+                <button onclick="setEraserSize(50)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">Large</button>
+                <button onclick="setEraserSize(100)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-mono font-bold text-slate-300">XL</button>
+              </div>
+              <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
+              <button onclick="clearAllCanvasDrawings()" class="px-3 py-1.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 transition cursor-pointer font-bold">
+                Clear All Drawings
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (cat === 'redact') {
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
             <div class="flex items-center gap-2 flex-wrap">
@@ -2832,6 +3149,12 @@
         startX = (e.clientX - rect.left) * scaleX;
         startY = (e.clientY - rect.top) * scaleY;
 
+        if (currentCategory === 'eraser') {
+          isDrawing = true;
+          eraseAtPoint(startX, startY);
+          return;
+        }
+
         if (currentCategory === 'text') {
           const defaultText = prompt("Enter text to add to canvas:", "Type here...");
           if (defaultText) {
@@ -2889,6 +3212,11 @@
         const scaleY = studioCanvas.height / rect.height;
         const currX = (e.clientX - rect.left) * scaleX;
         const currY = (e.clientY - rect.top) * scaleY;
+
+        if (currentCategory === 'eraser' && isDrawing) {
+          eraseAtPoint(currX, currY);
+          return;
+        }
 
         if ((currentCategory === 'crop' || currentCategory === 'redact') && isDragToolActive) {
           const mouseX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
