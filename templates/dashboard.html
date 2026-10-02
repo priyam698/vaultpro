@@ -140,6 +140,41 @@
       touch-action: none;
     }
 
+    /* Interactive Text Element Styles */
+    .studio-text-box {
+      position: absolute;
+      cursor: move;
+      user-select: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: pre;
+      line-height: 1.25;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: outline 0.15s ease;
+    }
+    .studio-text-box:hover {
+      outline: 1.5px dashed rgba(56, 189, 248, 0.6);
+    }
+    .studio-text-active {
+      outline: 2px solid #38bdf8 !important;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+    }
+    .studio-text-locked {
+      cursor: default !important;
+      outline: 1.5px solid rgba(234, 179, 8, 0.6) !important;
+    }
+    .text-resize-handle {
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      background: #38bdf8;
+      border: 2px solid #0f172a;
+      border-radius: 50%;
+      z-index: 25;
+      cursor: nwse-resize;
+    }
+
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -176,32 +211,6 @@
       border: 1px solid #bae6fd !important;
       box-shadow: 0 25px 60px -15px rgba(2, 132, 199, 0.12), 0 0 0 1px rgba(186, 230, 253, 0.5) !important;
       color: #0f172a !important;
-    }
-
-    body.light-theme .obsidian-card h1,
-    body.light-theme .obsidian-card h2,
-    body.light-theme .obsidian-card h3,
-    body.light-theme .obsidian-card h4,
-    body.light-theme .obsidian-card label {
-      color: #0f172a !important;
-    }
-
-    body.light-theme .obsidian-card p,
-    body.light-theme .obsidian-card span {
-      color: #334155 !important;
-    }
-
-    body.light-theme input,
-    body.light-theme textarea,
-    body.light-theme select {
-      background-color: #ffffff !important;
-      border: 1px solid #93c5fd !important;
-      color: #0f172a !important;
-    }
-
-    body.light-theme #dropZoneContainer {
-      background: #f8fbff !important;
-      border-color: #93c5fd !important;
     }
   </style>
 </head>
@@ -295,13 +304,25 @@
                 <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 transition-all duration-100 ease-out"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
 
-                <!-- FLASHING QUICK-ACTION PILL (LOCK & DELETE) -->
+                <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER -->
+                <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible"></div>
+
+                <!-- FLASHING QUICK-ACTION PILL (EDIT, LOCK, DELETE, COLOR, SIZE) -->
                 <div id="floatingActionPill" class="hidden absolute z-30 flex items-center gap-1.5 p-1 rounded-2xl bg-[#090e1a]/95 border border-indigo-500/60 shadow-2xl backdrop-blur-xl">
-                  <button id="pillLockBtn" onclick="toggleLockActiveContent(event)" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                  <button id="pillEditBtn" onclick="editSelectedTextContent(event)" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
+                    <span>✏️</span> <span>Edit</span>
+                  </button>
+                  <button id="pillLockBtn" onclick="toggleLockActiveContent(event)" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
                     <span id="pillLockIcon">🔒</span>
                     <span id="pillLockLabel">Lock</span>
                   </button>
-                  <button id="pillDeleteBtn" onclick="deleteActiveContent(event)" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+                  <label class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 cursor-pointer" title="Change Color">
+                    <span>🎨</span>
+                    <input type="color" id="pillTextColorPicker" class="w-4 h-4 rounded bg-transparent border-0 cursor-pointer" oninput="changeSelectedTextColor(this.value)">
+                  </label>
+                  <button onclick="stepSelectedTextSize(-4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Smaller font">A-</button>
+                  <button onclick="stepSelectedTextSize(4)" class="px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition cursor-pointer" title="Bigger font">A+</button>
+                  <button id="pillDeleteBtn" onclick="deleteActiveContent(event)" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer">
                     <span>🗑️</span>
                     <span>Delete</span>
                   </button>
@@ -318,7 +339,7 @@
               <video id="studioVideoEl" controls playsinline class="max-h-[70vh] max-w-[95%] w-auto h-auto rounded-2xl shadow-2xl border border-white/10 bg-black"></video>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-2.5 bg-black/80 px-4 py-2 rounded-2xl border border-white/15 text-xs font-bold shrink-0">
-              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️ Trim 5s Clip</button>
+              <button onclick="trimVideoClip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition cursor-pointer">✂️️ Trim 5s Clip</button>
               <button onclick="overlayAudioSong()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition cursor-pointer">🎵 Add Audio / Song Track</button>
               <button onclick="setVideoCanvasBg()" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">🎨 Set Canvas Letterbox BG</button>
             </div>
@@ -588,7 +609,7 @@
       <input type="file" id="driveFileInput" multiple class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️️</div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
         <div>
           <h3 class="text-xs font-black text-white group-hover:text-indigo-300 transition">Click to upload or drag files into your Cloud Drive</h3>
           <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Encrypted, private, and stored permanently until you delete them.</p>
@@ -741,6 +762,17 @@
     let activeFrameWidth = 40;
     let activeFrameColor = '#2b1810';
 
+    // -------------------------------------------------------------
+    // INTERACTIVE TEXT OBJECT STATE & RECT LAYER
+    // -------------------------------------------------------------
+    let studioTextObjects = [];
+    let activeTextId = null;
+    let isDraggingText = false;
+    let isResizingText = false;
+    let textDragStartX = 0, textDragStartY = 0;
+    let textInitialX = 0, textInitialY = 0;
+    let textInitialFontSize = 32;
+
     const CODE_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
@@ -848,8 +880,11 @@
         panX = 0;
         panY = 0;
         frameBaseCanvas = null;
+        studioTextObjects = [];
+        activeTextId = null;
         updatePanTransform();
         dismissFloatingPill();
+        clearTextOverlayDOM();
 
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -960,6 +995,13 @@
       studioCtx.imageSmoothingQuality = "high";
       studioCtx.drawImage(tempCanvas, 0, 0, newW, newH);
 
+      // Rescale any existing text objects to match new resolution
+      studioTextObjects.forEach(t => {
+        t.x = Math.round(t.x * scale);
+        t.y = Math.round(t.y * scale);
+        t.fontSize = Math.round(t.fontSize * scale);
+      });
+
       pushHistorySnapshot();
       fitStudioImageToViewport();
 
@@ -994,7 +1036,8 @@
       canvasHistory.push({
         dataUrl: studioCanvas.toDataURL("image/png"),
         width: studioCanvas.width,
-        height: studioCanvas.height
+        height: studioCanvas.height,
+        textObjects: JSON.parse(JSON.stringify(studioTextObjects))
       });
       if (canvasHistory.length > 30) {
         canvasHistory.shift();
@@ -1035,6 +1078,9 @@
         studioCtx.clearRect(0, 0, state.width, state.height);
         studioCtx.drawImage(img, 0, 0);
         frameBaseCanvas = null;
+        studioTextObjects = state.textObjects ? JSON.parse(JSON.stringify(state.textObjects)) : [];
+        activeTextId = null;
+        renderAllTextObjects();
         applyStudioCanvasDisplaySize();
       };
       img.src = state.dataUrl;
@@ -1055,6 +1101,10 @@
         } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
           e.preventDefault();
           redoStudioCanvas();
+        } else if (e.key === "Delete" || e.key === "Backspace") {
+          if (activeTextId && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA" && !e.target.isContentEditable) {
+            deleteActiveContent();
+          }
         }
       }
     });
@@ -1065,8 +1115,8 @@
       if (!pill || !wrapper) return;
 
       const rect = wrapper.getBoundingClientRect();
-      const posX = Math.max(80, Math.min(rect.width - 80, clientX - rect.left));
-      const posY = Math.max(30, Math.min(rect.height - 20, clientY - rect.top));
+      const posX = Math.max(100, Math.min(rect.width - 100, clientX - rect.left));
+      const posY = Math.max(40, Math.min(rect.height - 20, clientY - rect.top));
 
       pill.style.left = `${posX}px`;
       pill.style.top = `${posY}px`;
@@ -1084,32 +1134,289 @@
 
     function toggleLockActiveContent(e) {
       if (e) e.stopPropagation();
+      if (activeTextId) {
+        const textObj = studioTextObjects.find(t => t.id === activeTextId);
+        if (textObj) {
+          textObj.isLocked = !textObj.isLocked;
+          isContentLocked = textObj.isLocked;
+          renderAllTextObjects();
+          syncLockUI(isContentLocked);
+          pushHistorySnapshot();
+          return;
+        }
+      }
+
       isContentLocked = !isContentLocked;
+      syncLockUI(isContentLocked);
+    }
+
+    function syncLockUI(locked) {
       const icon = document.getElementById("pillLockIcon");
       const label = document.getElementById("pillLockLabel");
       const btn = document.getElementById("pillLockBtn");
+      if (!btn) return;
 
-      if (isContentLocked) {
-        icon.innerText = "🔓";
-        label.innerText = "Unlock";
-        btn.className = "px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer";
-        alert("🔒 Content locked! Modifications are protected.");
+      if (locked) {
+        if (icon) icon.innerText = "🔓";
+        if (label) label.innerText = "Unlock";
+        btn.className = "px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs flex items-center gap-1 transition cursor-pointer";
       } else {
-        icon.innerText = "🔒";
-        label.innerText = "Lock";
-        btn.className = "px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer";
-        alert("🔓 Content unlocked!");
+        if (icon) icon.innerText = "🔒";
+        if (label) label.innerText = "Lock";
+        btn.className = "px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer";
       }
     }
 
     function deleteActiveContent(e) {
       if (e) e.stopPropagation();
+      if (activeTextId) {
+        const textObj = studioTextObjects.find(t => t.id === activeTextId);
+        if (textObj && textObj.isLocked) {
+          alert("⚠️ This text element is locked! Click 'Unlock' first to delete it.");
+          return;
+        }
+        studioTextObjects = studioTextObjects.filter(t => t.id !== activeTextId);
+        activeTextId = null;
+        renderAllTextObjects();
+        dismissFloatingPill();
+        pushHistorySnapshot();
+        return;
+      }
+
       if (isContentLocked) {
-        alert("⚠️ This content is currently locked! Please click 'Unlock' first to delete it.");
+        alert("⚠️ Content is locked! Unlock to delete.");
         return;
       }
       undoStudioCanvas();
       dismissFloatingPill();
+    }
+
+    // -------------------------------------------------------------
+    // INTERACTIVE TEXT OBJECT ENGINE (DRAG, STRETCH, EDIT, COLOR)
+    // -------------------------------------------------------------
+    function clearTextOverlayDOM() {
+      const container = document.getElementById("textOverlayContainer");
+      if (container) container.innerHTML = "";
+    }
+
+    function createStudioText(text = "Edit Text", clientX = null, clientY = null) {
+      if (!studioCanvas) return;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
+      let cx = Math.round(studioCanvas.width / 2) - 120;
+      let cy = Math.round(studioCanvas.height / 2) - 30;
+
+      if (clientX !== null && clientY !== null) {
+        cx = Math.round((clientX - rect.left) * scaleX);
+        cy = Math.round((clientY - rect.top) * scaleY);
+      }
+
+      const newId = "txt_" + Date.now();
+      const newObj = {
+        id: newId,
+        text: text,
+        x: cx,
+        y: cy,
+        fontSize: Math.max(26, Math.round(studioCanvas.width / 32)),
+        color: brushColor || "#38bdf8",
+        isLocked: false
+      };
+
+      studioTextObjects.push(newObj);
+      activeTextId = newId;
+      renderAllTextObjects();
+      pushHistorySnapshot();
+
+      const el = document.getElementById(newId);
+      if (el) {
+        const box = el.getBoundingClientRect();
+        flashFloatingPill(box.left + (box.width / 2), box.top);
+      }
+    }
+
+    function renderAllTextObjects() {
+      const container = document.getElementById("textOverlayContainer");
+      if (!container || !studioCanvas) return;
+
+      const dispW = studioCanvas.clientWidth || studioCanvas.width;
+      const dispH = studioCanvas.clientHeight || studioCanvas.height;
+      const scaleFactor = dispW / studioCanvas.width;
+
+      container.innerHTML = studioTextObjects.map(obj => {
+        const leftPx = Math.round(obj.x * scaleFactor);
+        const topPx = Math.round(obj.y * scaleFactor);
+        const fontPx = Math.max(10, Math.round(obj.fontSize * scaleFactor));
+        const isActive = obj.id === activeTextId;
+
+        return `
+          <div id="${obj.id}" 
+               class="studio-text-box pointer-events-auto ${isActive ? 'studio-text-active' : ''} ${obj.isLocked ? 'studio-text-locked' : ''}" 
+               style="left: ${leftPx}px; top: ${topPx}px; font-size: ${fontPx}px; color: ${obj.color};"
+               onmousedown="startTextDrag(event, '${obj.id}')"
+               ondblclick="editSelectedTextContent(event, '${obj.id}')">
+            ${escapeHtml(obj.text)}
+            ${obj.isLocked ? '<span class="text-[10px] ml-1 opacity-70">🔒</span>' : ''}
+            ${isActive && !obj.isLocked ? `
+              <div class="text-resize-handle" style="right: -6px; bottom: -6px;" onmousedown="startTextResize(event, '${obj.id}')" title="Drag to stretch or compress font size"></div>
+              <div class="text-resize-handle" style="left: -6px; top: -6px;" onmousedown="startTextResize(event, '${obj.id}')" title="Drag to stretch or compress font size"></div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function startTextDrag(e, id) {
+      e.stopPropagation();
+      activeTextId = id;
+      const textObj = studioTextObjects.find(t => t.id === id);
+      if (!textObj) return;
+
+      syncLockUI(textObj.isLocked);
+      renderAllTextObjects();
+
+      const el = document.getElementById(id);
+      if (el) {
+        const box = el.getBoundingClientRect();
+        flashFloatingPill(box.left + (box.width / 2), box.top);
+      }
+
+      if (textObj.isLocked) return;
+
+      isDraggingText = true;
+      textDragStartX = e.clientX;
+      textDragStartY = e.clientY;
+      textInitialX = textObj.x;
+      textInitialY = textObj.y;
+
+      const scale = studioCanvas.width / studioCanvas.clientWidth;
+
+      function onMove(evt) {
+        if (!isDraggingText) return;
+        const dx = (evt.clientX - textDragStartX) * scale;
+        const dy = (evt.clientY - textDragStartY) * scale;
+        textObj.x = Math.round(textInitialX + dx);
+        textObj.y = Math.round(textInitialY + dy);
+        renderAllTextObjects();
+        evt.preventDefault();
+      }
+
+      function onUp(evt) {
+        if (isDraggingText) {
+          isDraggingText = false;
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+          pushHistorySnapshot();
+          if (el) {
+            const box = el.getBoundingClientRect();
+            flashFloatingPill(box.left + (box.width / 2), box.top);
+          }
+        }
+      }
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    }
+
+    function startTextResize(e, id) {
+      e.stopPropagation();
+      e.preventDefault();
+      const textObj = studioTextObjects.find(t => t.id === id);
+      if (!textObj || textObj.isLocked) return;
+
+      isResizingText = true;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const initialSize = textObj.fontSize;
+      const scale = studioCanvas.width / studioCanvas.clientWidth;
+
+      function onResizeMove(evt) {
+        if (!isResizingText) return;
+        const delta = Math.hypot(evt.clientX - startX, evt.clientY - startY);
+        const isShrinking = (evt.clientX < startX && evt.clientY < startY);
+        const sizeDiff = (isShrinking ? -delta : delta) * scale * 0.35;
+        textObj.fontSize = Math.max(10, Math.min(260, Math.round(initialSize + sizeDiff)));
+        renderAllTextObjects();
+        evt.preventDefault();
+      }
+
+      function onResizeUp() {
+        if (isResizingText) {
+          isResizingText = false;
+          window.removeEventListener("mousemove", onResizeMove);
+          window.removeEventListener("mouseup", onResizeUp);
+          pushHistorySnapshot();
+        }
+      }
+
+      window.addEventListener("mousemove", onResizeMove);
+      window.addEventListener("mouseup", onResizeUp);
+    }
+
+    function editSelectedTextContent(e, id = null) {
+      if (e) e.stopPropagation();
+      const targetId = id || activeTextId;
+      if (!targetId) return;
+
+      const textObj = studioTextObjects.find(t => t.id === targetId);
+      if (!textObj) return;
+
+      if (textObj.isLocked) {
+        alert("⚠️ This text is locked. Unlock it before editing text content.");
+        return;
+      }
+
+      const updated = prompt("Edit text content:", textObj.text);
+      if (updated !== null && updated.trim() !== "") {
+        textObj.text = updated;
+        renderAllTextObjects();
+        pushHistorySnapshot();
+      }
+    }
+
+    function changeSelectedTextColor(color) {
+      brushColor = color;
+      if (!activeTextId) return;
+
+      const textObj = studioTextObjects.find(t => t.id === activeTextId);
+      if (!textObj) return;
+
+      textObj.color = color;
+      renderAllTextObjects();
+      markStudioModified();
+    }
+
+    function stepSelectedTextSize(delta) {
+      if (!activeTextId) return;
+      const textObj = studioTextObjects.find(t => t.id === activeTextId);
+      if (!textObj || textObj.isLocked) return;
+
+      textObj.fontSize = Math.max(10, Math.min(260, textObj.fontSize + delta));
+      renderAllTextObjects();
+      pushHistorySnapshot();
+    }
+
+    function burnAllTextToCanvas() {
+      if (!studioCanvas || !studioCtx || !studioTextObjects.length) return;
+      studioTextObjects.forEach(t => {
+        studioCtx.save();
+        studioCtx.font = `bold ${t.fontSize}px 'Plus Jakarta Sans', sans-serif`;
+        studioCtx.fillStyle = t.color;
+        studioCtx.textBaseline = "top";
+        studioCtx.shadowColor = "rgba(0,0,0,0.65)";
+        studioCtx.shadowBlur = 4;
+        studioCtx.fillText(t.text, t.x, t.y);
+        studioCtx.restore();
+      });
+      studioTextObjects = [];
+      activeTextId = null;
+      clearTextOverlayDOM();
+      pushHistorySnapshot();
+    }
+
+    function escapeHtml(string) {
+      return String(string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function updatePanTransform() {
@@ -1189,6 +1496,9 @@
       } else if (currentCategory === 'draw' || currentCategory === 'lines' || currentCategory === 'highlighter' || currentCategory === 'shapes') {
         viewport.style.cursor = "crosshair";
         studioCanvas.style.cursor = "crosshair";
+      } else if (currentCategory === 'text') {
+        viewport.style.cursor = "text";
+        studioCanvas.style.cursor = "text";
       } else {
         viewport.style.cursor = "default";
         studioCanvas.style.cursor = "default";
@@ -1196,7 +1506,7 @@
     }
 
     // -------------------------------------------------------------
-    // HIGH-END EXTRAORDINARY NON-DESTRUCTIVE FRAME ENGINE
+    // FRAME ENGINE
     // -------------------------------------------------------------
     function captureFrameBase() {
       if (!studioCanvas) return;
@@ -1260,7 +1570,6 @@
       let imgY = 0;
 
       if (activeFrameStyle === 'gallery') {
-        // 🏛️ LUXURIOUS ART GALLERY (DYNAMIC MOULDING TINT + IVORY MATTE + CORE BEVEL + PLAQUE)
         const moulding = Math.max(24, Math.round(w * 0.7));
         const matte = Math.max(30, Math.round(w * 0.85));
         const totalPad = moulding + matte;
@@ -1273,7 +1582,6 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // 1. Outer Moulding using activeFrameColor
         const woodGrad = studioCtx.createLinearGradient(0, 0, newW, newH);
         woodGrad.addColorStop(0, col);
         woodGrad.addColorStop(0.5, `rgb(${Math.min(255, Math.round(r * 1.35))}, ${Math.min(255, Math.round(g * 1.35))}, ${Math.min(255, Math.round(b * 1.35))})`);
@@ -1281,7 +1589,6 @@
         studioCtx.fillStyle = woodGrad;
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Miter Corner Accents
         studioCtx.strokeStyle = "rgba(0, 0, 0, 0.45)";
         studioCtx.lineWidth = 1.5;
         studioCtx.beginPath();
@@ -1291,23 +1598,19 @@
         studioCtx.moveTo(newW, newH); studioCtx.lineTo(newW - moulding, newH - moulding);
         studioCtx.stroke();
 
-        // 2. Archival Passe-Partout Museum Matte
         studioCtx.fillStyle = isLight ? "#ffffff" : "#f5f3ec";
         studioCtx.fillRect(moulding, moulding, newW - (moulding * 2), newH - (moulding * 2));
 
-        // 3. Inner 45° Beveled Core Cut with Cast Shadow
         studioCtx.strokeStyle = "rgba(0, 0, 0, 0.35)";
         studioCtx.lineWidth = 2.5;
         studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
 
-        // 4. Draw Artwork with Inner Shadow
         studioCtx.save();
         studioCtx.shadowColor = "rgba(0, 0, 0, 0.35)";
         studioCtx.shadowBlur = 12;
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
         studioCtx.restore();
 
-        // 5. Polished Brass Museum Gallery Plaque
         if (matte > 35) {
           const plaqueW = Math.min(240, Math.round(newW * 0.38));
           const plaqueH = 26;
@@ -1332,7 +1635,6 @@
         }
 
       } else if (activeFrameStyle === 'macos') {
-        // 💻 macOS RETINA STUDIO WINDOW (TINTED CHASSIS + TRAFFIC LIGHTS + URL CAPSULE)
         const headerH = Math.max(44, Math.round(w * 0.9));
         const sidePad = Math.max(16, Math.round(w * 0.35));
         const bottomPad = sidePad;
@@ -1345,15 +1647,12 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Window Chassis Background with custom color tint
         studioCtx.fillStyle = col;
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Header Titlebar
         studioCtx.fillStyle = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(0, 0, 0, 0.35)";
         studioCtx.fillRect(0, 0, newW, headerH);
 
-        // Divider
         studioCtx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)";
         studioCtx.lineWidth = 1;
         studioCtx.beginPath();
@@ -1361,7 +1660,6 @@
         studioCtx.lineTo(newW, headerH);
         studioCtx.stroke();
 
-        // macOS Window Controls
         const dotY = Math.round(headerH / 2);
         const dotRadius = 6.5;
         const dots = [
@@ -1386,7 +1684,6 @@
           studioCtx.fill();
         });
 
-        // Center URL Capsule
         const capsuleW = Math.min(380, Math.round(newW * 0.45));
         const capsuleH = 24;
         const capsuleX = (newW - capsuleW) / 2;
@@ -1406,7 +1703,6 @@
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
       } else if (activeFrameStyle === 'polaroid') {
-        // 📷 POLAROID FRAME (FULL BODY COLOR ADAPTATION + CONTRAST TEXT + WASHI TAPE)
         const padSide = Math.max(24, Math.round(w * 0.65));
         const padTop = padSide;
         const padBottom = Math.max(90, Math.round(padSide * 3.0));
@@ -1419,19 +1715,15 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Custom Colored Polaroid Body
         studioCtx.fillStyle = col;
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Inner Recessed Dark Rim
         studioCtx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.22)" : "rgba(255, 255, 255, 0.25)";
         studioCtx.lineWidth = 1.5;
         studioCtx.strokeRect(imgX - 1, imgY - 1, baseW + 2, baseH + 2);
 
-        // Draw Artwork
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
-        // Washi Tape Strip at Top
         const tapeW = Math.min(180, Math.round(newW * 0.32));
         const tapeH = 26;
         const tapeX = (newW - tapeW) / 2;
@@ -1444,7 +1736,6 @@
         studioCtx.strokeRect(tapeX, tapeY, tapeW, tapeH);
         studioCtx.restore();
 
-        // Contrast-adaptive Handwritten Marker Date
         studioCtx.fillStyle = isLight ? "#0f172a" : "#ffffff";
         studioCtx.font = "italic bold 16px 'Plus Jakarta Sans', sans-serif";
         studioCtx.textAlign = "center";
@@ -1452,7 +1743,6 @@
         studioCtx.fillText(`Zephyr Master • ${todayStr}`, newW / 2, newH - 34);
 
       } else if (activeFrameStyle === 'neon') {
-        // ⚡ CYBER NEON GLOW (CHOSEN COLOR FOR GLOW, TUBE & HUD CORNERS)
         const glowPad = Math.max(40, w);
         newW = baseW + (glowPad * 2);
         newH = baseH + (glowPad * 2);
@@ -1462,11 +1752,9 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Dark Stage Background
         studioCtx.fillStyle = "#04060d";
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Dynamic Color Photonic Bloom
         studioCtx.save();
         studioCtx.shadowColor = col;
         studioCtx.shadowBlur = Math.round(glowPad * 0.9);
@@ -1479,12 +1767,10 @@
         studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
         studioCtx.restore();
 
-        // High-Intensity Core Line
         studioCtx.strokeStyle = col;
         studioCtx.lineWidth = 2;
         studioCtx.strokeRect(imgX - 3, imgY - 3, baseW + 6, baseH + 6);
 
-        // Corner HUD Brackets
         const bracketLen = 22;
         studioCtx.strokeStyle = col;
         studioCtx.lineWidth = 3.5;
@@ -1510,7 +1796,6 @@
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
       } else if (activeFrameStyle === 'film') {
-        // 🎞️ 35mm FILM STRIP (COLORED FILM BORDER + SPROCKET HOLES + EDGE CODES)
         const filmBorderH = Math.max(50, Math.round(w * 1.1));
         const filmBorderW = Math.max(20, Math.round(w * 0.4));
 
@@ -1522,11 +1807,9 @@
         studioCanvas.width = newW;
         studioCanvas.height = newH;
 
-        // Custom Colored Film Border
         studioCtx.fillStyle = col;
         studioCtx.fillRect(0, 0, newW, newH);
 
-        // Sprocket Holes (Inverted for contrast)
         const holeW = 12;
         const holeH = 18;
         const holeSpacing = 32;
@@ -1542,7 +1825,6 @@
           studioCtx.fill();
         }
 
-        // Film Edge Typography
         studioCtx.fillStyle = isLight ? "#b45309" : "#fbbf24";
         studioCtx.font = "bold 9px monospace";
         studioCtx.fillText("▶ 24A", 48, filmBorderH - 10);
@@ -1552,7 +1834,6 @@
         studioCtx.drawImage(frameBaseCanvas, imgX, imgY);
 
       } else {
-        // 🔲 CLEAN STUDIO BORDER (FULL WIDTH MATTE WITH INNER CONTRAST LINE)
         newW = baseW + (w * 2);
         newH = baseH + (w * 2);
         imgX = w;
@@ -1612,7 +1893,75 @@
     }
 
     // -------------------------------------------------------------
-    // CATEGORY SWITCHER & FRAME SUBDRAWER
+    // BACKGROUND ENGINE (STAGE BACKDROP & MATTE BORDERS)
+    // -------------------------------------------------------------
+    function setStageBackground(color, isChecker = false) {
+      const stage = document.getElementById("studioBodyStage");
+      const viewport = document.getElementById("studioCanvasViewport");
+      if (!stage || !viewport) return;
+
+      if (isChecker) {
+        stage.classList.add("artboard-checker");
+        stage.style.backgroundColor = "";
+        viewport.style.backgroundColor = "";
+      } else {
+        stage.classList.remove("artboard-checker");
+        stage.style.backgroundColor = color;
+        viewport.style.backgroundColor = color;
+      }
+    }
+
+    function applyMattePadding(color, padding = 40) {
+      if (!studioCanvas || !studioCtx) return;
+      const oldW = studioCanvas.width;
+      const oldH = studioCanvas.height;
+      const newW = oldW + (padding * 2);
+      const newH = oldH + (padding * 2);
+
+      const temp = document.createElement("canvas");
+      temp.width = oldW;
+      temp.height = oldH;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = newW;
+      studioCanvas.height = newH;
+
+      studioCtx.fillStyle = color;
+      studioCtx.fillRect(0, 0, newW, newH);
+      studioCtx.drawImage(temp, padding, padding);
+
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function applySquareMatte(color) {
+      if (!studioCanvas || !studioCtx) return;
+      const dim = Math.max(studioCanvas.width, studioCanvas.height) + 60;
+      const padX = Math.round((dim - studioCanvas.width) / 2);
+      const padY = Math.round((dim - studioCanvas.height) / 2);
+
+      const temp = document.createElement("canvas");
+      temp.width = studioCanvas.width;
+      temp.height = studioCanvas.height;
+      temp.getContext("2d").drawImage(studioCanvas, 0, 0);
+
+      studioCanvas.width = dim;
+      studioCanvas.height = dim;
+
+      studioCtx.fillStyle = color;
+      studioCtx.fillRect(0, 0, dim, dim);
+      studioCtx.drawImage(temp, padX, padY);
+
+      pushHistorySnapshot();
+      fitStudioImageToViewport();
+    }
+
+    function setCanvasBackground(color) {
+      setStageBackground(color, false);
+    }
+
+    // -------------------------------------------------------------
+    // CATEGORY SWITCHER & FRAME/TEXT SUBDRAWER
     // -------------------------------------------------------------
     function selectStudioCategory(cat) {
       currentCategory = cat;
@@ -1631,7 +1980,37 @@
       dismissFloatingPill();
       updateCursorForCategory();
 
-      if (cat === 'frame') {
+      if (cat === 'text') {
+        drawer.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="createStudioText('Type text here...')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:opacity-95 text-white font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                <span>+</span> <span>Add Text Box</span>
+              </button>
+              <span class="text-slate-400 font-mono text-[11px]">Click or drag on image to place text, or click existing text to edit/lock/delete</span>
+            </div>
+
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400">Color:</span>
+                <input type="color" value="${brushColor}" oninput="changeSelectedTextColor(this.value)" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+              </div>
+
+              <div class="flex items-center gap-1">
+                <span class="text-slate-400 mr-1">Scale:</span>
+                <button onclick="stepSelectedTextSize(-4)" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer">-</button>
+                <button onclick="stepSelectedTextSize(4)" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer">+</button>
+              </div>
+
+              <div class="h-4 w-[1px] bg-white/15 mx-1"></div>
+
+              <button onclick="burnAllTextToCanvas()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 transition cursor-pointer" title="Flatten text into canvas pixels">
+                Flatten All Text
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (cat === 'frame') {
         captureFrameBase();
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap text-xs font-bold w-full justify-between">
@@ -1786,7 +2165,7 @@
         drawer.innerHTML = `
           <div class="flex items-center gap-3 flex-wrap">
             <span class="text-sky-300 font-bold flex items-center gap-1.5">
-              <span>✂️️</span>
+              <span>✂️</span>
               <span>Click & drag across the image to select the crop box</span>
             </span>
             <button onclick="applyInteractiveCrop()" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black shadow-md cursor-pointer transition flex items-center gap-1">
@@ -1861,17 +2240,6 @@
             <button onclick="convertTo4KUltraHD()" class="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 transition">✨ Upscale to 4K</button>
           </div>
         `;
-      } else if (cat === 'text') {
-        drawer.innerHTML = `
-          <div class="flex items-center gap-3 flex-wrap font-bold">
-            <span class="text-slate-400">Color:</span>
-            <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
-            <span class="text-slate-400">Size:</span>
-            <input type="range" min="12" max="90" value="28" id="textFontSizeSlider" class="w-24 accent-sky-400 cursor-pointer">
-            <button onclick="stampWatermark()" class="px-3 py-1 rounded-xl bg-indigo-600 text-white">Stamp Center Watermark</button>
-          </div>
-          <span class="text-slate-400 font-mono text-[11px]">Click anywhere on image to add text</span>
-        `;
       } else if (cat === 'stickers') {
         drawer.innerHTML = `
           <div class="flex items-center gap-1.5 flex-wrap text-base">
@@ -1901,6 +2269,9 @@
       }
     }
 
+    // -------------------------------------------------------------
+    // CANVAS DRAWING & TEXT CLICK ROUTER
+    // -------------------------------------------------------------
     function setupCanvasDrawing() {
       if (!studioCanvas || !studioCtx) return;
       let isDrawing = false;
@@ -1929,20 +2300,11 @@
         startX = (e.clientX - rect.left) * scaleX;
         startY = (e.clientY - rect.top) * scaleY;
 
+        // If in text mode, create a new interactive text element where clicked
         if (currentCategory === 'text') {
-          const txt = prompt("Enter text annotation to add:", "Zephyr Verified");
-          if (txt) {
-            const sizeSlider = document.getElementById("textFontSizeSlider");
-            const sz = sizeSlider ? parseInt(sizeSlider.value) : 28;
-            studioCtx.save();
-            studioCtx.font = `bold ${sz * Math.max(1, studioCanvas.width / 800)}px 'Plus Jakarta Sans', sans-serif`;
-            studioCtx.fillStyle = brushColor;
-            studioCtx.shadowColor = "rgba(0,0,0,0.85)";
-            studioCtx.shadowBlur = 6;
-            studioCtx.fillText(txt, startX, startY);
-            studioCtx.restore();
-            pushHistorySnapshot();
-            flashFloatingPill(e.clientX, e.clientY);
+          const defaultText = prompt("Enter text to add to canvas:", "Type here...");
+          if (defaultText) {
+            createStudioText(defaultText, e.clientX, e.clientY);
           }
           return;
         }
@@ -2107,6 +2469,12 @@
       studioCtx.clearRect(0, 0, sw, sh);
       studioCtx.drawImage(tempCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
 
+      // Reposition active text objects relative to crop offset
+      studioTextObjects.forEach(t => {
+        t.x = Math.max(0, t.x - sx);
+        t.y = Math.max(0, t.y - sy);
+      });
+
       cancelCropMode();
       pushHistorySnapshot();
       fitStudioImageToViewport();
@@ -2205,16 +2573,7 @@
     }
 
     function stampWatermark() {
-      if (!studioCanvas || !studioCtx) return;
-      studioCtx.save();
-      studioCtx.translate(studioCanvas.width / 2, studioCanvas.height / 2);
-      studioCtx.rotate((-30 * Math.PI) / 180);
-      studioCtx.font = `bold ${Math.max(24, studioCanvas.width / 16)}px sans-serif`;
-      studioCtx.fillStyle = "rgba(255, 255, 255, 0.25)";
-      studioCtx.textAlign = "center";
-      studioCtx.fillText("ZEPHYR PROTECTED DELIVERABLE", 0, 0);
-      studioCtx.restore();
-      pushHistorySnapshot();
+      createStudioText("ZEPHYR PROTECTED DELIVERABLE", studioCanvas.width / 4, studioCanvas.height / 2);
     }
 
     function rotateCanvas(deg) {
@@ -2355,6 +2714,9 @@
       panX = 0;
       panY = 0;
       frameBaseCanvas = null;
+      studioTextObjects = [];
+      activeTextId = null;
+      clearTextOverlayDOM();
       updatePanTransform();
       dismissFloatingPill();
       pushHistorySnapshot();
@@ -2400,6 +2762,8 @@
 
       const display = document.getElementById("studioZoomDisplay");
       if (display) display.innerText = `${Math.round(studioZoom * 100)}%`;
+
+      renderAllTextObjects();
     }
 
     window.addEventListener("resize", () => {
@@ -2436,7 +2800,7 @@
     }
 
     function requestSaveFile() {
-      if (!isStudioModified) {
+      if (!isStudioModified && !studioTextObjects.length) {
         alert("No unsaved edits found.");
         return;
       }
@@ -2445,6 +2809,12 @@
 
     async function saveStudioFileChanges() {
       if (!activeStudioFile) return;
+
+      // Burn all active text layers onto the canvas context before saving to R2
+      if (studioTextObjects.length) {
+        burnAllTextToCanvas();
+      }
+
       const ext = activeStudioFile.filename.split('.').pop().toLowerCase();
       let payloadBlob = null;
 
