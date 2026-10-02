@@ -138,6 +138,7 @@
       will-change: transform;
       user-select: none;
       touch-action: none;
+      position: relative;
     }
 
     /* Interactive Text Element Styles */
@@ -154,6 +155,7 @@
       transition: outline 0.15s ease;
       z-index: 28;
       pointer-events: auto !important;
+      box-sizing: border-box;
     }
     .studio-text-box:hover {
       outline: 1.5px dashed rgba(56, 189, 248, 0.6);
@@ -193,11 +195,11 @@
       backdrop-filter: blur(16px) brightness(0.95);
       -webkit-backdrop-filter: blur(16px) brightness(0.95);
       background: rgba(255, 255, 255, 0.16);
-      border: 1.5px dashed rgba(244, 63, 94, 0.55);
+      border: 1.5px dashed rgba(244, 63, 94, 0.65);
     }
     .studio-redact-box.redact-blackout {
       background: #000000;
-      border: 1.5px dashed rgba(244, 63, 94, 0.55);
+      border: 1.5px dashed rgba(244, 63, 94, 0.65);
     }
     .studio-redact-box:hover {
       outline: 2px dashed #f43f5e;
@@ -349,14 +351,14 @@
           <div id="studioImageStage" class="w-full h-full flex items-center justify-center relative overflow-hidden select-none">
             <div id="studioCanvasViewport" class="w-full h-full flex items-center justify-center overflow-hidden p-4 relative select-none transition-colors duration-200">
               <div id="canvasPositionWrapper" class="relative inline-block shadow-2xl rounded-xl">
-                <canvas id="studioImageCanvas" class="canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 transition-all duration-100 ease-out"></canvas>
+                <canvas id="studioImageCanvas" class="canvas-ultra-smooth block rounded-xl shadow-2xl border border-white/15"></canvas>
                 <div id="cropSelectionBox" class="crop-selection-box hidden"></div>
 
-                <!-- DYNAMIC INTERACTIVE REDACTION & BLUR LAYER -->
-                <div id="redactOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible"></div>
+                <!-- DYNAMIC INTERACTIVE REDACTION & BLUR LAYER (PERCENTAGE-LOCKED) -->
+                <div id="redactOverlayContainer" class="absolute inset-0 pointer-events-none z-20 overflow-visible" style="width:100%; height:100%;"></div>
 
-                <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER -->
-                <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-25 overflow-visible"></div>
+                <!-- DYNAMIC DRAGGABLE INTERACTIVE TEXT LAYER (PERCENTAGE-LOCKED) -->
+                <div id="textOverlayContainer" class="absolute inset-0 pointer-events-none z-25 overflow-visible" style="width:100%; height:100%;"></div>
 
                 <!-- FLASHING QUICK-ACTION PILL -->
                 <div id="floatingActionPill" class="hidden absolute z-30 flex items-center gap-1.5 p-1 rounded-2xl bg-[#090e1a]/95 border border-indigo-500/60 shadow-2xl backdrop-blur-xl">
@@ -727,7 +729,7 @@
         if (icon) icon.innerText = "🌙";
       } else {
         document.body.classList.remove("light-theme");
-        if (icon) icon.innerText = "☀️";
+        if (icon) icon.innerText = "☀️️";
       }
     }
 
@@ -1095,18 +1097,18 @@
       });
 
       if (mode === 'crisp') {
-        canvas.className = "canvas-crisp-pixels object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
+        canvas.className = "canvas-crisp-pixels block rounded-xl shadow-2xl border border-white/15 cursor-crosshair";
         if (studioCtx) studioCtx.imageSmoothingEnabled = false;
         if (btnCrisp) btnCrisp.className = "py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/60 text-sky-300 text-[10px] font-black shadow";
       } else if (mode === 'smooth') {
-        canvas.className = "object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
+        canvas.className = "block rounded-xl shadow-2xl border border-white/15 cursor-crosshair";
         if (studioCtx) {
           studioCtx.imageSmoothingEnabled = true;
           studioCtx.imageSmoothingQuality = "medium";
         }
         if (btnSmooth) btnSmooth.className = "py-1.5 rounded-lg bg-indigo-500/20 border border-indigo-400/60 text-indigo-300 text-[10px] font-black shadow";
       } else if (mode === 'ultra') {
-        canvas.className = "canvas-ultra-smooth object-contain rounded-xl shadow-2xl border border-white/15 cursor-crosshair transition-all duration-100 ease-out";
+        canvas.className = "canvas-ultra-smooth block rounded-xl shadow-2xl border border-white/15 cursor-crosshair";
         if (studioCtx) {
           studioCtx.imageSmoothingEnabled = true;
           studioCtx.imageSmoothingQuality = "high";
@@ -1465,7 +1467,7 @@
     }
 
     // -------------------------------------------------------------
-    // NON-DESTRUCTIVE BLUR & REDACT OBJECT ENGINE
+    // NON-DESTRUCTIVE BLUR & REDACT OBJECT ENGINE (PERCENTAGE-BASED)
     // -------------------------------------------------------------
     function clearRedactOverlayDOM() {
       const container = document.getElementById("redactOverlayContainer");
@@ -1517,20 +1519,20 @@
       const container = document.getElementById("redactOverlayContainer");
       if (!container || !studioCanvas) return;
 
-      const dispW = studioCanvas.clientWidth || studioCanvas.width;
-      const scaleFactor = dispW / studioCanvas.width;
+      const cw = studioCanvas.width;
+      const ch = studioCanvas.height;
 
       container.innerHTML = studioRedactObjects.map(obj => {
-        const leftPx = Math.round(obj.x * scaleFactor);
-        const topPx = Math.round(obj.y * scaleFactor);
-        const widthPx = Math.round(obj.w * scaleFactor);
-        const heightPx = Math.round(obj.h * scaleFactor);
+        const leftPct = (obj.x / cw) * 100;
+        const topPct = (obj.y / ch) * 100;
+        const widthPct = (obj.w / cw) * 100;
+        const heightPct = (obj.h / ch) * 100;
         const isActive = obj.id === activeRedactId;
 
         return `
           <div id="${obj.id}" 
                class="studio-redact-box ${obj.type === 'blackout' ? 'redact-blackout' : 'redact-blur'} ${isActive ? 'studio-redact-active' : ''} ${obj.isLocked ? 'studio-redact-locked' : ''}" 
-               style="left: ${leftPx}px; top: ${topPx}px; width: ${widthPx}px; height: ${heightPx}px;"
+               style="left: ${leftPct}%; top: ${topPct}%; width: ${widthPct}%; height: ${heightPct}%;"
                onmousedown="startRedactDrag(event, '${obj.id}')"
                onclick="selectRedactObject(event, '${obj.id}')">
             ${obj.isLocked ? '<span class="absolute top-1 right-1 text-[10px] bg-black/60 px-1 rounded text-amber-300 pointer-events-none">🔒</span>' : ''}
@@ -1571,17 +1573,19 @@
       if (!redactObj || redactObj.isLocked) return;
 
       isDraggingRedact = true;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
       redactDragStartX = e.clientX;
       redactDragStartY = e.clientY;
       redactInitialX = redactObj.x;
       redactInitialY = redactObj.y;
 
-      const scale = studioCanvas.width / studioCanvas.clientWidth;
-
       function onMove(evt) {
         if (!isDraggingRedact) return;
-        const dx = (evt.clientX - redactDragStartX) * scale;
-        const dy = (evt.clientY - redactDragStartY) * scale;
+        const dx = (evt.clientX - redactDragStartX) * scaleX;
+        const dy = (evt.clientY - redactDragStartY) * scaleY;
         redactObj.x = Math.round(redactInitialX + dx);
         redactObj.y = Math.round(redactInitialY + dy);
         renderAllRedactObjects();
@@ -1608,16 +1612,19 @@
       if (!redactObj || redactObj.isLocked) return;
 
       isResizingRedact = true;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
       const startX = e.clientX;
       const startY = e.clientY;
       redactInitialW = redactObj.w;
       redactInitialH = redactObj.h;
-      const scale = studioCanvas.width / studioCanvas.clientWidth;
 
       function onResizeMove(evt) {
         if (!isResizingRedact) return;
-        const dw = (evt.clientX - startX) * scale;
-        const dh = (evt.clientY - startY) * scale;
+        const dw = (evt.clientX - startX) * scaleX;
+        const dh = (evt.clientY - startY) * scaleY;
         redactObj.w = Math.max(16, Math.round(redactInitialW + dw));
         redactObj.h = Math.max(16, Math.round(redactInitialH + dh));
         renderAllRedactObjects();
@@ -1638,7 +1645,7 @@
     }
 
     // -------------------------------------------------------------
-    // INTERACTIVE TEXT OBJECT ENGINE
+    // INTERACTIVE TEXT OBJECT ENGINE (PERCENTAGE-BASED)
     // -------------------------------------------------------------
     function clearTextOverlayDOM() {
       const container = document.getElementById("textOverlayContainer");
@@ -1687,19 +1694,21 @@
       const container = document.getElementById("textOverlayContainer");
       if (!container || !studioCanvas) return;
 
-      const dispW = studioCanvas.clientWidth || studioCanvas.width;
-      const scaleFactor = dispW / studioCanvas.width;
+      const cw = studioCanvas.width;
+      const ch = studioCanvas.height;
+      const dispW = studioCanvas.clientWidth || (studioCanvas.width * studioZoom);
+      const scaleFactor = dispW / cw;
 
       container.innerHTML = studioTextObjects.map(obj => {
-        const leftPx = Math.round(obj.x * scaleFactor);
-        const topPx = Math.round(obj.y * scaleFactor);
+        const leftPct = (obj.x / cw) * 100;
+        const topPct = (obj.y / ch) * 100;
         const fontPx = Math.max(10, Math.round(obj.fontSize * scaleFactor));
         const isActive = obj.id === activeTextId;
 
         return `
           <div id="${obj.id}" 
                class="studio-text-box pointer-events-auto ${isActive ? 'studio-text-active' : ''} ${obj.isLocked ? 'studio-text-locked' : ''}" 
-               style="left: ${leftPx}px; top: ${topPx}px; font-size: ${fontPx}px; color: ${obj.color};"
+               style="left: ${leftPct}%; top: ${topPct}%; font-size: ${fontPx}px; color: ${obj.color};"
                onmousedown="startTextDrag(event, '${obj.id}')"
                ondblclick="editSelectedTextContent(event, '${obj.id}')">
             ${escapeHtml(obj.text)}
@@ -1733,17 +1742,19 @@
       if (textObj.isLocked) return;
 
       isDraggingText = true;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+      const scaleY = studioCanvas.height / rect.height;
+
       textDragStartX = e.clientX;
       textDragStartY = e.clientY;
       textInitialX = textObj.x;
       textInitialY = textObj.y;
 
-      const scale = studioCanvas.width / studioCanvas.clientWidth;
-
       function onMove(evt) {
         if (!isDraggingText) return;
-        const dx = (evt.clientX - textDragStartX) * scale;
-        const dy = (evt.clientY - textDragStartY) * scale;
+        const dx = (evt.clientX - textDragStartX) * scaleX;
+        const dy = (evt.clientY - textDragStartY) * scaleY;
         textObj.x = Math.round(textInitialX + dx);
         textObj.y = Math.round(textInitialY + dy);
         renderAllTextObjects();
@@ -1770,16 +1781,18 @@
       if (!textObj || textObj.isLocked) return;
 
       isResizingText = true;
+      const rect = studioCanvas.getBoundingClientRect();
+      const scaleX = studioCanvas.width / rect.width;
+
       const startX = e.clientX;
       const startY = e.clientY;
       const initialSize = textObj.fontSize;
-      const scale = studioCanvas.width / studioCanvas.clientWidth;
 
       function onResizeMove(evt) {
         if (!isResizingText) return;
         const delta = Math.hypot(evt.clientX - startX, evt.clientY - startY);
         const isShrinking = (evt.clientX < startX && evt.clientY < startY);
-        const sizeDiff = (isShrinking ? -delta : delta) * scale * 0.35;
+        const sizeDiff = (isShrinking ? -delta : delta) * scaleX * 0.35;
         textObj.fontSize = Math.max(10, Math.min(260, Math.round(initialSize + sizeDiff)));
         renderAllTextObjects();
         evt.preventDefault();
@@ -1807,7 +1820,7 @@
       if (!textObj) return;
 
       if (textObj.isLocked) {
-        alert("⚠️️ This text is locked. Unlock it before editing text content.");
+        alert("⚠️ This text is locked. Unlock it before editing text content.");
         return;
       }
 
@@ -2521,7 +2534,7 @@
             <div class="flex items-center gap-2.5 flex-wrap">
               <div class="flex items-center gap-1.5">
                 <span class="text-slate-400">Color:</span>
-                <input type="color" value="${brushColor}" oninput="changeSelectedTextColor(this.value)" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
+                <input type="color" value="${brushColor}" onchange="brushColor=this.value" class="w-7 h-7 rounded-lg border border-white/20 bg-transparent cursor-pointer">
               </div>
 
               <div class="flex items-center gap-1">
@@ -3223,6 +3236,33 @@
       resetImg.src = targetSource;
     }
 
+    // -------------------------------------------------------------
+    // CANVAS DISPLAY RESIZING & SYNCHRONOUS OVERLAY MOUNTING
+    // -------------------------------------------------------------
+    function applyStudioCanvasDisplaySize() {
+      if (!studioCanvas) return;
+      const nw = studioCanvas.width;
+      const nh = studioCanvas.height;
+
+      const wPx = Math.round(nw * studioZoom);
+      const hPx = Math.round(nh * studioZoom);
+
+      studioCanvas.style.width = wPx + "px";
+      studioCanvas.style.height = hPx + "px";
+
+      const wrapper = document.getElementById("canvasPositionWrapper");
+      if (wrapper) {
+        wrapper.style.width = wPx + "px";
+        wrapper.style.height = hPx + "px";
+      }
+
+      const display = document.getElementById("studioZoomDisplay");
+      if (display) display.innerText = `${Math.round(studioZoom * 100)}%`;
+
+      renderAllTextObjects();
+      renderAllRedactObjects();
+    }
+
     function fitStudioImageToViewport() {
       if (!studioCanvas) return;
       const viewport = document.getElementById("studioCanvasViewport");
@@ -3250,21 +3290,6 @@
     function zoomStudioCanvas(delta) {
       studioZoom = Math.max(0.15, Math.min(6.0, Math.round((studioZoom + delta) * 10) / 10));
       applyStudioCanvasDisplaySize();
-    }
-
-    function applyStudioCanvasDisplaySize() {
-      if (!studioCanvas) return;
-      const nw = studioCanvas.width;
-      const nh = studioCanvas.height;
-
-      studioCanvas.style.width = Math.round(nw * studioZoom) + "px";
-      studioCanvas.style.height = Math.round(nh * studioZoom) + "px";
-
-      const display = document.getElementById("studioZoomDisplay");
-      if (display) display.innerText = `${Math.round(studioZoom * 100)}%`;
-
-      renderAllTextObjects();
-      renderAllRedactObjects();
     }
 
     window.addEventListener("resize", () => {
