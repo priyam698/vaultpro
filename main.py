@@ -1060,11 +1060,7 @@ async def support_chat(req: SupportChatRequest):
     if not user_msg:
         raise HTTPException(status_code=400, detail="Empty query.")
 
-    @app.post("/api/support/chat")
-async def support_chat(req: SupportChatRequest):
-    user_msg = req.message.strip()
-    if not user_msg:
-        raise HTTPException(status_code=400, detail="Empty query.")
+   
 
     q = user_msg.lower()
 
