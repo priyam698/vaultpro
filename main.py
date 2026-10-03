@@ -1060,16 +1060,148 @@ async def support_chat(req: SupportChatRequest):
     if not user_msg:
         raise HTTPException(status_code=400, detail="Empty query.")
 
+    @app.post("/api/support/chat")
+async def support_chat(req: SupportChatRequest):
+    user_msg = req.message.strip()
+    if not user_msg:
+        raise HTTPException(status_code=400, detail="Empty query.")
+
     q = user_msg.lower()
 
-    payout_keywords = ["how much", "payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "receive", "take-home"]
-    if any(k in q for k in payout_keywords) and any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money", "get"]):
+    # 1. Human Support / Live Agent Escalation
+    if any(k in q for k in ["human", "agent", "person", "representative", "contact", "support email", "talk to someone", "real person", "customer service", "helpdesk", "reach out"]):
         return {
-            "reply": "For every payment received through Pay-to-Unlock Escrow, you receive an **88% user payout**, and Zephyr retains a **12% platform fee split**. Payouts are transferred directly to your bank account via Stripe Connect or Indian Bank/UPI transfer."
+            "reply": (
+                "**Contact Zephyr Human Support:**\n\n"
+                "• **Direct Email:** Reach our core engineering & billing desk at **`support@zephyr-drive.com`**.\n"
+                "• **Response Times:**\n"
+                "  - **Zephyr Pro & Plus:** Priority queue (average response < 2 hours).\n"
+                "  - **Lite & Micro:** Under 12 hours.\n"
+                "  - **Free Starter:** Under 24 hours.\n"
+                "• **In-App Assistance:** If your issue relates to an active transfer, please provide your **Share ID** or **Transaction Reference ID** in your email for rapid resolution."
+            )
         }
 
-    return {"reply": "I am here to help with Zephyr transfers, storage vaults, E-Sign, paywall escrow, and privacy features. If you need human support, feel free to email Priyam Rana at priyamrana069@gmail.com!"}
+    # 2. Payment Failures, Missing Receipts & Billing Troubleshooting
+    if any(k in q for k in ["receipt", "invoice", "fail", "failed", "declined", "didn't get", "did not receive", "billing issue", "charge", "refund", "card error", "checkout error"]):
+        return {
+            "reply": (
+                "**Payment & Receipt Resolution:**\n\n"
+                "• **If your card was declined or payment failed:**\n"
+                "  1. Ensure international & online e-commerce transactions are activated on your card.\n"
+                "  2. Confirm 3D Secure verification was completed before closing the checkout window.\n"
+                "  3. Any failed authorization holds are automatically voided by your bank within 24–48 hours.\n\n"
+                "• **If your payment succeeded but you didn't receive a receipt:**\n"
+                "  1. Check your email spam/promotions folder for a confirmation receipt sent from our payment processors (**Dodo Payments** or **Stripe**).\n"
+                "  2. Allow 60–90 seconds for automated webhook provisioning to update your account status.\n"
+                "  3. If your tier has not updated after 5 minutes, email **`support@zephyr-drive.com`** with your registered account email and bank transaction time. Our team will verify and activate your tier manually."
+            )
+        }
 
+    # 3. Daily E-Sign Document Quotas
+    if any(k in q for k in ["e-sign", "esign", "sign", "signature", "envelope", "contract", "daily limit", "how many sign"]):
+        return {
+            "reply": (
+                "**Daily E-Sign Creation Quotas (Resets Daily at 00:00 UTC):**\n\n"
+                "• **Free Starter:** 7 documents / day\n"
+                "• **Zephyr Micro ($1.80/mo):** 15 documents / day\n"
+                "• **Zephyr Lite ($2.50/mo):** 30 documents / day\n"
+                "• **Zephyr Plus ($4.50/mo):** 50 documents / day\n"
+                "• **Zephyr Pro ($7.00/mo):** **Unlimited** daily document signing\n\n"
+                "• **Security Standards:** All envelopes feature drag-and-drop signatures, realistic vector ink, cryptographic SHA-256 audit trails, and zero-knowledge storage."
+            )
+        }
+
+    # 4. 4K Ultra HD AI Super-Resolution (Real-ESRGAN)
+    if any(k in q for k in ["4k", "upscal", "esrgan", "enhance", "super-resolution", "resolution", "pixel", "hd", "clarity", "sharpen", "ai tool"]):
+        return {
+            "reply": (
+                "**4K Ultra HD AI Super-Resolution (Real-ESRGAN):**\n\n"
+                "• **Capabilities:** Reconstructs degraded textures, removes JPEG artifacts, and scales images up to 4× native resolution (up to 3840×2160 UHD).\n"
+                "• **Plan Allowances:**\n"
+                "  - **Zephyr Lite ($2.50/mo):** 15 AI runs / month\n"
+                "  - **Zephyr Plus ($4.50/mo):** 60 AI runs / month\n"
+                "  - **Zephyr Pro ($7.00/mo):** **Unlimited** AI runs\n"
+                "  - *Free Starter & Micro do not include 4K upscaling.*\n"
+                "• **How to use:** Open any image from your Vault by clicking **Open** to launch Drive Studio, then click **4K Ultra HD Converter** in the studio toolbar. Save your lossless PNG directly back to your vault."
+            )
+        }
+
+    # 5. Storage Plans, Vault Limits & Prorated Upgrades
+    if any(k in q for k in ["plan", "pricing", "price", "cost", "tier", "subscription", "upgrade", "vault size", "storage", "micro", "lite", "plus", "pro"]):
+        return {
+            "reply": (
+                "**Zephyr Transfer & Storage Plans:**\n\n"
+                "• **Free Starter ($0 / forever):** 5 GB Vault • 2 GB single transfer • 7 E-Signs/day\n"
+                "• **Zephyr Micro ($1.80/mo):** 15 GB Vault • 5 GB transfer • 15 E-Signs/day • 20-Day Grace\n"
+                "• **Zephyr Lite ($2.50/mo):** 30 GB Vault • 10 GB transfer • 30 E-Signs/day • 15 4K AI runs • Client Drop & QR\n"
+                "• **Zephyr Plus ($4.50/mo):** 80 GB Vault • 25 GB transfer • 50 E-Signs/day • 60 4K AI runs • Studio Branding\n"
+                "• **Zephyr Pro ($7.00/mo):** 200 GB Vault • 50 GB transfer • Unlimited E-Signs • Unlimited 4K AI runs • Pay-to-Unlock Escrow\n\n"
+                "*Upgrades between tiers mid-cycle are seamlessly prorated (+ $0.50 processing fee).*"
+            )
+        }
+
+    # 6. Pay-to-Unlock Escrow, Bank Payouts & Anti-Screenshot Shield
+    payout_keywords = ["payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "escrow", "paywall", "unlock price", "bank account", "stripe connect"]
+    if any(k in q for k in payout_keywords) or (any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money"]) and any(h in q for h in ["how", "what", "where"])):
+        return {
+            "reply": (
+                "**Pay-to-Unlock Escrow Protocol:**\n\n"
+                "• **88% Direct Payout:** Creators receive 88% of every unlock directly wired to their connected bank account via Stripe with 0% escrow chargeback risk.\n"
+                "• **12% Protocol Fee:** Zephyr retains 12% to cover edge bandwidth, hosting, and encryption pipelines.\n"
+                "• **Anti-Screenshot Protection:** Media streams inside a forensic viewer featuring dynamic moving watermarks and window-blur curtains.\n"
+                "• **Lifetime Unlock:** Upon purchase, buyers receive an access passcode sent to their Gmail for lifetime viewing without paying twice."
+            )
+        }
+
+    # 7. Client Drop Portals & Mobile QR Codes
+    if any(k in q for k in ["client drop", "drop zone", "qr", "deposit", "receive files", "request file", "file request"]):
+        return {
+            "reply": (
+                "**Client Deposit Portals & QR Codes:**\n\n"
+                "• **No-Account Client Uploads:** Generate a deposit portal where clients and collaborators can upload large project assets directly into your vault without creating a Zephyr account.\n"
+                "• **Mobile QR Scanner:** Scan the generated QR code directly with any smartphone camera to deposit photos, videos, or documents on the go.\n"
+                "• **Availability:** Included with Zephyr Lite ($2.50/mo), Plus ($4.50/mo), and Pro ($7.00/mo)."
+            )
+        }
+
+    # 8. Zero-Knowledge Encryption & Burn-on-Read
+    if any(k in q for k in ["security", "encryption", "zero-knowledge", "burn", "shred", "aes", "r2", "privacy", "passcode", "password"]):
+        return {
+            "reply": (
+                "**Zero-Knowledge Architecture & Self-Shredding:**\n\n"
+                "• **Client-Side AES-256:** Key derivation and file hashing execute entirely inside your browser. No unencrypted passcodes or raw master keys are ever written to server logs or databases.\n"
+                "• **Cloudflare R2 Direct Pipe:** Files stream straight through edge nodes with zero intermediary inspection.\n"
+                "• **Burn-on-Read (🔥):** Setting max downloads to 1 triggers instant edge purging the millisecond a recipient finishes downloading, destroying the link permanently."
+            )
+        }
+
+    # 9. 20-Day Retention Grace Period
+    if any(k in q for k in ["grace", "lapse", "cancel", "expire", "expiration", "retention", "prun", "buffer", "delete files"]):
+        return {
+            "reply": (
+                "**20-Day Retention Grace Period:**\n\n"
+                "• If your paid plan lapses, your vault enters an industry-standard **20-day read-only grace period**.\n"
+                "• Your data remains fully protected and downloadable during these 20 days.\n"
+                "• If the plan is not renewed after 20 days, the vault is automatically pruned down to your active tier limit by permanently shredding the oldest files."
+            )
+        }
+
+    # 10. Default / Fallback Navigation Menu
+    return {
+        "reply": (
+            "I'm Zephyr Copilot! How can I help you today? You can ask me about:\n\n"
+            "• **4K Ultra HD AI Upscaler** (Quotas, Real-ESRGAN, Studio tools)\n"
+            "• **Storage Plans & Pricing** (Free Starter, Micro, Lite, Plus, Pro)\n"
+            "• **E-Sign Studio Quotas** (Daily document creation limits)\n"
+            "• **Payment or Receipt Issues** (Failed checkouts, missing receipts)\n"
+            "• **Pay-to-Unlock Escrow** (88% payouts, Stripe Connect, forensic viewers)\n"
+            "• **Client Drop & QR Portals** (Direct client deposit links)\n"
+            "• **Zero-Knowledge Security & 20-Day Grace Retention**\n"
+            "• **Contacting Human Support** (`support@zephyr-drive.com`)\n\n"
+            "What would you like to explore?"
+        )
+    }
 # ----------------- Main Static Routes -----------------
 @app.get("/favicon.ico", include_in_schema=False)
 async def site_favicon():
