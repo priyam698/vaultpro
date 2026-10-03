@@ -1,5 +1,9 @@
 import os
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
+import replicate
 import uuid
 import time
 import math
@@ -3559,7 +3563,56 @@ async def lemon_webhook(request: Request):
 
     conn.close()
     return {"status": "received"}
+# -------------------------------------------------------------
+# AI 4K SUPER-RESOLUTION ENDPOINT (REAL-ESRGAN VIA REPLICATE)
+# -------------------------------------------------------------
+import tempfile
+
+@app.post("/api/drive/ai-upscale")
+async def ai_upscale_endpoint(
+    file: UploadFile = File(...),
+    user_id: str = Form(...)
+):
+    tmp_path = None
+    try:
+        # Read uploaded image bytes
+        contents = await file.read()
+        ext = os.path.splitext(file.filename)[1] if file.filename else ".png"
+
+        # Create a temp file on disk so Replicate gets a real path and valid filename
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+            tmp.write(contents)
+            tmp_path = tmp.name
+
+        # Send to Replicate Real-ESRGAN
+        with open(tmp_path, "rb") as image_file:
+            output = replicate.run(
+                "nightmareai/real-esrgan:42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
+                input={
+                    "image": image_file,
+                    "scale": 4,
+                    "face_enhance": True
+                }
+            )
+
+        # Replicate can return a URL string, FileOutput, or list of URLs
+        upscaled_url = str(output[0]) if isinstance(output, list) else str(output)
+        return JSONResponse({"upscaled_url": upscaled_url})
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Clean up temporary disk file
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+  

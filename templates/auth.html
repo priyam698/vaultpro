@@ -261,11 +261,11 @@
 
     initTheme();
 
-    const SUPABASE_URL = "{{ supabase_url }}";
-    const SUPABASE_ANON = "{{ supabase_anon }}";
+    const SUPABASE_URL = "https://xkdchqdratmbauwnrxcl.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrZGNocWRyYXRtYmF1d25yeGNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNjYxNjEsImV4cCI6MjEwMzk0MjE2MX0.zGJeNqTMNg8yQgCefFLDnAPuqQ7_ddbNH0GktDJHx7M";
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    let isSignUp = false;
+    let isSignup = false, issignup = false, isSignUp = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash;
@@ -278,14 +278,16 @@
     });
 
     function toggleMode() {
-      isSignUp = !isSignUp;
-      document.getElementById('formTitle').innerText = isSignUp ? "Create Your Vault Account" : "Sign In to Zephyr";
-      document.getElementById('authBtn').innerText = isSignUp ? "Create Account" : "Sign In";
-      document.getElementById('toggleText').innerText = isSignUp ? "Already have an account?" : "Don't have an account?";
-      document.getElementById('toggleBtn').innerText = isSignUp ? "Sign In" : "Create Account";
-      document.getElementById('forgotPwdBtn').classList.toggle('hidden', isSignUp);
-      hideMsg('authMsg');
-    }
+  isSignup = !isSignup;
+  issignup = isSignup;
+  isSignUp = isSignup;
+  document.getElementById('formTitle').innerText = isSignup ? "Create Your Vault Account" : "Sign In to Zephyr";
+  document.getElementById('authBtn').innerText = isSignup ? "Create Account" : "Sign In";
+  document.getElementById('toggleText').innerText = isSignup ? "Already have an account?" : "Don't have an account?";
+  document.getElementById('toggleBtn').innerText = isSignup ? "Sign In" : "Create Account";
+  document.getElementById('forgotPwdBtn').classList.toggle('hidden', isSignup);
+  hideMsg('authMsg');
+}
 
     function toggleForgotView(showForgot) {
       document.getElementById('formTitle').innerText = showForgot ? "Reset Your Password" : (isSignUp ? "Create Your Vault Account" : "Sign In to Zephyr");
@@ -336,7 +338,7 @@
 
       showMsg('authMsg', "Authenticating...", "text-amber-400");
 
-      let res = isSignUp 
+      let res = isSignup
         ? await sb.auth.signUp({ email, password }) 
         : await sb.auth.signInWithPassword({ email, password });
 

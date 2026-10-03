@@ -1383,66 +1383,107 @@ async function shareFile(fileId, filename) {
       }
     }
 
-    function convertTo4KUltraHD() {
-      if (!studioCanvas || !studioCtx) return;
-      const curW = studioCanvas.width;
-      const curH = studioCanvas.height;
-      const targetLongDim = 3840;
-      const curLongDim = Math.max(curW, curH);
+    async function convertTo4KUltraHD() {
+  if (!studioCanvas || !studioCtx) return;
 
-      if (curLongDim >= targetLongDim) {
-        alert(`This asset is already at 4K Ultra HD resolution.`);
-        return;
-      }
+  // 1. Tier check: Only Lite, Plus, and Pro plans
+  const allowedTiers = ['lite', 'plus', 'pro'];
+  if (!allowedTiers.includes((currentAccountUserTier || '').toLowerCase())) {
+    alert("⚡ The 4K Ultra HD Converter is exclusively available on Lite, Plus, and Pro plans.\n\nPlease upgrade your vault plan to unlock AI Super-Resolution.");
+    openPlansModal();
+    return;
+  }
 
-      if (!preAiCanvasState) {
-        preAiCanvasState = {
-          width: curW,
-          height: curH,
-          dataUrl: studioCanvas.toDataURL("image/png")
-        };
-      }
-      isAi4kApplied = true;
+  const curW = studioCanvas.width;
+  const curH = studioCanvas.height;
+  if (Math.max(curW, curH) >= 3840) {
+    alert("This asset is already at 4K Ultra HD resolution.");
+    return;
+  }
 
-      const scale = targetLongDim / curLongDim;
-      const newW = Math.round(curW * scale);
-      const newH = Math.round(curH * scale);
+  // 2. Save pre-AI snapshot for 1-click revert
+  if (!preAiCanvasState) {
+    preAiCanvasState = {
+      width: curW,
+      height: curH,
+      dataUrl: studioCanvas.toDataURL("image/png")
+    };
+  }
 
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = curW;
-      tempCanvas.height = curH;
-      tempCanvas.getContext("2d").drawImage(studioCanvas, 0, 0);
+  const upscaleBtn = event?.currentTarget || document.querySelector("button[onclick='convertTo4KUltraHD()']");
+  const originalHtml = upscaleBtn ? upscaleBtn.innerHTML : null;
+
+  try {
+    if (upscaleBtn) {
+      upscaleBtn.disabled = true;
+      upscaleBtn.innerHTML = `<span>⏳</span><span>Processing AI 4K Detail...</span>`;
+    }
+
+    const dataUrl = studioCanvas.toDataURL("image/png");
+    const blobRes = await fetch(dataUrl);
+    const blob = await blobRes.blob();
+
+    const formData = new FormData();
+    formData.append("file", blob, "canvas_source.png");
+    formData.append("user_id", currentUserId);
+
+    const res = await fetch("/api/drive/ai-upscale", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Server failed to upscale image");
+    }
+
+    const data = await res.json();
+    const aiImg = new Image();
+    aiImg.crossOrigin = "anonymous";
+    aiImg.onload = () => {
+      const newW = aiImg.naturalWidth;
+      const newH = aiImg.naturalHeight;
+      const scaleX = newW / curW;
+      const scaleY = newH / curH;
 
       studioCanvas.width = newW;
       studioCanvas.height = newH;
-      studioCtx.imageSmoothingEnabled = true;
-      studioCtx.imageSmoothingQuality = "high";
-      studioCtx.drawImage(tempCanvas, 0, 0, newW, newH);
+      studioCtx.drawImage(aiImg, 0, 0, newW, newH);
 
       studioTextObjects.forEach(t => {
-        t.x = Math.round(t.x * scale);
-        t.y = Math.round(t.y * scale);
-        t.fontSize = Math.round(t.fontSize * scale);
+        t.x = Math.round(t.x * scaleX);
+        t.y = Math.round(t.y * scaleY);
+        t.fontSize = Math.round(t.fontSize * scaleX);
       });
-
       studioRedactObjects.forEach(r => {
-        r.x = Math.round(r.x * scale);
-        r.y = Math.round(r.y * scale);
-        r.w = Math.round(r.w * scale);
-        r.h = Math.round(r.h * scale);
+        r.x = Math.round(r.x * scaleX);
+        r.y = Math.round(r.y * scaleY);
+        r.w = Math.round(r.w * scaleX);
+        r.h = Math.round(r.h * scaleY);
       });
 
+      isAi4kApplied = true;
       pushHistorySnapshot();
       fitStudioImageToViewport();
       renderAllRedactObjects();
       renderAllTextObjects();
 
       const sizeDisplay = document.getElementById("studioFileSize");
-      if (sizeDisplay) sizeDisplay.innerText = `${newW} × ${newH} (4K UHD)`;
+      if (sizeDisplay) sizeDisplay.innerText = `${newW} × ${newH} (AI 4K UHD)`;
 
-      alert(`✨ Converted successfully to 4K Ultra HD (${newW} × ${newH})!`);
+      alert(`✨ Enhanced successfully to true 4K Ultra HD (${newW} × ${newH})!`);
+    };
+    aiImg.src = data.upscaled_url;
+
+  } catch (err) {
+    alert("AI Upscale Error: " + err.message);
+  } finally {
+    if (upscaleBtn && originalHtml) {
+      upscaleBtn.disabled = false;
+      upscaleBtn.innerHTML = originalHtml;
     }
-
+  }
+}
     function applyAutoEnhance() {
       if (!studioCanvas || !studioCtx) return;
       adjustBrightness = 104;
