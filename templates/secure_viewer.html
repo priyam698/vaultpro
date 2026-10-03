@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Shield | {{ filename }}</title>
+  <title>{{ package_title or "Deliverables" }} | Zephyr Secure Viewer</title>
   
   <link rel="icon" type="image/svg+xml" href="/favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
@@ -19,271 +19,296 @@
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
-    html, body {
+    body {
       font-family: var(--font-sans);
-      background: #06080e !important;
-      color: #e2e8f0;
-      min-height: 100vh;
+      background-color: #030712 !important;
+      color: #f9fafb;
       margin: 0;
       padding: 0;
       overflow-x: hidden;
-      -webkit-user-select: none;
       user-select: none;
+      -webkit-user-select: none;
+      user-drag: none;
     }
     .font-mono-code {
       font-family: var(--font-mono);
       -webkit-user-select: text;
       user-select: text;
     }
-    .ambient-canvas {
+    #watermarkCanvas {
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 60;
+    }
+    .artboard-checker {
+      background-color: #0b0f19;
+      background-image: 
+        radial-gradient(ellipse 70% 50% at 20% 20%, rgba(99, 102, 241, 0.15), transparent 75%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(14, 165, 233, 0.12), transparent 75%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(168, 85, 247, 0.08), transparent 75%);
+    }
+    .ambient-glow {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
       pointer-events: none;
       z-index: 0;
-      background: 
-        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(99, 102, 241, 0.18), transparent 75%),
-        radial-gradient(ellipse 50% 30% at 15% 100%, rgba(56, 189, 248, 0.08), transparent 60%),
-        radial-gradient(ellipse 40% 30% at 85% 100%, rgba(168, 85, 247, 0.08), transparent 60%);
-    }
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      background-size: 36px 36px;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-color: #030712;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12), transparent 50%),
+        linear-gradient(180deg, rgba(3, 7, 18, 0.6) 0%, rgba(3, 7, 18, 1) 100%);
     }
     .media-high-quality {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: high-quality;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.25); border-radius: 9999px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 9999px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.35); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.65); }
+    .obsidian-card {
+      background: linear-gradient(180deg, rgba(15, 21, 37, 0.88) 0%, rgba(7, 10, 19, 0.96) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
   </style>
 </head>
-<body class="min-h-full flex flex-col justify-between relative bg-[#06080e]" oncontextmenu="return false;">
-
-  <div class="ambient-canvas"></div>
-  <div class="grid-overlay"></div>
-
-  <!-- POST-PAYMENT FILE SELECTOR OVERLAY -->
-  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300">
-    <a href="/share/{{ share_id }}" class="absolute top-6 left-6 text-slate-400 hover:text-white flex items-center gap-2 text-sm font-medium transition bg-white/[0.04] px-4 py-2 rounded-xl border border-white/10 shadow-lg cursor-pointer">
-      ← Back to Vault
-    </a>
-    
-    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-2xl mb-4 text-indigo-400 shadow-[0_0_35px_rgba(99,102,241,0.3)] animate-pulse">
-      📁
-    </div>
-    
-    <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-indigo-400 uppercase mb-1.5 block">Licensed Package Manifest</span>
-    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">Select Deliverable to Inspect</h2>
-    <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
-      Under confidential inspection mode. Select any deliverable to stream inside your sandbox. Direct downloads for media, code, and documents are disabled.
-    </p>
-
-    <div id="modalFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full max-h-[55vh] overflow-y-auto custom-scroll p-1.5 text-xs text-slate-300 font-mono text-center">
-      <!-- Populated via initViewerManifest() -->
+<body class="min-h-full flex flex-col justify-between relative lg:min-h-screen" oncontextmenu="return false;">
+  
+  <div class="ambient-glow"></div>
+  <canvas id="watermarkCanvas"></canvas>
+  
+  <!-- POST-PAYMENT FILE SELECTION OVERLAY -->
+  <div id="postPaymentPickerModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-[#080d1a] border border-indigo-500/30 rounded-3xl p-6 sm:p-8 flex flex-col items-center gap-4 text-center shadow-2xl relative">
+      <button type="button" onclick="closePickerModal()" class="absolute top-6 left-6 text-slate-400 hover:text-white flex items-center gap-2 text-xs font-medium cursor-pointer">
+        <span>✕ Close Manifest</span>
+      </button>
+      
+      <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-3xl mb-2">
+        📦
+      </div>
+      
+      <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-indigo-400 uppercase mb-1.5">Licensed Package Manifest</span>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">Select Deliverable to Inspect</h2>
+      <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-4">
+        Under confidential inspection mode. Select any deliverable to stream inside your sandbox. Direct downloads for media, code, and documents are disabled.
+      </p>
+      
+      <div id="modalDeliverablesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full max-h-[48vh] overflow-y-auto custom-scroll pr-1">
+        <!-- Populated via initReviewerManifest() -->
+      </div>
     </div>
   </div>
-
-  <!-- ANTI-SCREENSHOT GUARD SHIELD -->
-  <div id="antiCaptureShield" class="hidden fixed inset-0 z-50 bg-[#06080e]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-150">
-    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl mb-4 text-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.3)] animate-pulse">
+  
+  <!-- ANTI-SCREENSHOT SHIELD (BLUR) -->
+  <div id="captureShield" class="hidden fixed inset-0 z-40 bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-150">
+    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-3xl mb-4 shadow-lg">
       🛡️
     </div>
-    <span class="text-[10px] font-mono font-bold tracking-[0.2em] text-amber-400 uppercase mb-1">Zephyr Shield Active</span>
-    <h2 class="text-2xl font-extrabold text-white mb-2 tracking-tight">Viewing Window Inactive</h2>
-    <p class="text-xs text-slate-400 max-w-md leading-relaxed">
+    <span class="text-[11px] font-mono font-bold tracking-[0.2em] text-amber-400 uppercase mb-1">Zephyr Shield Active</span>
+    <h2 class="text-2xl font-black text-white mb-2 tracking-tight">Viewing Window Inactive</h2>
+    <p class="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
       Media and deliverables are concealed while the application is backgrounded or a screen utility is active. Click anywhere inside this window to resume viewing.
     </p>
-    <button type="button" onclick="dismissShield()" class="mt-5 px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-semibold shadow-lg transition cursor-pointer">
+    <button type="button" onclick="dimissShield()" class="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold shadow-lg transition cursor-pointer">
       Resume Viewing
     </button>
   </div>
-
+  
   <!-- TOP HEADER (CONTAINS ALL SESSION IDENTIFICATION) -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-[#06080e]/90 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/30 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner">
+  <header class="relative z-30 border-b border-white/[0.08] bg-[#030712]/80 backdrop-blur-xl px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2.5 sm:gap-3">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-sky-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-black text-indigo-300 shadow-inner">
         Z
       </div>
-      <span class="font-extrabold text-sm tracking-tight text-slate-100">Zephyr Shield</span>
+      <div>
+        <span class="text-xs font-extrabold text-white tracking-tight flex items-center gap-1.5">
+          <span>{{ package_title or "Deliverables" }}</span>
+          <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 uppercase">Vault</span>
+        </span>
+      </div>
     </div>
-
-    <div class="flex items-center gap-3">
-      <!-- Session identifier positioned in upper panel outside of content -->
-      <div class="hidden md:flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono shadow-sm">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>CONFIDENTIAL SESSION &bull; {{ buyer_email }}</span>
-      </div>
-
-      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
+    
+    <!-- Center Gap Header Details -->
+    <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-mono shadow-sm">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span>Forensic Watermarking & Anti-Tamper Active</span>
+    </div>
+    
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Payment / Escrow Badge -->
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
-        <span class="hidden sm:inline">Verified Purchase</span>
+        <span>{{ "Paid Delivery" if is_unlocked else "Pay-to-Unlock" }}</span>
       </div>
-
-      <div class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/20 text-amber-400 font-mono font-bold tracking-wider uppercase">
-        Inspection Mode
-      </div>
+      
+      <!-- Package Deliverable Manifest trigger -->
+      <button type="button" onclick="openPickerModal()" class="px-3.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/20 text-amber-400 text-[11px] font-bold tracking-wider uppercase transition cursor-pointer">
+        Package ({{ package_files|length if package_files else 1 }})
+      </button>
     </div>
   </header>
-
+  
   <!-- MAIN VIEWPORT CONTAINER -->
-  <main class="relative z-20 w-full flex-1 flex flex-col items-center px-2 sm:px-4 py-3 w-full">
-    <div class="relative w-full flex-1 flex flex-col rounded-2xl bg-[#090c14]/90 border border-white/[0.08] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
+  <main class="relative z-20 flex-1 max-w-7xl mx-auto w-full p-3 sm:p-6 flex flex-col gap-4">
+    <div class="obsidian-card w-full flex-1 rounded-3xl p-4 sm:p-5 flex flex-col overflow-hidden shadow-2xl relative min-h-[580px] backdrop-blur-2xl">
       
-      <!-- Deliverables Deck (Top File Tabs) -->
-      <div class="deliverables-deck px-4 py-2 border-b border-white/[0.06] flex items-center justify-between gap-3 overflow-x-auto custom-scroll relative z-20 bg-black/20">
-        <div id="fileTabsContainer" class="flex items-center gap-2">
-          <button type="button" onclick="openPickerModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 shadow-sm transition shrink-0 cursor-pointer">
-            <span>📁 Deliverables (<span id="filesCountBadge">{{ files_count }}</span>)</span>
-          </button>
+      <!-- Deliverable Deck (Top Tab Bar) -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3.5 mb-3 gap-2 overflow-x-auto custom-scroll relative z-20">
+        <div class="flex items-center gap-2 overflow-x-auto custom-scroll" id="fileTabsContainer">
+          <!-- Filled dynamically by renderFileTabs() -->
         </div>
+        <button type="button" onclick="openPickerModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-indigo-300 hover:text-white transition shrink-0 cursor-pointer">
+          <span>📂</span> <span>All Deliverables</span>
+        </button>
       </div>
-
+      
       <!-- Action Toolbar with Zoom Controls & File Info -->
-      <div class="px-4 py-2.5 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-4 relative z-20 bg-black/30">
-        <div class="flex items-center gap-3.5 overflow-hidden min-w-0">
-          <div id="formatIconBadge" class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
+      <div class="flex flex-wrap items-center justify-between gap-4 relative z-20 bg-black/20 p-2 rounded-2xl border border-white/5 mb-3">
+        <div class="flex items-center gap-3 truncate">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl shrink-0 shadow-inner">
             📄
           </div>
-          <div>
-            <h3 id="activeFileNameDisplay" class="text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-md md:max-w-lg tracking-tight">
-              {{ filename }}
+          <div class="truncate">
+            <h3 id="activeFilenameDisplay" class="text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-md w-full tracking-tight">
+              Loading item...
             </h3>
-            <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
-              <span id="activeFileFormatTag" class="px-1.5 py-0.2 rounded bg-white/10 text-slate-300 font-bold uppercase">FILE</span>
-              <span id="statusText">Original Resolution &bull; <span class="text-rose-400 font-semibold">Direct Download Disabled</span></span>
+            <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+              <span id="activeFilesizeDisplay">0.0 MB</span>
+              <span>•</span>
+              <span id="formatBadge" class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold uppercase text-slate-400">RAW</span>
+              <span id="stateText">Original Resolution</span>
             </div>
           </div>
         </div>
-
-        <!-- Controls: Image Zoom & File Switcher -->
+        
+        <!-- View-Only Action Controls (NO EDITING TOOLBARS) -->
         <div class="flex items-center gap-2.5 shrink-0">
-          <div id="imageZoomControls" class="hidden flex items-center bg-black/50 border border-white/10 rounded-xl p-1 text-xs font-mono">
-            <button type="button" onclick="zoomImage(-0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom Out">-</button>
-            <span id="imageZoomPercent" class="px-2 text-[10px] font-bold text-slate-300 min-w-[50px] text-center">100%</span>
-            <button type="button" onclick="zoomImage(0.2)" class="px-2.5 py-1 hover:bg-white/10 text-slate-300 rounded-lg transition font-bold" title="Zoom In">+</button>
-            <button type="button" onclick="fitImageToScreen()" class="px-2.5 py-1 text-[10px] font-bold text-indigo-400 hover:bg-white/10 rounded-lg transition">Fit</button>
+          <!-- Image Zoom Controls -->
+          <div id="imageZoomControls" class="hidden flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1 text-xs font-mono">
+            <button type="button" onclick="zoomImage(-0.15)" class="px-2 py-0.5 hover:bg-white/10 text-slate-300 rounded-lg transition cursor-pointer" title="Zoom Out">-</button>
+            <span id="imageZoomDisplay" class="px-1 text-slate-300 text-xs font-bold">100%</span>
+            <button type="button" onclick="zoomImage(0.15)" class="px-2 py-0.5 hover:bg-white/10 text-slate-300 rounded-lg transition cursor-pointer" title="Zoom In">+</button>
+            <button type="button" onclick="fitImageToScreen()" class="px-2 py-0.5 hover:bg-white/10 text-slate-300 rounded-lg transition cursor-pointer" title="Fit to Screen">⛶ Fit</button>
           </div>
-
-          <button id="downloadActiveFileBtn" type="button" onclick="downloadActiveFile()" class="hidden px-4 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
-            <span>⬇️ Download File</span>
+          
+          <!-- Big Screen Fullscreen Button -->
+          <button type="button" id="bigScreenBtn" onclick="toggleBigScreen()" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-slate-200 border border-white/10 flex items-center gap-1.5 transition cursor-pointer shadow-sm" title="Toggle Fullscreen View">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <span>Big Screen</span>
           </button>
-          <button type="button" onclick="openPickerModal()" class="px-4 py-2 bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
-            <span>📁 Browse All Deliverables</span>
+          
+          <!-- Direct Download Action (Shown only if unlocked or licensed) -->
+          <button id="downloadActiveBtn" type="button" onclick="downloadActiveFile()" class="hidden px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
+            <span>💾</span> <span>Download File</span>
           </button>
         </div>
       </div>
-
-      <!-- CLEAN FULL-SCALE MEDIA STAGE (NO OVERLAY WATERMARKS) -->
-      <div id="mediaStage" class="relative w-full flex-1 flex flex-col items-center justify-center bg-[#05070d] overflow-hidden p-4 sm:p-6 select-none min-h-[520px]">
-
+      
+      <!-- STAGE MEDIA VIEWPORTS -->
+      <div id="mediaStageWrapper" class="flex-1 w-full flex flex-col justify-center items-center relative overflow-hidden artboard-checker rounded-2xl min-h-[380px] p-2">
+        
         <!-- Video Player Viewport -->
         <div id="videoContainer" class="hidden w-full h-full flex flex-col items-center justify-center">
-          <video id="nativeVideoPlayer" controls controlslist="nodownload noplaybackrate" disablepictureinpicture playsinline preload="metadata" 
-                 class="media-high-quality max-h-[76vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl border border-white/[0.08] bg-black">
+          <video id="nativeVideoPlayer" controls controlslist="nodownload noplaybackrate" disablepictureinpicture playsinline preload="metadata" class="max-h-[72vh] max-w-full rounded-xl shadow-2xl border border-white/10 bg-black">
             <source id="videoSource" src="" type="video/mp4">
           </video>
         </div>
-
-        <!-- Image Viewer Viewport (Proper Display Size) -->
+        
+        <!-- Image Viewer Viewport -->
         <div id="imageContainer" class="hidden w-full h-full flex items-center justify-center overflow-auto custom-scroll p-4">
-          <img id="nativeImageViewer" src="" alt="Deliverable" draggable="false" 
-               class="media-high-quality w-full max-w-2xl sm:max-w-3xl max-h-[76vh] h-auto object-contain rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] bg-black/40 border border-white/[0.08] select-none pointer-events-none">
+          <img id="nativeImageViewer" src="" alt="Deliverable" draggable="false" class="block max-h-[72vh] max-w-full rounded-xl shadow-2xl border border-white/15 select-none pointer-events-none object-contain media-high-quality transition-transform duration-100 ease-out">
         </div>
-
+        
         <!-- Audio Player Viewport -->
-        <div id="audioContainer" class="hidden w-full max-w-lg p-8 rounded-3xl bg-slate-900/90 border border-white/15 text-center space-y-5 shadow-2xl">
-          <div class="w-20 h-20 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-3xl font-bold border border-indigo-500/30">
+        <div id="audioContainer" class="hidden w-full h-full flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center space-y-4">
+          <div class="w-20 h-20 rounded-3xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-4xl mx-auto shadow-inner">
             🎵
           </div>
           <div>
-            <h3 id="audioTitle" class="text-sm font-black text-white truncate">{{ filename }}</h3>
-            <p class="text-[10px] font-mono text-slate-400 mt-1">Confidential Audio Stream</p>
+            <h4 id="audioTitle" class="text-sm font-black text-white truncate">Audio Track</h4>
+            <span id="audioMeta" class="text-xs text-slate-400 font-mono">Encrypted Audio Stream</span>
           </div>
           <audio id="nativeAudioPlayer" controls controlslist="nodownload" class="w-full"></audio>
         </div>
-
+        
         <!-- Code & Text Log Viewer -->
-        <div id="codeContainer" class="hidden w-full h-full max-w-4xl flex flex-col rounded-2xl border border-white/[0.08] bg-[#0c101c] overflow-hidden shadow-2xl max-h-[76vh]">
-          <div class="px-4 py-2.5 bg-black/40 border-b border-white/[0.08] flex items-center justify-between text-xs">
-            <span class="text-[11px] font-mono text-slate-300" id="codeLinesCount">-- lines</span>
-            <button type="button" onclick="copyScriptCode()" class="px-3 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded-lg text-[10px] font-mono font-bold transition">
-              Copy Buffer
-            </button>
+        <div id="codeContainer" class="hidden w-full h-full max-w-4xl flex flex-col rounded-2xl border border-white/10 bg-[#050811] overflow-hidden shadow-2xl">
+          <div class="px-4 py-2 bg-black/40 border-b border-white/10 flex items-center justify-between text-xs font-mono">
+            <span id="codeFilenameBadge" class="text-slate-300 font-bold">source_code</span>
+            <button type="button" onclick="copyCodeContent()" class="px-2.5 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-xs transition cursor-pointer">Copy Code</button>
           </div>
-          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs font-mono m-0 bg-transparent"><code id="codeViewerBox" class="language-none"></code></pre>
+          <pre class="flex-1 p-4 overflow-auto custom-scroll text-xs font-mono bg-transparent"><code id="codeViewer" class="language-none font-mono-code"></code></pre>
         </div>
-
+        
         <!-- Document Viewer (PDF Embed) -->
-        <div id="pdfContainer" class="hidden w-full h-full max-w-4xl max-h-[78vh] flex flex-col rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-950">
-          <iframe id="pdfEmbed" src="" class="w-full h-full border-0"></iframe>
+        <div id="pdfContainer" class="hidden w-full h-full max-w-4xl flex flex-col rounded-2xl border border-white/10 bg-slate-950 overflow-hidden shadow-2xl">
+          <iframe id="pdfViewer" src="" class="w-full h-[65vh] border-0"></iframe>
         </div>
-
+        
         <!-- Spreadsheet Table Viewer (CSV/TSV) -->
-        <div id="tableContainer" class="hidden w-full h-full max-w-4xl max-h-[78vh] flex flex-col rounded-2xl border border-white/10 bg-slate-900/90 overflow-hidden shadow-2xl">
-          <div class="overflow-auto custom-scroll flex-1 p-4 text-xs font-mono">
-            <table id="parsedTable" class="w-full text-left border-collapse"></table>
+        <div id="tableContainer" class="hidden w-full h-full max-w-5xl flex flex-col rounded-2xl border border-white/10 bg-slate-950 overflow-hidden shadow-2xl p-4">
+          <div class="overflow-auto max-h-[60vh] custom-scroll">
+            <table id="csvTable" class="w-full text-left text-xs border-collapse"></table>
           </div>
         </div>
-
+        
         <!-- Universal Archive Fallback -->
-        <div id="genericContainer" class="hidden w-full max-w-md p-8 rounded-3xl bg-slate-900/90 border border-white/15 text-center space-y-4 shadow-2xl">
-          <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-2xl font-bold">
+        <div id="genericContainer" class="hidden w-full max-w-md p-8 rounded-3xl bg-slate-900/80 border border-white/10 text-center space-y-4 shadow-2xl">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
             📦
           </div>
-          <h3 id="genericFileName" class="text-sm font-black text-white truncate">{{ filename }}</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Direct browser playback is not supported for this deliverable type. Click below to download.
-          </p>
-          <button type="button" onclick="downloadActiveFile()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">
+          <div>
+            <h4 id="genericFilename" class="text-sm font-black text-white truncate">archive.zip</h4>
+            <p class="text-xs text-slate-400 mt-1">Direct browser playback is not supported for this deliverable type. Click below to download.</p>
+          </div>
+          <button type="button" onclick="downloadActiveFile()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition cursor-pointer">
             Download Deliverable
           </button>
         </div>
-
+        
       </div>
-
+      
       <!-- Studio Status Bar -->
-      <div class="px-4 py-2 border-t border-white/[0.06] bg-black/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-400 z-20">
+      <div class="px-4 py-2 border-t border-white/[0.08] bg-black/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-400 mt-3">
         <div class="flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-          <span>Zero-Knowledge Confidential Stream [AES-256]</span>
+          <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+          <span>Zero-Knowledge Confidential Stream (Read-Only)</span>
         </div>
-        <div class="opacity-70 text-[10px]">End-to-End Keyed Pipeline</div>
+        <div class="opacity-70">End-to-End Keyed Pipeline</div>
       </div>
-
+      
     </div>
   </main>
 
   <script>
-    const shareId = "{{ share_id }}";
     const token = "{{ token }}";
-    let activeFile = "{{ filename }}";
-    let packageFiles = [];
-
-    const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v', 'flv'];
-    const imageExts = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'raw', 'dng', 'heic'];
-    const audioExts = ['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac', 'aiff'];
-    const codeExts = ['txt', 'json', 'js', 'ts', 'jsx', 'tsx', 'py', 'html', 'css', 'scss', 'c', 'cpp', 'cs', 'go', 'rs', 'php', 'rb', 'yaml', 'yml', 'xml', 'md', 'log', 'ipynb'];
-    const pdfExt = ['pdf'];
+    const shareId = "{{ share_id }}";
+    let packageFiles = {{ package_files | tojson | safe }} || [];
+    if (!packageFiles.length && "{{ filename }}") {
+      packageFiles = [{ filename: "{{ filename }}", filesize_mb: {{ filesize_mb or 0 }} }];
+    }
+    let activeFileIndex = 0;
+    let activeFile = null;
+    let isBigScreenActive = false;
+    
+    const videoExts = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
+    const imageExts = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'svg'];
+    const audioExts = ['mp3', 'wav', 'ogg', 'm4a', 'flac'];
+    const codeExts = ['js', 'ts', 'py', 'json', 'html', 'css', 'md', 'txt', 'csv', 'sql', 'sh', 'xml', 'yaml', 'yml', 'c', 'cpp', 'rs', 'go', 'php', 'rb'];
+    const pdfExts = ['pdf'];
     const tableExts = ['csv', 'tsv'];
 
     function getDeliverableType(ext) {
       if (videoExts.includes(ext)) return 'video';
       if (imageExts.includes(ext)) return 'image';
       if (audioExts.includes(ext)) return 'audio';
-      if (codeExts.includes(ext)) return 'code';
-      if (pdfExt.includes(ext)) return 'pdf';
+      if (pdfExts.includes(ext)) return 'pdf';
       if (tableExts.includes(ext)) return 'table';
+      if (codeExts.includes(ext)) return 'code';
       return 'generic';
     }
 
@@ -292,9 +317,6 @@
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
-      const zoomControls = document.getElementById("imageZoomControls");
-      if (zoomControls) zoomControls.classList.add("hidden");
-
       const vid = document.getElementById('nativeVideoPlayer');
       if (vid) { vid.pause(); vid.removeAttribute('src'); vid.load(); }
       const aud = document.getElementById('nativeAudioPlayer');
@@ -303,20 +325,18 @@
 
     // Image Zoom Logic
     let currentImageScale = 1.0;
-
     function applyImageZoom() {
-      const img = document.getElementById("nativeImageViewer");
-      const zoomText = document.getElementById("imageZoomPercent");
-      if (img) {
-        img.style.transform = `scale(${currentImageScale})`;
-      }
+      const img = document.getElementById('nativeImageViewer');
+      const zoomText = document.getElementById('imageZoomDisplay');
+      if (!img) return;
+      img.style.transform = `scale(${currentImageScale})`;
       if (zoomText) {
         zoomText.innerText = `${Math.round(currentImageScale * 100)}%`;
       }
     }
 
     function zoomImage(delta) {
-      currentImageScale = Math.min(3.5, Math.max(0.4, currentImageScale + delta));
+      currentImageScale = Math.min(4.0, Math.max(0.4, currentImageScale + delta));
       applyImageZoom();
     }
 
@@ -325,122 +345,145 @@
       applyImageZoom();
     }
 
-    async function renderActiveDeliverable(fname) {
+    // Big Screen Fullscreen Engine
+    function toggleBigScreen() {
+      const stage = document.getElementById('mediaStageWrapper');
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (stage.requestFullscreen) {
+          stage.requestFullscreen();
+        } else if (stage.webkitRequestFullscreen) {
+          stage.webkitRequestFullscreen();
+        }
+        isBigScreenActive = true;
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        isBigScreenActive = false;
+      }
+    }
+
+    async function renderActiveDeliverable(frame) {
+      if (!frame) return;
+      activeFile = frame;
+      currentImageScale = 1.0;
+      applyImageZoom();
+
+      document.getElementById('activeFilenameDisplay').innerText = frame.filename;
+      document.getElementById('activeFilesizeDisplay').innerText = `${frame.filesize_mb || 0} MB`;
+      const ext = frame.filename.split('.').pop().toLowerCase();
+      document.getElementById('formatBadge').innerText = ext.toUpperCase();
+
       hideAllViewers();
-      activeFile = fname;
-      fitImageToScreen();
-
-      document.getElementById('activeFileNameDisplay').innerText = fname;
-      const streamUrl = `/api/paywall/stream/${shareId}?token=${token}&file=${encodeURIComponent(fname)}`;
-      const ext = fname.split('.').pop().toLowerCase();
-      const formatTag = document.getElementById('activeFileFormatTag');
-      if (formatTag) formatTag.innerText = ext.toUpperCase();
-
       const type = getDeliverableType(ext);
+      const streamUrl = `/api/paywall/stream/${shareId}?filename=${encodeURIComponent(frame.filename)}&access_token=${token}`;
+
+      const imageZoom = document.getElementById('imageZoomControls');
+      if (imageZoom) {
+        if (type === 'image') imageZoom.classList.remove('hidden');
+        else imageZoom.classList.add('hidden');
+      }
 
       if (type === 'video') {
         const vc = document.getElementById('videoContainer');
-        const player = document.getElementById('nativeVideoPlayer');
-        const source = document.getElementById('videoSource');
-        source.src = streamUrl;
-        player.load();
+        const vid = document.getElementById('nativeVideoPlayer');
+        const vsrc = document.getElementById('videoSource');
+        vsrc.src = streamUrl;
+        vid.load();
         vc.classList.remove('hidden');
-        document.getElementById('formatIconBadge').innerText = '🎬';
       } else if (type === 'image') {
         const ic = document.getElementById('imageContainer');
         const img = document.getElementById('nativeImageViewer');
         img.src = streamUrl;
         ic.classList.remove('hidden');
-        document.getElementById("imageZoomControls").classList.remove("hidden");
-        document.getElementById('formatIconBadge').innerText = '🖼️';
       } else if (type === 'audio') {
         const ac = document.getElementById('audioContainer');
         const aud = document.getElementById('nativeAudioPlayer');
-        document.getElementById('audioTitle').innerText = fname;
+        document.getElementById('audioTitle').innerText = frame.filename;
         aud.src = streamUrl;
         ac.classList.remove('hidden');
-        document.getElementById('formatIconBadge').innerText = '🎵';
-      } else if (type === 'code') {
-        document.getElementById('codeContainer').classList.remove('hidden');
-        document.getElementById('formatIconBadge').innerText = '💻';
-        loadSourceCode(streamUrl, ext);
       } else if (type === 'pdf') {
         const pc = document.getElementById('pdfContainer');
-        document.getElementById('pdfEmbed').src = `${streamUrl}#toolbar=0`;
+        const pdf = document.getElementById('pdfViewer');
+        pdf.src = streamUrl;
         pc.classList.remove('hidden');
-        document.getElementById('formatIconBadge').innerText = '📑';
       } else if (type === 'table') {
-        document.getElementById('tableContainer').classList.remove('hidden');
-        document.getElementById('formatIconBadge').innerText = '📊';
+        const tc = document.getElementById('tableContainer');
+        tc.classList.remove('hidden');
         loadTableData(streamUrl);
+      } else if (type === 'code') {
+        const cc = document.getElementById('codeContainer');
+        cc.classList.remove('hidden');
+        document.getElementById('codeFilenameBadge').innerText = frame.filename;
+        loadSourceCode(streamUrl, ext);
       } else {
         const gc = document.getElementById('genericContainer');
-        document.getElementById('genericFileName').innerText = fname;
+        document.getElementById('genericFilename').innerText = frame.filename;
         gc.classList.remove('hidden');
-        document.getElementById('formatIconBadge').innerText = '📦';
+      }
+
+      const downloadBtn = document.getElementById('downloadActiveBtn');
+      if (downloadBtn) {
+        {% if is_unlocked %}
+        downloadBtn.classList.remove('hidden');
+        {% else %}
+        downloadBtn.classList.add('hidden');
+        {% endif %}
       }
     }
 
     async function loadSourceCode(streamUrl, ext) {
-      const codeBox = document.getElementById('codeViewerBox');
-      const linesEl = document.getElementById('codeLinesCount');
-      codeBox.textContent = 'Loading source code...';
-
+      const codebox = document.getElementById('codeViewer');
+      codebox.textContent = "Loading source code...";
       try {
         const res = await fetch(streamUrl);
         const text = await res.text();
-        codeBox.textContent = text || '// Empty file';
-        const lines = text.split('\n').length;
-        if (linesEl) linesEl.innerText = `${lines} lines`;
-
+        codebox.textContent = text || "// Empty file";
         const langMap = {
           'js': 'javascript', 'ts': 'typescript', 'py': 'python',
           'html': 'markup', 'css': 'css', 'json': 'json', 'md': 'markdown'
         };
         const lang = langMap[ext] || 'none';
-        codeBox.className = `language-${lang}`;
-        if (window.Prism) Prism.highlightElement(codeBox);
+        codebox.className = `language-${lang} font-mono-code`;
+        if (window.Prism) Prism.highlightElement(codebox);
       } catch (err) {
-        codeBox.textContent = `// Failed to load source: ${err.message}`;
+        codebox.textContent = `// Failed to load source: ${err.message}`;
       }
     }
 
-    function copyScriptCode() {
-      const code = document.getElementById('codeViewerBox').textContent;
+    function copyCodeContent() {
+      const code = document.getElementById('codeViewer').textContent;
       navigator.clipboard.writeText(code);
-      alert('Source code copied to clipboard!');
+      alert("Source code copied to clipboard!");
     }
 
     async function loadTableData(streamUrl) {
-      const table = document.getElementById('parsedTable');
-      table.innerHTML = '<tr><td class="p-3 text-slate-400">Loading spreadsheet data...</td></tr>';
+      const table = document.getElementById('csvTable');
+      table.innerHTML = `<tr><td class="p-3 text-slate-400">Loading spreadsheet data...</td></tr>`;
       try {
         const res = await fetch(streamUrl);
         const text = await res.text();
-        const rows = text.split('\n').filter(r => r.trim());
+        const rows = text.trim().split('\n').map(r => r.split(','));
         if (!rows.length) return;
-
         let html = '';
         rows.forEach((row, idx) => {
-          const cols = row.split(',');
           if (idx === 0) {
-            html += '<tr class="bg-indigo-950/40 text-indigo-300 font-bold border-b border-white/10">';
-            cols.forEach(c => html += `<th class="p-2.5 border-r border-white/5 truncate">${c.trim()}</th>`);
-            html += '</tr>';
+            html += `<tr class="border-b border-indigo-500/30 text-indigo-300 font-bold bg-indigo-500/10">${row.map(c => `<th class="p-2 border-r border-white/10 truncate">${c.trim()}</th>`).join('')}</tr>`;
           } else {
-            html += '<tr class="border-b border-white/5 hover:bg-white/[0.02]">';
-            cols.forEach(c => html += `<td class="p-2 border-r border-white/5 truncate text-slate-300">${c.trim()}</td>`);
-            html += '</tr>';
+            html += `<tr class="border-b border-white/5 hover:bg-white/5">${row.map(c => `<td class="p-2 border-r border-white/5 truncate text-slate-300">${c.trim()}</td>`).join('')}</tr>`;
           }
         });
         table.innerHTML = html;
       } catch (e) {
-        table.innerHTML = '<tr><td class="p-3 text-rose-400">Failed to render table</td></tr>';
+        table.innerHTML = `<tr><td class="p-3 text-rose-400">Failed to render table data.</td></tr>`;
       }
     }
 
     function downloadActiveFile() {
-      window.location.href = `/api/download/${shareId}?file=${encodeURIComponent(activeFile)}&access_token=${token}`;
+      if (!activeFile) return;
+      window.location.href = `/api/download/${shareId}?filename=${encodeURIComponent(activeFile.filename)}&access_token=${token}`;
     }
 
     function openPickerModal() {
@@ -451,82 +494,108 @@
       document.getElementById('postPaymentPickerModal').classList.add('hidden');
     }
 
-    function switchActiveFile(fname) {
-      closePickerModal();
-      renderActiveDeliverable(fname);
+    function switchActiveFile(index) {
+      if (index < 0 || index >= packageFiles.length) return;
+      activeFileIndex = index;
       renderFileTabs();
+      renderActiveDeliverable(packageFiles[activeFileIndex]);
+      closePickerModal();
     }
 
     function renderFileTabs() {
       const container = document.getElementById('fileTabsContainer');
-      container.innerHTML = `
-        <button type="button" onclick="openPickerModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 shadow-sm transition shrink-0 cursor-pointer">
-          <span>📁 Deliverables (${packageFiles.length})</span>
-        </button>
-      `;
-
-      packageFiles.slice(0, 5).forEach(f => {
-        const isActive = f.filename === activeFile;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.onclick = () => switchActiveFile(f.filename);
-        btn.className = `px-3 py-1.5 rounded-xl text-xs font-mono transition shrink-0 cursor-pointer ${
-          isActive 
-            ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30' 
-            : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5'
-        }`;
-        btn.innerText = f.filename;
-        container.appendChild(btn);
-      });
+      if (!container) return;
+      container.innerHTML = packageFiles.map((file, idx) => {
+        const isActive = idx === activeFileIndex;
+        return `
+          <button type="button" onclick="switchActiveFile(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition shrink-0 cursor-pointer ${isActive ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5'}">
+            <span>${file.filename}</span>
+          </button>
+        `;
+      }).join('');
     }
 
-    async function initViewerManifest() {
-      try {
-        const res = await fetch(`/api/share-details/${shareId}`);
-        const data = await res.json();
-        packageFiles = data.files || [{ filename: data.filename, filesize_mb: data.filesize_mb }];
-        
-        document.getElementById('filesCountBadge').innerText = packageFiles.length;
-
-        const grid = document.getElementById('modalFilesGrid');
-        grid.innerHTML = packageFiles.map(f => `
-          <button type="button" onclick="switchActiveFile('${f.filename}')" class="p-3 rounded-2xl border transition flex items-center justify-between text-left cursor-pointer ${
-            f.filename === activeFile 
-              ? 'bg-indigo-600/25 border-indigo-500/50 text-white shadow-lg shadow-indigo-600/20' 
-              : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.08] text-slate-300'
-          }">
+    async function initReviewerManifest() {
+      renderFileTabs();
+      if (packageFiles.length > 0) {
+        renderActiveDeliverable(packageFiles[0]);
+      }
+      
+      const grid = document.getElementById('modalDeliverablesGrid');
+      if (grid) {
+        grid.innerHTML = packageFiles.map((file, idx) => `
+          <button type="button" onclick="switchActiveFile(${idx})" class="p-3 rounded-2xl border transition flex items-center justify-between text-left cursor-pointer bg-white/5 hover:bg-white/10 border-white/10 text-slate-300">
             <div class="flex items-center gap-2.5 truncate">
               <span class="text-base">📄</span>
-              <div class="truncate">
-                <span class="text-xs font-bold block truncate">${f.filename}</span>
-                <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
-              </div>
+              <span class="text-xs font-bold block truncate">${file.filename}</span>
             </div>
-            ${f.filename === activeFile ? '<span class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Active</span>' : ''}
+            <span class="text-[10px] font-mono text-indigo-400 shrink-0">${file.filesize_mb || 0} MB</span>
           </button>
         `).join('');
-
-        renderFileTabs();
-        renderActiveDeliverable(activeFile);
-      } catch (err) {
-        console.error('Failed to load viewer manifest:', err);
       }
     }
 
-    // Anti-Screenshot / Privacy Blur Handler
-    const shield = document.getElementById('antiCaptureShield');
+    // Dynamic Moving Forensic Watermark Engine
+    function initForensicWatermark() {
+      const canvas = document.getElementById('watermarkCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let x = 60, y = 60;
+      let dx = 0.45, dy = 0.35;
+      const watermarkText = "{{ client_email or session_id or 'CONFIDENTIAL • ZEPHYR FORENSIC STREAM' }}";
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.font = "bold 13px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+        ctx.rotate(-20 * Math.PI / 180);
+        
+        for (let i = -canvas.width; i < canvas.width * 2; i += 320) {
+          for (let j = -canvas.height; j < canvas.height * 2; j += 140) {
+            ctx.fillText(watermarkText, i, j);
+          }
+        }
+        ctx.restore();
+
+        // Moving identifier
+        ctx.save();
+        ctx.font = "bold 13px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "rgba(99, 102, 241, 0.18)";
+        ctx.fillText(`🔒 ${watermarkText} • VIEW ONLY`, x, y);
+        ctx.restore();
+
+        x += dx;
+        y += dy;
+        if (x < 20 || x > canvas.width - 280) dx = -dx;
+        if (y < 40 || y > canvas.height - 40) dy = -dy;
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    // Anti-Screenshot & Screen Curtain Protection
+    const shield = document.getElementById('captureShield');
     function triggerShield() {
       if (shield) shield.classList.remove('hidden');
     }
-    function dismissShield() {
+    function dimissShield() {
       if (shield) shield.classList.add('hidden');
     }
 
     window.addEventListener('blur', triggerShield);
-    window.addEventListener('focus', dismissShield);
+    window.addEventListener('focus', dimissShield);
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) triggerShield();
-      else dismissShield();
+      else dimissShield();
     });
 
     window.addEventListener('keydown', (e) => {
@@ -536,7 +605,8 @@
       }
     });
 
-    initViewerManifest();
+    initReviewerManifest();
+    initForensicWatermark();
   </script>
 </body>
 </html>
