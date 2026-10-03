@@ -217,6 +217,18 @@
       color: #0f172a !important;
     }
 
+    body.light-theme .nav-pill-track {
+      background: #f0f7ff !important;
+      border: 1px solid #bfdbfe !important;
+    }
+    body.light-theme .nav-pill-track a {
+      color: #334155 !important;
+    }
+    body.light-theme .nav-pill-track a:hover {
+      color: #0284c7 !important;
+      background: rgba(2, 132, 199, 0.08) !important;
+    }
+
     body.light-theme #worldLangSelect,
     body.light-theme #themeToggleBtn,
     body.light-theme header .header-pill,
@@ -737,55 +749,65 @@
     </div>
   </div>
 
-  <!-- Transparent Header -->
-  <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+  <!-- ========================================================================= -->
+  <!-- STRUCTURED 3-ZONE HEADER NAVIGATION                                      -->
+  <!-- ========================================================================= -->
+  <header class="relative z-30 border-b border-white/[0.08] bg-[#06070b]/80 backdrop-blur-xl sticky top-0 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo -->
-      <a href="/" class="flex items-center gap-3 group">
-        <div class="brand-logo-box w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
-            <defs>
-              <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="60%" stop-color="#6366f1"/>
-                <stop offset="100%" stop-color="#4338ca"/>
-              </linearGradient>
-              <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#c084fc"/>
-                <stop offset="50%" stop-color="#818cf8"/>
-                <stop offset="100%" stop-color="#06b6d4"/>
-              </linearGradient>
-              <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
-              </linearGradient>
-            </defs>
-            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
-            <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#navGlassSheen)"/>
-            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
-            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#navRibbonCyan)"/>
-            <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#navGlassSheen)"/>
-          </svg>
-        </div>
-        <span class="font-black text-2xl tracking-tight">Zephyr</span>
-      </a>
+      <!-- ZONE 1: BRAND LOGO -->
+      <div class="flex items-center shrink-0">
+        <a href="/" class="flex items-center gap-3 group">
+          <div class="brand-logo-box w-10 h-10 p-1.5 rounded-xl bg-[#080d1c]/85 border border-white/10 flex items-center justify-center shadow-inner shadow-indigo-500/10 group-hover:border-indigo-400/50 transition duration-300">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
+              <defs>
+                <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="60%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#4338ca"/>
+                </linearGradient>
+                <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#c084fc"/>
+                  <stop offset="50%" stop-color="#818cf8"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+                <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
+                </linearGradient>
+              </defs>
+              <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
+              <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#navGlassSheen)"/>
+              <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
+              <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#navRibbonCyan)"/>
+              <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#navGlassSheen)"/>
+            </svg>
+          </div>
+          <span class="font-black text-2xl tracking-tight text-white">Zephyr</span>
+        </a>
+      </div>
 
-      <!-- Controls: Navigation, Theme Switcher, Email Badge & Auth -->
-      <div class="flex items-center gap-2.5 sm:gap-4">
-        <a href="#control" class="text-xs font-bold hover:opacity-80 transition hidden lg:inline-block">Features</a>
-        <a href="#ai-studio" class="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition hidden lg:inline-block">4K AI Studio</a>
-        <a href="#pricing" class="text-xs font-bold hover:opacity-80 transition hidden sm:inline-block">Pricing</a>
-        
-        <!-- Branding Quick Access Link -->
-        <a href="/dashboard" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/25 hover:border-indigo-400/50 text-xs font-semibold transition-all shadow-sm cursor-pointer">
+      <!-- ZONE 2: CENTER PRIMARY NAVIGATION PILL -->
+      <nav class="nav-pill-track hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 shadow-inner backdrop-blur-md">
+        <a href="#control" class="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition">Features</a>
+        <a href="#ai-studio" class="px-3.5 py-1.5 rounded-full text-xs font-bold text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 border border-indigo-500/20 transition flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+          <span>4K AI Studio</span>
+        </a>
+        <a href="#pricing" class="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition">Pricing</a>
+        <a href="/dashboard" class="header-pill px-3.5 py-1.5 rounded-full text-xs font-semibold text-indigo-300 hover:text-indigo-200 hover:bg-indigo-500/15 transition flex items-center gap-1.5">
           <span>🎨</span>
           <span>Branding</span>
         </a>
+      </nav>
 
-        <div class="relative flex items-center">
+      <!-- ZONE 3: UTILITIES & ACCOUNT CONTROLS -->
+      <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        
+        <!-- Language Selector -->
+        <div class="relative hidden sm:flex items-center">
           <span class="absolute left-2.5 text-xs pointer-events-none">🌐</span>
-          <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl border text-xs font-bold focus:outline-none transition cursor-pointer appearance-none">
+          <select id="worldLangSelect" onchange="changeLanguage(this.value)" class="pl-7 pr-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold bg-slate-900/60 focus:outline-none transition cursor-pointer appearance-none">
             <option value="en">English (US)</option>
             <option value="es">Español (Spanish)</option>
             <option value="fr">Français (French)</option>
@@ -810,27 +832,28 @@
           </select>
         </div>
 
-        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border flex items-center justify-center text-sm font-bold text-amber-400 transition cursor-pointer">
+        <!-- Theme Switcher -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-9 h-9 rounded-xl border border-white/10 bg-slate-900/60 flex items-center justify-center text-sm font-bold text-amber-400 hover:bg-white/10 transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
 
         <!-- Request Button -->
-        <button onclick="openRequestModal()" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 hover:border-cyan-400/50 text-xs font-semibold transition cursor-pointer">
+        <button onclick="openRequestModal()" class="header-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 hover:border-cyan-400/50 text-xs font-semibold transition cursor-pointer">
           <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span>Request</span>
+          <span class="hidden md:inline">Request</span>
         </button>
 
         <!-- Drive Vault Pill -->
-        <a href="/dashboard" class="header-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-500/30 text-xs font-medium transition">
+        <a href="/dashboard" class="header-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-500/30 text-xs font-medium transition">
           <span>Drive</span>
           <span id="headerTierBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-600/30 text-indigo-300 border border-indigo-500/20">5 GB</span>
         </a>
 
-        <!-- User Email Badge -->
-        <span id="userEmailBadge" class="header-pill hidden text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border border-slate-700/40 bg-slate-900/60 text-slate-300 shadow-sm"></span>
+        <!-- User Email Badge (with max width truncate so long emails don't push anything off screen) -->
+        <span id="userEmailBadge" class="header-pill hidden text-xs font-mono font-bold px-3 py-1.5 rounded-full border border-slate-700/40 bg-slate-900/60 text-slate-300 shadow-sm max-w-[150px] sm:max-w-[200px] truncate"></span>
 
         <!-- Sign In / Sign Out Button -->
-        <a id="navAuthBtn" href="/auth" class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer">
+        <a id="navAuthBtn" href="/auth" class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition cursor-pointer shrink-0">
           Sign In
         </a>
       </div>
@@ -3251,7 +3274,7 @@
                 reject(new Error("Upload failed for " + safeName));
               }
             };
-            xhr.onerror = () => reject(new Error("Network connection lost"));
+            xhr.onerror = () => reject(new Error("Network error"));
             xhr.send(file);
           });
         }
