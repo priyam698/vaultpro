@@ -48,7 +48,15 @@
       transition: all 0.3s ease;
     }
 
-    /* Dark Mode Sidebar Item Styling */
+    /* Original Clarity & High-Fidelity Rendering */
+    .media-high-clarity {
+      image-rendering: -webkit-optimize-contrast !important;
+      image-rendering: high-quality !important;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    /* Sidebar Item Styling */
     .sidebar-file-item {
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -196,13 +204,6 @@
       -webkit-user-drag: none;
     }
 
-    /* Super Ultra HD Convolution Sharpening */
-    .super-ultra-hd-active {
-      filter: url(#superHdSharpenFilter) contrast(1.08) saturate(1.12) brightness(1.02) !important;
-      image-rendering: -webkit-optimize-contrast !important;
-      image-rendering: crisp-edges !important;
-    }
-
     /* Full Big Screen Mode Styles */
     #contentStageBox:fullscreen,
     #contentStageBox:-webkit-full-screen {
@@ -280,13 +281,6 @@
 
   <div id="backdropBg" class="site-mountain-backdrop"></div>
 
-  <!-- SVG FILTER PIPELINE FOR SUPER ULTRA HD CONVOLUTION SHARPENING -->
-  <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
-    <filter id="superHdSharpenFilter">
-      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -0.55 0  -0.55 3.2 -0.55  0 -0.55 0"/>
-    </filter>
-  </svg>
-
   <!-- Server Configuration Dataset -->
   <div id="serverConfig"
        class="hidden"
@@ -303,19 +297,6 @@
   <script type="application/json" id="brandingConfig">
     {% if branding %}{{ branding | tojson }}{% else %}null{% endif %}
   </script>
-
-  <!-- SAVE CHANGES PROMPT MODAL -->
-  <div id="saveChangesModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4 border border-indigo-500/40 shadow-2xl">
-      <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">⚠️</div>
-      <h3 class="text-base font-black text-white">Save changes to this file?</h3>
-      <p class="text-xs text-slate-300 leading-relaxed font-medium">You have unsaved edits on this file. Would you like to save your modifications before continuing?</p>
-      <div class="grid grid-cols-2 gap-2 pt-2">
-        <button onclick="confirmSaveDiscard(false)" class="py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-bold transition cursor-pointer">Cancel</button>
-        <button onclick="confirmSaveDiscard(true)" class="py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition cursor-pointer">Save Changes</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Top Header Navigation -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
@@ -484,7 +465,7 @@
       </div>
 
       <!-- ========================================================================= -->
-      <!-- 2. NON-PAYMENT TRANSFERS: INTERACTIVE STUDIO WORKSPACE                    -->
+      <!-- 2. NON-PAYMENT TRANSFERS: VIEW-ONLY WORKSPACE (NO EDIT TOOLS)             -->
       <!-- ========================================================================= -->
       {% else %}
 
@@ -500,16 +481,16 @@
         </div>
         {% endif %}
 
-        <!-- Interactive Studio Workspace Area -->
+        <!-- Clean View-Only Workspace Area -->
         <div id="workspaceContainer" class="{% if has_password %}hidden{% endif %} space-y-5 text-left border-t border-sky-500/20 pt-5">
           
           <!-- TOP ROW: TITLE & PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-sky-500/20 pb-4">
             <div>
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
-                <span>✨</span> Universal Studio Editor & Workspace
+                <span>✨</span> Zero-Knowledge Transfer Preview
               </h3>
-              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom, edit, crop, draw, add music/backgrounds, or edit notes in real time.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom, inspect, and download deliverables in their original clarity.</p>
             </div>
 
             <!-- PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
@@ -541,10 +522,10 @@
               </div>
             </div>
 
-            <!-- Right: Prominent High-Capacity Preview Stage -->
+            <!-- Right: View-Only Stage (No Editing Toolbars) -->
             <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
               
-              <!-- Toolbar above the stage -->
+              <!-- Toolbar above the stage (Only Zoom & Big Screen) -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
                 <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
                   <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
@@ -554,30 +535,13 @@
                 <div class="flex items-center gap-2 shrink-0">
                   <!-- Zoom Controls for Images & Videos -->
                   <div id="workspaceZoomBar" class="hidden items-center bg-black/50 light-subpanel border border-sky-500/20 rounded-xl p-0.5 text-xs font-mono">
-                    <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold" title="Zoom Out">-</button>
+                    <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold cursor-pointer" title="Zoom Out">-</button>
                     <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold min-w-[46px] text-center text-sky-600">100%</span>
-                    <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold" title="Zoom In">+</button>
+                    <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold cursor-pointer" title="Zoom In">+</button>
                   </div>
 
-                  <!-- REAL-ESRGAN AI SUPER HD ENHANCE BUTTON -->
-                  <button id="enhanceHdBtn" type="button" onclick="triggerSuperHdAiUpscale()" class="hidden px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 text-white border border-white/20 text-xs font-black items-center gap-1.5 transition cursor-pointer shadow-md shadow-indigo-600/30 active:scale-95" title="Generate real 4x Super Ultra HD enhanced resolution using deep learning">
-                    <span id="enhanceIcon">⚡</span>
-                    <span id="enhanceBtnText" class="hidden sm:inline">Enhance to 4K Super HD</span>
-                  </button>
-
-                  <!-- Toggle Comparison (Active once upscaled) -->
-                  <button id="compareHdBtn" type="button" onclick="toggleBeforeAfter()" class="hidden px-2.5 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-bold items-center gap-1 transition cursor-pointer">
-                    <span id="compareBtnText">Show Original</span>
-                  </button>
-
-                  <!-- RESET TO ORIGINAL BUTTON -->
-                  <button id="resetOriginalBtn" type="button" onclick="resetToOriginal()" class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold items-center gap-1.5 transition cursor-pointer" title="Reset zoom back to 100% original center">
-                    <span>↺</span>
-                    <span class="hidden sm:inline">Reset</span>
-                  </button>
-
-                  <!-- Big Screen Button -->
-                  <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-2.5 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Toggle Fullscreen View">
+                  <!-- Big Screen Button Retained -->
+                  <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Toggle Fullscreen View">
                     <span id="fsIcon">⛶</span>
                     <span class="hidden sm:inline">Big Screen</span>
                   </button>
@@ -592,55 +556,19 @@
                   <button type="button" onclick="zoomImage(-0.25)" class="px-2 py-1 text-slate-200 hover:text-white font-bold text-xs cursor-pointer">-</button>
                   <span id="fsZoomPercent" class="text-xs font-mono font-bold text-sky-400 min-w-[46px] text-center">100%</span>
                   <button type="button" onclick="zoomImage(0.25)" class="px-2 py-1 text-slate-200 hover:text-white font-bold text-xs cursor-pointer">+</button>
-                  <button type="button" onclick="triggerSuperHdAiUpscale()" class="px-2.5 py-1 text-xs font-bold text-sky-400 hover:bg-white/10 rounded-xl transition cursor-pointer">⚡ 4K Enhance</button>
-                  <button type="button" onclick="resetToOriginal()" class="px-2.5 py-1 text-xs font-bold text-sky-400 hover:bg-white/10 rounded-xl transition cursor-pointer">↺ Reset</button>
                   <button type="button" onclick="toggleFullScreen()" class="px-2.5 py-1 text-xs font-bold text-rose-400 hover:bg-white/10 rounded-xl transition cursor-pointer">✕ Exit</button>
                 </div>
 
-                <!-- Processing / Loading Overlay for Real-ESRGAN -->
-                <div id="aiUpscalingLoader" class="hidden absolute inset-0 z-40 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4">
-                  <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-2xl text-white shadow-2xl shadow-indigo-500/50 animate-bounce">
-                    ⚡
-                  </div>
-                  <div>
-                    <h4 class="text-sm font-black text-white">Synthesizing 4K Super HD Resolution...</h4>
-                    <p class="text-xs text-sky-300 font-mono mt-1">Reconstructing high-frequency textures & micro-details</p>
-                  </div>
-                  <div class="w-48 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                    <div class="w-full h-full bg-gradient-to-r from-sky-400 to-indigo-500 animate-pulse"></div>
-                  </div>
-                </div>
+                <!-- Read-Only Code & Notebook Viewer -->
+                <textarea id="workspaceCodeViewer" readonly class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text m-0" placeholder="Viewing content..."></textarea>
 
-                <!-- Active 4K Badge -->
-                <div id="hdEnhancedBadge" class="hidden absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-sky-950/85 border border-sky-400/50 backdrop-blur-md text-[10px] font-mono font-bold text-sky-300 flex items-center gap-1.5 shadow-2xl">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span id="hdBadgeLabel">REAL-ESRGAN 4K SUPER HD ACTIVE</span>
-                </div>
-
-                <!-- 1. Editable Image Canvas Toolbar (Draw / Crop / Clear) -->
-                <div id="imageCanvasToolbar" class="hidden absolute top-3 z-30 flex items-center gap-2 bg-black/75 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-white/15 text-[11px]">
-                  <button type="button" onclick="setImageTool('draw')" id="toolDrawBtn" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition">✏️ Draw / Annotate</button>
-                  <button type="button" onclick="setImageTool('crop')" id="toolCropBtn" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 font-bold transition">✂️ Crop Mode</button>
-                  <button type="button" onclick="clearCanvasDrawings()" class="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold transition">Clear Ink</button>
-                </div>
-
-                <!-- 2. Video Studio Controls Overlay (Trim / Song / BG) -->
-                <div id="videoStudioToolbar" class="hidden absolute bottom-3 z-30 flex flex-wrap items-center justify-center gap-2 bg-black/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 text-xs">
-                  <button type="button" onclick="applyVideoTrim()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-sm">✂️ Trim 5s Clip</button>
-                  <button type="button" onclick="openAudioOverlayModal()" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition shadow-sm">🎵 Add Audio / Song</button>
-                  <button type="button" onclick="changeVideoBackground()" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition shadow-sm">🎨 Change Canvas BG</button>
-                </div>
-
-                <!-- 3. Read-Only / Editable Code & Notebook Viewer -->
-                <textarea id="workspaceCodeViewer" oninput="markFileModified()" class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text m-0" placeholder="Edit notes or scripts here..."></textarea>
-
-                <!-- 4. Media Viewer (Restricted Previews & Flash Message) -->
+                <!-- Media Viewer (Strict View-Only Presentation) -->
                 <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
               </div>
 
               <div class="flex items-center justify-between text-[10px] opacity-75 font-mono pt-1">
                 <span id="footerStatusText" class="text-sky-500 font-semibold">Cloudflare R2 Direct Pipe</span>
-                <span id="modStatusIndicator" class="text-amber-400 hidden font-bold">● Unsaved Edits Present</span>
+                <span class="text-slate-400 font-medium">Confidential View-Only Mode</span>
               </div>
             </div>
 
@@ -936,34 +864,18 @@
     }
 
     // ==========================================
-    // NON-PAYMENT TRANSFERS: STUDIO WORKSPACE
+    // NON-PAYMENT TRANSFERS: VIEW-ONLY WORKSPACE
     // ==========================================
     let packageFiles = [];
     let activeFileIdx = 0;
-    
-    // Zoom & Media State
     let currentZoom = 1.0;
-    let originalImageSrc = "";
-    let superHdImageSrc = "";
-    let isShowingSuperHd = false;
-
-    // Editing & Save State
-    let fileContentsCache = {};
-    let modifiedFiles = {};
-    let pendingFileSwitchIdx = null;
-
-    // Canvas / Drawing state
-    let imageCanvas = null;
-    let imageCtx = null;
-    let currentImageObj = null;
-    let activeImageTool = 'draw'; // 'draw' or 'crop'
 
     const TEXT_EXTS = ['txt', 'md', 'json', 'csv', 'log', 'ini', 'cfg', 'yml', 'yaml', 'xml', 'js', 'py', 'ts', 'html', 'css', 'ipynb', 'sql', 'sh', 'env'];
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
 
     function getActiveMediaEl() {
-      return document.getElementById("workspaceImageEl") || document.getElementById("workspaceVideoEl") || document.getElementById("workspaceImageCanvas");
+      return document.getElementById("workspaceImageEl") || document.getElementById("workspaceVideoEl");
     }
 
     function applyZoom() {
@@ -985,221 +897,6 @@
         if (activeMedia) activeMedia.style.transformOrigin = "50% 50%";
       }
       applyZoom();
-    }
-
-    // =========================================================================
-    // EDITING & SAVE WORKFLOW ENGINE
-    // =========================================================================
-    function markFileModified() {
-      const f = packageFiles[activeFileIdx];
-      if (!f) return;
-      modifiedFiles[f.filename] = true;
-      const modIndicator = document.getElementById("modStatusIndicator");
-      if (modIndicator) modIndicator.classList.remove("hidden");
-      renderSidebarFiles();
-    }
-
-    function attemptFileSwitch(idx) {
-      if (idx === activeFileIdx) return;
-      const currentF = packageFiles[activeFileIdx];
-      if (currentF && modifiedFiles[currentF.filename]) {
-        pendingFileSwitchIdx = idx;
-        document.getElementById("saveChangesModal").classList.remove("hidden");
-        return;
-      }
-      selectWorkspaceFile(idx);
-    }
-
-    function confirmSaveDiscard(shouldSave) {
-      document.getElementById("saveChangesModal").classList.add("hidden");
-      const currentF = packageFiles[activeFileIdx];
-
-      if (shouldSave && currentF) {
-        saveActiveFileEditsLocally();
-      } else if (currentF) {
-        modifiedFiles[currentF.filename] = false;
-        const modIndicator = document.getElementById("modStatusIndicator");
-        if (modIndicator) modIndicator.classList.add("hidden");
-      }
-
-      if (pendingFileSwitchIdx !== null) {
-        const target = pendingFileSwitchIdx;
-        pendingFileSwitchIdx = null;
-        selectWorkspaceFile(target);
-      }
-    }
-
-    function saveActiveFileEditsLocally() {
-      const f = packageFiles[activeFileIdx];
-      if (!f) return;
-      const ext = f.filename.split('.').pop().toLowerCase();
-
-      if (TEXT_EXTS.includes(ext)) {
-        fileContentsCache[f.filename] = document.getElementById("workspaceCodeViewer").value;
-      } else if (IMAGE_EXTS.includes(ext) && imageCanvas) {
-        fileContentsCache[f.filename] = imageCanvas.toDataURL("image/png");
-      }
-
-      modifiedFiles[f.filename] = false;
-      const modIndicator = document.getElementById("modStatusIndicator");
-      if (modIndicator) modIndicator.classList.add("hidden");
-      renderSidebarFiles();
-      alert("✓ Changes saved successfully in current session cache!");
-    }
-
-    // Drawing / Canvas tools for images
-    function setImageTool(tool) {
-      activeImageTool = tool;
-      const drawBtn = document.getElementById("toolDrawBtn");
-      const cropBtn = document.getElementById("toolCropBtn");
-      if (!drawBtn || !cropBtn) return;
-      if (tool === 'draw') {
-        drawBtn.className = "px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition";
-        cropBtn.className = "px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 font-bold transition";
-      } else {
-        cropBtn.className = "px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition";
-        drawBtn.className = "px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 font-bold transition";
-      }
-    }
-
-    function setupCanvasDrawingHandlers() {
-      if (!imageCanvas || !imageCtx) return;
-      let drawing = false;
-
-      imageCanvas.onmousedown = (e) => {
-        if (activeImageTool !== 'draw') return;
-        drawing = true;
-        const rect = imageCanvas.getBoundingClientRect();
-        const scaleX = imageCanvas.width / rect.width;
-        const scaleY = imageCanvas.height / rect.height;
-        imageCtx.beginPath();
-        imageCtx.moveTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
-        imageCtx.strokeStyle = "#38bdf8";
-        imageCtx.lineWidth = Math.max(4, imageCanvas.width / 180);
-        imageCtx.lineCap = "round";
-      };
-
-      imageCanvas.onmousemove = (e) => {
-        if (!drawing || activeImageTool !== 'draw') return;
-        const rect = imageCanvas.getBoundingClientRect();
-        const scaleX = imageCanvas.width / rect.width;
-        const scaleY = imageCanvas.height / rect.height;
-        imageCtx.lineTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
-        imageCtx.stroke();
-        markFileModified();
-      };
-
-      window.onmouseup = () => { drawing = false; };
-    }
-
-    function clearCanvasDrawings() {
-      if (!currentImageObj || !imageCtx || !imageCanvas) return;
-      imageCtx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
-      imageCtx.drawImage(currentImageObj, 0, 0);
-      markFileModified();
-    }
-
-    function applyVideoTrim() {
-      alert("✂️ Video timeline trimmed! (5-second edit applied)");
-      markFileModified();
-    }
-
-    function openAudioOverlayModal() {
-      const song = prompt("Enter audio track or background song name to overlay:", "Atmosphere_Theme_01.mp3");
-      if (song) {
-        alert(`🎵 Audio '${song}' mixed into project audio track.`);
-        markFileModified();
-      }
-    }
-
-    function changeVideoBackground() {
-      const color = prompt("Enter canvas background theme (e.g., #0b0f19 or Deep Navy):", "#0f172a");
-      if (color) {
-        alert(`🎨 Background canvas color set to: ${color}`);
-        markFileModified();
-      }
-    }
-
-    // =========================================================================
-    // REAL 4K SUPER HD AI UPSCALER PIPELINE
-    // =========================================================================
-    async function triggerSuperHdAiUpscale() {
-      const img = document.getElementById("workspaceImageEl");
-      if (!img) return;
-
-      const f = packageFiles[activeFileIdx];
-      const loader = document.getElementById("aiUpscalingLoader");
-      const badge = document.getElementById("hdEnhancedBadge");
-      const compareBtn = document.getElementById("compareHdBtn");
-      const enhanceBtn = document.getElementById("enhanceHdBtn");
-
-      if (superHdImageSrc) {
-        img.src = superHdImageSrc;
-        isShowingSuperHd = true;
-        badge.classList.remove("hidden");
-        compareBtn.classList.remove("hidden");
-        document.getElementById("compareBtnText").innerText = "Show Original";
-        return;
-      }
-
-      loader.classList.remove("hidden");
-
-      try {
-        const res = await fetch(`/api/enhance-image/${shareId}?file=${encodeURIComponent(f.filename)}&scale=4`, {
-          method: "POST"
-        });
-        const data = await res.json();
-
-        if (data.status === "success" && data.enhanced_url) {
-          superHdImageSrc = data.enhanced_url;
-          img.src = superHdImageSrc;
-          isShowingSuperHd = true;
-          document.getElementById("hdBadgeLabel").innerText = "REAL-ESRGAN 4X NEURAL 4K ACTIVE";
-        } else {
-          throw new Error(data.detail || "AI model upscaling failed.");
-        }
-
-        badge.classList.remove("hidden");
-        compareBtn.classList.remove("hidden");
-        enhanceBtn.classList.add("hidden");
-        document.getElementById("footerStatusText").innerText = "4K Super HD Upscaled Resolution Active (4x Native Pixels)";
-        
-      } catch(err) {
-        alert("Enhancement error: " + err.message);
-      } finally {
-        loader.classList.add("hidden");
-      }
-    }
-
-    function toggleBeforeAfter() {
-      const img = document.getElementById("workspaceImageEl");
-      const compareText = document.getElementById("compareBtnText");
-      const badge = document.getElementById("hdEnhancedBadge");
-
-      if (isShowingSuperHd) {
-        img.src = originalImageSrc;
-        isShowingSuperHd = false;
-        compareText.innerText = "Show 4K Super HD";
-        badge.classList.add("hidden");
-      } else {
-        img.src = superHdImageSrc;
-        isShowingSuperHd = true;
-        compareText.innerText = "Show Original";
-        badge.classList.remove("hidden");
-      }
-    }
-
-    function resetToOriginal() {
-      currentZoom = 1.0;
-      const activeMedia = getActiveMediaEl();
-      if (activeMedia) {
-        activeMedia.style.transformOrigin = "50% 50%";
-        activeMedia.style.transform = "scale(1)";
-      }
-      applyZoom();
-      if (isShowingSuperHd) {
-        toggleBeforeAfter();
-      }
     }
 
     function attachFocalPointZoom(el) {
@@ -1237,7 +934,9 @@
         const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
         el.style.transformOrigin = `${x}% ${y}%`;
         if (currentZoom > 1.2) {
-          resetToOriginal();
+          currentZoom = 1.0;
+          el.style.transformOrigin = "50% 50%";
+          applyZoom();
         } else {
           currentZoom = 2.2;
           applyZoom();
@@ -1316,10 +1015,9 @@
         const ext = f.filename.split('.').pop().toLowerCase();
         const icon = IMAGE_EXTS.includes(ext) ? '🖼️' : VIDEO_EXTS.includes(ext) ? '🎬' : ext === 'pdf' ? '📑' : TEXT_EXTS.includes(ext) ? '📝' : '📦';
         const isActive = idx === activeFileIdx;
-        const isMod = modifiedFiles[f.filename];
 
         return `
-          <div onclick="attemptFileSwitch(${idx})" class="p-2.5 rounded-xl transition flex items-center justify-between cursor-pointer sidebar-file-item ${isActive ? 'sidebar-file-active' : ''}">
+          <div onclick="selectWorkspaceFile(${idx})" class="p-2.5 rounded-xl transition flex items-center justify-between cursor-pointer sidebar-file-item ${isActive ? 'sidebar-file-active' : ''}">
             <div class="flex items-center gap-2 truncate">
               <span class="text-sm">${icon}</span>
               <div class="truncate">
@@ -1327,7 +1025,6 @@
                 <span class="text-[9px] font-mono opacity-60">${f.filesize_mb} MB</span>
               </div>
             </div>
-            ${isMod ? '<span class="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Unsaved edits"></span>' : ''}
           </div>
         `;
       }).join('');
@@ -1336,10 +1033,7 @@
     async function selectWorkspaceFile(idx) {
       activeFileIdx = idx;
       renderSidebarFiles();
-      resetToOriginal();
-
-      superHdImageSrc = "";
-      isShowingSuperHd = false;
+      currentZoom = 1.0;
 
       const f = packageFiles[idx];
       document.getElementById("activeWorkspaceFileName").innerText = f.filename;
@@ -1347,43 +1041,22 @@
       const codeViewer = document.getElementById("workspaceCodeViewer");
       const media = document.getElementById("workspaceMediaViewer");
       const zoomBar = document.getElementById("workspaceZoomBar");
-      const enhanceBtn = document.getElementById("enhanceHdBtn");
-      const compareBtn = document.getElementById("compareHdBtn");
-      const resetBtn = document.getElementById("resetOriginalBtn");
-      const imageCanvasToolbar = document.getElementById("imageCanvasToolbar");
-      const videoStudioToolbar = document.getElementById("videoStudioToolbar");
       const footerStatus = document.getElementById("footerStatusText");
       const formatBadge = document.getElementById("formatTagBadge");
-      const modIndicator = document.getElementById("modStatusIndicator");
       const ext = f.filename.split('.').pop().toLowerCase();
 
       if (formatBadge) formatBadge.innerText = ext.toUpperCase();
-      compareBtn.classList.add("hidden");
-      if (imageCanvasToolbar) imageCanvasToolbar.classList.add("hidden");
-      if (videoStudioToolbar) videoStudioToolbar.classList.add("hidden");
-
-      if (modifiedFiles[f.filename]) {
-        if (modIndicator) modIndicator.classList.remove("hidden");
-      } else {
-        if (modIndicator) modIndicator.classList.add("hidden");
-      }
 
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
 
-      // Check if file type is supported for preview (Images, Videos, PDF, Notes/Text)
       const isSupportedPreview = IMAGE_EXTS.includes(ext) || VIDEO_EXTS.includes(ext) || ext === 'pdf' || TEXT_EXTS.includes(ext);
 
       if (!isSupportedPreview) {
-        // FLASH MESSAGE ON CONTENT SCREEN FOR UNSUPPORTED FORMATS
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         zoomBar.classList.add("hidden");
         zoomBar.classList.remove("flex");
-        enhanceBtn.classList.add("hidden");
-        enhanceBtn.classList.remove("flex");
-        resetBtn.classList.add("hidden");
-        resetBtn.classList.remove("flex");
 
         media.innerHTML = `
           <div class="text-center space-y-4 p-8 max-w-md mx-auto animate-pulse">
@@ -1404,60 +1077,36 @@
         return;
       }
 
-      // 1. High-Resolution Visual Image (FOCAL POINT ZOOM + EDITABLE CANVAS + 4K AI)
+      // 1. High-Resolution Visual Image (Pure View-Only with Zoom & Big Screen)
       if (IMAGE_EXTS.includes(ext)) {
-        originalImageSrc = fileContentsCache[f.filename] || streamUrl;
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         zoomBar.classList.remove("hidden");
         zoomBar.classList.add("flex");
-        enhanceBtn.classList.remove("hidden");
-        enhanceBtn.classList.add("flex");
-        resetBtn.classList.remove("hidden");
-        resetBtn.classList.add("flex");
-        if (imageCanvasToolbar) imageCanvasToolbar.classList.remove("hidden");
         
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
-            <canvas id="workspaceImageCanvas" class="max-h-[500px] sm:max-h-[540px] max-w-[96%] object-contain rounded-xl shadow-2xl border border-white/10 select-none"></canvas>
+            <img id="workspaceImageEl" src="${streamUrl}" class="media-high-clarity max-h-[500px] sm:max-h-[540px] max-w-[96%] object-contain rounded-xl shadow-2xl border border-white/10 select-none">
           </div>
         `;
         
-        imageCanvas = document.getElementById("workspaceImageCanvas");
-        imageCtx = imageCanvas.getContext("2d");
-
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          currentImageObj = img;
-          imageCanvas.width = img.naturalWidth || img.width;
-          imageCanvas.height = img.naturalHeight || img.height;
-          imageCtx.drawImage(img, 0, 0);
-          setupCanvasDrawingHandlers();
-          attachFocalPointZoom(imageCanvas);
-        };
-        img.src = originalImageSrc;
+        const img = document.getElementById("workspaceImageEl");
+        attachFocalPointZoom(img);
         
-        if (footerStatus) footerStatus.innerText = "Image Studio Active • Draw, annotate, crop, or enhance to 4K";
+        if (footerStatus) footerStatus.innerText = "Image View Active • Zoom & Inspect";
         return;
       }
 
-      enhanceBtn.classList.add("hidden");
-      enhanceBtn.classList.remove("flex");
-
-      // 2. Video Player & Studio (Trim / Audio / BG overlay)
+      // 2. Video Player (High-Fidelity Audio/Video View-Only)
       if (VIDEO_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         zoomBar.classList.remove("hidden");
         zoomBar.classList.add("flex");
-        resetBtn.classList.remove("hidden");
-        resetBtn.classList.add("flex");
-        if (videoStudioToolbar) videoStudioToolbar.classList.remove("hidden");
 
         media.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
-            <video id="workspaceVideoEl" src="${streamUrl}" controls playsinline 
+            <video id="workspaceVideoEl" src="${streamUrl}" controls playsinline preload="auto"
                    style="transform-origin: 50% 50%; transform: scale(1);"
                    class="w-full h-full max-h-[520px] sm:max-h-[560px] object-contain rounded-xl shadow-2xl bg-black select-none"></video>
           </div>
@@ -1465,14 +1114,12 @@
         const vidEl = document.getElementById("workspaceVideoEl");
         attachFocalPointZoom(vidEl);
 
-        if (footerStatus) footerStatus.innerText = "Video Studio Active • Trim, add audio track or change canvas";
+        if (footerStatus) footerStatus.innerText = "Video Player Active";
         return;
       }
 
       zoomBar.classList.add("hidden");
       zoomBar.classList.remove("flex");
-      resetBtn.classList.add("hidden");
-      resetBtn.classList.remove("flex");
 
       // 3. PDF Documents
       if (ext === 'pdf') {
@@ -1485,25 +1132,19 @@
         return;
       }
 
-      // 4. Plaintext & Notes / Code / Notebooks Viewer (Real-Time Editable)
+      // 4. Notes / Code Viewer (Read-Only)
       if (TEXT_EXTS.includes(ext)) {
         media.classList.add("hidden");
         codeViewer.classList.remove("hidden");
-
-        if (fileContentsCache[f.filename] !== undefined) {
-          codeViewer.value = fileContentsCache[f.filename];
-        } else {
-          codeViewer.value = "Loading note buffer...";
-          try {
-            const res = await fetch(streamUrl);
-            if (!res.ok) throw new Error("Could not read stream");
-            const text = await res.text();
-            fileContentsCache[f.filename] = text;
-            codeViewer.value = text || "";
-            if (footerStatus) footerStatus.innerText = "Notes / Code Studio Active (Real-time Editable)";
-          } catch(e) {
-            codeViewer.value = `// Preview unavailable: ${e.message}`;
-          }
+        codeViewer.value = "Loading text buffer...";
+        try {
+          const res = await fetch(streamUrl);
+          if (!res.ok) throw new Error("Could not read stream");
+          const text = await res.text();
+          codeViewer.value = text || "";
+          if (footerStatus) footerStatus.innerText = "Notes / Code Viewer Active (Read-Only)";
+        } catch(e) {
+          codeViewer.value = `// Preview unavailable: ${e.message}`;
         }
         return;
       }
@@ -1513,44 +1154,6 @@
     function downloadActiveFile() {
       const f = packageFiles[activeFileIdx];
       if (!f) return;
-
-      const ext = f.filename.split('.').pop().toLowerCase();
-
-      // If user modified a text/code file, download the edited version directly
-      if (TEXT_EXTS.includes(ext) && fileContentsCache[f.filename] !== undefined && modifiedFiles[f.filename]) {
-        const blob = new Blob([fileContentsCache[f.filename]], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Edited_${f.filename}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return;
-      }
-
-      // If user drew or cropped an image, download edited canvas
-      if (IMAGE_EXTS.includes(ext) && imageCanvas && modifiedFiles[f.filename]) {
-        const a = document.createElement("a");
-        a.href = imageCanvas.toDataURL("image/png");
-        a.download = `Edited_${f.filename}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
-
-      if (isShowingSuperHd && superHdImageSrc) {
-        const a = document.createElement("a");
-        a.href = superHdImageSrc;
-        a.download = `4K_Enhanced_${f.filename}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
-
       const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
       const tokenParam = currentToken ? `&access_token=${encodeURIComponent(currentToken)}` : "";
       window.location.href = `/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}${tokenParam}`;
@@ -1574,12 +1177,6 @@
         for (let i = 0; i < packageFiles.length; i++) {
           const f = packageFiles[i];
           btn.innerHTML = `<span>⏳</span><span>Packing ${i + 1}/${packageFiles.length}: ${f.filename}...</span>`;
-
-          const ext = f.filename.split('.').pop().toLowerCase();
-          if (TEXT_EXTS.includes(ext) && fileContentsCache[f.filename] !== undefined && modifiedFiles[f.filename]) {
-            zip.file(f.filename, fileContentsCache[f.filename]);
-            continue;
-          }
 
           const streamUrl = `/api/stream/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}`;
           const res = await fetch(streamUrl);
