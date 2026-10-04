@@ -56,6 +56,17 @@
       backface-visibility: hidden;
     }
 
+    /* Hand Grab & Catch Cursor Engine */
+    .hand-grab-surface {
+      cursor: grab !important;
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+    }
+    .hand-grab-surface:active,
+    .hand-grabbing-active {
+      cursor: grabbing !important;
+    }
+
     /* Sidebar Item Styling */
     .sidebar-file-item {
       background: rgba(255, 255, 255, 0.035);
@@ -75,7 +86,7 @@
       box-shadow: 0 4px 18px -2px rgba(99, 102, 241, 0.4) !important;
     }
 
-    /* High-Contrast Action Buttons */
+    /* Action Buttons */
     .btn-download-this {
       background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
       color: #ffffff !important;
@@ -197,13 +208,6 @@
       color: #64748b !important;
     }
 
-    /* Hand Zoom / Inspection Indicator */
-    .image-zoom-hand {
-      cursor: zoom-in !important;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-
     /* Full Big Screen Mode Styles */
     #contentStageBox:fullscreen,
     #contentStageBox:-webkit-full-screen {
@@ -223,40 +227,6 @@
       width: 100vw !important;
       height: 94vh !important;
       max-height: 94vh !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-
-    #contentStageBox:fullscreen #workspaceImageEl,
-    #contentStageBox:-webkit-full-screen #workspaceImageEl {
-      max-height: 94vh !important;
-      max-width: 96vw !important;
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain !important;
-    }
-
-    #contentStageBox:fullscreen video,
-    #contentStageBox:-webkit-full-screen video {
-      max-height: 94vh !important;
-      max-width: 96vw !important;
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain !important;
-    }
-
-    #contentStageBox:fullscreen iframe,
-    #contentStageBox:-webkit-full-screen iframe {
-      width: 96vw !important;
-      height: 92vh !important;
-      max-height: 92vh !important;
-    }
-
-    #contentStageBox:fullscreen pre,
-    #contentStageBox:-webkit-full-screen pre {
-      width: 92vw !important;
-      max-height: 90vh !important;
     }
 
     .fs-floating-controls {
@@ -271,10 +241,23 @@
       z-index: 50;
     }
 
-    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 8px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(2, 132, 199, 0.35); border-radius: 8px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(2, 132, 199, 0.65); }
+    /* Visible High-Contrast Scrollbars for Both Directions */
+    .custom-scroll {
+      overflow: auto !important;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(56, 189, 248, 0.5) rgba(0, 0, 0, 0.3);
+    }
+    .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.25); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.45); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.85); }
+    
+    body.light-theme .custom-scroll {
+      scrollbar-color: rgba(2, 132, 199, 0.5) rgba(224, 242, 254, 0.6);
+    }
+    body.light-theme .custom-scroll::-webkit-scrollbar-track { background: rgba(224, 242, 254, 0.6); }
+    body.light-theme .custom-scroll::-webkit-scrollbar-thumb { background: rgba(2, 132, 199, 0.5); }
+    body.light-theme .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(2, 132, 199, 0.8); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white relative">
@@ -465,7 +448,7 @@
       </div>
 
       <!-- ========================================================================= -->
-      <!-- 2. NON-PAYMENT TRANSFERS: VIEW-ONLY WORKSPACE (FULL SIZE PROPORTIONAL)    -->
+      <!-- 2. NON-PAYMENT TRANSFERS: VIEW-ONLY WORKSPACE (WITH HAND PAN & SCROLLBAR) -->
       <!-- ========================================================================= -->
       {% else %}
 
@@ -490,7 +473,7 @@
               <h3 class="text-xs font-black uppercase tracking-wider text-sky-500 flex items-center gap-1.5">
                 <span>✨</span> Zero-Knowledge Transfer Preview
               </h3>
-              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Zoom, inspect, and download deliverables in their original clarity.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">High-resolution preview stage. Click and drag with the hand to pan, scroll to navigate, or zoom to inspect.</p>
             </div>
 
             <!-- PROMINENT HIGH-CONTRAST DOWNLOAD BUTTONS -->
@@ -522,10 +505,10 @@
               </div>
             </div>
 
-            <!-- Right: View-Only Stage (Full Proportional Scale) -->
+            <!-- Right: View-Only Stage -->
             <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[620px] sm:min-h-[680px]">
               
-              <!-- Toolbar above the stage (Only Zoom & Big Screen) -->
+              <!-- Toolbar above the stage (Zoom & Big Screen Only) -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
                 <div class="flex items-center gap-2 truncate max-w-xs sm:max-w-md">
                   <span id="activeWorkspaceFileName" class="text-xs font-mono font-bold truncate">Select a file</span>
@@ -538,9 +521,10 @@
                     <button type="button" onclick="zoomImage(-0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold cursor-pointer" title="Zoom Out">-</button>
                     <span id="zoomPercentDisplay" class="px-2 text-[10px] font-bold min-w-[46px] text-center text-sky-600">100%</span>
                     <button type="button" onclick="zoomImage(0.25)" class="px-2.5 py-1 hover:bg-sky-500/10 rounded-lg transition font-bold cursor-pointer" title="Zoom In">+</button>
+                    <button type="button" onclick="resetToOriginal()" class="px-2 py-1 text-[10px] text-slate-300 hover:text-white rounded-lg transition font-bold cursor-pointer" title="Reset Zoom">Fit</button>
                   </div>
 
-                  <!-- Big Screen Button Retained -->
+                  <!-- Big Screen Button -->
                   <button id="fullscreenToggleBtn" type="button" onclick="toggleFullScreen()" class="px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Toggle Fullscreen View">
                     <span id="fsIcon">⛶</span>
                     <span class="hidden sm:inline">Big Screen</span>
@@ -548,7 +532,7 @@
                 </div>
               </div>
 
-              <!-- High-Resolution Full-Stage Box (Generous Viewport Bounds) -->
+              <!-- High-Resolution Full-Stage Box -->
               <div id="contentStageBox" class="flex-1 w-full relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#050811] border border-sky-500/20 min-h-[520px] sm:min-h-[600px] p-2 sm:p-4">
                 
                 <!-- Floating Controls Overlay for Fullscreen Mode -->
@@ -556,14 +540,15 @@
                   <button type="button" onclick="zoomImage(-0.25)" class="px-2 py-1 text-slate-200 hover:text-white font-bold text-xs cursor-pointer">-</button>
                   <span id="fsZoomPercent" class="text-xs font-mono font-bold text-sky-400 min-w-[46px] text-center">100%</span>
                   <button type="button" onclick="zoomImage(0.25)" class="px-2 py-1 text-slate-200 hover:text-white font-bold text-xs cursor-pointer">+</button>
+                  <button type="button" onclick="resetToOriginal()" class="px-2 py-1 text-xs font-bold text-slate-200 hover:text-white cursor-pointer">Fit</button>
                   <button type="button" onclick="toggleFullScreen()" class="px-2.5 py-1 text-xs font-bold text-rose-400 hover:bg-white/10 rounded-xl transition cursor-pointer">✕ Exit</button>
                 </div>
 
                 <!-- Read-Only Code & Notebook Viewer -->
                 <textarea id="workspaceCodeViewer" readonly class="hidden w-full h-full min-h-[520px] max-h-[70vh] p-4 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text m-0" placeholder="Viewing content..."></textarea>
 
-                <!-- Media Viewer (Scales to Fill the Box Beautifully) -->
-                <div id="workspaceMediaViewer" class="w-full h-full flex-1 flex flex-col items-center justify-center overflow-hidden relative select-none min-h-[500px]"></div>
+                <!-- Media Viewer with Hand Grab & Scrollbars -->
+                <div id="workspaceMediaViewer" class="w-full h-full flex-1 flex flex-col items-center justify-center overflow-auto custom-scroll relative select-none min-h-[500px]"></div>
               </div>
 
               <div class="flex items-center justify-between text-[10px] opacity-75 font-mono pt-1">
@@ -874,71 +859,119 @@
     const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico'];
     const VIDEO_EXTS = ['mp4', 'mov', 'webm', 'mkv', 'avi'];
 
-    function getActiveMediaEl() {
-      return document.getElementById("workspaceImageEl") || document.getElementById("workspaceVideoEl");
-    }
-
     function applyZoom() {
-      const activeMedia = getActiveMediaEl();
+      const img = document.getElementById("workspaceImageEl");
+      const wrapper = document.getElementById("imageWrapperEl");
+      const container = document.getElementById("workspaceMediaViewer");
+      const vid = document.getElementById("workspaceVideoEl");
+
       const zoomText = document.getElementById("zoomPercentDisplay");
       const fsZoomText = document.getElementById("fsZoomPercent");
-      if (activeMedia) {
-        activeMedia.style.transform = `scale(${currentZoom})`;
-      }
       const label = `${Math.round(currentZoom * 100)}%`;
       if (zoomText) zoomText.innerText = label;
       if (fsZoomText) fsZoomText.innerText = label;
+
+      if (img && wrapper && container) {
+        const naturalW = img.naturalWidth || 800;
+        const naturalH = img.naturalHeight || 600;
+        const baseW = Math.max(300, container.clientWidth - 40);
+        const baseH = Math.max(300, container.clientHeight - 40);
+        const aspect = naturalW / naturalH;
+
+        let targetW, targetH;
+        if (baseW / baseH > aspect) {
+          targetH = baseH;
+          targetW = baseH * aspect;
+        } else {
+          targetW = baseW;
+          targetH = baseW / aspect;
+        }
+
+        const scaledW = Math.round(targetW * currentZoom);
+        const scaledH = Math.round(targetH * currentZoom);
+
+        img.style.width = `${scaledW}px`;
+        img.style.height = `${scaledH}px`;
+        img.style.maxWidth = 'none';
+        img.style.maxHeight = 'none';
+
+        wrapper.style.width = `${scaledW}px`;
+        wrapper.style.height = `${scaledH}px`;
+      } else if (vid) {
+        vid.style.transform = `scale(${currentZoom})`;
+      }
     }
 
     function zoomImage(delta) {
       currentZoom = Math.min(6.0, Math.max(0.4, Math.round((currentZoom + delta) * 10) / 10));
-      if (currentZoom <= 1.0) {
-        const activeMedia = getActiveMediaEl();
-        if (activeMedia) activeMedia.style.transformOrigin = "50% 50%";
-      }
       applyZoom();
     }
 
-    function attachFocalPointZoom(el) {
-      if (!el) return;
-      el.classList.add("image-zoom-hand");
-      el.style.transition = "transform 0.15s ease-out, transform-origin 0.2s cubic-bezier(0.2, 0, 0, 1)";
+    function resetToOriginal() {
+      currentZoom = 1.0;
+      applyZoom();
+      const container = document.getElementById("workspaceMediaViewer");
+      if (container) {
+        container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+        container.scrollTop = (container.scrollHeight - container.clientHeight) / 2;
+      }
+    }
 
-      el.addEventListener("mousemove", (e) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-          const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
-          if (currentZoom > 1.05) {
-            el.style.transformOrigin = `${x}% ${y}%`;
-          }
-        }
+    // Hand Catch & Drag Pan Engine
+    function setupHandPan(container) {
+      if (!container) return;
+      let isDown = false;
+      let startX, startY;
+      let scrollLeft, scrollTop;
+
+      container.classList.add("hand-grab-surface");
+
+      container.addEventListener("mousedown", (e) => {
+        // Only trigger on left click
+        if (e.button !== 0) return;
+        isDown = true;
+        container.classList.add("hand-grabbing-active");
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
       });
 
-      el.addEventListener("wheel", (e) => {
+      container.addEventListener("mouseleave", () => {
+        isDown = false;
+        container.classList.remove("hand-grabbing-active");
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDown = false;
+        if (container) container.classList.remove("hand-grabbing-active");
+      });
+
+      container.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
         e.preventDefault();
-        const rect = el.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-          const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
-          el.style.transformOrigin = `${x}% ${y}%`;
-        }
-        const delta = e.deltaY < 0 ? 0.25 : -0.25;
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = (x - startX) * 1.5;
+        const walkY = (y - startY) * 1.5;
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
+      });
+
+      // Smooth Mouse Wheel Zoom
+      container.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
         zoomImage(delta);
       }, { passive: false });
 
-      el.addEventListener("dblclick", (e) => {
+      // Double Click Toggle Zoom
+      container.addEventListener("dblclick", (e) => {
         e.preventDefault();
-        const rect = el.getBoundingClientRect();
-        const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-        const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
-        el.style.transformOrigin = `${x}% ${y}%`;
-        if (currentZoom > 1.2) {
-          currentZoom = 1.0;
-          el.style.transformOrigin = "50% 50%";
-          applyZoom();
+        if (currentZoom > 1.1) {
+          resetToOriginal();
         } else {
-          currentZoom = 2.2;
+          currentZoom = 2.0;
           applyZoom();
         }
       });
@@ -1077,7 +1110,7 @@
         return;
       }
 
-      // 1. High-Resolution Visual Image (Scales to Fill Stage Naturally Like Native Photo Viewers)
+      // 1. High-Resolution Visual Image (Hand Pan + Scrollbar Enabled)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
@@ -1085,15 +1118,18 @@
         zoomBar.classList.add("flex");
         
         media.innerHTML = `
-          <div class="w-full h-full flex-1 flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
-            <img id="workspaceImageEl" src="${streamUrl}" class="media-high-clarity w-full h-full min-h-[420px] sm:min-h-[520px] max-h-[68vh] lg:max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10 select-none">
+          <div id="imageWrapperEl" class="m-auto flex items-center justify-center transition-all duration-75 relative">
+            <img id="workspaceImageEl" src="${streamUrl}" class="media-high-clarity object-contain rounded-xl shadow-2xl border border-white/10 select-none">
           </div>
         `;
         
         const img = document.getElementById("workspaceImageEl");
-        attachFocalPointZoom(img);
+        img.onload = () => {
+          applyZoom();
+          setupHandPan(media);
+        };
         
-        if (footerStatus) footerStatus.innerText = "Image View Active • Zoom & Inspect";
+        if (footerStatus) footerStatus.innerText = "Image View Active • Drag to Pan • Wheel to Zoom";
         return;
       }
 
@@ -1111,8 +1147,6 @@
                    class="w-full h-full min-h-[420px] sm:min-h-[520px] max-h-[68vh] lg:max-h-[75vh] object-contain rounded-xl shadow-2xl bg-black select-none"></video>
           </div>
         `;
-        const vidEl = document.getElementById("workspaceVideoEl");
-        attachFocalPointZoom(vidEl);
 
         if (footerStatus) footerStatus.innerText = "Video Player Active";
         return;
@@ -1203,6 +1237,13 @@
         btn.innerHTML = originalText;
       }
     }
+
+    // Window Resize Handler
+    window.addEventListener("resize", () => {
+      if (IMAGE_EXTS.includes(packageFiles[activeFileIdx]?.filename.split('.').pop().toLowerCase())) {
+        applyZoom();
+      }
+    });
 
     // DOM Ready Checker
     window.addEventListener("DOMContentLoaded", async () => {
