@@ -1223,9 +1223,10 @@ async def terms_page(request: Request):
 async def privacy_page(request: Request):
     return render_template("privacy.html", request)
 
+@app.get("/products/{slug}", response_class=HTMLResponse)
 @app.get("/products/transfer", response_class=HTMLResponse)
-async def product_transfer_page(request: Request):
-    return render_template("product_transfer.html", request)
+async def product_detail_page(request: Request, slug: str = "transfer"):
+    return render_template("product_transfer.html", request, {"active_slug": slug})
 
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):

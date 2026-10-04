@@ -3,17 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zephyr Transfer — Zero-Knowledge Edge File Delivery</title>
+  <title>Zephyr Ecosystem — Product Documentation & Guide</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="min-h-screen bg-[#02050e] text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between">
+<body class="min-h-screen bg-[#030712] text-slate-200 selection:bg-indigo-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- EXACT HOMEPAGE ATMOSPHERIC BACKGROUND (GLOW NEBULAS & FLOATING ASSET TILES)-->
+  <!-- ========================================================================= -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <!-- Top Indigo/Cyan Cosmic Aurora (Matches Homepage) -->
+    <div class="absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full bg-gradient-to-b from-indigo-600/25 via-sky-500/12 to-transparent blur-[140px]"></div>
+    <!-- Left Atmosphere -->
+    <div class="absolute top-[28%] -left-[180px] w-[650px] h-[650px] rounded-full bg-sky-500/10 blur-[160px]"></div>
+    <!-- Right Studio Violet -->
+    <div class="absolute top-[52%] -right-[180px] w-[700px] h-[700px] rounded-full bg-purple-600/12 blur-[160px]"></div>
+    <!-- Bottom Nebula -->
+    <div class="absolute bottom-[-100px] left-[25%] w-[800px] h-[450px] rounded-full bg-indigo-600/15 blur-[150px]"></div>
+
+    <!-- Floating Homepage Asset Badge: Sculpture_Still_8K.dng -->
+    <div class="absolute top-24 left-8 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500/30 to-rose-500/30 border border-white/10 flex items-center justify-center text-sm">🌸</div>
+      <div class="text-left font-mono">
+        <span class="block text-xs font-bold text-white">Sculpture_Still_8K.dng</span>
+        <span class="text-[10px] text-amber-400">14.2 GB • RAW</span>
+      </div>
+    </div>
+
+    <!-- Floating Homepage Asset Badge: Lookbook_SS26.tif -->
+    <div class="absolute top-72 right-10 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500/30 to-indigo-500/30 border border-white/10 flex items-center justify-center text-sm">🏔️</div>
+      <div class="text-left font-mono">
+        <span class="block text-xs font-bold text-white">Lookbook_SS26.tif</span>
+        <span class="text-[10px] text-sky-400">16-Bit Master</span>
+      </div>
+    </div>
+
+    <!-- Floating Homepage Asset Badge: Zephyr_Archive_v01 -->
+    <div class="absolute bottom-32 left-16 hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35 font-mono text-[11px] text-slate-300">
+      <span>📁</span>
+      <span>Zephyr_Archive_v01</span>
+    </div>
+  </div>
 
   <!-- TOP OBSIDIAN NAVIGATION -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 flex items-center justify-center p-1.5 shadow-lg shadow-sky-500/10">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10">
           <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
             <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
             <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
@@ -28,139 +66,447 @@
           ← Back to Hub
         </a>
         <a href="/" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:opacity-95 text-xs font-bold text-white shadow-lg shadow-sky-500/20 transition">
-          Start a Transfer
+          Start Transfer
         </a>
       </div>
     </div>
   </header>
 
+  <!-- ========================================================================= -->
+  <!-- INTERACTIVE OBSIDIAN PRODUCT SELECTOR DOCK                                -->
+  <!-- ========================================================================= -->
+  <div class="max-w-5xl mx-auto px-6 pt-10 w-full">
+    <div class="p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto custom-scroll shadow-2xl">
+      <button onclick="switchProduct('transfer')" id="tab-transfer" class="product-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30">
+        <span>⚡</span> <span>Zephyr Transfer</span>
+      </button>
+      <button onclick="switchProduct('vault')" id="tab-vault" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
+        <span>🗄️</span> <span>Drive Vault</span>
+      </button>
+      <button onclick="switchProduct('ai-studio')" id="tab-ai-studio" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
+        <span>✨</span> <span>4K AI Studio</span>
+      </button>
+      <button onclick="switchProduct('esign')" id="tab-esign" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
+        <span>✍️</span> <span>E-Sign Studio</span>
+      </button>
+      <button onclick="switchProduct('escrow')" id="tab-escrow" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
+        <span>💳</span> <span>Paywall Escrow</span>
+      </button>
+      <button onclick="switchProduct('portal')" id="tab-portal" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
+        <span>📥</span> <span>Inbound Portal</span>
+      </button>
+    </div>
+  </div>
+
   <!-- MAIN DOCUMENTATION CONTAINER -->
-  <main class="max-w-5xl mx-auto px-6 py-16 space-y-16">
-    
-    <!-- Hero Banner -->
-    <div class="text-center space-y-4 max-w-3xl mx-auto">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-mono font-bold">
-        <span>⚡</span> Core Product Specification
-      </div>
-      <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-        Zephyr Transfer. <br>
-        <span class="bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-          Zero-Knowledge Client Delivery.
-        </span>
-      </h1>
-      <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
-        Built for high-resolution video creators, independent VFX artists, and privacy-conscious teams needing to deliver large master assets without data harvesting, link throttling, or compression.
-      </p>
-    </div>
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-16 w-full">
 
-    <!-- 3 Core Architecture Pillars -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
-        <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🛡️</div>
-        <h3 class="text-sm font-black text-white">Client AES-256 Hashing</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Files are encrypted before transit. Decryption keys stay within your link fragment and never touch our database servers.
+    <!-- 1. ZEPHYR TRANSFER SECTION -->
+    <div id="section-transfer" class="product-section space-y-12">
+      <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-mono font-bold">
+          <span>⚡</span> Transfer Architecture
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          Zephyr Transfer. <br>
+          <span class="bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">Zero-Knowledge Client Delivery.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Engineered for high-resolution video creators and independent VFX artists who need to send gigabytes of master assets without bandwidth throttling or server-side retention.
         </p>
       </div>
 
-      <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">🚀</div>
-        <h3 class="text-sm font-black text-white">Cloudflare R2 Direct Pipe</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Transfers bypass origin bottlenecks by chunk-streaming directly to worldwide edge buckets with 0 egress fees.
-        </p>
+      <!-- Pillars -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🛡️</div>
+          <h3 class="text-sm font-black text-white">Client AES-256 Hashing</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Files are encrypted in-browser before transit. Keys reside solely in your URL link fragment.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">🚀</div>
+          <h3 class="text-sm font-black text-white">Cloudflare R2 Direct Pipe</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Direct multi-chunk streaming straight to global edge nodes with 0 origin server bottlenecks.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/25 flex items-center justify-center text-lg">🔥</div>
+          <h3 class="text-sm font-black text-white">Burn-on-Read Shredding</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Automatically purge and unmap storage buckets the moment the recipient completes their first download.</p>
+        </div>
       </div>
 
-      <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/25 flex items-center justify-center text-lg">💳</div>
-        <h3 class="text-sm font-black text-white">Pay-to-Unlock Escrow</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Lock deliverables behind payment. Clients inspect previews on the anti-screenshot viewer, pay via card or UPI, and unlock original files.
-        </p>
-      </div>
-    </div>
-
-    <!-- Step-by-Step "How to Use" Guide -->
-    <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-8">
-      <div class="border-b border-white/10 pb-4">
-        <h2 class="text-xl font-black text-white flex items-center gap-2.5">
-          <span>📖</span> How to Use Zephyr Transfer
-        </h2>
-        <p class="text-xs text-slate-400 mt-1">Follow this sequential workflow to deliver your files:</p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
-          <span class="px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 01</span>
-          <h4 class="font-bold text-white text-sm">Select Your Files or Folders</h4>
-          <p class="text-slate-400 leading-relaxed">
-            Drag and drop your footage, archives, or folder trees into the transfer hub. Zephyr maintains exact nested directory paths.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
-          <span class="px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 02</span>
-          <h4 class="font-bold text-white text-sm">Choose Delivery Mode</h4>
-          <p class="text-slate-400 leading-relaxed">
-            Select <strong>Get link</strong> for instant shareable URLs, or <strong>Send email</strong> to dispatch secure download links to your client.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
-          <span class="px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 03</span>
-          <h4 class="font-bold text-white text-sm">Configure Security & Lifespan</h4>
-          <p class="text-slate-400 leading-relaxed">
-            Set link expiry (from 1 hour to 30 days) and optionally enable <strong>Burn-on-Read</strong> to automatically destroy files after the initial download.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
-          <span class="px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 04</span>
-          <h4 class="font-bold text-white text-sm">Add Deliverable Escrow</h4>
-          <p class="text-slate-400 leading-relaxed">
-            Toggle <strong>Paywall</strong> and enter your invoice amount. Recipients must settle payment before downloading original uncompressed files.
-          </p>
+      <!-- How to Use -->
+      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Zephyr Transfer</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 1</span>
+            <h4 class="font-bold text-white text-sm">Upload Deliverables</h4>
+            <p class="text-slate-400">Drag files or complete folders directly into the transfer card.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 2</span>
+            <h4 class="font-bold text-white text-sm">Choose Delivery Method</h4>
+            <p class="text-slate-400">Select "Get link" for instant copying or "Send email" for automated notifications.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 3</span>
+            <h4 class="font-bold text-white text-sm">Security Controls</h4>
+            <p class="text-slate-400">Toggle Burn-on-Read or customize link expiry up to 30 days.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 4</span>
+            <h4 class="font-bold text-white text-sm">One-Click Dispatch</h4>
+            <p class="text-slate-400">Click Transfer. Deliverables upload directly to Cloudflare R2 edge buckets.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Technical Specifications Table -->
-    <div class="space-y-4">
-      <h3 class="text-lg font-black text-white">Technical Specifications</h3>
-      <div class="overflow-x-auto rounded-2xl border border-white/10">
+    <!-- 2. ZEPHYR DRIVE VAULT SECTION -->
+    <div id="section-vault" class="product-section hidden space-y-12">
+      <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-mono font-bold">
+          <span>🗄️</span> Permanent Cloud Storage
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          Zephyr Drive Vault. <br>
+          <span class="bg-gradient-to-r from-indigo-400 via-sky-300 to-teal-400 bg-clip-text text-transparent">Encrypted Personal Storage Hub.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Persistent, zero-knowledge cloud drive featuring folder hierarchy management, inline media streaming, and granular file permissions.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📁</div>
+          <h3 class="text-sm font-black text-white">Full Folder Hierarchy</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Organize complex project directory trees with instant drag-and-drop file sorting.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🔒</div>
+          <h3 class="text-sm font-black text-white">Zero-Knowledge Metadata</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">File names and folder headers are encrypted client-side using Supabase Vault tokens.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-400/25 flex items-center justify-center text-lg">⚡</div>
+          <h3 class="text-sm font-black text-white">Instant Resumable Sync</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Uploads automatically resume if your connection drops mid-transfer.</p>
+        </div>
+      </div>
+
+      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Drive Vault</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 1</span>
+            <h4 class="font-bold text-white text-sm">Access Your Vault</h4>
+            <p class="text-slate-400">Click "Drive" in the top cockpit navigation to enter your authenticated storage space.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 2</span>
+            <h4 class="font-bold text-white text-sm">Create Directory Structure</h4>
+            <p class="text-slate-400">Add project folders to separate raw media, masters, and client assets.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 3</span>
+            <h4 class="font-bold text-white text-sm">Upload & Stream</h4>
+            <p class="text-slate-400">Preview raw footage, play lossless audio stems, and share secure download links.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 4</span>
+            <h4 class="font-bold text-white text-sm">Storage Allocation</h4>
+            <p class="text-slate-400">Track storage usage in real time via the live capacity meter.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 4K AI STUDIO SECTION -->
+    <div id="section-ai-studio" class="product-section hidden space-y-12">
+      <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-xs font-mono font-bold">
+          <span>✨</span> Next-Gen Neural Tools
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          4K AI Studio. <br>
+          <span class="bg-gradient-to-r from-purple-400 via-pink-300 to-indigo-400 bg-clip-text text-transparent">AI Asset Enhancement & Protection.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Integrated neural upscaling, adaptive video compression, and dynamic anti-screenshot watermarking designed for media deliverables.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/25 flex items-center justify-center text-lg">🔍</div>
+          <h3 class="text-sm font-black text-white">4K Neural Upscaler</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Enhance standard 1080p footage to 4K resolution using generative edge sharpening.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-400/25 flex items-center justify-center text-lg">🛡️</div>
+          <h3 class="text-sm font-black text-white">Anti-Screenshot Glare</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Generates client review stages that disrupt automated screen capture and OCR scrapers.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📉</div>
+          <h3 class="text-sm font-black text-white">Perceptual Lossless Compression</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Shrink archive sizes by up to 60% while preserving color fidelity and audio bitrates.</p>
+        </div>
+      </div>
+
+      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use 4K AI Studio</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 1</span>
+            <h4 class="font-bold text-white text-sm">Select Source Asset</h4>
+            <p class="text-slate-400">Open your dashboard and choose any image, video, or deliverable asset.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 2</span>
+            <h4 class="font-bold text-white text-sm">Choose AI Processing Model</h4>
+            <p class="text-slate-400">Select "4K Super-Resolution" or "Secure Client Review Mode".</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 3</span>
+            <h4 class="font-bold text-white text-sm">Configure Watermark & Glare</h4>
+            <p class="text-slate-400">Embed dynamic client name watermarks across frames to prevent unauthorized distribution.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 4</span>
+            <h4 class="font-bold text-white text-sm">Export Master Copy</h4>
+            <p class="text-slate-400">Export enhanced files directly to your Zephyr Drive or generate a protected client transfer link.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. E-SIGN STUDIO SECTION -->
+    <div id="section-esign" class="product-section hidden space-y-12">
+      <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-mono font-bold">
+          <span>✍️</span> Cryptographic Document Signatures
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          E-Sign Studio. <br>
+          <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 bg-clip-text text-transparent">Legally Enforceable Deliverable NDAs.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Require clients to sign contracts, licensing agreements, or non-disclosure waivers before they can access and download your files.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/25 flex items-center justify-center text-lg">📜</div>
+          <h3 class="text-sm font-black text-white">SHA-256 Tamper Proofing</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Contracts are sealed with cryptographic timestamps to prove document integrity.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-emerald-400/25 flex items-center justify-center text-lg">🚪</div>
+        <h3 class="text-sm font-black text-white">Pre-Download Gateway</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">Lock files behind signatures. Deliverables unlock only after signing is completed.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-400/25 flex items-center justify-center text-lg">🗂️</div>
+          <h3 class="text-sm font-black text-white">Complete Audit Logs</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Records IP addresses, timestamps, and browser fingerprints into an exportable audit certificate.</p>
+        </div>
+      </div>
+
+      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use E-Sign Studio</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 1</span>
+            <h4 class="font-bold text-white text-sm">Upload Agreement (PDF)</h4>
+            <p class="text-slate-400">Attach your contract, licensing terms, or client release form.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 2</span>
+            <h4 class="font-bold text-white text-sm">Attach Transfer Files</h4>
+            <p class="text-slate-400">Select the deliverables that should remain locked behind the signature.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 3</span>
+            <h4 class="font-bold text-white text-sm">Client Signature Flow</h4>
+            <p class="text-slate-400">Your recipient signs via stylus, mouse, or typed cryptographic key verification.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 4</span>
+            <h4 class="font-bold text-white text-sm">Automated Release</h4>
+            <p class="text-slate-400">Files unlock instantly and both parties receive a cryptographically sealed PDF receipt.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. PAYWALL ESCROW SECTION -->
+    <div id="section-escrow" class="product-section hidden space-y-12">
+      <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-mono font-bold">
+          <span>💳</span> Monetization & Escrow
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          Paywall Escrow. <br>
+          <span class="bg-gradient-to-r from-amber-400 via-orange-300 to-rose-400 bg-clip-text text-transparent">Pay-to-Unlock Deliverable Protection.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Eliminate unpaid creative invoices. Clients review watermarked deliverables in-browser, settle payment, and immediately unlock original assets.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/25 flex items-center justify-center text-lg">💰</div>
+          <h3 class="text-sm font-black text-white">Direct Client Payments</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Accept credit cards, international debit, and UPI directly through integrated DODO payments.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-400/25 flex items-center justify-center text-lg">🔒</div>
+          <h3 class="text-sm font-black text-white">Cryptographic File Lock</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Original high-res assets remain encrypted on edge storage until checkout confirmation.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-400/25 flex items-center justify-center text-lg">👁️</div>
+          <h3 class="text-sm font-black text-white">Zero-Loss Preview Stage</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Clients can pan, inspect, and verify project quality with protected overlay watermarks.</p>
+        </div>
+      </div>
+
+      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Paywall Escrow</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 1</span>
+            <h4 class="font-bold text-white text-sm">Upload Deliverable Batch</h4>
+            <p class="text-slate-400">Upload video edits, logo packages, codebases, or raw 3D assets to Zephyr.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 2</span>
+            <h4 class="font-bold text-white text-sm">Set Price & Currency</h4>
+            <p class="text-slate-400">Toggle "Paywall Escrow" on the transfer card and specify invoice amount and currency.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 3</span>
+            <h4 class="font-bold text-white text-sm">Send Client Link</h4>
+            <p class="text-slate-400">Clients open the link to inspect deliverables in a protected preview environment.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 4</span>
+            <h4 class="font-bold text-white text-sm">Automated Settlement</h4>
+            <p class="text-slate-400">Payment settles into your account and files unlock automatically for download.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. INBOUND PORTAL SECTION -->
+    <div id="section-portal" class="product-section hidden space-y-12">
+      <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold">
+          <span>📥</span> Client Inbound Transfers
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          Inbound Portal. <br>
+          <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">Direct Client Asset Ingestion.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Provide clients with a branded portal where they can upload multi-gigabyte footage, documents, and assets directly into your Zephyr Drive without needing an account.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/25 flex items-center justify-center text-lg">🔗</div>
+          <h3 class="text-sm font-black text-white">Custom Inbound URL</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Share links like <code>zephyr-drive.com/request/yourstudio</code> to receive raw files directly.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🚫</div>
+          <h3 class="text-sm font-black text-white">No Client Sign-Up Required</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Clients can upload assets immediately without creating accounts or entering passwords.</p>
+        </div>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📁</div>
+          <h3 class="text-sm font-black text-white">Direct Vault Routing</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Incoming uploads route straight to your dedicated Inbound folder on Cloudflare R2.</p>
+        </div>
+      </div>
+
+      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Inbound Portal</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 1</span>
+            <h4 class="font-bold text-white text-sm">Generate Inbound Link</h4>
+            <p class="text-slate-400">Click "Request" in the top navigation or open Inbound Portals in your dashboard.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 2</span>
+            <h4 class="font-bold text-white text-sm">Send to Client</h4>
+            <p class="text-slate-400">Send your private drop-link via Slack, WhatsApp, or email.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 3</span>
+            <h4 class="font-bold text-white text-sm">Client Drops Assets</h4>
+            <p class="text-slate-400">Clients drag and drop their raw files into your branded portal page.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 4</span>
+            <h4 class="font-bold text-white text-sm">Instant Notification</h4>
+            <p class="text-slate-400">Receive upload alerts as files appear directly inside your Zephyr Drive.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Specifications Matrix -->
+    <div class="space-y-4 pt-4">
+      <h3 class="text-lg font-black text-white flex items-center gap-2">
+        <span>📊</span> Unified Platform Comparison
+      </h3>
+      <div class="overflow-x-auto rounded-2xl border border-white/10 bg-[#070b18]/60">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-white/[0.04] text-slate-300 border-b border-white/10">
-              <th class="p-3.5 font-bold">Feature</th>
-              <th class="p-3.5 font-bold">Free Tier</th>
-              <th class="p-3.5 font-bold">Plus Plan</th>
-              <th class="p-3.5 font-bold">Pro Studio Plan</th>
+              <th class="p-3.5 font-bold">Platform Capability</th>
+              <th class="p-3.5 font-bold">Free</th>
+              <th class="p-3.5 font-bold">Plus</th>
+              <th class="p-3.5 font-bold">Pro Studio</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5 text-slate-300">
             <tr>
-              <td class="p-3.5 font-medium text-white">Max Single Transfer Size</td>
+              <td class="p-3.5 font-medium text-white">Transfer File Cap</td>
               <td class="p-3.5 font-mono">2 GB</td>
               <td class="p-3.5 font-mono">20 GB</td>
               <td class="p-3.5 font-mono text-sky-400 font-bold">50 GB</td>
             </tr>
             <tr>
-              <td class="p-3.5 font-medium text-white">Custom Studio Wallpapers</td>
+              <td class="p-3.5 font-medium text-white">Persistent Vault Storage</td>
+              <td class="p-3.5 font-mono">2 GB</td>
+              <td class="p-3.5 font-mono">50 GB</td>
+              <td class="p-3.5 font-mono text-sky-400 font-bold">200 GB</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-medium text-white">4K AI Studio & Neural Glare</td>
+              <td class="p-3.5 text-slate-500">✕</td>
+              <td class="p-3.5 text-emerald-400">✓ Standard</td>
+              <td class="p-3.5 text-emerald-400">✓ Unlimited 4K</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-medium text-white">Escrow Payment Processing Fee</td>
+              <td class="p-3.5">5.0%</td>
+              <td class="p-3.5">2.5%</td>
+              <td class="p-3.5 text-sky-400 font-bold">0% Platform Fee</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-medium text-white">Custom Studio Wallpapers & Logos</td>
               <td class="p-3.5 text-slate-500">✕</td>
               <td class="p-3.5 text-emerald-400">✓ Included</td>
-              <td class="p-3.5 text-emerald-400">✓ Custom Domain + Logo</td>
-            </tr>
-            <tr>
-              <td class="p-3.5 font-medium text-white">Burn-on-Read Shredding</td>
-              <td class="p-3.5 text-emerald-400">✓ Included</td>
-              <td class="p-3.5 text-emerald-400">✓ Included</td>
-              <td class="p-3.5 text-emerald-400">✓ Included</td>
-            </tr>
-            <tr>
-              <td class="p-3.5 font-medium text-white">Pay-to-Unlock Escrow Fee</td>
-              <td class="p-3.5">Standard (5%)</td>
-              <td class="p-3.5">Reduced (2.5%)</td>
-              <td class="p-3.5 text-sky-400 font-bold">0% Platform Fee</td>
+              <td class="p-3.5 text-emerald-400">✓ White-label</td>
             </tr>
           </tbody>
         </table>
@@ -184,6 +530,43 @@
   <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono">
     © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
   </footer>
+
+  <!-- SCRIPT FOR INSTANT PRODUCT SWITCHING & URL SYNCHRONIZATION -->
+  <script>
+    const validProducts = ['transfer', 'vault', 'ai-studio', 'esign', 'escrow', 'portal'];
+
+    function switchProduct(slug) {
+      if (!validProducts.includes(slug)) slug = 'transfer';
+
+      // Hide all sections
+      document.querySelectorAll('.product-section').forEach(el => el.classList.add('hidden'));
+
+      // Reset all tab styling
+      document.querySelectorAll('.product-tab').forEach(el => {
+        el.className = "product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]";
+      });
+
+      // Show selected section
+      const activeSection = document.getElementById('section-' + slug);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      // Highlight selected tab
+      const activeTab = document.getElementById('tab-' + slug);
+      if (activeTab) {
+        activeTab.className = "product-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30";
+      }
+
+      // Update URL without page reload
+      window.history.replaceState(null, '', '/products/' + slug);
+    }
+
+    // Detect initial product from URL (e.g. /products/ai-studio)
+    window.addEventListener('DOMContentLoaded', () => {
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      const initialSlug = pathParts[1] || 'transfer';
+      switchProduct(initialSlug);
+    });
+  </script>
 
 </body>
 </html>
