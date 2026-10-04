@@ -10,20 +10,16 @@
 <body class="min-h-screen bg-[#030712] text-slate-200 selection:bg-indigo-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden">
 
   <!-- ========================================================================= -->
-  <!-- EXACT HOMEPAGE ATMOSPHERIC BACKGROUND (GLOW NEBULAS & FLOATING ASSET TILES)-->
+  <!-- EXACT HOMEPAGE ATMOSPHERIC BACKGROUND                                     -->
   <!-- ========================================================================= -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-    <!-- Top Indigo/Cyan Cosmic Aurora (Matches Homepage) -->
     <div class="absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full bg-gradient-to-b from-indigo-600/25 via-sky-500/12 to-transparent blur-[140px]"></div>
-    <!-- Left Atmosphere -->
     <div class="absolute top-[28%] -left-[180px] w-[650px] h-[650px] rounded-full bg-sky-500/10 blur-[160px]"></div>
-    <!-- Right Studio Violet -->
     <div class="absolute top-[52%] -right-[180px] w-[700px] h-[700px] rounded-full bg-purple-600/12 blur-[160px]"></div>
-    <!-- Bottom Nebula -->
     <div class="absolute bottom-[-100px] left-[25%] w-[800px] h-[450px] rounded-full bg-indigo-600/15 blur-[150px]"></div>
 
-    <!-- Floating Homepage Asset Badge: Sculpture_Still_8K.dng -->
-    <div class="absolute top-24 left-8 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
+    <!-- Floating Homepage Asset Badges -->
+    <div class="absolute top-28 left-8 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500/30 to-rose-500/30 border border-white/10 flex items-center justify-center text-sm">🌸</div>
       <div class="text-left font-mono">
         <span class="block text-xs font-bold text-white">Sculpture_Still_8K.dng</span>
@@ -31,7 +27,6 @@
       </div>
     </div>
 
-    <!-- Floating Homepage Asset Badge: Lookbook_SS26.tif -->
     <div class="absolute top-72 right-10 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500/30 to-indigo-500/30 border border-white/10 flex items-center justify-center text-sm">🏔️</div>
       <div class="text-left font-mono">
@@ -40,7 +35,6 @@
       </div>
     </div>
 
-    <!-- Floating Homepage Asset Badge: Zephyr_Archive_v01 -->
     <div class="absolute bottom-32 left-16 hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35 font-mono text-[11px] text-slate-300">
       <span>📁</span>
       <span>Zephyr_Archive_v01</span>
@@ -51,7 +45,7 @@
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10">
           <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
             <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
             <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
@@ -72,16 +66,14 @@
     </div>
   </header>
 
-  <!-- ========================================================================= -->
-  <!-- INTERACTIVE OBSIDIAN PRODUCT SELECTOR DOCK                                -->
-  <!-- ========================================================================= -->
+  <!-- INTERACTIVE PRODUCT DOCK -->
   <div class="max-w-5xl mx-auto px-6 pt-10 w-full">
     <div class="p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto custom-scroll shadow-2xl">
       <button onclick="switchProduct('transfer')" id="tab-transfer" class="product-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30">
         <span>⚡</span> <span>Zephyr Transfer</span>
       </button>
       <button onclick="switchProduct('vault')" id="tab-vault" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
-        <span>🗄️</span> <span>Drive Vault</span>
+        <span>🗄️️</span> <span>Drive Vault</span>
       </button>
       <button onclick="switchProduct('ai-studio')" id="tab-ai-studio" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
         <span>✨</span> <span>4K AI Studio</span>
@@ -101,7 +93,7 @@
   <!-- MAIN DOCUMENTATION CONTAINER -->
   <main class="max-w-5xl mx-auto px-6 py-12 space-y-16 w-full">
 
-    <!-- 1. ZEPHYR TRANSFER SECTION -->
+    <!-- 1. ZEPHYR TRANSFER -->
     <div id="section-transfer" class="product-section space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-mono font-bold">
@@ -112,11 +104,10 @@
           <span class="bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">Zero-Knowledge Client Delivery.</span>
         </h1>
         <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
-          Engineered for high-resolution video creators and independent VFX artists who need to send gigabytes of master assets without bandwidth throttling or server-side retention.
+          Engineered for high-resolution video creators and VFX artists who need to send gigabytes of master assets without bandwidth throttling or server-side retention.
         </p>
       </div>
 
-      <!-- Pillars -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🛡️</div>
@@ -135,7 +126,6 @@
         </div>
       </div>
 
-      <!-- How to Use -->
       <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Zephyr Transfer</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -163,7 +153,7 @@
       </div>
     </div>
 
-    <!-- 2. ZEPHYR DRIVE VAULT SECTION -->
+    <!-- 2. ZEPHYR DRIVE VAULT -->
     <div id="section-vault" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-mono font-bold">
@@ -223,7 +213,7 @@
       </div>
     </div>
 
-    <!-- 3. 4K AI STUDIO SECTION -->
+    <!-- 3. 4K AI STUDIO -->
     <div id="section-ai-studio" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-xs font-mono font-bold">
@@ -283,7 +273,7 @@
       </div>
     </div>
 
-    <!-- 4. E-SIGN STUDIO SECTION -->
+    <!-- 4. E-SIGN STUDIO -->
     <div id="section-esign" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-mono font-bold">
@@ -304,13 +294,14 @@
           <h3 class="text-sm font-black text-white">SHA-256 Tamper Proofing</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Contracts are sealed with cryptographic timestamps to prove document integrity.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-emerald-400/25 flex items-center justify-center text-lg">🚪</div>
-        <h3 class="text-sm font-black text-white">Pre-Download Gateway</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">Lock files behind signatures. Deliverables unlock only after signing is completed.</p>
+        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/25 flex items-center justify-center text-lg">🚪</div>
+          <h3 class="text-sm font-black text-white">Pre-Download Gateway</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Lock files behind signatures. Deliverables unlock only after signing is completed.</p>
         </div>
         <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-400/25 flex items-center justify-center text-lg">🗂️</div>
-          <h3 class="text-sm font-black text-white">Complete Audit Logs</h3>
+          <h3 class="text-sm font-black text-white">Cryptographic Audit Logs</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Records IP addresses, timestamps, and browser fingerprints into an exportable audit certificate.</p>
         </div>
       </div>
@@ -342,7 +333,7 @@
       </div>
     </div>
 
-    <!-- 5. PAYWALL ESCROW SECTION -->
+    <!-- 5. PAYWALL ESCROW -->
     <div id="section-escrow" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-mono font-bold">
@@ -402,7 +393,7 @@
       </div>
     </div>
 
-    <!-- 6. INBOUND PORTAL SECTION -->
+    <!-- 6. INBOUND PORTAL -->
     <div id="section-portal" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold">
@@ -462,58 +453,181 @@
       </div>
     </div>
 
-    <!-- Technical Specifications Matrix -->
-    <div class="space-y-4 pt-4">
-      <h3 class="text-lg font-black text-white flex items-center gap-2">
-        <span>📊</span> Unified Platform Comparison
-      </h3>
-      <div class="overflow-x-auto rounded-2xl border border-white/10 bg-[#070b18]/60">
+    <!-- ========================================================================= -->
+    <!-- UNIFIED PLATFORM COMPARISON (INCLUDES ZEPHYR LITE + LIVE EXECUTION HOOKS) -->
+    <!-- ========================================================================= -->
+    <div class="space-y-6 pt-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-xl font-black text-white flex items-center gap-2">
+            <span>📊</span> Unified Platform Comparison
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">Live platform constraints, verified storage tiers, and interactive execution hooks.</p>
+        </div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Direct Edge Enforced
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-3xl border border-white/10 bg-[#070b18]/80 backdrop-blur-xl shadow-2xl">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="bg-white/[0.04] text-slate-300 border-b border-white/10">
-              <th class="p-3.5 font-bold">Platform Capability</th>
-              <th class="p-3.5 font-bold">Free</th>
-              <th class="p-3.5 font-bold">Plus</th>
-              <th class="p-3.5 font-bold">Pro Studio</th>
+            <tr class="bg-white/[0.04] text-slate-300 border-b border-white/10 text-[11px] font-black tracking-wider uppercase">
+              <th class="p-4">Platform Capability</th>
+              <th class="p-4 text-center">Free Tier</th>
+              <th class="p-4 text-center text-sky-300 bg-sky-500/[0.04] border-x border-white/5">Zephyr Lite</th>
+              <th class="p-4 text-center text-indigo-300">Zephyr Plus</th>
+              <th class="p-4 text-center text-purple-300">Pro Studio</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5 text-slate-300">
-            <tr>
-              <td class="p-3.5 font-medium text-white">Transfer File Cap</td>
-              <td class="p-3.5 font-mono">2 GB</td>
-              <td class="p-3.5 font-mono">20 GB</td>
-              <td class="p-3.5 font-mono text-sky-400 font-bold">50 GB</td>
+            
+            <!-- ROW 1: TRANSFER CAP -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>Transfer File Cap</span>
+                  <a href="/" class="text-[10px] text-sky-400 hover:text-sky-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Launch Transfer</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center font-mono">2 GB</td>
+              <td class="p-4 text-center font-mono font-bold text-sky-400 bg-sky-500/[0.04] border-x border-white/5">5 GB</td>
+              <td class="p-4 text-center font-mono font-bold text-indigo-300">20 GB</td>
+              <td class="p-4 text-center font-mono font-black text-purple-400">50 GB</td>
             </tr>
-            <tr>
-              <td class="p-3.5 font-medium text-white">Persistent Vault Storage</td>
-              <td class="p-3.5 font-mono">2 GB</td>
-              <td class="p-3.5 font-mono">50 GB</td>
-              <td class="p-3.5 font-mono text-sky-400 font-bold">200 GB</td>
+
+            <!-- ROW 2: VAULT STORAGE -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>Persistent Vault Storage</span>
+                  <a href="/dashboard" class="text-[10px] text-indigo-400 hover:text-indigo-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Open Drive Vault</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center font-mono">2 GB</td>
+              <td class="p-4 text-center font-mono font-bold text-sky-400 bg-sky-500/[0.04] border-x border-white/5">20 GB</td>
+              <td class="p-4 text-center font-mono font-bold text-indigo-300">50 GB</td>
+              <td class="p-4 text-center font-mono font-black text-purple-400">200 GB</td>
             </tr>
-            <tr>
-              <td class="p-3.5 font-medium text-white">4K AI Studio & Neural Glare</td>
-              <td class="p-3.5 text-slate-500">✕</td>
-              <td class="p-3.5 text-emerald-400">✓ Standard</td>
-              <td class="p-3.5 text-emerald-400">✓ Unlimited 4K</td>
+
+            <!-- ROW 3: AI STUDIO -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>4K AI Studio & Neural Glare</span>
+                  <a href="/dashboard" class="text-[10px] text-purple-400 hover:text-purple-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Open AI Studio</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center text-slate-500">✕</td>
+              <td class="p-4 text-center text-slate-400 bg-sky-500/[0.04] border-x border-white/5 font-mono text-[11px]">1080p AI Enhance</td>
+              <td class="p-4 text-center text-emerald-400 font-semibold">✓ 4K Neural Scale</td>
+              <td class="p-4 text-center text-purple-300 font-bold">✓ Unlimited 4K Studio</td>
             </tr>
-            <tr>
-              <td class="p-3.5 font-medium text-white">Escrow Payment Processing Fee</td>
-              <td class="p-3.5">5.0%</td>
-              <td class="p-3.5">2.5%</td>
-              <td class="p-3.5 text-sky-400 font-bold">0% Platform Fee</td>
+
+            <!-- ROW 4: ESCROW -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>Escrow Platform Fee</span>
+                  <a href="/#control" class="text-[10px] text-amber-400 hover:text-amber-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Configure Escrow</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center font-mono">5.0%</td>
+              <td class="p-4 text-center font-mono text-sky-300 bg-sky-500/[0.04] border-x border-white/5">3.5%</td>
+              <td class="p-4 text-center font-mono text-indigo-300">2.5%</td>
+              <td class="p-4 text-center font-mono font-black text-emerald-400">0% Platform Fee</td>
             </tr>
-            <tr>
-              <td class="p-3.5 font-medium text-white">Custom Studio Wallpapers & Logos</td>
-              <td class="p-3.5 text-slate-500">✕</td>
-              <td class="p-3.5 text-emerald-400">✓ Included</td>
-              <td class="p-3.5 text-emerald-400">✓ White-label</td>
+
+            <!-- ROW 5: BRANDING -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>Studio Wallpapers & Logos</span>
+                  <a href="/" class="text-[10px] text-teal-400 hover:text-teal-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Custom Wallpapers</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center text-slate-500">✕</td>
+              <td class="p-4 text-center text-emerald-400 bg-sky-500/[0.04] border-x border-white/5 font-medium">✓ Custom Wallpaper</td>
+              <td class="p-4 text-center text-emerald-400 font-semibold">✓ Wallpaper + Logo</td>
+              <td class="p-4 text-center text-purple-300 font-bold">✓ White-Label Domain</td>
             </tr>
+
+            <!-- ROW 6: E-SIGN -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>E-Sign Deliverable NDAs</span>
+                  <a href="/sign" class="text-[10px] text-emerald-400 hover:text-emerald-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Launch E-Sign</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center font-mono">1 Doc / mo</td>
+              <td class="p-4 text-center font-mono text-sky-300 bg-sky-500/[0.04] border-x border-white/5">5 Docs / mo</td>
+              <td class="p-4 text-center font-mono text-indigo-300">25 Docs / mo</td>
+              <td class="p-4 text-center font-mono font-bold text-emerald-400">Unlimited Seals</td>
+            </tr>
+
+            <!-- ROW 7: INBOUND PORTALS -->
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="p-4 font-medium text-white">
+                <div class="flex flex-col">
+                  <span>Inbound Client Portals</span>
+                  <a href="/dashboard" class="text-[10px] text-cyan-400 hover:text-cyan-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                    <span>▶ Create Inbound URL</span> <span>↗</span>
+                  </a>
+                </div>
+              </td>
+              <td class="p-4 text-center font-mono">1 Temp Drop</td>
+              <td class="p-4 text-center font-mono text-sky-300 bg-sky-500/[0.04] border-x border-white/5">3 Portals</td>
+              <td class="p-4 text-center font-mono text-indigo-300">10 Portals</td>
+              <td class="p-4 text-center font-mono font-bold text-emerald-400">Unlimited Portals</td>
+            </tr>
+
+            <!-- ROW 8: DIRECT WORKING CHECKOUT ACTION BUTTONS -->
+            <tr class="bg-white/[0.02] border-t border-white/10">
+              <td class="p-4 font-bold text-white uppercase text-[10px] tracking-wider">
+                Direct Activation
+              </td>
+              <td class="p-4 text-center">
+                <a href="/" class="inline-flex items-center justify-center px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold text-xs transition border border-white/10">
+                  Current (Free)
+                </a>
+              </td>
+              <td class="p-4 text-center bg-sky-500/[0.04] border-x border-white/5">
+                <button type="button" onclick="openDodoCheckout('lite')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-xs transition shadow-lg shadow-sky-500/25 cursor-pointer">
+                  Get Lite
+                </button>
+              </td>
+              <td class="p-4 text-center">
+                <button type="button" onclick="openDodoCheckout('plus')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs transition shadow-lg shadow-indigo-600/25 cursor-pointer">
+                  Get Plus
+                </button>
+              </td>
+              <td class="p-4 text-center">
+                <button type="button" onclick="openDodoCheckout('pro')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-black text-xs transition shadow-lg shadow-purple-600/25 cursor-pointer">
+                  Get Pro Studio
+                </button>
+              </td>
+            </tr>
+
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Bottom CTA Bar -->
+    <!-- BOTTOM CTA BANNER -->
     <div class="p-8 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border border-sky-500/25 flex flex-col sm:flex-row items-center justify-between gap-6">
       <div>
         <h3 class="text-base font-black text-white">Ready to transfer your deliverables?</h3>
@@ -531,41 +645,85 @@
     © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
   </footer>
 
-  <!-- SCRIPT FOR INSTANT PRODUCT SWITCHING & URL SYNCHRONIZATION -->
+  <!-- SCRIPT FOR SWITCHING & DIRECT DODO CHECKOUT INTEGRATION -->
   <script>
     const validProducts = ['transfer', 'vault', 'ai-studio', 'esign', 'escrow', 'portal'];
 
     function switchProduct(slug) {
       if (!validProducts.includes(slug)) slug = 'transfer';
 
-      // Hide all sections
       document.querySelectorAll('.product-section').forEach(el => el.classList.add('hidden'));
-
-      // Reset all tab styling
       document.querySelectorAll('.product-tab').forEach(el => {
         el.className = "product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]";
       });
 
-      // Show selected section
       const activeSection = document.getElementById('section-' + slug);
       if (activeSection) activeSection.classList.remove('hidden');
 
-      // Highlight selected tab
       const activeTab = document.getElementById('tab-' + slug);
       if (activeTab) {
         activeTab.className = "product-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30";
       }
 
-      // Update URL without page reload
       window.history.replaceState(null, '', '/products/' + slug);
     }
 
-    // Detect initial product from URL (e.g. /products/ai-studio)
+    // Auto-select tab matching URL
     window.addEventListener('DOMContentLoaded', () => {
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       const initialSlug = pathParts[1] || 'transfer';
       switchProduct(initialSlug);
     });
+
+    // OPERATIONAL DODO PAYMENTS EXECUTION (RUNS IN PRODUCTION OR TEST)
+    const ACTIVE_PAYMENT_ENV = "test"; 
+
+    const DODO_CONFIG = {
+      test: {
+        domain: "https://test.checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_0NoSL8gp9FUEk5GKWdB10",
+          lite: "pdt_0NoSLFQICnqD2weSbr0d",
+          plus: "pdt_0NoSKxDY49vabp31shvd1",
+          pro: "pdt_0NoSL3f1qb5yIZTPZv71H"
+        }
+      },
+      live: {
+        domain: "https://checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_LIVE_MICRO_ID_HERE",
+          lite: "pdt_LIVE_LITE_ID_HERE",
+          plus: "pdt_LIVE_PLUS_ID_HERE",
+          pro: "pdt_LIVE_PRO_ID_HERE"
+        }
+      }
+    };
+
+    function getStoredUserEmail() {
+      return sessionStorage.getItem("user_email") || sessionStorage.getItem("vp_user_email") || localStorage.getItem("user_email") || localStorage.getItem("vp_user_email") || "";
+    }
+
+    function getStoredUserId() {
+      return sessionStorage.getItem("user_id") || sessionStorage.getItem("vp_user_id") || localStorage.getItem("user_id") || localStorage.getItem("vp_user_id") || "";
+    }
+
+    function openDodoCheckout(tier = "pro") {
+      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
+      const productId = envConfig.products[tier] || envConfig.products["pro"];
+      let targetUrl = `${envConfig.domain}/${productId}`;
+
+      const email = getStoredUserEmail();
+      const uid = getStoredUserId();
+      const params = new URLSearchParams();
+      if (email) params.append("email", email);
+      if (uid) params.append("metadata_user_id", uid);
+      params.append("tier", tier);
+      params.append("env", ACTIVE_PAYMENT_ENV);
+
+      const qs = params.toString();
+      if (qs) targetUrl += "?" + qs;
+      window.location.href = targetUrl;
+    }
   </script>
 
 </body>
