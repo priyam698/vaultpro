@@ -795,28 +795,24 @@
       <!-- ZONE 2: CENTER FLOATING GLASS DOCK (COLOR FLOATING ON HOVER) -->
     <nav class="hidden xl:flex items-center gap-1.5 p-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
       
-      <!-- 1. Features (Electric Sky Floating Pill) -->
-      <a href="#control" 
-         class="nav-dock-btn nav-btn-features px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-sky-300 hover:bg-sky-500/15 border border-transparent hover:border-sky-400/40 hover:shadow-[0_4px_16px_rgba(56,189,248,0.35)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+      <!-- 1. Features (Electric Sky Floating Aura) -->
+      <a href="#control" class="dock-btn dock-features px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 border border-transparent">
         Features
       </a>
 
-      <!-- 2. 4K AI Studio (Cosmic Purple Floating Pill) -->
-      <button type="button" onclick="openAiStudioModal()" 
-              class="nav-dock-btn nav-btn-studio relative px-4 py-1.5 rounded-full text-xs font-extrabold text-white bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-sky-500/30 border border-purple-400/40 hover:border-purple-300 hover:shadow-[0_4px_20px_rgba(168,85,247,0.45)] hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center gap-1.5 cursor-pointer">
+      <!-- 2. 4K AI Studio (Cosmic Purple Floating Aura) -->
+      <button type="button" onclick="openAiStudioModal()" class="dock-btn dock-studio relative px-4 py-1.5 rounded-full text-xs font-extrabold text-white bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-sky-500/30 border border-purple-400/40">
         <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
         <span>4K AI Studio</span>
       </button>
 
-      <!-- 3. Pricing (Emerald Mint Floating Pill) -->
-      <a href="#pricing" 
-         class="nav-dock-btn nav-btn-pricing px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:bg-emerald-500/15 border border-transparent hover:border-emerald-400/40 hover:shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+      <!-- 3. Pricing (Emerald Mint Floating Aura) -->
+      <a href="#pricing" class="dock-btn dock-pricing px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 border border-transparent">
         Pricing
       </a>
 
-      <!-- 4. Branding (Warm Amber Floating Pill) -->
-      <button type="button" onclick="openBrandingModal()" 
-              class="nav-dock-btn nav-btn-branding px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-amber-300 hover:bg-amber-500/15 border border-transparent hover:border-amber-400/40 hover:shadow-[0_4px_16px_rgba(245,158,11,0.35)] hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center gap-1.5 cursor-pointer">
+      <!-- 4. Branding (Warm Amber Floating Aura) -->
+      <button type="button" onclick="openBrandingModal()" class="dock-btn dock-branding px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 border border-transparent">
         <span>🎨</span>
         <span>Branding</span>
       </button>
@@ -2434,7 +2430,182 @@
       </details>
     </div>
   </section>
+<style>
+    /* ========================================================================= */
+    /* 1. THE 4 BUTTONS: COLOR FLOATING ON HOVER (DARK & LIGHT THEMES)           */
+    /* ========================================================================= */
+    .dock-btn {
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.375rem !important;
+    }
 
+    /* Dark Mode Hover Auras */
+    .dock-features:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: rgba(56, 189, 248, 0.18) !important;
+      color: #38bdf8 !important;
+      border-color: rgba(56, 189, 248, 0.55) !important;
+      box-shadow: 0 8px 24px -2px rgba(56, 189, 248, 0.5) !important;
+    }
+
+    .dock-studio:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(99, 102, 241, 0.4)) !important;
+      color: #ffffff !important;
+      border-color: rgba(192, 132, 252, 0.75) !important;
+      box-shadow: 0 8px 28px -2px rgba(168, 85, 247, 0.6) !important;
+    }
+
+    .dock-pricing:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: rgba(52, 211, 153, 0.18) !important;
+      color: #34d399 !important;
+      border-color: rgba(52, 211, 153, 0.55) !important;
+      box-shadow: 0 8px 24px -2px rgba(52, 211, 153, 0.5) !important;
+    }
+
+    .dock-branding:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: rgba(251, 191, 36, 0.18) !important;
+      color: #fbbf24 !important;
+      border-color: rgba(251, 191, 36, 0.55) !important;
+      box-shadow: 0 8px 24px -2px rgba(251, 191, 36, 0.5) !important;
+    }
+
+    /* Day Mode (Light Theme) Nav Dock & Floating Colors */
+    body.light-theme nav.rounded-full {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+    }
+
+    body.light-theme .dock-btn {
+      color: #0f172a !important;
+      font-weight: 600 !important;
+    }
+
+    body.light-theme .dock-features:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: rgba(14, 165, 233, 0.12) !important;
+      color: #0284c7 !important;
+      border-color: rgba(14, 165, 233, 0.45) !important;
+      box-shadow: 0 8px 20px -2px rgba(14, 165, 233, 0.32) !important;
+    }
+
+    body.light-theme .dock-studio {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(99, 102, 241, 0.15)) !important;
+      color: #6b21a8 !important;
+      border-color: rgba(168, 85, 247, 0.35) !important;
+    }
+    body.light-theme .dock-studio:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(99, 102, 241, 0.28)) !important;
+      color: #581c87 !important;
+      border-color: rgba(168, 85, 247, 0.55) !important;
+      box-shadow: 0 8px 22px -2px rgba(168, 85, 247, 0.38) !important;
+    }
+
+    body.light-theme .dock-pricing:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: rgba(16, 185, 129, 0.12) !important;
+      color: #059669 !important;
+      border-color: rgba(16, 185, 129, 0.45) !important;
+      box-shadow: 0 8px 20px -2px rgba(16, 185, 129, 0.32) !important;
+    }
+
+    body.light-theme .dock-branding:hover {
+      transform: translateY(-2.5px) scale(1.02) !important;
+      background: rgba(245, 158, 11, 0.14) !important;
+      color: #b45309 !important;
+      border-color: rgba(245, 158, 11, 0.45) !important;
+      box-shadow: 0 8px 20px -2px rgba(245, 158, 11, 0.32) !important;
+    }
+
+    /* ========================================================================= */
+    /* 2. DAY THEME (LIGHT MODE): FOOTER TEXT CONTRAST OVERHAUL                  */
+    /* ========================================================================= */
+    body.light-theme footer {
+      background-color: #ffffff !important;
+      border-top-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    /* All 4 Column Headings: PRODUCTS, PRIVACY, COMPANY, LEGAL & HELP */
+    body.light-theme footer h4 {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.05em !important;
+    }
+
+    /* Brand description paragraph & headquarters address */
+    body.light-theme footer p {
+      color: #334155 !important;
+      font-weight: 500 !important;
+    }
+
+    body.light-theme footer div.font-mono {
+      color: #475569 !important;
+      font-weight: 500 !important;
+    }
+
+    /* Tagline under Zephyr logo */
+    body.light-theme footer span.uppercase.text-sky-400 {
+      color: #0284c7 !important;
+      font-weight: 700 !important;
+    }
+
+    /* All Column Links and Buttons (Privacy, Company, Legal, etc.) */
+    body.light-theme footer ul li a,
+    body.light-theme footer ul li button {
+      color: #1e293b !important;
+      font-weight: 600 !important;
+      transition: color 0.15s ease !important;
+    }
+
+    body.light-theme footer ul li a:hover,
+    body.light-theme footer ul li button:hover {
+      color: #0284c7 !important;
+    }
+
+    /* "About Us" button in Company column */
+    body.light-theme footer ul li button.text-sky-400 {
+      color: #0284c7 !important;
+      font-weight: 800 !important;
+    }
+
+    /* Bottom Sub-bar (Copyright & Legal Links) */
+    body.light-theme footer .text-slate-400,
+    body.light-theme footer .text-slate-300,
+    body.light-theme footer .text-slate-500 {
+      color: #334155 !important;
+      font-weight: 500 !important;
+    }
+
+    body.light-theme footer .text-slate-600 {
+      color: #94a3b8 !important;
+    }
+
+    /* Social icons in Column 1 */
+    body.light-theme footer a[target="_blank"].rounded-xl {
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+    body.light-theme footer a[target="_blank"].rounded-xl:hover {
+      background-color: #e2e8f0 !important;
+      color: #0284c7 !important;
+      border-color: #94a3b8 !important;
+    }
+
+    /* Column divider borders */
+    body.light-theme footer .border-white\/\[0\.06\],
+    body.light-theme footer .border-white\/\[0\.08\] {
+      border-color: #e2e8f0 !important;
+    }
+  </style>
   <!-- ========================================================================= -->
   <!-- MEGA DIRECTORY FOOTER (PROTON-STYLE MULTI-COLUMN ARCHITECTURE)            -->
   <!-- ========================================================================= -->
