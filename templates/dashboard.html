@@ -763,45 +763,91 @@ body {
   </div>
 
   <!-- BRANDING SUITE MODAL -->
-  <div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
-    <div class="obsidian-card max-w-md w-full rounded-3xl p-6 sm:p-8 relative border border-purple-500/30 space-y-5 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <h3 class="text-sm font-black text-white flex items-center gap-2">
-          <span>🎨</span>
-          <span>Studio Branding Preferences</span>
-        </h3>
-        <button onclick="closeBrandingModal()" class="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">✕</button>
+<div id="brandingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+  <div class="obsidian-card max-w-lg w-full rounded-3xl p-6 sm:p-7 relative border border-purple-500/30 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto custom-scroll">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between border-b border-white/10 pb-3">
+      <h3 class="text-sm font-black text-white flex items-center gap-2">
+        <span>🎨</span>
+        <span>Studio Branding Preferences</span>
+      </h3>
+      <button type="button" onclick="closeBrandingModal()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+    </div>
+
+    <!-- Inputs Area -->
+    <div class="space-y-3.5 text-xs text-left">
+      <!-- 1. Custom Studio Title -->
+      <div>
+        <label class="block font-bold mb-1.5 text-slate-300">Custom Studio Title</label>
+        <input id="brandTitle" type="text" placeholder="e.g. Lunar Studios" 
+               class="w-full rounded-xl px-3.5 py-2.5 bg-[#0a0f1d] border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-medium">
       </div>
-      
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold mb-1 opacity-80">Custom Studio Title</label>
-          <input id="brandTitle" type="text" placeholder="e.g. Skyline Productions" class="w-full rounded-xl px-3.5 py-2 font-medium focus:outline-none">
-        </div>
-        <div>
-          <label class="block font-bold mb-1 opacity-80">Brand Accent Color</label>
-          <div class="flex items-center gap-2">
-            <input id="brandColorPicker" type="color" value="#6366f1" onchange="document.getElementById('brandColorText').value = this.value" class="w-9 h-9 rounded-xl border border-white/20 bg-transparent cursor-pointer">
-            <input id="brandColorText" type="text" value="#6366f1" class="flex-1 rounded-xl px-3.5 py-2 font-mono uppercase focus:outline-none">
-          </div>
-        </div>
-        <div>
-          <label class="block font-bold mb-1 opacity-80">Custom Logo Image URL</label>
-          <input id="brandLogoUrl" type="url" placeholder="https://domain.com/logo.png" class="w-full rounded-xl px-3.5 py-2 font-mono focus:outline-none">
-        </div>
-        <div>
-          <label class="block font-bold mb-1 opacity-80">Custom Background Wallpaper URL</label>
-          <input id="brandBgUrl" type="url" placeholder="https://domain.com/wallpaper.jpg" class="w-full rounded-xl px-3.5 py-2 font-mono focus:outline-none">
+
+      <!-- 2. Brand Accent Color -->
+      <div>
+        <label class="block font-bold mb-1.5 text-slate-300">Brand Accent Color</label>
+        <div class="flex items-center gap-2.5">
+          <input id="brandColorPicker" type="color" value="#6366f1" onchange="document.getElementById('brandColorText').value = this.value" 
+                 class="w-10 h-10 rounded-xl bg-transparent border border-white/15 cursor-pointer p-0.5">
+          <input id="brandColorText" type="text" value="#6366f1" oninput="document.getElementById('brandColorPicker').value = this.value" 
+                 class="flex-1 rounded-xl px-3.5 py-2.5 bg-[#0a0f1d] border border-white/15 font-mono text-white uppercase focus:outline-none focus:border-sky-400">
         </div>
       </div>
 
-      <div class="pt-3 border-t border-white/10 flex items-center gap-2">
-        <button type="button" onclick="closeBrandingModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold transition">Cancel</button>
-        <button type="button" onclick="saveBrandingPreferences()" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-md transition">Save Branding</button>
+      <!-- 3. Custom Studio Logo (Choose from device) -->
+      <div>
+        <label class="block font-bold mb-1.5 text-slate-300">Custom Studio Logo (Image File)</label>
+        <input type="file" id="logoFileInput" accept="image/*" class="hidden" onchange="handleBrandingFile(event, 'logo')">
+        <input type="hidden" id="brandLogoUrl">
+        
+        <div onclick="document.getElementById('logoFileInput').click()" 
+             class="border border-dashed border-white/20 hover:border-sky-400/60 rounded-2xl p-3.5 bg-[#0a0f1d]/80 flex items-center justify-between gap-3 cursor-pointer transition group">
+          <div class="flex items-center gap-3">
+            <div id="logoPreviewBox" class="w-11 h-11 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+              <span id="logoIconPlaceholder" class="text-lg">🖼️</span>
+              <img id="logoPreviewImg" src="" class="hidden w-full h-full object-contain">
+            </div>
+            <div>
+              <span id="logoFileNameText" class="text-xs font-semibold text-slate-200 block group-hover:text-sky-300 transition">Click to choose Logo from files...</span>
+              <span class="text-[10px] text-slate-500 font-mono">PNG, JPG, SVG, WEBP</span>
+            </div>
+          </div>
+          <span class="px-3 py-1 rounded-lg bg-white/5 group-hover:bg-sky-500/20 text-slate-300 group-hover:text-sky-300 text-[11px] font-bold border border-white/10 transition">Browse</span>
+        </div>
+      </div>
+
+      <!-- 4. Custom Background Wallpaper (Choose from device) -->
+      <div>
+        <label class="block font-bold mb-1.5 text-slate-300">Custom Background Wallpaper (Image File)</label>
+        <input type="file" id="bgFileInput" accept="image/*" class="hidden" onchange="handleBrandingFile(event, 'bg')">
+        <input type="hidden" id="brandBgUrl">
+        
+        <div onclick="document.getElementById('bgFileInput').click()" 
+             class="border border-dashed border-white/20 hover:border-sky-400/60 rounded-2xl p-3.5 bg-[#0a0f1d]/80 flex items-center justify-between gap-3 cursor-pointer transition group">
+          <div class="flex items-center gap-3">
+            <div id="bgPreviewBox" class="w-14 h-11 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+              <span id="bgIconPlaceholder" class="text-lg">🌄</span>
+              <img id="bgPreviewImg" src="" class="hidden w-full h-full object-cover">
+            </div>
+            <div>
+              <span id="bgFileNameText" class="text-xs font-semibold text-slate-200 block group-hover:text-sky-300 transition">Click to choose Wallpaper from files...</span>
+              <span class="text-[10px] text-slate-500 font-mono">JPG, PNG, WEBP</span>
+            </div>
+          </div>
+          <span class="px-3 py-1 rounded-lg bg-white/5 group-hover:bg-sky-500/20 text-slate-300 group-hover:text-sky-300 text-[11px] font-bold border border-white/10 transition">Browse</span>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- Buttons -->
+    <div class="pt-3 border-t border-white/10 flex items-center gap-2">
+      <button type="button" onclick="closeBrandingModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer">Cancel</button>
+      <button type="button" id="saveBrandingBtn" onclick="saveBrandingPreferences()" class="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-bold text-xs rounded-xl shadow-lg transition cursor-pointer">Save Branding</button>
+    </div>
+
+  </div>
+</div>
   <!-- FIXED HEADER NAVBAR -->
   <header class="relative z-30 border-b border-white/[0.08] bg-transparent backdrop-blur-md sticky top-0 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -3854,94 +3900,165 @@ async function shareFile(fileId, filename) {
     }
 
     function openPlansModal() {
-      fetch(`/api/user-subscriptions?user_id=${currentUserId}`)
-        .then(r => r.json())
-        .then(subs => {
-          const list = document.getElementById("activeSubsList");
-          if (!subs || !subs.length) {
-            list.innerHTML = `<div class="p-3 text-xs opacity-60">No active subscriptions found.</div>`;
-            return;
-          }
+  const modal = document.getElementById("plansModal");
+  if (modal) modal.classList.remove("hidden");
+}
 
-          let stackedGb = 0;
-          list.innerHTML = subs.map(s => {
-            if (s.is_active) stackedGb += s.gb;
-            return `
-              <div class="plans-active-box p-3.5 rounded-2xl flex items-center justify-between">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-white">${s.name} (${s.gb} GB)</span>
-                    <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded ${s.is_active ? 'plans-badge-active' : 'plans-badge-inactive'}">${s.is_active ? 'Active' : 'Expired'}</span>
-                  </div>
-                  <span class="text-[10px] opacity-75 font-mono">$${s.price.toFixed(2)} / month • Ends ${s.subscription_end_at}</span>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" onchange="toggleAutoRenew(${s.id}, this.checked)" ${s.auto_renew ? 'checked' : ''} class="sr-only peer">
-                  <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-            `;
-          }).join('');
+function closePlansModal() {
+  const modal = document.getElementById("plansModal");
+  if (modal) modal.classList.add("hidden");
+}
 
-          document.getElementById("stackedCapacityBadge").innerText = `Total: ${stackedGb} GB`;
-        });
+async function subscribePlan(subId, isAuto = true) {
+  try {
+    const res = await fetch("/api/plans/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
+    });
+    if (res.ok) window.location.reload();
+  } catch(e) {}
+}
 
-      document.getElementById("plansModal").classList.remove("hidden");
-    }
+let uploadedLogoData = null;
+let uploadedBgData = null;
 
-    function closePlansModal() { document.getElementById("plansModal").classList.add("hidden"); }
+// Convert chosen file directly into optimized data for your R2 / DB pipeline
+function handleBrandingFile(event, type) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-    async function toggleAutoRenew(subId, isAuto) {
-      try {
-        await fetch("/api/user-subscriptions/toggle-auto-renew", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
-        });
-      } catch(e) {}
-    }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const rawUrl = e.target.result;
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      let maxDim = type === 'logo' ? 400 : 1920;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+        else { w = Math.round((w * maxDim) / h); h = maxDim; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      const optimized = canvas.toDataURL(type === 'logo' ? "image/png" : "image/jpeg", 0.90);
+      
+      if (type === 'logo') {
+        uploadedLogoData = optimized;
+        const input = document.getElementById("brandLogoUrl");
+        if (input) input.value = optimized;
+        const prev = document.getElementById("logoPreviewImg");
+        if (prev) { prev.src = optimized; prev.classList.remove("hidden"); }
+        const icon = document.getElementById("logoIconPlaceholder");
+        if (icon) icon.classList.add("hidden");
+        const name = document.getElementById("logoFileNameText");
+        if (name) name.innerText = file.name;
+      } else {
+        uploadedBgData = optimized;
+        const input = document.getElementById("brandBgUrl");
+        if (input) input.value = optimized;
+        const prev = document.getElementById("bgPreviewImg");
+        if (prev) { prev.src = optimized; prev.classList.remove("hidden"); }
+        const icon = document.getElementById("bgIconPlaceholder");
+        if (icon) icon.classList.add("hidden");
+        const name = document.getElementById("bgFileNameText");
+        if (name) name.innerText = file.name;
+      }
+    };
+    img.src = rawUrl;
+  };
+  reader.readAsDataURL(file);
+}
 
-    function openBrandingModal() {
-      fetch(`/api/branding/${currentUserId}`)
-        .then(r => r.json())
-        .then(b => {
-          document.getElementById("brandTitle").value = b.brand_title || "";
-          document.getElementById("brandColorPicker").value = b.brand_accent_color || "#6366f1";
-          document.getElementById("brandColorText").value = b.brand_accent_color || "#6366f1";
-          document.getElementById("brandLogoUrl").value = b.brand_logo_url || "";
-          document.getElementById("brandBgUrl").value = b.brand_bg_url || "";
-        });
-
-      document.getElementById("brandingModal").classList.remove("hidden");
-    }
-
-    function closeBrandingModal() { document.getElementById("brandingModal").classList.add("hidden"); }
-
-    async function saveBrandingPreferences() {
-      const payload = {
-        user_id: currentUserId,
-        brand_title: document.getElementById("brandTitle").value.trim(),
-        brand_accent_color: document.getElementById("brandColorText").value.trim(),
-        brand_logo_url: document.getElementById("brandLogoUrl").value.trim() || null,
-        brand_bg_url: document.getElementById("brandBgUrl").value.trim() || null
-      };
-
-      try {
-        const res = await fetch("/api/branding/update", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-          alert("Branding preferences saved successfully!");
-          closeBrandingModal();
-        } else {
-          alert("Branding features require a Plus or Pro subscription.");
+function openBrandingModal() {
+  fetch(`/api/branding/${currentUserId}`)
+    .then(r => r.json())
+    .then(b => {
+      if (b) {
+        const titleEl = document.getElementById("brandTitle");
+        if (titleEl) titleEl.value = b.brand_title || "";
+        const picker = document.getElementById("brandColorPicker");
+        if (picker) picker.value = b.brand_accent_color || "#6366f1";
+        const text = document.getElementById("brandColorText");
+        if (text) text.value = b.brand_accent_color || "#6366f1";
+        
+        if (b.brand_logo_url) {
+          uploadedLogoData = b.brand_logo_url;
+          const input = document.getElementById("brandLogoUrl");
+          if (input) input.value = b.brand_logo_url;
+          const prev = document.getElementById("logoPreviewImg");
+          if (prev) { prev.src = b.brand_logo_url; prev.classList.remove("hidden"); }
+          const icon = document.getElementById("logoIconPlaceholder");
+          if (icon) icon.classList.add("hidden");
+          const name = document.getElementById("logoFileNameText");
+          if (name) name.innerText = "Current Logo";
         }
-      } catch(e) {}
-    }
+        if (b.brand_bg_url) {
+          uploadedBgData = b.brand_bg_url;
+          const input = document.getElementById("brandBgUrl");
+          if (input) input.value = b.brand_bg_url;
+          const prev = document.getElementById("bgPreviewImg");
+          if (prev) { prev.src = b.brand_bg_url; prev.classList.remove("hidden"); }
+          const icon = document.getElementById("bgIconPlaceholder");
+          if (icon) icon.classList.add("hidden");
+          const name = document.getElementById("bgFileNameText");
+          if (name) name.innerText = "Current Wallpaper";
+        }
+      }
+    }).catch(() => {});
 
-    async function downloadFile(fileId) {
+  const modal = document.getElementById("brandingModal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeBrandingModal() {
+  const modal = document.getElementById("brandingModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function saveBrandingPreferences() {
+  const btn = document.getElementById("saveBrandingBtn");
+  if (btn) { btn.disabled = true; btn.innerText = "Saving..."; }
+
+  const titleEl = document.getElementById("brandTitle");
+  const colorEl = document.getElementById("brandColorText");
+  const logoEl = document.getElementById("brandLogoUrl");
+  const bgEl = document.getElementById("brandBgUrl");
+
+  const payload = {
+    user_id: currentUserId,
+    brand_title: titleEl ? titleEl.value.trim() : "",
+    brand_accent_color: colorEl ? colorEl.value.trim() : "#6366f1",
+    brand_logo_url: uploadedLogoData || (logoEl ? logoEl.value.trim() : null) || null,
+    brand_bg_url: uploadedBgData || (bgEl ? bgEl.value.trim() : null) || null
+  };
+
+  try {
+    const res = await fetch("/api/branding/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      alert("Branding preferences saved successfully!");
+      closeBrandingModal();
+      window.location.reload();
+    } else {
+      alert("Branding features require a Plus or Pro subscription.");
+    }
+  } catch(e) {
+    alert("Error saving branding: " + e.message);
+ } finally {
+      if (btn) { btn.disabled = false; btn.innerText = "Save Branding"; }
+    }
+  }
+
+  async function downloadFile(fileId) {
       try {
         const res = await fetch(`/api/drive/download/${fileId}?user_id=${currentUserId}`);
         const data = await res.json();
