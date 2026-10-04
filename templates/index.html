@@ -792,23 +792,36 @@
         </a>
       </div>
 
-      <!-- ZONE 2: CENTER FLOATING GLASS DOCK -->
-      <nav class="hidden xl:flex items-center gap-1 p-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_24px_-8px_rgba(0,0,0,0.7)] backdrop-blur-xl">
-        <a href="#control" class="px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all duration-200">
-          Features
-        </a>
-        <button type="button" onclick="openAiStudioModal()" class="relative px-4 py-1.5 rounded-full text-xs font-extrabold text-white bg-gradient-to-r from-sky-500/30 to-indigo-500/30 border border-sky-400/40 hover:border-purple-400/60 shadow-lg shadow-sky-500/20 transition inline-flex items-center gap-1.5 cursor-pointer">
-          <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
-          <span>4K AI Studio</span>
-        </button>
-        <a href="#pricing" class="px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all duration-200">
-          Pricing
-        </a>
-        <a href="/dashboard" class="px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all duration-200 flex items-center gap-1.5">
-          <span>🎨</span>
-          <span>Branding</span>
-        </a>
-      </nav>
+      <!-- ZONE 2: CENTER FLOATING GLASS DOCK (COLOR FLOATING ON HOVER) -->
+    <nav class="hidden xl:flex items-center gap-1.5 p-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+      
+      <!-- 1. Features (Electric Sky Floating Pill) -->
+      <a href="#control" 
+         class="nav-dock-btn nav-btn-features px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-sky-300 hover:bg-sky-500/15 border border-transparent hover:border-sky-400/40 hover:shadow-[0_4px_16px_rgba(56,189,248,0.35)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+        Features
+      </a>
+
+      <!-- 2. 4K AI Studio (Cosmic Purple Floating Pill) -->
+      <button type="button" onclick="openAiStudioModal()" 
+              class="nav-dock-btn nav-btn-studio relative px-4 py-1.5 rounded-full text-xs font-extrabold text-white bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-sky-500/30 border border-purple-400/40 hover:border-purple-300 hover:shadow-[0_4px_20px_rgba(168,85,247,0.45)] hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center gap-1.5 cursor-pointer">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        <span>4K AI Studio</span>
+      </button>
+
+      <!-- 3. Pricing (Emerald Mint Floating Pill) -->
+      <a href="#pricing" 
+         class="nav-dock-btn nav-btn-pricing px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:bg-emerald-500/15 border border-transparent hover:border-emerald-400/40 hover:shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+        Pricing
+      </a>
+
+      <!-- 4. Branding (Warm Amber Floating Pill) -->
+      <button type="button" onclick="openBrandingModal()" 
+              class="nav-dock-btn nav-btn-branding px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-amber-300 hover:bg-amber-500/15 border border-transparent hover:border-amber-400/40 hover:shadow-[0_4px_16px_rgba(245,158,11,0.35)] hover:-translate-y-0.5 transition-all duration-200 inline-flex items-center gap-1.5 cursor-pointer">
+        <span>🎨</span>
+        <span>Branding</span>
+      </button>
+
+    </nav>
 
       <!-- ZONE 3: EXECUTIVE OBSIDIAN UTILITY COCKPIT (MATCHED PILL DOCK) -->
       <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
