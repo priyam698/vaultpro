@@ -80,11 +80,11 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.55); border-radius: 6px; border: 2px solid transparent; background-clip: content-box; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.9); }
     
-    body.light-theme .custom-scroll {
-      scrollbar-color: rgba(2, 132, 199, 0.6) rgba(224, 242, 254, 0.7);
+    /* Sender Message Card Theming */
+    .sender-msg-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
-    body.light-theme .custom-scroll::-webkit-scrollbar-track { background: rgba(224, 242, 254, 0.7); }
-    body.light-theme .custom-scroll::-webkit-scrollbar-thumb { background: rgba(2, 132, 199, 0.6); }
 
     /* Sidebar Item Styling */
     .sidebar-file-item {
@@ -134,7 +134,7 @@
       box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.6) !important;
     }
 
-    /* Day Mode */
+    /* Day Mode Overrides */
     body.light-theme {
       background-color: #f0f7ff;
       color: #0f172a;
@@ -176,6 +176,14 @@
 
     body.light-theme .obsidian-card p,
     body.light-theme .obsidian-card label {
+      color: #334155 !important;
+    }
+
+    body.light-theme .sender-msg-card {
+      background: #f0f7ff !important;
+      border-color: #bae6fd !important;
+    }
+    body.light-theme .sender-msg-card p {
       color: #334155 !important;
     }
 
@@ -226,6 +234,12 @@
       border-top: 1px solid #dbeafe !important;
       color: #64748b !important;
     }
+
+    body.light-theme .custom-scroll {
+      scrollbar-color: rgba(2, 132, 199, 0.6) rgba(224, 242, 254, 0.7);
+    }
+    body.light-theme .custom-scroll::-webkit-scrollbar-track { background: rgba(224, 242, 254, 0.7); }
+    body.light-theme .custom-scroll::-webkit-scrollbar-thumb { background: rgba(2, 132, 199, 0.6); }
 
     /* Full Big Screen Mode Styles */
     #contentStageBox:fullscreen,
@@ -345,10 +359,16 @@
           {{ filesize }} MB • Total Downloads: <span id="downloadCount">{{ downloads }}</span>
         </p>
 
-        {% if message and is_paywalled %}
-        <div class="mt-4 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-left text-xs max-w-lg mx-auto">
-          <span class="font-bold opacity-75 block text-[10px] uppercase text-sky-500">Sender Message</span>
-          <p class="mt-1 whitespace-pre-wrap text-slate-300">{{ message }}</p>
+        <!-- SENDER MESSAGE CARD (Displayed on both Paywalled and Standard Free Transfers) -->
+        {% if message and message.strip() %}
+        <div class="mt-4 p-4 rounded-2xl sender-msg-card text-left text-xs max-w-xl mx-auto shadow-lg backdrop-blur-md flex items-start gap-3 transition-all">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/15 border border-sky-500/25 text-sky-400 flex items-center justify-center shrink-0 text-base shadow-sm">
+            💬
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="font-bold opacity-80 block text-[10px] uppercase tracking-wider text-sky-400 mb-0.5">Sender Message</span>
+            <p class="whitespace-pre-wrap text-slate-200 leading-relaxed font-medium break-words text-xs">{{ message }}</p>
+          </div>
         </div>
         {% endif %}
       </div>
