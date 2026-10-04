@@ -184,12 +184,25 @@
       border-color: #bae6fd !important;
     }
 
-    body.light-theme .sender-message-box {
+    /* Light Theme Styling for Sender Message Box */
+    body.light-theme .sender-message-card {
       background: #ffffff !important;
-      border-color: #bae6fd !important;
-      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.08) !important;
+      border: 1px solid #bae6fd !important;
+      box-shadow: 0 10px 30px -5px rgba(2, 132, 199, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
     }
-    body.light-theme .sender-message-box p {
+    body.light-theme .sender-message-card .sender-msg-header {
+      border-color: #e2e8f0 !important;
+    }
+    body.light-theme .sender-message-card .sender-title-text {
+      color: #0f172a !important;
+    }
+    body.light-theme .sender-message-card .sender-sub-text {
+      color: #0284c7 !important;
+    }
+    body.light-theme .sender-message-card .sender-msg-body {
+      border-left-color: #0284c7 !important;
+    }
+    body.light-theme .sender-message-card p {
       color: #1e293b !important;
     }
 
@@ -354,16 +367,41 @@
           {{ filesize }} MB • Total Downloads: <span id="downloadCount">{{ downloads }}</span>
         </p>
 
-        <!-- SENDER MESSAGE BOX: ATTACHED PROMINENTLY FOR ALL RECIPIENTS -->
+        <!-- SENDER MESSAGE BOX: ULTRA-PREMIUM EDITORIAL DESIGN -->
         {% if message %}
-        <div class="sender-message-box mt-4 p-4 rounded-2xl bg-white/[0.04] border border-sky-500/25 text-left text-xs max-w-lg mx-auto shadow-md backdrop-blur-md transition-all">
-          <div class="flex items-center justify-between pb-1.5 border-b border-white/10 mb-2">
-            <span class="font-bold text-[10px] uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
-              <span>💬</span> Note from Sender
-            </span>
-            <span class="text-[9px] font-mono opacity-50">Confidential Message</span>
+        <div class="sender-message-card mt-5 p-5 rounded-2xl relative overflow-hidden text-left max-w-xl mx-auto backdrop-blur-2xl border border-white/10 shadow-[0_15px_45px_-10px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.14)] bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent group transition-all duration-300 hover:border-sky-400/40">
+          
+          <!-- Ambient Radial Lighting -->
+          <div class="absolute -top-12 -right-12 w-36 h-36 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Header Bar: Monogram Badge & Security Identifier -->
+          <div class="sender-msg-header flex items-center justify-between pb-3 border-b border-white/[0.08] relative z-10">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-sky-500/25 to-indigo-500/25 border border-sky-400/40 text-sky-300 flex items-center justify-center shadow-inner">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+              </div>
+              <div>
+                <span class="sender-title-text font-extrabold text-[11px] uppercase tracking-wider text-slate-100 block leading-tight">Note from Sender</span>
+                <span class="sender-sub-text text-[9px] font-mono text-sky-400 block leading-none mt-0.5">Encrypted Transmission Memo</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Confidential Payload</span>
+            </div>
           </div>
-          <p class="whitespace-pre-wrap text-slate-200 leading-relaxed font-medium text-xs">{{ message }}</p>
+
+          <!-- Body: Styled Quote Message with Left Neon Border -->
+          <div class="sender-msg-body relative z-10 pt-3.5 pl-3.5 border-l-2 border-sky-400/60 mt-1">
+            <p class="whitespace-pre-wrap text-slate-200 leading-relaxed font-medium text-xs sm:text-[13px] tracking-normal selection:bg-sky-500/30">
+              {{ message }}
+            </p>
+          </div>
+
         </div>
         {% endif %}
       </div>
