@@ -6,56 +6,138 @@
   <title>Zephyr Ecosystem — Product Documentation & Guide</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* ========================================================================= */
+    /* DAY THEME (LIGHT MODE) HOMEPAGE AESTHETIC (CLEAN WHITE + SKY ACCENTS)     */
+    /* ========================================================================= */
+    body.light-theme {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    body.light-theme .ambient-glow-top {
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(224, 242, 254, 0.45) 50%, transparent 80%) !important;
+    }
+
+    body.light-theme .ambient-glow-side {
+      background: radial-gradient(circle, rgba(186, 230, 253, 0.3) 0%, transparent 70%) !important;
+    }
+
+    body.light-theme header {
+      background-color: rgba(255, 255, 255, 0.88) !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme .nav-dock-container {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 2px 14px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    body.light-theme .product-tab {
+      color: #475569 !important;
+    }
+
+    body.light-theme .product-tab.tab-active {
+      background-color: rgba(14, 165, 233, 0.12) !important;
+      color: #0284c7 !important;
+      border-color: rgba(14, 165, 233, 0.4) !important;
+    }
+
+    body.light-theme .guide-card {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.05) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-theme .guide-card h1,
+    body.light-theme .guide-card h2,
+    body.light-theme .guide-card h3,
+    body.light-theme .guide-card h4 {
+      color: #0f172a !important;
+    }
+
+    body.light-theme .guide-card p {
+      color: #475569 !important;
+    }
+
+    body.light-theme .guide-subcard {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+
+    body.light-theme .guide-table-wrap {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme table thead tr {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+
+    body.light-theme table tbody tr {
+      border-color: #f1f5f9 !important;
+      color: #334155 !important;
+    }
+
+    body.light-theme table tbody tr:hover {
+      background: #f8fafc !important;
+    }
+
+    body.light-theme .table-highlight-col {
+      background-color: rgba(14, 165, 233, 0.04) !important;
+      border-color: #e2e8f0 !important;
+    }
+
+    body.light-theme footer {
+      background-color: #ffffff !important;
+      border-top-color: #e2e8f0 !important;
+      color: #475569 !important;
+    }
+
+    body.light-theme .brand-title {
+      color: #0f172a !important;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-[#030712] text-slate-200 selection:bg-indigo-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden">
+<body class="min-h-screen bg-[#030712] text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
 
   <!-- ========================================================================= -->
-  <!-- EXACT HOMEPAGE ATMOSPHERIC BACKGROUND                                     -->
+  <!-- ATMOSPHERIC BACKGROUND NEBULAS                                            -->
   <!-- ========================================================================= -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-    <div class="absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full bg-gradient-to-b from-indigo-600/25 via-sky-500/12 to-transparent blur-[140px]"></div>
-    <div class="absolute top-[28%] -left-[180px] w-[650px] h-[650px] rounded-full bg-sky-500/10 blur-[160px]"></div>
-    <div class="absolute top-[52%] -right-[180px] w-[700px] h-[700px] rounded-full bg-purple-600/12 blur-[160px]"></div>
-    <div class="absolute bottom-[-100px] left-[25%] w-[800px] h-[450px] rounded-full bg-indigo-600/15 blur-[150px]"></div>
-
-    <!-- Floating Homepage Asset Badges -->
-    <div class="absolute top-28 left-8 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500/30 to-rose-500/30 border border-white/10 flex items-center justify-center text-sm">🌸</div>
-      <div class="text-left font-mono">
-        <span class="block text-xs font-bold text-white">Sculpture_Still_8K.dng</span>
-        <span class="text-[10px] text-amber-400">14.2 GB • RAW</span>
-      </div>
-    </div>
-
-    <div class="absolute top-72 right-10 hidden xl:flex items-center gap-3 p-2.5 pr-4 rounded-2xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500/30 to-indigo-500/30 border border-white/10 flex items-center justify-center text-sm">🏔️</div>
-      <div class="text-left font-mono">
-        <span class="block text-xs font-bold text-white">Lookbook_SS26.tif</span>
-        <span class="text-[10px] text-sky-400">16-Bit Master</span>
-      </div>
-    </div>
-
-    <div class="absolute bottom-32 left-16 hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#090d1f]/60 border border-white/10 backdrop-blur-md opacity-35 font-mono text-[11px] text-slate-300">
-      <span>📁</span>
-      <span>Zephyr_Archive_v01</span>
-    </div>
+    <div class="ambient-glow-top absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full bg-gradient-to-b from-indigo-600/25 via-sky-500/15 to-transparent blur-[140px] transition-all"></div>
+    <div class="ambient-glow-side absolute top-[28%] -left-[180px] w-[650px] h-[650px] rounded-full bg-sky-500/10 blur-[160px] transition-all"></div>
+    <div class="ambient-glow-side absolute top-[52%] -right-[180px] w-[700px] h-[700px] rounded-full bg-purple-600/12 blur-[160px] transition-all"></div>
   </div>
 
-  <!-- TOP OBSIDIAN NAVIGATION -->
-  <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08]">
+  <!-- ========================================================================= -->
+  <!-- TOP OBSIDIAN NAVIGATION BAR (MATCHED SQUIRCLE LOGO & DAY/NIGHT TOGGLE)    -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      
+      <!-- Unified Logo: Exact Match to Homepage Squircle -->
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10">
+        <div class="w-10 h-10 rounded-2xl bg-[#090d1f] border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10 transition group-hover:scale-105">
           <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
             <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
             <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
             <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
           </svg>
         </div>
-        <span class="font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition">Zephyr</span>
+        <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-400 transition-colors">Zephyr</span>
       </a>
 
+      <!-- Actions & Theme Toggle -->
       <div class="flex items-center gap-3">
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Theme" class="w-9 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+          <span id="themeIcon">☀️</span>
+        </button>
         <a href="/" class="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-semibold text-slate-200 transition">
           ← Back to Hub
         </a>
@@ -66,14 +148,16 @@
     </div>
   </header>
 
-  <!-- INTERACTIVE PRODUCT DOCK -->
+  <!-- ========================================================================= -->
+  <!-- INTERACTIVE PRODUCT DOCK SWITCHER                                         -->
+  <!-- ========================================================================= -->
   <div class="max-w-5xl mx-auto px-6 pt-10 w-full">
-    <div class="p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto custom-scroll shadow-2xl">
-      <button onclick="switchProduct('transfer')" id="tab-transfer" class="product-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30">
+    <div class="nav-dock-container p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto custom-scroll shadow-2xl transition">
+      <button onclick="switchProduct('transfer')" id="tab-transfer" class="product-tab tab-active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30">
         <span>⚡</span> <span>Zephyr Transfer</span>
       </button>
       <button onclick="switchProduct('vault')" id="tab-vault" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
-        <span>🗄️️</span> <span>Drive Vault</span>
+        <span>🗄️</span> <span>Drive Vault</span>
       </button>
       <button onclick="switchProduct('ai-studio')" id="tab-ai-studio" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
         <span>✨</span> <span>4K AI Studio</span>
@@ -90,13 +174,15 @@
     </div>
   </div>
 
-  <!-- MAIN DOCUMENTATION CONTAINER -->
+  <!-- ========================================================================= -->
+  <!-- MAIN DOCUMENTATION CONTAINER                                              -->
+  <!-- ========================================================================= -->
   <main class="max-w-5xl mx-auto px-6 py-12 space-y-16 w-full">
 
     <!-- 1. ZEPHYR TRANSFER -->
     <div id="section-transfer" class="product-section space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-400 text-xs font-mono font-bold">
           <span>⚡</span> Transfer Architecture
         </div>
         <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -109,42 +195,42 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🛡️</div>
           <h3 class="text-sm font-black text-white">Client AES-256 Hashing</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Files are encrypted in-browser before transit. Keys reside solely in your URL link fragment.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">🚀</div>
           <h3 class="text-sm font-black text-white">Cloudflare R2 Direct Pipe</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Direct multi-chunk streaming straight to global edge nodes with 0 origin server bottlenecks.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/25 flex items-center justify-center text-lg">🔥</div>
           <h3 class="text-sm font-black text-white">Burn-on-Read Shredding</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">Automatically purge and unmap storage buckets the moment the recipient completes their first download.</p>
+          <p class="text-xs text-slate-400 leading-relaxed">Automatically purge storage buckets the moment the recipient completes their first download.</p>
         </div>
       </div>
 
-      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+      <div class="guide-card p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Zephyr Transfer</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 1</span>
             <h4 class="font-bold text-white text-sm">Upload Deliverables</h4>
             <p class="text-slate-400">Drag files or complete folders directly into the transfer card.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Choose Delivery Method</h4>
             <p class="text-slate-400">Select "Get link" for instant copying or "Send email" for automated notifications.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Security Controls</h4>
             <p class="text-slate-400">Toggle Burn-on-Read or customize link expiry up to 30 days.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">One-Click Dispatch</h4>
             <p class="text-slate-400">Click Transfer. Deliverables upload directly to Cloudflare R2 edge buckets.</p>
@@ -156,7 +242,7 @@
     <!-- 2. ZEPHYR DRIVE VAULT -->
     <div id="section-vault" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-400 text-xs font-mono font-bold">
           <span>🗄️</span> Permanent Cloud Storage
         </div>
         <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -169,42 +255,42 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📁</div>
           <h3 class="text-sm font-black text-white">Full Folder Hierarchy</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Organize complex project directory trees with instant drag-and-drop file sorting.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🔒</div>
           <h3 class="text-sm font-black text-white">Zero-Knowledge Metadata</h3>
           <p class="text-xs text-slate-400 leading-relaxed">File names and folder headers are encrypted client-side using Supabase Vault tokens.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-400/25 flex items-center justify-center text-lg">⚡</div>
           <h3 class="text-sm font-black text-white">Instant Resumable Sync</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Uploads automatically resume if your connection drops mid-transfer.</p>
         </div>
       </div>
 
-      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+      <div class="guide-card p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Drive Vault</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 1</span>
             <h4 class="font-bold text-white text-sm">Access Your Vault</h4>
             <p class="text-slate-400">Click "Drive" in the top cockpit navigation to enter your authenticated storage space.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Create Directory Structure</h4>
             <p class="text-slate-400">Add project folders to separate raw media, masters, and client assets.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Upload & Stream</h4>
             <p class="text-slate-400">Preview raw footage, play lossless audio stems, and share secure download links.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">Storage Allocation</h4>
             <p class="text-slate-400">Track storage usage in real time via the live capacity meter.</p>
@@ -216,7 +302,7 @@
     <!-- 3. 4K AI STUDIO -->
     <div id="section-ai-studio" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-400 text-xs font-mono font-bold">
           <span>✨</span> Next-Gen Neural Tools
         </div>
         <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -229,42 +315,42 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/25 flex items-center justify-center text-lg">🔍</div>
           <h3 class="text-sm font-black text-white">4K Neural Upscaler</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Enhance standard 1080p footage to 4K resolution using generative edge sharpening.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-400/25 flex items-center justify-center text-lg">🛡️</div>
           <h3 class="text-sm font-black text-white">Anti-Screenshot Glare</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Generates client review stages that disrupt automated screen capture and OCR scrapers.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📉</div>
           <h3 class="text-sm font-black text-white">Perceptual Lossless Compression</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Shrink archive sizes by up to 60% while preserving color fidelity and audio bitrates.</p>
         </div>
       </div>
 
-      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+      <div class="guide-card p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use 4K AI Studio</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 1</span>
             <h4 class="font-bold text-white text-sm">Select Source Asset</h4>
             <p class="text-slate-400">Open your dashboard and choose any image, video, or deliverable asset.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Choose AI Processing Model</h4>
             <p class="text-slate-400">Select "4K Super-Resolution" or "Secure Client Review Mode".</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Configure Watermark & Glare</h4>
             <p class="text-slate-400">Embed dynamic client name watermarks across frames to prevent unauthorized distribution.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">Export Master Copy</h4>
             <p class="text-slate-400">Export enhanced files directly to your Zephyr Drive or generate a protected client transfer link.</p>
@@ -276,7 +362,7 @@
     <!-- 4. E-SIGN STUDIO -->
     <div id="section-esign" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-400 text-xs font-mono font-bold">
           <span>✍️</span> Cryptographic Document Signatures
         </div>
         <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -289,42 +375,42 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/25 flex items-center justify-center text-lg">📜</div>
           <h3 class="text-sm font-black text-white">SHA-256 Tamper Proofing</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Contracts are sealed with cryptographic timestamps to prove document integrity.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/25 flex items-center justify-center text-lg">🚪</div>
           <h3 class="text-sm font-black text-white">Pre-Download Gateway</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Lock files behind signatures. Deliverables unlock only after signing is completed.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-400/25 flex items-center justify-center text-lg">🗂️</div>
           <h3 class="text-sm font-black text-white">Cryptographic Audit Logs</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Records IP addresses, timestamps, and browser fingerprints into an exportable audit certificate.</p>
         </div>
       </div>
 
-      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+      <div class="guide-card p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use E-Sign Studio</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 1</span>
             <h4 class="font-bold text-white text-sm">Upload Agreement (PDF)</h4>
             <p class="text-slate-400">Attach your contract, licensing terms, or client release form.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Attach Transfer Files</h4>
             <p class="text-slate-400">Select the deliverables that should remain locked behind the signature.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Client Signature Flow</h4>
             <p class="text-slate-400">Your recipient signs via stylus, mouse, or typed cryptographic key verification.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">Automated Release</h4>
             <p class="text-slate-400">Files unlock instantly and both parties receive a cryptographically sealed PDF receipt.</p>
@@ -336,7 +422,7 @@
     <!-- 5. PAYWALL ESCROW -->
     <div id="section-escrow" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-400 text-xs font-mono font-bold">
           <span>💳</span> Monetization & Escrow
         </div>
         <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -349,42 +435,42 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/25 flex items-center justify-center text-lg">💰</div>
           <h3 class="text-sm font-black text-white">Direct Client Payments</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">Accept credit cards, international debit, and UPI directly through integrated DODO payments.</p>
+          <p class="text-xs text-slate-400 leading-relaxed">Accept cards and UPI directly through integrated DODO payments.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-400/25 flex items-center justify-center text-lg">🔒</div>
           <h3 class="text-sm font-black text-white">Cryptographic File Lock</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Original high-res assets remain encrypted on edge storage until checkout confirmation.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-400/25 flex items-center justify-center text-lg">👁️</div>
           <h3 class="text-sm font-black text-white">Zero-Loss Preview Stage</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">Clients can pan, inspect, and verify project quality with protected overlay watermarks.</p>
+          <p class="text-xs text-slate-400 leading-relaxed">Clients inspect project quality with protected overlay watermarks.</p>
         </div>
       </div>
 
-      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+      <div class="guide-card p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Paywall Escrow</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 1</span>
             <h4 class="font-bold text-white text-sm">Upload Deliverable Batch</h4>
             <p class="text-slate-400">Upload video edits, logo packages, codebases, or raw 3D assets to Zephyr.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Set Price & Currency</h4>
-            <p class="text-slate-400">Toggle "Paywall Escrow" on the transfer card and specify invoice amount and currency.</p>
+            <p class="text-slate-400">Toggle "Paywall Escrow" on the transfer card and specify invoice amount.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Send Client Link</h4>
             <p class="text-slate-400">Clients open the link to inspect deliverables in a protected preview environment.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">Automated Settlement</h4>
             <p class="text-slate-400">Payment settles into your account and files unlock automatically for download.</p>
@@ -396,7 +482,7 @@
     <!-- 6. INBOUND PORTAL -->
     <div id="section-portal" class="product-section hidden space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-400 text-xs font-mono font-bold">
           <span>📥</span> Client Inbound Transfers
         </div>
         <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -409,42 +495,42 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/25 flex items-center justify-center text-lg">🔗</div>
           <h3 class="text-sm font-black text-white">Custom Inbound URL</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Share links like <code>zephyr-drive.com/request/yourstudio</code> to receive raw files directly.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🚫</div>
           <h3 class="text-sm font-black text-white">No Client Sign-Up Required</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">Clients can upload assets immediately without creating accounts or entering passwords.</p>
+          <p class="text-xs text-slate-400 leading-relaxed">Clients can upload assets immediately without creating accounts.</p>
         </div>
-        <div class="p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
+        <div class="guide-card p-6 rounded-3xl bg-[#070b18]/80 border border-white/10 space-y-3">
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📁</div>
           <h3 class="text-sm font-black text-white">Direct Vault Routing</h3>
           <p class="text-xs text-slate-400 leading-relaxed">Incoming uploads route straight to your dedicated Inbound folder on Cloudflare R2.</p>
         </div>
       </div>
 
-      <div class="p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
+      <div class="guide-card p-8 sm:p-10 rounded-3xl bg-[#070b18]/90 border border-white/10 space-y-6">
         <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Inbound Portal</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 1</span>
             <h4 class="font-bold text-white text-sm">Generate Inbound Link</h4>
             <p class="text-slate-400">Click "Request" in the top navigation or open Inbound Portals in your dashboard.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Send to Client</h4>
             <p class="text-slate-400">Send your private drop-link via Slack, WhatsApp, or email.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Client Drops Assets</h4>
             <p class="text-slate-400">Clients drag and drop their raw files into your branded portal page.</p>
           </div>
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+          <div class="guide-subcard p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">Instant Notification</h4>
             <p class="text-slate-400">Receive upload alerts as files appear directly inside your Zephyr Drive.</p>
@@ -454,7 +540,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- UNIFIED PLATFORM COMPARISON (INCLUDES ZEPHYR LITE + LIVE EXECUTION HOOKS) -->
+    <!-- UNIFIED PLATFORM COMPARISON MATRIX (INCLUDES LITE + OPERATIONAL HOOKS)    -->
     <!-- ========================================================================= -->
     <div class="space-y-6 pt-6">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -470,37 +556,33 @@
         </div>
       </div>
 
-      <div class="overflow-x-auto rounded-3xl border border-white/10 bg-[#070b18]/80 backdrop-blur-xl shadow-2xl">
+      <div class="guide-table-wrap overflow-x-auto rounded-3xl border border-white/10 bg-[#070b18]/80 backdrop-blur-xl shadow-2xl transition">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-white/[0.04] text-slate-300 border-b border-white/10 text-[11px] font-black tracking-wider uppercase">
               <th class="p-4">Platform Capability</th>
               <th class="p-4 text-center">Free Tier</th>
-              <th class="p-4 text-center text-sky-300 bg-sky-500/[0.04] border-x border-white/5">Zephyr Lite</th>
-              <th class="p-4 text-center text-indigo-300">Zephyr Plus</th>
-              <th class="p-4 text-center text-purple-300">Pro Studio</th>
+              <th class="table-highlight-col p-4 text-center text-sky-400 bg-sky-500/[0.04] border-x border-white/5">Zephyr Lite</th>
+              <th class="p-4 text-center text-indigo-400">Zephyr Plus</th>
+              <th class="p-4 text-center text-purple-400">Pro Studio</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5 text-slate-300">
-            
-            <!-- ROW 1: TRANSFER CAP -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>Transfer File Cap</span>
-                  <a href="/" class="text-[10px] text-sky-400 hover:text-sky-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                  <a href="/?action=transfer" class="text-[10px] text-sky-400 hover:text-sky-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
                     <span>▶ Launch Transfer</span> <span>↗</span>
                   </a>
                 </div>
               </td>
               <td class="p-4 text-center font-mono">2 GB</td>
-              <td class="p-4 text-center font-mono font-bold text-sky-400 bg-sky-500/[0.04] border-x border-white/5">5 GB</td>
-              <td class="p-4 text-center font-mono font-bold text-indigo-300">20 GB</td>
+              <td class="table-highlight-col p-4 text-center font-mono font-bold text-sky-400 bg-sky-500/[0.04] border-x border-white/5">5 GB</td>
+              <td class="p-4 text-center font-mono font-bold text-indigo-400">20 GB</td>
               <td class="p-4 text-center font-mono font-black text-purple-400">50 GB</td>
             </tr>
-
-            <!-- ROW 2: VAULT STORAGE -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>Persistent Vault Storage</span>
@@ -510,61 +592,53 @@
                 </div>
               </td>
               <td class="p-4 text-center font-mono">2 GB</td>
-              <td class="p-4 text-center font-mono font-bold text-sky-400 bg-sky-500/[0.04] border-x border-white/5">20 GB</td>
-              <td class="p-4 text-center font-mono font-bold text-indigo-300">50 GB</td>
+              <td class="table-highlight-col p-4 text-center font-mono font-bold text-sky-400 bg-sky-500/[0.04] border-x border-white/5">20 GB</td>
+              <td class="p-4 text-center font-mono font-bold text-indigo-400">50 GB</td>
               <td class="p-4 text-center font-mono font-black text-purple-400">200 GB</td>
             </tr>
-
-            <!-- ROW 3: AI STUDIO -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>4K AI Studio & Neural Glare</span>
-                  <a href="/dashboard" class="text-[10px] text-purple-400 hover:text-purple-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                  <a href="/?action=ai-studio" class="text-[10px] text-purple-400 hover:text-purple-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
                     <span>▶ Open AI Studio</span> <span>↗</span>
                   </a>
                 </div>
               </td>
               <td class="p-4 text-center text-slate-500">✕</td>
-              <td class="p-4 text-center text-slate-400 bg-sky-500/[0.04] border-x border-white/5 font-mono text-[11px]">1080p AI Enhance</td>
+              <td class="table-highlight-col p-4 text-center text-slate-400 bg-sky-500/[0.04] border-x border-white/5 font-mono text-[11px]">1080p AI Enhance</td>
               <td class="p-4 text-center text-emerald-400 font-semibold">✓ 4K Neural Scale</td>
-              <td class="p-4 text-center text-purple-300 font-bold">✓ Unlimited 4K Studio</td>
+              <td class="p-4 text-center text-purple-400 font-bold">✓ Unlimited 4K Studio</td>
             </tr>
-
-            <!-- ROW 4: ESCROW -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>Escrow Platform Fee</span>
-                  <a href="/#control" class="text-[10px] text-amber-400 hover:text-amber-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                  <a href="/?action=escrow" class="text-[10px] text-amber-400 hover:text-amber-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
                     <span>▶ Configure Escrow</span> <span>↗</span>
                   </a>
                 </div>
               </td>
               <td class="p-4 text-center font-mono">5.0%</td>
-              <td class="p-4 text-center font-mono text-sky-300 bg-sky-500/[0.04] border-x border-white/5">3.5%</td>
-              <td class="p-4 text-center font-mono text-indigo-300">2.5%</td>
+              <td class="table-highlight-col p-4 text-center font-mono text-sky-400 bg-sky-500/[0.04] border-x border-white/5">3.5%</td>
+              <td class="p-4 text-center font-mono text-indigo-400">2.5%</td>
               <td class="p-4 text-center font-mono font-black text-emerald-400">0% Platform Fee</td>
             </tr>
-
-            <!-- ROW 5: BRANDING -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>Studio Wallpapers & Logos</span>
-                  <a href="/" class="text-[10px] text-teal-400 hover:text-teal-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                  <a href="/?action=branding" class="text-[10px] text-teal-400 hover:text-teal-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
                     <span>▶ Custom Wallpapers</span> <span>↗</span>
                   </a>
                 </div>
               </td>
               <td class="p-4 text-center text-slate-500">✕</td>
-              <td class="p-4 text-center text-emerald-400 bg-sky-500/[0.04] border-x border-white/5 font-medium">✓ Custom Wallpaper</td>
+              <td class="table-highlight-col p-4 text-center text-emerald-400 bg-sky-500/[0.04] border-x border-white/5 font-medium">✓ Custom Wallpaper</td>
               <td class="p-4 text-center text-emerald-400 font-semibold">✓ Wallpaper + Logo</td>
-              <td class="p-4 text-center text-purple-300 font-bold">✓ White-Label Domain</td>
+              <td class="p-4 text-center text-purple-400 font-bold">✓ White-Label Domain</td>
             </tr>
-
-            <!-- ROW 6: E-SIGN -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>E-Sign Deliverable NDAs</span>
@@ -574,61 +648,48 @@
                 </div>
               </td>
               <td class="p-4 text-center font-mono">1 Doc / mo</td>
-              <td class="p-4 text-center font-mono text-sky-300 bg-sky-500/[0.04] border-x border-white/5">5 Docs / mo</td>
-              <td class="p-4 text-center font-mono text-indigo-300">25 Docs / mo</td>
+              <td class="table-highlight-col p-4 text-center font-mono text-sky-400 bg-sky-500/[0.04] border-x border-white/5">5 Docs / mo</td>
+              <td class="p-4 text-center font-mono text-indigo-400">25 Docs / mo</td>
               <td class="p-4 text-center font-mono font-bold text-emerald-400">Unlimited Seals</td>
             </tr>
-
-            <!-- ROW 7: INBOUND PORTALS -->
-            <tr class="hover:bg-white/[0.02] transition">
+            <tr>
               <td class="p-4 font-medium text-white">
                 <div class="flex flex-col">
                   <span>Inbound Client Portals</span>
-                  <a href="/dashboard" class="text-[10px] text-cyan-400 hover:text-cyan-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
+                  <a href="/?action=request" class="text-[10px] text-cyan-400 hover:text-cyan-300 transition mt-0.5 inline-flex items-center gap-1 font-mono">
                     <span>▶ Create Inbound URL</span> <span>↗</span>
                   </a>
                 </div>
               </td>
               <td class="p-4 text-center font-mono">1 Temp Drop</td>
-              <td class="p-4 text-center font-mono text-sky-300 bg-sky-500/[0.04] border-x border-white/5">3 Portals</td>
-              <td class="p-4 text-center font-mono text-indigo-300">10 Portals</td>
+              <td class="table-highlight-col p-4 text-center font-mono text-sky-400 bg-sky-500/[0.04] border-x border-white/5">3 Portals</td>
+              <td class="p-4 text-center font-mono text-indigo-400">10 Portals</td>
               <td class="p-4 text-center font-mono font-bold text-emerald-400">Unlimited Portals</td>
             </tr>
-
-            <!-- ROW 8: DIRECT WORKING CHECKOUT ACTION BUTTONS -->
             <tr class="bg-white/[0.02] border-t border-white/10">
-              <td class="p-4 font-bold text-white uppercase text-[10px] tracking-wider">
-                Direct Activation
+              <td class="p-4 font-bold text-white uppercase text-[10px] tracking-wider">Direct Activation</td>
+              <td class="p-4 text-center">
+                <a href="/" class="inline-flex items-center justify-center px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold text-xs transition border border-white/10">Current (Free)</a>
+              </td>
+              <td class="table-highlight-col p-4 text-center bg-sky-500/[0.04] border-x border-white/5">
+                <button type="button" onclick="openDodoCheckout('lite')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-xs transition shadow-lg shadow-sky-500/25 cursor-pointer">Get Lite</button>
               </td>
               <td class="p-4 text-center">
-                <a href="/" class="inline-flex items-center justify-center px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold text-xs transition border border-white/10">
-                  Current (Free)
-                </a>
-              </td>
-              <td class="p-4 text-center bg-sky-500/[0.04] border-x border-white/5">
-                <button type="button" onclick="openDodoCheckout('lite')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-xs transition shadow-lg shadow-sky-500/25 cursor-pointer">
-                  Get Lite
-                </button>
+                <button type="button" onclick="openDodoCheckout('plus')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs transition shadow-lg shadow-indigo-600/25 cursor-pointer">Get Plus</button>
               </td>
               <td class="p-4 text-center">
-                <button type="button" onclick="openDodoCheckout('plus')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs transition shadow-lg shadow-indigo-600/25 cursor-pointer">
-                  Get Plus
-                </button>
-              </td>
-              <td class="p-4 text-center">
-                <button type="button" onclick="openDodoCheckout('pro')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-black text-xs transition shadow-lg shadow-purple-600/25 cursor-pointer">
-                  Get Pro Studio
-                </button>
+                <button type="button" onclick="openDodoCheckout('pro')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-black text-xs transition shadow-lg shadow-purple-600/25 cursor-pointer">Get Pro Studio</button>
               </td>
             </tr>
-
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- BOTTOM CTA BANNER -->
-    <div class="p-8 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border border-sky-500/25 flex flex-col sm:flex-row items-center justify-between gap-6">
+    <!-- ========================================================================= -->
+    <!-- BOTTOM CALL TO ACTION                                                     -->
+    <!-- ========================================================================= -->
+    <div class="guide-card p-8 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border border-sky-500/25 flex flex-col sm:flex-row items-center justify-between gap-6">
       <div>
         <h3 class="text-base font-black text-white">Ready to transfer your deliverables?</h3>
         <p class="text-xs text-slate-400 mt-0.5">No account required for zero-knowledge transfers under 2 GB.</p>
@@ -640,12 +701,16 @@
 
   </main>
 
-  <!-- SUB FOOTER -->
-  <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono">
+  <!-- ========================================================================= -->
+  <!-- SUB FOOTER                                                                -->
+  <!-- ========================================================================= -->
+  <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono transition-colors">
     © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
   </footer>
 
-  <!-- SCRIPT FOR SWITCHING & DIRECT DODO CHECKOUT INTEGRATION -->
+  <!-- ========================================================================= -->
+  <!-- CLIENT LOGIC & DODO PAYMENT PIPELINE                                      -->
+  <!-- ========================================================================= -->
   <script>
     const validProducts = ['transfer', 'vault', 'ai-studio', 'esign', 'escrow', 'portal'];
 
@@ -662,22 +727,40 @@
 
       const activeTab = document.getElementById('tab-' + slug);
       if (activeTab) {
-        activeTab.className = "product-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30";
+        activeTab.className = "product-tab tab-active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30";
       }
 
       window.history.replaceState(null, '', '/products/' + slug);
     }
 
-    // Auto-select tab matching URL
+    // Theme Engine: Reads preference from Homepage
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       const initialSlug = pathParts[1] || 'transfer';
       switchProduct(initialSlug);
     });
 
-    // OPERATIONAL DODO PAYMENTS EXECUTION (RUNS IN PRODUCTION OR TEST)
     const ACTIVE_PAYMENT_ENV = "test"; 
-
     const DODO_CONFIG = {
       test: {
         domain: "https://test.checkout.dodopayments.com/buy",
@@ -699,30 +782,14 @@
       }
     };
 
-    function getStoredUserEmail() {
-      return sessionStorage.getItem("user_email") || sessionStorage.getItem("vp_user_email") || localStorage.getItem("user_email") || localStorage.getItem("vp_user_email") || "";
-    }
-
-    function getStoredUserId() {
-      return sessionStorage.getItem("user_id") || sessionStorage.getItem("vp_user_id") || localStorage.getItem("user_id") || localStorage.getItem("vp_user_id") || "";
-    }
-
     function openDodoCheckout(tier = "pro") {
       const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
       const productId = envConfig.products[tier] || envConfig.products["pro"];
       let targetUrl = `${envConfig.domain}/${productId}`;
-
-      const email = getStoredUserEmail();
-      const uid = getStoredUserId();
       const params = new URLSearchParams();
-      if (email) params.append("email", email);
-      if (uid) params.append("metadata_user_id", uid);
       params.append("tier", tier);
       params.append("env", ACTIVE_PAYMENT_ENV);
-
-      const qs = params.toString();
-      if (qs) targetUrl += "?" + qs;
-      window.location.href = targetUrl;
+      window.location.href = targetUrl + "?" + params.toString();
     }
   </script>
 
