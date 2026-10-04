@@ -1223,6 +1223,10 @@ async def terms_page(request: Request):
 async def privacy_page(request: Request):
     return render_template("privacy.html", request)
 
+@app.get("/products/transfer", response_class=HTMLResponse)
+async def product_transfer_page(request: Request):
+    return render_template("product_transfer.html", request)
+
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)
