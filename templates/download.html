@@ -230,19 +230,19 @@
 
     #contentStageBox:fullscreen #workspaceImageEl,
     #contentStageBox:-webkit-full-screen #workspaceImageEl {
-      max-height: 92vh !important;
-      max-width: 95vw !important;
-      width: auto !important;
-      height: auto !important;
+      max-height: 94vh !important;
+      max-width: 96vw !important;
+      width: 100% !important;
+      height: 100% !important;
       object-fit: contain !important;
     }
 
     #contentStageBox:fullscreen video,
     #contentStageBox:-webkit-full-screen video {
-      max-height: 92vh !important;
-      max-width: 95vw !important;
-      width: auto !important;
-      height: auto !important;
+      max-height: 94vh !important;
+      max-width: 96vw !important;
+      width: 100% !important;
+      height: 100% !important;
       object-fit: contain !important;
     }
 
@@ -465,7 +465,7 @@
       </div>
 
       <!-- ========================================================================= -->
-      <!-- 2. NON-PAYMENT TRANSFERS: VIEW-ONLY WORKSPACE (NO EDIT TOOLS)             -->
+      <!-- 2. NON-PAYMENT TRANSFERS: VIEW-ONLY WORKSPACE (FULL SIZE PROPORTIONAL)    -->
       <!-- ========================================================================= -->
       {% else %}
 
@@ -522,8 +522,8 @@
               </div>
             </div>
 
-            <!-- Right: View-Only Stage (No Editing Toolbars) -->
-            <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[580px] sm:min-h-[640px]">
+            <!-- Right: View-Only Stage (Full Proportional Scale) -->
+            <div class="lg:col-span-8 rounded-2xl bg-black/50 light-subpanel border border-sky-500/20 p-4 flex flex-col space-y-3 min-h-[620px] sm:min-h-[680px]">
               
               <!-- Toolbar above the stage (Only Zoom & Big Screen) -->
               <div class="flex flex-wrap items-center justify-between border-b border-sky-500/20 pb-2.5 gap-2">
@@ -548,8 +548,8 @@
                 </div>
               </div>
 
-              <!-- High-Resolution Full-Stage Box -->
-              <div id="contentStageBox" class="flex-1 relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#050811] border border-sky-500/20 min-h-[480px] p-2 sm:p-4">
+              <!-- High-Resolution Full-Stage Box (Generous Viewport Bounds) -->
+              <div id="contentStageBox" class="flex-1 w-full relative flex flex-col items-center justify-center rounded-xl overflow-hidden bg-[#050811] border border-sky-500/20 min-h-[520px] sm:min-h-[600px] p-2 sm:p-4">
                 
                 <!-- Floating Controls Overlay for Fullscreen Mode -->
                 <div class="fs-floating-controls items-center gap-2 bg-black/80 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-2xl shadow-2xl">
@@ -560,10 +560,10 @@
                 </div>
 
                 <!-- Read-Only Code & Notebook Viewer -->
-                <textarea id="workspaceCodeViewer" readonly class="hidden w-full h-full max-h-[540px] p-4 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text m-0" placeholder="Viewing content..."></textarea>
+                <textarea id="workspaceCodeViewer" readonly class="hidden w-full h-full min-h-[520px] max-h-[70vh] p-4 text-xs font-mono bg-transparent text-slate-200 focus:outline-none resize-none custom-scroll leading-relaxed select-text m-0" placeholder="Viewing content..."></textarea>
 
-                <!-- Media Viewer (Strict View-Only Presentation) -->
-                <div id="workspaceMediaViewer" class="w-full h-full flex flex-col items-center justify-center overflow-hidden relative select-none"></div>
+                <!-- Media Viewer (Scales to Fill the Box Beautifully) -->
+                <div id="workspaceMediaViewer" class="w-full h-full flex-1 flex flex-col items-center justify-center overflow-hidden relative select-none min-h-[500px]"></div>
               </div>
 
               <div class="flex items-center justify-between text-[10px] opacity-75 font-mono pt-1">
@@ -1077,7 +1077,7 @@
         return;
       }
 
-      // 1. High-Resolution Visual Image (Pure View-Only with Zoom & Big Screen)
+      // 1. High-Resolution Visual Image (Scales to Fill Stage Naturally Like Native Photo Viewers)
       if (IMAGE_EXTS.includes(ext)) {
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
@@ -1085,8 +1085,8 @@
         zoomBar.classList.add("flex");
         
         media.innerHTML = `
-          <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
-            <img id="workspaceImageEl" src="${streamUrl}" class="media-high-clarity max-h-[500px] sm:max-h-[540px] max-w-[96%] object-contain rounded-xl shadow-2xl border border-white/10 select-none">
+          <div class="w-full h-full flex-1 flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
+            <img id="workspaceImageEl" src="${streamUrl}" class="media-high-clarity w-full h-full min-h-[420px] sm:min-h-[520px] max-h-[68vh] lg:max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10 select-none">
           </div>
         `;
         
@@ -1105,10 +1105,10 @@
         zoomBar.classList.add("flex");
 
         media.innerHTML = `
-          <div class="w-full h-full flex items-center justify-center p-2 overflow-hidden select-none">
+          <div class="w-full h-full flex-1 flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
             <video id="workspaceVideoEl" src="${streamUrl}" controls playsinline preload="auto"
                    style="transform-origin: 50% 50%; transform: scale(1);"
-                   class="w-full h-full max-h-[520px] sm:max-h-[560px] object-contain rounded-xl shadow-2xl bg-black select-none"></video>
+                   class="w-full h-full min-h-[420px] sm:min-h-[520px] max-h-[68vh] lg:max-h-[75vh] object-contain rounded-xl shadow-2xl bg-black select-none"></video>
           </div>
         `;
         const vidEl = document.getElementById("workspaceVideoEl");
@@ -1126,7 +1126,7 @@
         codeViewer.classList.add("hidden");
         media.classList.remove("hidden");
         media.innerHTML = `
-          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[520px] rounded-xl border-0"></iframe>
+          <iframe src="${streamUrl}#toolbar=0" class="w-full h-full min-h-[540px] lg:min-h-[650px] rounded-xl border-0"></iframe>
         `;
         if (footerStatus) footerStatus.innerText = "Document Viewport (PDF Standard)";
         return;
