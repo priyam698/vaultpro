@@ -2422,17 +2422,209 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-10 px-6 text-center text-xs opacity-80">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-      <span>© 2026 Zephyr Systems. Zero-knowledge transfers and Cloud Drive.</span>
-      <div class="flex items-center gap-6">
-        <a href="/privacy" class="hover:underline transition font-bold">Privacy Policy</a>
-        <span class="opacity-40">•</span>
-        <a href="/terms" class="hover:underline transition font-bold">Terms & Conditions</a>
+  <!-- ========================================================================= -->
+  <!-- MEGA DIRECTORY FOOTER (PROTON-STYLE MULTI-COLUMN ARCHITECTURE)            -->
+  <!-- ========================================================================= -->
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#02050e]/95 backdrop-blur-3xl pt-16 pb-12 text-xs">
+    <div class="max-w-7xl mx-auto px-6 space-y-12">
+      
+      <!-- Main Directory Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-6 pb-12 border-b border-white/[0.06]">
+        
+        <!-- Column 1 & 2: Brand Identity & Headquarters (Span 2) -->
+        <div class="col-span-2 space-y-4 pr-0 lg:pr-6">
+          <a href="/" class="flex items-center gap-3 group inline-flex">
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 group-hover:border-sky-400/50 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center overflow-hidden">
+              <div class="w-full h-full rounded-[14px] bg-[#070b18] flex items-center justify-center p-2">
+                <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
+                  <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
+                  <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
+                  <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
+                </svg>
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
+              <span class="text-[10px] text-sky-400 font-mono tracking-widest uppercase">Privacy by default</span>
+            </div>
+          </a>
+
+          <p class="text-slate-400 text-xs leading-relaxed max-w-sm">
+            Zero-knowledge edge transfer network, client deliverable escrow, and encrypted cloud drive built for creative production studios and privacy-conscious teams.
+          </p>
+
+          <!-- Social Icon Grid -->
+          <div class="flex items-center gap-2 pt-1 text-slate-400">
+            <a href="https://x.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-xs hover:text-white transition" title="X (Twitter)">
+              𝕏
+            </a>
+            <a href="https://github.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-xs hover:text-white transition" title="GitHub">
+              ⌥
+            </a>
+            <a href="https://discord.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-xs hover:text-white transition" title="Discord">
+              💬
+            </a>
+            <a href="https://linkedin.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-xs hover:text-white transition" title="LinkedIn">
+              in
+            </a>
+          </div>
+
+          <!-- Headquarters Tagline -->
+          <div class="pt-2 text-[11px] font-mono text-slate-500">
+            Zephyr Systems Inc.<br>
+            Surat, Gujarat, India • Global Edge Deployment
+          </div>
+        </div>
+
+        <!-- Column 3: Products (Column A) -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2">
+            <span>📦</span> Products
+          </h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/" class="hover:text-sky-400 transition">Zephyr Transfer</a></li>
+            <li><a href="/dashboard" class="hover:text-sky-400 transition">Zephyr Drive Vault</a></li>
+            <li>
+              <a href="/dashboard" class="hover:text-sky-400 transition inline-flex items-center gap-1.5">
+                <span>4K AI Studio</span>
+                <span class="px-1.5 py-0.2 rounded-md bg-purple-500/25 border border-purple-400/40 text-[9px] font-mono font-bold text-purple-300">New</span>
+              </a>
+            </li>
+            <li><a href="/dashboard" class="hover:text-sky-400 transition">E-Sign Studio</a></li>
+            <li><a href="#control" class="hover:text-sky-400 transition">Paywall Escrow</a></li>
+            <li><a href="/request" class="hover:text-sky-400 transition">Inbound Portal</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Privacy & Protocol -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2">
+            <span>🔒</span> Privacy
+          </h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/security" class="hover:text-sky-400 transition">Zero-Knowledge</a></li>
+            <li><a href="/security" class="hover:text-sky-400 transition">AES-256 Encryption</a></li>
+            <li><a href="#control" class="hover:text-sky-400 transition">Burn-on-Read Shred</a></li>
+            <li><a href="/security" class="hover:text-sky-400 transition">Anti-Screenshot Stage</a></li>
+            <li><a href="/security" class="hover:text-sky-400 transition">Cloudflare R2 Direct</a></li>
+            <li><a href="/security" class="hover:text-sky-400 transition">Security Whitepaper</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 5: Company -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2">
+            <span>🏢</span> Company
+          </h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li>
+              <button type="button" onclick="openAboutModal()" class="hover:text-sky-400 transition cursor-pointer text-left font-bold text-sky-400">
+                About Us
+              </button>
+            </li>
+            <li><a href="#pricing" onclick="if(window.openPlansModal){ event.preventDefault(); openPlansModal(); }" class="hover:text-sky-400 transition">Pricing Plans</a></li>
+            <li><button type="button" onclick="openBrandingModal()" class="hover:text-sky-400 transition cursor-pointer">Branding Suite</button></li>
+            <li>
+              <a href="/careers" class="hover:text-sky-400 transition inline-flex items-center gap-1.5">
+                <span>Careers</span>
+                <span class="px-1.5 py-0.2 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-[9px] font-mono font-bold text-emerald-300">Hiring</span>
+              </a>
+            </li>
+            <li><a href="/blog" class="hover:text-sky-400 transition">Changelog & Blog</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 6: Connect & Legal -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2">
+            <span>🛡️</span> Legal & Help
+          </h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/privacy" class="hover:text-sky-400 transition">Privacy Policy</a></li>
+            <li><a href="/terms" class="hover:text-sky-400 transition">Terms & Conditions</a></li>
+            <li><a href="/dmca" class="hover:text-sky-400 transition">DMCA Compliance</a></li>
+            <li>
+              <a href="/status" class="hover:text-sky-400 transition inline-flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Systems Active</span>
+              </a>
+            </li>
+            <li><a href="mailto:support@zephyr-drive.com" class="hover:text-sky-400 transition">Contact Support</a></li>
+          </ul>
+        </div>
+
       </div>
+
+      <!-- Bottom Status & Copyright Bar -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 text-slate-400 text-xs">
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="text-slate-300 font-semibold">© 2026 Zephyr Systems Inc.</span>
+          <span class="text-slate-600 hidden sm:inline">•</span>
+          <span>Zero-knowledge edge transfers and encrypted cloud drive</span>
+        </div>
+        <div class="flex items-center gap-4 text-[11px] font-medium">
+          <button type="button" onclick="openAboutModal()" class="hover:text-sky-300 transition cursor-pointer">About Us</button>
+          <span class="text-slate-600">•</span>
+          <a href="/privacy" class="hover:text-slate-200 transition">Privacy</a>
+          <span class="text-slate-600">•</span>
+          <a href="/terms" class="hover:text-slate-200 transition">Terms</a>
+          <span class="text-slate-600">•</span>
+          <a href="/security" class="hover:text-slate-200 transition">Security</a>
+        </div>
+      </div>
+
     </div>
   </footer>
+
+  <!-- ABOUT US OBSIDIAN MODAL -->
+  <div id="aboutModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="obsidian-card w-full max-w-xl rounded-3xl p-6 sm:p-8 space-y-5 border border-white/10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scroll text-left">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-400 flex items-center justify-center text-sm font-black">
+            Z
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">About Zephyr Systems</h3>
+            <p class="text-[10px] text-sky-400 font-mono">Zero-Knowledge Infrastructure & Creative Deliverables</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAboutModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+        <p>
+          <strong>Zephyr</strong> was built to transform how multi-gigabyte production assets, master video renders, and sensitive client work are delivered online. Unlike legacy transfer providers, Zephyr enforces zero-knowledge client encryption so payloads remain private.
+        </p>
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
+          <span class="text-[11px] font-black uppercase text-sky-400 tracking-wider block">Our Core Pillars</span>
+          <ul class="space-y-1.5 text-[11px]">
+            <li class="flex items-start gap-2">
+              <span class="text-sky-400 font-bold">1.</span>
+              <span><strong>Privacy by Default:</strong> Client-side cryptographic hashing and burn-on-read shredding keep file contents protected from third parties.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-sky-400 font-bold">2.</span>
+              <span><strong>Escrow Deliverables:</strong> Direct pay-to-unlock safeguards prevent unauthorized downloads until client invoices are cleared.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-sky-400 font-bold">3.</span>
+              <span><strong>Edge Pipe Performance:</strong> Powered by Cloudflare R2 infrastructure for fast uploads and egress-free global delivery.</span>
+            </li>
+          </ul>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">
+          Headquartered in Surat, Gujarat, India. Designed for digital studios worldwide.
+        </p>
+      </div>
+
+      <div class="pt-3 border-t border-white/10 flex items-center justify-end">
+        <button type="button" onclick="closeAboutModal()" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-xs transition cursor-pointer shadow-lg shadow-sky-500/25">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- ZEPHYR COPILOT AI CHATBOT WIDGET                                          -->
@@ -2538,6 +2730,18 @@
     }
 
     initTheme();
+
+function openAboutModal() {
+  const modal = document.getElementById("aboutModal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeAboutModal() {
+  const modal = document.getElementById("aboutModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+
 
     const ACTIVE_PAYMENT_ENV = "test"; // Change to "live" when deploying to production
 
