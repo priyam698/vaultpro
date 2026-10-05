@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Changelog & Releases — Zephyr</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      background-color: #03050a !important;
+      color: #e2e8f0 !important;
+    }
+    .glow-blue {
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, rgba(30, 64, 175, 0.12) 45%, transparent 75%);
+    }
+    .glow-orange {
+      background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
+    }
+    .privacy-card-container {
+      background: rgba(7, 11, 24, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(24px);
+    }
+    #themeToggleBtn, .btn-back-app {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      transition: all 0.2s ease;
+    }
+    #themeToggleBtn:hover, .btn-back-app:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    body.light-theme {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    body.light-theme .glow-blue {
+      background: radial-gradient(circle, rgba(186, 230, 253, 0.65) 0%, rgba(224, 242, 254, 0.35) 50%, transparent 80%) !important;
+    }
+    body.light-theme .glow-orange {
+      background: radial-gradient(circle, rgba(254, 215, 170, 0.35) 0%, rgba(255, 237, 213, 0.15) 50%, transparent 75%) !important;
+    }
+    body.light-theme header {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
+    }
+    body.light-theme #themeToggleBtn, body.light-theme .btn-back-app {
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-theme #themeToggleBtn:hover, body.light-theme .btn-back-app:hover {
+      background-color: #f1f5f9 !important;
+      border-color: #0284c7 !important;
+      color: #0284c7 !important;
+    }
+    body.light-theme .privacy-card-container {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme strong, body.light-theme .text-white {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+    body.light-theme p, body.light-theme li {
+      color: #334155 !important;
+      font-weight: 500 !important;
+    }
+    body.light-theme .text-slate-300, body.light-theme .text-slate-400, body.light-theme .text-slate-500 {
+      color: #475569 !important;
+    }
+    body.light-theme .release-box {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    body.light-theme footer {
+      background-color: #ffffff !important;
+      border-top-color: #e2e8f0 !important;
+      color: #64748b !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
+
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px]"></div>
+    <div class="glow-orange absolute top-[22%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px]"></div>
+    <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px]"></div>
+  </div>
+
+  <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 group shrink-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 group-hover:border-sky-400/50 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center overflow-hidden shrink-0">
+          <div class="w-full h-full rounded-[14px] bg-[#070b18] flex items-center justify-center p-2">
+            <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
+              <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
+              <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
+              <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
+            </svg>
+          </div>
+        </div>
+        <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Day/Night Theme" class="w-9 h-9 rounded-xl flex items-center justify-center text-xs transition cursor-pointer">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <a href="/" class="btn-back-app px-4 py-2 rounded-xl text-xs font-bold transition inline-flex items-center gap-1.5 cursor-pointer">
+          <span>←</span> <span>Back to App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-12 space-y-12 w-full">
+    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-400 text-xs font-mono font-bold uppercase tracking-wider">
+          Changelog & System Versions
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          Platform Releases & History
+        </h1>
+        <p class="text-slate-400 text-xs font-mono">
+          Production Deployments • Cryptographic Revisions • Global Edge Upgrades
+        </p>
+      </div>
+
+      <div class="space-y-6">
+        <!-- v2.4.0 -->
+        <div class="release-box p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-black text-white flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono text-xs">v2.4.0</span>
+              Multi-Product Ecosystem & Day Theme Engine
+            </span>
+            <span class="text-xs font-mono text-slate-400">October 2026</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Synchronized the unified gradient-sheen squircle logo across all headers and footers. Rolled out high-contrast Day Theme support across all standalone pages. Added dedicated routes for About, Pricing, Branding, and Changelog.
+          </p>
+        </div>
+
+        <!-- v2.3.0 -->
+        <div class="release-box p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-black text-white flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono text-xs">v2.3.0</span>
+              Paywall Escrow & E-Sign Pre-Download Gateway
+            </span>
+            <span class="text-xs font-mono text-slate-400">August 2026</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Shipped automated pay-to-unlock deliverables via DODO payments escrow. Added cryptographic SHA-256 pre-download document signing gateways to lock assets behind enforceable NDAs.
+          </p>
+        </div>
+
+        <!-- v2.2.0 -->
+        <div class="release-box p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-black text-white flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono text-xs">v2.2.0</span>
+              Cloudflare R2 Direct Pipe & Resumable Streams
+            </span>
+            <span class="text-xs font-mono text-slate-400">May 2026</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Replaced centralized transit proxies with direct multi-chunk presigned streaming straight to Cloudflare R2 edge buckets, dropping egress latency to near-zero.
+          </p>
+        </div>
+
+        <!-- v2.0.0 -->
+        <div class="release-box p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-black text-white flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-mono text-xs">v2.0.0</span>
+              Genesis Zero-Knowledge Architecture
+            </span>
+            <span class="text-xs font-mono text-slate-400">January 2026</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Initial production release of client-side AES-256 hashing where decryption keys remain exclusively within URL hash fragments.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono transition-colors">
+    © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Global Edge Deployment
+  </footer>
+
+  <script>
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+    window.addEventListener('DOMContentLoaded', initTheme);
+  </script>
+</body>
+</html>

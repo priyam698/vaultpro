@@ -2707,22 +2707,23 @@
           </ul>
         </div>
 
-        <!-- Column 5: Company (Interactive Information Modals & Pricing) -->
+        <!-- Column 5: Company -->
         <div class="space-y-3.5 text-left">
           <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🏢</span> Company</h4>
           <ul class="space-y-2.5 text-slate-300 font-medium">
-            <li><a href="/about" class="hover:text-sky-400 transition cursor-pointer text-sky-400 font-bold">About Us</a></li>
-            <li><a href="/#pricing" class="hover:text-sky-400 transition cursor-pointer">Pricing Plans</a></li>
-            <li><a href="/?action=branding" class="hover:text-sky-400 transition cursor-pointer">Branding Suite</a></li>
+            <li><a href="/about" class="hover:text-sky-400 transition cursor-pointer">About Us</a></li>
+            <li><a href="/pricing" class="hover:text-sky-400 transition cursor-pointer">Pricing Plans</a></li>
+            <li><a href="/branding" class="hover:text-sky-400 transition cursor-pointer">Branding Suite</a></li>
             <li class="pt-0.5">
-              <button type="button" onclick="openCareersModal()" class="inline-flex items-center gap-2 select-none text-left" title="View hiring roadmap">
-                <span class="flex items-center gap-1 text-slate-300 hover:text-sky-400 transition"><span>🔒</span> Careers</span>
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-amber-500/20 text-amber-400 border border-amber-400/30">
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Coming Soon
+              <!-- LOCKED CAREERS OPTION -->
+              <div class="inline-flex items-center gap-2 select-none cursor-not-allowed opacity-85" title="Applications currently closed">
+                <span class="flex items-center gap-1.5 text-slate-400"><span>🔒</span> Careers</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Coming Soon
                 </span>
-              </button>
+              </div>
             </li>
-            <li><button type="button" onclick="openChangelogModal()" class="hover:text-sky-400 transition cursor-pointer text-left">Changelog</button></li>
+            <li><a href="/changelog" class="hover:text-sky-400 transition cursor-pointer">Changelog</a></li>
           </ul>
         </div>
 

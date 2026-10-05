@@ -1227,6 +1227,18 @@ async def privacy_page(request: Request):
 async def about_page(request: Request):
     return render_template("about.html", request)
 
+@app.get("/pricing", response_class=HTMLResponse)
+async def pricing_page(request: Request):
+    return render_template("pricing.html", request)
+
+@app.get("/branding", response_class=HTMLResponse)
+async def branding_page(request: Request):
+    return render_template("branding.html", request)
+
+@app.get("/changelog", response_class=HTMLResponse)
+async def changelog_page(request: Request):
+    return render_template("changelog.html", request)
+
 @app.get("/products/{slug}", response_class=HTMLResponse)
 @app.get("/products/transfer", response_class=HTMLResponse)
 async def product_detail_page(request: Request, slug: str = "transfer"):
