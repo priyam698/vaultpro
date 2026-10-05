@@ -2711,7 +2711,7 @@
         <div class="space-y-3.5 text-left">
           <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🏢</span> Company</h4>
           <ul class="space-y-2.5 text-slate-300 font-medium">
-            <li><button type="button" onclick="openAboutModal()" class="hover:text-sky-400 transition cursor-pointer text-left">About Us</button></li>
+            <li><a href="/about" class="hover:text-sky-400 transition cursor-pointer text-sky-400 font-bold">About Us</a></li>
             <li><a href="/#pricing" class="hover:text-sky-400 transition cursor-pointer">Pricing Plans</a></li>
             <li><a href="/?action=branding" class="hover:text-sky-400 transition cursor-pointer">Branding Suite</a></li>
             <li class="pt-0.5">
@@ -2752,8 +2752,8 @@
           <span class="hidden sm:inline">•</span>
           <span>Zero-knowledge edge transfers and encrypted cloud drive</span>
         </div>
-        <div class="flex items-center gap-4 text-[11px] font-medium">
-          <a href="/?action=branding" class="hover:text-sky-300 transition cursor-pointer">About Us</a>
+       <div class="flex items-center gap-4 text-[11px] font-medium">
+          <a href="/about" class="hover:text-sky-300 transition cursor-pointer">About Us</a>
           <span class="text-slate-600">•</span>
           <a href="/privacy" class="hover:text-slate-200 transition">Privacy</a>
           <span class="text-slate-600">•</span>
@@ -3044,7 +3044,7 @@
       const m = document.getElementById("statusModal");
       if (m) m.classList.add("hidden");
     }
-    
+
     function openSecurityModal() {
     const m = document.getElementById("securityModal");
     if (m) m.classList.remove("hidden");

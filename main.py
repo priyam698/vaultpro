@@ -1223,6 +1223,10 @@ async def terms_page(request: Request):
 async def privacy_page(request: Request):
     return render_template("privacy.html", request)
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.get("/products/{slug}", response_class=HTMLResponse)
 @app.get("/products/transfer", response_class=HTMLResponse)
 async def product_detail_page(request: Request, slug: str = "transfer"):
