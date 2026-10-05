@@ -226,15 +226,35 @@
       
       <!-- Unified Squircle Logo Mark -->
       <a href="/" class="flex items-center gap-3 group shrink-0">
-        <div class="w-10 h-10 rounded-2xl bg-[#090d1f] border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10 transition group-hover:scale-105 shrink-0">
-          <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
-            <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
-            <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
-            <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
-          </svg>
-        </div>
-        <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-400 transition-colors">Zephyr</span>
-      </a>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 group-hover:border-sky-400/50 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center overflow-hidden shrink-0">
+              <div class="w-full h-full rounded-[14px] bg-[#070b18] flex items-center justify-center p-2">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
+                  <defs>
+                    <linearGradient id="navRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#38bdf8"/>
+                      <stop offset="60%" stop-color="#6366f1"/>
+                      <stop offset="100%" stop-color="#4338ca"/>
+                    </linearGradient>
+                    <linearGradient id="navRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#c084fc"/>
+                      <stop offset="50%" stop-color="#818cf8"/>
+                      <stop offset="100%" stop-color="#06b6d4"/>
+                    </linearGradient>
+                    <linearGradient id="navGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#navRibbonCyan)"/>
+                  <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#navGlassSheen)"/>
+                  <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#navRibbonViolet)"/>
+                  <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#navRibbonCyan)"/>
+                  <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#navGlassSheen)"/>
+                </svg>
+              </div>
+            </div>
+            <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
+          </a>
 
       <!-- Visible Action Controls & Theme Toggle -->
       <div class="flex items-center gap-3">
