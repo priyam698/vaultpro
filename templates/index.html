@@ -2681,7 +2681,7 @@
           </div>
         </div>
 
-        <!-- Column 3: Products -->
+       <!-- Column 3: Products (Links to dedicated product guides) -->
         <div class="space-y-3.5 text-left">
           <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>📦</span> Products</h4>
           <ul class="space-y-2.5 text-slate-300 font-medium">
@@ -2694,52 +2694,52 @@
           </ul>
         </div>
 
-        <!-- Column 4: Privacy -->
+        <!-- Column 4: Privacy (Redirects to Architecture Tabs & Whitepaper) -->
         <div class="space-y-3.5 text-left">
           <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🔒</span> Privacy</h4>
           <ul class="space-y-2.5 text-slate-300 font-medium">
-            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer">Zero-Knowledge</a></li>
-            <li><a href="/products/vault" class="hover:text-sky-400 transition cursor-pointer">AES-256 Encryption</a></li>
-            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer">Burn-on-Read Shred</a></li>
-            <li><a href="/products/ai-studio" class="hover:text-sky-400 transition cursor-pointer">Anti-Screenshot Stage</a></li>
-            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer">Cloudflare R2 Direct</a></li>
-            <li><a href="/" class="hover:text-sky-400 transition cursor-pointer">Security Whitepaper</a></li>
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer flex items-center gap-1">Zero-Knowledge</a></li>
+            <li><a href="/products/vault" class="hover:text-sky-400 transition cursor-pointer flex items-center gap-1">AES-256 Encryption</a></li>
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer flex items-center gap-1">Burn-on-Read Shred</a></li>
+            <li><a href="/products/ai-studio" class="hover:text-sky-400 transition cursor-pointer flex items-center gap-1">Anti-Screenshot Stage</a></li>
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer flex items-center gap-1">Cloudflare R2 Direct</a></li>
+            <li><button type="button" onclick="openSecurityModal()" class="hover:text-sky-400 transition cursor-pointer text-left flex items-center gap-1">Security Whitepaper</button></li>
           </ul>
         </div>
 
-        <!-- Column 5: Company -->
+        <!-- Column 5: Company (Interactive Information Modals & Pricing) -->
         <div class="space-y-3.5 text-left">
           <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🏢</span> Company</h4>
           <ul class="space-y-2.5 text-slate-300 font-medium">
-            <li><a href="/?action=branding" class="hover:text-sky-400 transition cursor-pointer text-sky-400 font-bold">About Us</a></li>
+            <li><button type="button" onclick="openAboutModal()" class="hover:text-sky-400 transition cursor-pointer text-left">About Us</button></li>
             <li><a href="/#pricing" class="hover:text-sky-400 transition cursor-pointer">Pricing Plans</a></li>
             <li><a href="/?action=branding" class="hover:text-sky-400 transition cursor-pointer">Branding Suite</a></li>
             <li class="pt-0.5">
-              <div class="inline-flex items-center gap-2 select-none" title="We are not hiring at the moment">
-                <span class="flex items-center gap-1 text-slate-500 cursor-not-allowed"><span>🔒</span> Careers</span>
+              <button type="button" onclick="openCareersModal()" class="inline-flex items-center gap-2 select-none text-left" title="View hiring roadmap">
+                <span class="flex items-center gap-1 text-slate-300 hover:text-sky-400 transition"><span>🔒</span> Careers</span>
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-amber-500/20 text-amber-400 border border-amber-400/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Coming Soon
                 </span>
-              </div>
+              </button>
             </li>
-            <li><button type="button" onclick="alert('Zephyr v2.4 Changelog: Added local studio file picker, upgraded obsidian cockpit dock, and enhanced neural watermarking algorithms.')" class="hover:text-sky-400 transition cursor-pointer">Changelog</button></li>
+            <li><button type="button" onclick="openChangelogModal()" class="hover:text-sky-400 transition cursor-pointer text-left">Changelog</button></li>
           </ul>
         </div>
 
-        <!-- Column 6: Legal -->
+        <!-- Column 6: Legal & Help (Direct Legal Pages & Live Telemetry) -->
         <div class="space-y-3.5 text-left">
           <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🛡️</span> Legal & Help</h4>
           <ul class="space-y-2.5 text-slate-300 font-medium">
             <li><a href="/privacy" class="hover:text-sky-400 transition cursor-pointer">Privacy Policy</a></li>
             <li><a href="/terms" class="hover:text-sky-400 transition cursor-pointer">Terms & Conditions</a></li>
-            <li><a href="/" class="hover:text-sky-400 transition cursor-pointer">DMCA Compliance</a></li>
+            <li><button type="button" onclick="openDmcaModal()" class="hover:text-sky-400 transition cursor-pointer text-left">DMCA Compliance</button></li>
             <li>
-              <a href="/" class="hover:text-emerald-400 transition inline-flex items-center gap-1.5 cursor-pointer">
+              <button type="button" onclick="openStatusModal()" class="hover:text-emerald-400 transition inline-flex items-center gap-1.5 cursor-pointer text-left">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="text-emerald-400 font-bold">Systems Active</span>
-              </a>
+              </button>
             </li>
-            <li><a href="mailto:priyamrana069@gmail.com" class="hover:text-sky-400 transition cursor-pointer">Contact Support</a></li>
+            <li><a href="mailto:priyamrana069@gmail.com?subject=Zephyr%20Support%20Inquiry%20%E2%80%94%20Assistance%20Required" class="hover:text-sky-400 transition cursor-pointer">Contact Support</a></li>
           </ul>
         </div>
 
@@ -3044,6 +3044,26 @@
       const m = document.getElementById("statusModal");
       if (m) m.classList.add("hidden");
     }
+    
+    function openSecurityModal() {
+    const m = document.getElementById("securityModal");
+    if (m) m.classList.remove("hidden");
+  }
+
+  function openCareersModal() {
+    const m = document.getElementById("careersModal");
+    if (m) m.classList.remove("hidden");
+  }
+
+  function openChangelogModal() {
+    const m = document.getElementById("changelogModal");
+    if (m) m.classList.remove("hidden");
+  }
+
+  function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  }
 
     // --- 3. Tier Enforcement & Limits ---
     const TIER_SPECS = {
@@ -4118,5 +4138,125 @@
 
     fetchExchangeRates();
   </script>
+  <!-- ========================================================================= -->
+  <!-- FULL INFORMATION MODALS (SECURITY, ABOUT, CAREERS, CHANGELOG, STATUS)     -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. Security Whitepaper Modal -->
+  <div id="securityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#070b18] border border-white/10 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 text-left shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-lg font-black text-white flex items-center gap-2"><span>🔒</span> Security Architecture Whitepaper</h3>
+        <button onclick="closeModal('securityModal')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed max-h-96 overflow-y-auto pr-1">
+        <p><strong class="text-sky-400">1. Client-Side Cryptography:</strong> All files are hashed and encrypted directly inside your browser using Web Crypto API (AES-256-GCM). Decryption keys reside purely in the URL fragment (`#key=...`) and are never sent to or stored on our servers.</p>
+        <p><strong class="text-sky-400">2. Ephemeral Storage Pipe:</strong> Data is streamed in chunks directly to Cloudflare R2 edge locations with zero intermediate retention buffers.</p>
+        <p><strong class="text-sky-400">3. Burn-on-Read Guarantee:</strong> Once activated, completing the first download triggers an immediate unmapping and deletion routine across all storage buckets.</p>
+        <p><strong class="text-sky-400">4. Zero-Log Protocol:</strong> Server access logs strip IP addresses and file identifiers at the load balancer level.</p>
+      </div>
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeModal('securityModal')" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs transition">Close Whitepaper</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. About Us Modal -->
+  <div id="aboutModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#070b18] border border-white/10 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 text-left shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-lg font-black text-white flex items-center gap-2"><span>🏢</span> About Zephyr Systems</h3>
+        <button onclick="closeModal('aboutModal')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <p>Zephyr was engineered to eliminate invasive tracking, slow client delivery, and unpaid deliverable invoices for creative studios and privacy-conscious teams worldwide.</p>
+        <p>Built from Surat, Gujarat, India, Zephyr operates on a global edge topology providing zero-knowledge file routing, client escrow checkpoints, and persistent cloud storage vaults.</p>
+      </div>
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeModal('aboutModal')" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs transition">Understood</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Careers Modal -->
+  <div id="careersModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#070b18] border border-white/10 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 text-left shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-lg font-black text-white flex items-center gap-2"><span>🚀</span> Engineering & Careers</h3>
+        <button onclick="closeModal('careersModal')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <p class="text-amber-400 font-bold">Applications currently closed — Roadmap Openings:</p>
+        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+          <li>Core Systems: WebAssembly & Client-Side AES Streaming Engineers</li>
+          <li>Edge Infrastructure: Cloudflare Workers & R2 Storage Specialists</li>
+          <li>Design: High-Fidelity UI/UX Systems & Micro-Interactions</li>
+        </ul>
+        <p class="text-[11px] text-slate-500">Inquiries and early portfolio submissions: <a href="mailto:priyamrana069@gmail.com" class="text-sky-400 underline">priyamrana069@gmail.com</a></p>
+      </div>
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeModal('careersModal')" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Changelog Modal -->
+  <div id="changelogModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#070b18] border border-white/10 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 text-left shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-lg font-black text-white flex items-center gap-2"><span>📋</span> Platform Changelog</h3>
+        <button onclick="closeModal('changelogModal')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed max-h-96 overflow-y-auto pr-1">
+        <div class="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+          <div class="flex items-center justify-between font-bold text-white text-xs">
+            <span>v2.4.0 — Edge Multi-Product Ecosystem</span>
+            <span class="text-sky-400 font-mono text-[10px]">October 2026</span>
+          </div>
+          <p class="text-slate-400 mt-1">Unified glass squircle brand marks, added light/day homepage theme support, deployed 4K AI Studio upscaling engine, and automated Cloudflare R2 chunk streaming.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+          <div class="flex items-center justify-between font-bold text-white text-xs">
+            <span>v2.3.0 — Escrow & E-Sign Enclosure</span>
+            <span class="text-sky-400 font-mono text-[10px]">August 2026</span>
+          </div>
+          <p class="text-slate-400 mt-1">Introduced pay-to-unlock paywall escrows and cryptographic SHA-256 pre-download NDA signing gateways.</p>
+        </div>
+      </div>
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeModal('changelogModal')" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs transition">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Systems Active Telemetry Modal -->
+  <div id="statusModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#070b18] border border-white/10 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-5 text-left shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-lg font-black text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Edge Telemetry
+        </h3>
+        <button onclick="closeModal('statusModal')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-300 font-medium">Cloudflare R2 Direct Pipe</span>
+          <span class="text-emerald-400 font-mono font-bold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 99.99% Operational</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-300 font-medium">Zero-Knowledge Hashing Cluster</span>
+          <span class="text-emerald-400 font-mono font-bold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 0ms Degradation</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-300 font-medium">Supabase Metadata Vault</span>
+          <span class="text-emerald-400 font-mono font-bold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Optimal</span>
+        </div>
+      </div>
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeModal('statusModal')" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs transition">Close Status</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
