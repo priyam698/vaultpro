@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Zephyr — Zero-Knowledge Sovereign Infrastructure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* ========================================================================= */
+    /* 1. DARK THEME BASE (BLACK + DEEP BLUE + WARM ORANGE NEBULA)               */
+    /* ========================================================================= */
+    body {
+      background-color: #03050a !important;
+      color: #e2e8f0 !important;
+    }
+
+    .glow-blue {
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, rgba(30, 64, 175, 0.12) 45%, transparent 75%);
+    }
+    .glow-orange {
+      background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
+    }
+
+    .dossier-card {
+      background: rgba(7, 11, 24, 0.85);
+      border-color: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+
+    /* ========================================================================= */
+    /* 2. DAY THEME BASE (WHITE + SOFT SKY BLUE + RICH CONTRAST)                 */
+    /* ========================================================================= */
+    body.light-theme {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    body.light-theme .glow-blue {
+      background: radial-gradient(circle, rgba(186, 230, 253, 0.65) 0%, rgba(224, 242, 254, 0.35) 50%, transparent 80%) !important;
+    }
+    body.light-theme .glow-orange {
+      background: radial-gradient(circle, rgba(254, 215, 170, 0.35) 0%, rgba(255, 237, 213, 0.15) 50%, transparent 75%) !important;
+    }
+
+    body.light-theme header {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.light-theme #themeToggleBtn,
+    body.light-theme .btn-back-hub {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+    }
+    body.light-theme #themeToggleBtn:hover,
+    body.light-theme .btn-back-hub:hover {
+      background-color: #f8fafc !important;
+      color: #0284c7 !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    body.light-theme .dossier-card {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.07), 0 2px 6px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    body.light-theme h1,
+    body.light-theme h2,
+    body.light-theme h3 {
+      color: #0f172a !important;
+    }
+
+    body.light-theme p,
+    body.light-theme li {
+      color: #475569 !important;
+    }
+
+    body.light-theme .dossier-subbox {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+
+    body.light-theme .brand-title {
+      color: #0f172a !important;
+    }
+    body.light-theme a:hover .brand-title {
+      color: #0284c7 !important;
+    }
+
+    body.light-theme footer {
+      background-color: #ffffff !important;
+      border-top-color: #e2e8f0 !important;
+      color: #475569 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
+
+  <!-- BACKGROUND NEBULAS -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px] transition-all"></div>
+    <div class="glow-orange absolute top-[22%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px] transition-all"></div>
+    <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px] transition-all"></div>
+  </div>
+
+  <!-- TOP HEADER (IDENTICAL TO PRIVACY PAGE COCKPIT) -->
+  <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      
+      <!-- Unified Squircle Brand Logo Mark -->
+      <a href="/" class="flex items-center gap-3 group shrink-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 group-hover:border-sky-400/50 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center overflow-hidden shrink-0">
+          <div class="w-full h-full rounded-[14px] bg-[#070b18] flex items-center justify-center p-2">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
+              <defs>
+                <linearGradient id="aboutRibbonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="60%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#4338ca"/>
+                </linearGradient>
+                <linearGradient id="aboutRibbonViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#c084fc"/>
+                  <stop offset="50%" stop-color="#818cf8"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+                <linearGradient id="aboutGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
+                </linearGradient>
+              </defs>
+              <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="url(#aboutRibbonCyan)"/>
+              <path d="M 18,22 C 36,16 74,16 86,22 L 78,26 C 66,21 34,21 18,26 Z" fill="url(#aboutGlassSheen)"/>
+              <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="url(#aboutRibbonViolet)"/>
+              <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="url(#aboutRibbonCyan)"/>
+              <path d="M 14,78 C 28,72 60,72 82,76 L 76,80 C 58,76 28,76 14,81 Z" fill="url(#aboutGlassSheen)"/>
+            </svg>
+          </div>
+        </div>
+        <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
+      </a>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Day/Night Theme" class="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <a href="/" class="btn-back-hub px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-bold text-slate-200 transition inline-flex items-center gap-1.5 cursor-pointer">
+          <span>←</span> <span>Back to App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN ABOUT CONTENT CONTAINER (0 TO 100 DOSSIER) -->
+  <main class="max-w-4xl mx-auto px-6 py-12 space-y-12 w-full">
+
+    <div class="dossier-card rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
+      
+      <!-- Header Badge & Title -->
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-400 text-xs font-mono font-bold uppercase tracking-wider">
+          Company Architecture & Manifesto
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          About Zephyr Systems
+        </h1>
+        <p class="text-slate-400 text-xs font-mono">
+          Headquarters: Surat, Gujarat, India • Deployment: Global Anycast Edge Network • Founded: 2026
+        </p>
+      </div>
+
+      <!-- Section 1: The Genesis -->
+      <section class="space-y-3">
+        <h2 class="text-lg font-black text-white flex items-center gap-2">
+          <span class="text-sky-400 font-mono">01.</span> The Genesis & Philosophy
+        </h2>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Zephyr was conceived with a single non-negotiable premise: <strong>creative independence requires absolute cryptographic privacy.</strong> Traditional file-sharing platforms ingest, scan, index, and monetize user assets to train machine learning models, build advertiser profiles, and inspect raw client media.
+        </p>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Zephyr replaces centralized surveillance pipelines with zero-knowledge math. By executing AES-256 encryption in-browser before bytes leave your local storage, Zephyr ensures that neither network intermediaries, storage hosting vendors, nor internal platform operators can ever inspect your deliverables.
+        </p>
+      </section>
+
+      <!-- Section 2: Global Infrastructure -->
+      <section class="space-y-3">
+        <h2 class="text-lg font-black text-white flex items-center gap-2">
+          <span class="text-sky-400 font-mono">02.</span> Edge Network Infrastructure
+        </h2>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Headquartered in Surat, Gujarat, India, Zephyr coordinates high-throughput edge nodes spanning 300+ global data centers. Our direct-stream architecture links directly to Cloudflare R2 object storage buckets, bypassing traditional monolithic web server bottlenecks entirely:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="dossier-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <h4 class="font-bold text-white text-xs">Direct Edge Chunking</h4>
+            <p class="text-xs text-slate-400">Files stream via presigned multi-part chunk uploads straight to edge storage, achieving unthrottled gigabit speeds.</p>
+          </div>
+          <div class="dossier-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <h4 class="font-bold text-white text-xs">Zero Egress Penalties</h4>
+            <p class="text-xs text-slate-400">Recipients download assets without bandwidth limits, throttle caps, or third-party tracking scripts.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: The 6 Pillars -->
+      <section class="space-y-4">
+        <h2 class="text-lg font-black text-white flex items-center gap-2">
+          <span class="text-sky-400 font-mono">03.</span> The 6 Ecosystem Pillars
+        </h2>
+        <div class="space-y-3 text-sm text-slate-300">
+          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+            <strong class="text-white text-xs flex items-center gap-1.5"><span>⚡</span> 1. Zephyr Transfer</strong>
+            <p class="text-xs text-slate-400">Zero-knowledge link dispatching with automated Burn-on-Read shredding and custom expiry timers.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+            <strong class="text-white text-xs flex items-center gap-1.5"><span>🗄️</span> 2. Drive Vault</strong>
+            <p class="text-xs text-slate-400">Persistent encrypted cloud directory trees with inline media streaming and granular access control.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+            <strong class="text-white text-xs flex items-center gap-1.5"><span>✨</span> 3. 4K AI Studio</strong>
+            <p class="text-xs text-slate-400">Next-gen neural upscaling and dynamic anti-screenshot glare protection to safeguard client review previews.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+            <strong class="text-white text-xs flex items-center gap-1.5"><span>✍️</span> 4. E-Sign Studio</strong>
+            <p class="text-xs text-slate-400">Cryptographically sealed non-disclosure and release agreements locked as mandatory pre-download gateways.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+            <strong class="text-white text-xs flex items-center gap-1.5"><span>💳</span> 5. Paywall Escrow</strong>
+            <p class="text-xs text-slate-400">Eliminates creative invoice ghosting: master assets unlock automatically only upon successful payment settlement.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+            <strong class="text-white text-xs flex items-center gap-1.5"><span>📥</span> 6. Inbound Portal</strong>
+            <p class="text-xs text-slate-400">Branded standalone drop-boxes enabling clients to upload multi-gigabyte raw footage directly into your Drive.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Cryptographic Guarantee -->
+      <section class="space-y-3">
+        <h2 class="text-lg font-black text-white flex items-center gap-2">
+          <span class="text-sky-400 font-mono">04.</span> Cryptographic Guarantee
+        </h2>
+        <ul class="space-y-2 text-xs text-slate-300 list-disc pl-5 leading-relaxed">
+          <li><strong>Keys in Hash Fragments:</strong> URL decryption keys reside solely after the <code>#</code> symbol. RFC standards strictly prevent browsers from ever sending hash fragments to our origin servers.</li>
+          <li><strong>Burn-on-Read Mechanics:</strong> Once the recipient downloads the first byte payload, our edge workers schedule immediate block unmapping.</li>
+          <li><strong>No Content Logging:</strong> Server logs strip client IP addresses, MIME headers, and file identification metadata at ingress.</li>
+        </ul>
+      </section>
+
+      <!-- Section 5: Governance & Headquarters -->
+      <section class="space-y-3 pt-2 border-t border-white/5">
+        <h2 class="text-lg font-black text-white flex items-center gap-2">
+          <span class="text-sky-400 font-mono">05.</span> Organization & Contact
+        </h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Zephyr Systems Inc. operates as an independent infrastructure engineering firm based in Surat, Gujarat, India. For security whitepapers, enterprise white-labeling, or architectural audits:
+        </p>
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs font-mono space-y-1">
+          <div class="text-white font-bold">Zephyr Systems Inc.</div>
+          <div class="text-slate-400">Headquarters: Surat, Gujarat, India • 395003</div>
+          <div class="text-slate-400">Security Inquiries: <a href="mailto:priyamrana069@gmail.com" class="text-sky-400 hover:underline">priyamrana069@gmail.com</a></div>
+          <div class="text-slate-400">Status: Fully Operational Global Edge Nodes</div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- SUB FOOTER -->
+  <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono transition-colors">
+    © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
+  </footer>
+
+  <script>
+    // Theme Engine: Auto-syncs with Homepage & Privacy pages
+    function initTheme() {
+      const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
+      const icon = document.getElementById("themeIcon");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        document.body.classList.remove("light-theme");
+        if (icon) icon.innerText = "☀️";
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+    }
+
+    window.addEventListener('DOMContentLoaded', initTheme);
+  </script>
+
+</body>
+</html>
