@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <style>
     /* ========================================================================= */
-    /* 1. DARK THEME BASE (BLACK + DEEP BLUE + WARM ORANGE NEBULA)               */
+    /* 1. DARK THEME BASE (OBSIDIAN + DEEP BLUE + WARM ORANGE NEBULA)            */
     /* ========================================================================= */
     body {
       background-color: #03050a !important;
@@ -22,15 +22,15 @@
       background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
     }
 
-    .dossier-card {
+    .privacy-card-container {
       background: rgba(7, 11, 24, 0.85);
-      border-color: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
     }
 
     /* ========================================================================= */
-    /* 2. DAY THEME BASE (WHITE + SOFT SKY BLUE + RICH CONTRAST)                 */
+    /* 2. DAY THEME BASE (CRISP MIDNIGHT NAVY & HIGH CONTRAST)                   */
     /* ========================================================================= */
     body.light-theme {
       background-color: #f8fafc !important;
@@ -51,52 +51,80 @@
     }
 
     body.light-theme #themeToggleBtn,
-    body.light-theme .btn-back-hub {
+    body.light-theme .btn-back-app {
       background-color: #ffffff !important;
-      border-color: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
       color: #0f172a !important;
       box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
     }
     body.light-theme #themeToggleBtn:hover,
-    body.light-theme .btn-back-hub:hover {
-      background-color: #f8fafc !important;
+    body.light-theme .btn-back-app:hover {
+      background-color: #f1f5f9 !important;
       color: #0284c7 !important;
-      border-color: #cbd5e1 !important;
+      border-color: #94a3b8 !important;
     }
 
-    body.light-theme .dossier-card {
+    body.light-theme .privacy-card-container {
       background: #ffffff !important;
       border-color: #e2e8f0 !important;
-      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.07), 0 2px 6px rgba(15, 23, 42, 0.03) !important;
+      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04) !important;
     }
 
+    /* FIX: Force all headings, titles, and text-white elements to Midnight Navy */
     body.light-theme h1,
     body.light-theme h2,
-    body.light-theme h3 {
+    body.light-theme h3,
+    body.light-theme h4,
+    body.light-theme strong,
+    body.light-theme .text-white {
       color: #0f172a !important;
+      font-weight: 800 !important;
     }
 
+    /* FIX: Force body paragraphs & list items to deep Slate-700 for sharp legibility */
     body.light-theme p,
     body.light-theme li {
+      color: #334155 !important;
+      font-weight: 500 !important;
+    }
+
+    /* FIX: Secondary text & descriptions */
+    body.light-theme .text-slate-300,
+    body.light-theme .text-slate-400,
+    body.light-theme .text-slate-500 {
       color: #475569 !important;
     }
 
-    body.light-theme .dossier-subbox {
-      background: #f8fafc !important;
+    /* FIX: Inner boxes and cards */
+    body.light-theme .dossier-subbox,
+    body.light-theme .bg-white\/\[0\.02\] {
+      background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    body.light-theme .border-white\/5,
+    body.light-theme .border-white\/\[0\.08\] {
+      border-color: #e2e8f0 !important;
+    }
+
+    body.light-theme code {
+      background-color: #f1f5f9 !important;
+      color: #0284c7 !important;
+      border: 1px solid #cbd5e1 !important;
+      padding: 2px 6px !important;
+      border-radius: 6px !important;
+      font-weight: 600 !important;
     }
 
     body.light-theme .brand-title {
       color: #0f172a !important;
     }
-    body.light-theme a:hover .brand-title {
-      color: #0284c7 !important;
-    }
 
     body.light-theme footer {
       background-color: #ffffff !important;
       border-top-color: #e2e8f0 !important;
-      color: #475569 !important;
+      color: #64748b !important;
     }
   </style>
 </head>
