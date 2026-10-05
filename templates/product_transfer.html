@@ -8,21 +8,19 @@
   <link rel="stylesheet" href="/static/style.css">
   <style>
     /* ========================================================================= */
-    /* 1. DARK THEME: BLACK + DEEP BLUE + WARM ORANGE ATMOSPHERE                */
+    /* 1. DARK THEME: DEEP BLACK + BLUE + WARM ORANGE GLOW ATMOSPHERE            */
     /* ========================================================================= */
     body {
-      background-color: #030712 !important;
+      background-color: #03050a !important; /* Deepest black/blue base */
       color: #e2e8f0 !important;
     }
 
+    /* Cosmic Background Nebulas: Dark Mode */
     .glow-blue {
-      background: radial-gradient(circle, rgba(30, 64, 175, 0.38) 0%, rgba(14, 165, 233, 0.16) 45%, transparent 75%);
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(30, 64, 175, 0.1) 45%, transparent 75%);
     }
     .glow-orange {
-      background: radial-gradient(circle, rgba(234, 88, 12, 0.22) 0%, rgba(249, 115, 22, 0.08) 50%, transparent 75%);
-    }
-    .glow-cyan {
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(234, 88, 12, 0.12) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
     }
 
     .guide-card {
@@ -41,60 +39,34 @@
     }
 
     /* ========================================================================= */
-    /* 2. DAY THEME: HOMEPAGE REPLICA (WHITE + SKY BLUE + RICH CONTRAST)         */
+    /* 2. DAY THEME: EXACT HOMEPAGE (WHITE/LIGHT BLUE + DARK SLATE CONTRAST)     */
     /* ========================================================================= */
     body.light-theme {
-      background-color: #f0f7ff !important;
-      color: #1e293b !important;
+      background-color: #f8fafc !important; /* Exact homepage light background */
+      color: #0f172a !important;
     }
 
+    /* Day Mode Nebulas (Matches Homepage Soft Blue/Cyan wash) */
     body.light-theme .glow-blue {
-      background: radial-gradient(circle, rgba(186, 230, 253, 0.75) 0%, rgba(224, 242, 254, 0.45) 50%, transparent 80%) !important;
+      background: radial-gradient(circle, rgba(186, 230, 253, 0.6) 0%, rgba(224, 242, 254, 0.3) 50%, transparent 80%) !important;
     }
     body.light-theme .glow-orange {
-      background: radial-gradient(circle, rgba(254, 215, 170, 0.45) 0%, rgba(255, 237, 213, 0.2) 50%, transparent 75%) !important;
-    }
-    body.light-theme .glow-cyan {
-      background: radial-gradient(circle, rgba(165, 243, 252, 0.6) 0%, transparent 70%) !important;
+      background: radial-gradient(circle, rgba(254, 215, 170, 0.3) 0%, rgba(255, 237, 213, 0.15) 50%, transparent 75%) !important;
     }
 
+    /* Day Mode Navigation Header & Dock */
     body.light-theme header {
       background-color: rgba(255, 255, 255, 0.9) !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
     }
 
-    /* FIX: Back to Hub & Theme Toggle Day Visibility */
-    body.light-theme #themeToggleBtn {
-      background-color: #ffffff !important;
-      border-color: #cbd5e1 !important;
-      color: #0f172a !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
-    }
-    body.light-theme #themeToggleBtn:hover {
-      background-color: #f1f5f9 !important;
-      border-color: #94a3b8 !important;
-    }
-
-    body.light-theme .btn-back-hub {
-      background-color: #ffffff !important;
-      border-color: #cbd5e1 !important;
-      color: #0f172a !important;
-      font-weight: 700 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
-    }
-    body.light-theme .btn-back-hub:hover {
-      background-color: #f1f5f9 !important;
-      color: #0284c7 !important;
-      border-color: #0284c7 !important;
-    }
-
-    /* Product Navigation Switcher Dock */
     body.light-theme .nav-dock-container {
       background-color: #ffffff !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
     }
+
     body.light-theme .product-tab {
       color: #475569 !important;
     }
@@ -109,9 +81,9 @@
       box-shadow: 0 2px 10px rgba(14, 165, 233, 0.15) !important;
     }
 
-    /* Day Mode Typography & Headings (Multi-Colored, No Washed-Out Text) */
+    /* Day Mode Headings: Multi-Color & Rich Contrast (NOT PURE BLACK) */
     body.light-theme .hero-title-main {
-      color: #0f172a !important;
+      color: #1e293b !important; /* Deep Slate, not pure black */
     }
     body.light-theme .hero-title-gradient {
       background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%) !important;
@@ -119,9 +91,10 @@
       -webkit-text-fill-color: transparent !important;
     }
     body.light-theme .hero-desc {
-      color: #334155 !important;
+      color: #475569 !important; /* Slate */
     }
 
+    /* Day Mode Cards */
     body.light-theme .guide-card {
       background: #ffffff !important;
       border-color: #e2e8f0 !important;
@@ -129,10 +102,10 @@
     }
     body.light-theme .guide-card h2,
     body.light-theme .guide-card h3 {
-      color: #0f172a !important;
+      color: #1e293b !important; /* Deep Slate */
     }
     body.light-theme .guide-card h4 {
-      color: #1e293b !important;
+      color: #0f172a !important; /* Midnight Navy */
     }
     body.light-theme .guide-card p {
       color: #475569 !important;
@@ -143,7 +116,7 @@
       border-color: #e2e8f0 !important;
     }
 
-    /* Day Mode Table */
+    /* Day Mode Comparison Table */
     body.light-theme .table-wrap {
       background: #ffffff !important;
       border-color: #e2e8f0 !important;
@@ -151,7 +124,7 @@
     }
     body.light-theme table thead tr {
       background: #f1f5f9 !important;
-      color: #0f172a !important;
+      color: #1e293b !important;
       border-bottom-color: #e2e8f0 !important;
     }
     body.light-theme table tbody tr {
@@ -166,39 +139,53 @@
       border-color: #e2e8f0 !important;
     }
     body.light-theme .cap-title {
-      color: #0f172a !important;
+      color: #1e293b !important;
     }
 
-    /* Logo Text in Light Theme */
+    /* Brand Logo Text */
     body.light-theme .brand-title {
       color: #0f172a !important;
     }
-    body.light-theme a:hover .brand-title {
-      color: #0284c7 !important;
-    }
 
+    /* Day Mode Footer Restore */
     body.light-theme footer {
       background-color: #ffffff !important;
       border-top-color: #e2e8f0 !important;
+      color: #475569 !important;
+    }
+    body.light-theme footer h4 {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    body.light-theme footer ul li a,
+    body.light-theme footer ul li button {
+      color: #334155 !important;
+      font-weight: 600 !important;
+    }
+    body.light-theme footer ul li a:hover,
+    body.light-theme footer ul li button:hover {
+      color: #0284c7 !important;
+    }
+    body.light-theme footer .text-slate-400,
+    body.light-theme footer .text-slate-500 {
       color: #475569 !important;
     }
   </style>
 </head>
 <body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
 
-  <!-- BACKGROUND NEBULAS -->
+  <!-- ATMOSPHERIC BACKGROUND NEBULAS -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px] transition-all"></div>
     <div class="glow-orange absolute top-[20%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px] transition-all"></div>
-    <div class="glow-cyan absolute top-[48%] -right-[160px] w-[700px] h-[700px] rounded-full blur-[160px] transition-all"></div>
     <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px] transition-all"></div>
   </div>
 
-  <!-- TOP HEADER (MATCHED SQUIRCLE LOGO & PROPERLY VISIBLE CONTROLS) -->
+  <!-- TOP OBSIDIAN NAVIGATION BAR (MATCHED SQUIRCLE LOGO) -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
-      <!-- Unified Squircle Logo Mark -->
+      <!-- Unified Squircle Logo -->
       <a href="/" class="flex items-center gap-3 group shrink-0">
         <div class="w-10 h-10 rounded-2xl bg-[#090d1f] border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10 transition group-hover:scale-105 shrink-0">
           <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
@@ -210,12 +197,12 @@
         <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-400 transition-colors">Zephyr</span>
       </a>
 
-      <!-- Visible Action Controls & Theme Toggle -->
+      <!-- Actions & Theme Toggle -->
       <div class="flex items-center gap-3">
-        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Theme" class="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-200 hover:text-white flex items-center justify-center text-sm transition shadow-sm cursor-pointer">
-          <span id="themeIcon">☀️</span>
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Theme" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs transition cursor-pointer">
+          <span id="themeIcon">☀️️</span>
         </button>
-        <a href="/" class="btn-back-hub px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-bold text-slate-200 transition shadow-sm inline-flex items-center gap-1.5 cursor-pointer">
+        <a href="/" class="btn-back-hub px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-xs font-bold text-slate-200 transition inline-flex items-center gap-1.5 cursor-pointer">
           <span>←</span> <span>Back to Hub</span>
         </a>
         <a href="/" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:opacity-95 text-xs font-bold text-white shadow-lg shadow-sky-500/20 transition">
@@ -225,14 +212,14 @@
     </div>
   </header>
 
-  <!-- PRODUCT DOCK SWITCHER -->
+  <!-- INTERACTIVE PRODUCT DOCK SWITCHER -->
   <div class="max-w-5xl mx-auto px-6 pt-10 w-full">
     <div class="nav-dock-container p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto custom-scroll shadow-2xl transition">
       <button onclick="switchProduct('transfer')" id="tab-transfer" class="product-tab tab-active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30">
         <span>⚡</span> <span>Zephyr Transfer</span>
       </button>
       <button onclick="switchProduct('vault')" id="tab-vault" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
-        <span>🗄️️</span> <span>Drive Vault</span>
+        <span>🗄️</span> <span>Drive Vault</span>
       </button>
       <button onclick="switchProduct('ai-studio')" id="tab-ai-studio" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
         <span>✨</span> <span>4K AI Studio</span>
@@ -255,7 +242,7 @@
     <!-- 1. ZEPHYR TRANSFER -->
     <div id="section-transfer" class="product-section space-y-12">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-400 text-xs font-mono font-bold">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-500 text-xs font-mono font-bold">
           <span>⚡</span> Transfer Architecture
         </div>
         <h1 class="hero-title-main text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -269,7 +256,7 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="guide-card p-6 rounded-3xl border space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🛡️</div>
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center text-lg">🛡️️</div>
           <h3 class="text-sm font-black text-white">Client AES-256 Hashing</h3>
           <p class="text-xs leading-relaxed">Files are encrypted in-browser before transit. Keys reside solely in your URL link fragment.</p>
         </div>
@@ -282,32 +269,6 @@
           <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-400/25 flex items-center justify-center text-lg">🔥</div>
           <h3 class="text-sm font-black text-white">Burn-on-Read Shredding</h3>
           <p class="text-xs leading-relaxed">Automatically purge storage buckets the moment the recipient completes their first download.</p>
-        </div>
-      </div>
-
-      <div class="guide-card p-8 sm:p-10 rounded-3xl border space-y-6">
-        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Zephyr Transfer</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-500 font-mono font-bold text-[10px]">STEP 1</span>
-            <h4 class="font-bold text-white text-sm">Upload Deliverables</h4>
-            <p>Drag files or complete folders directly into the transfer card.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-500 font-mono font-bold text-[10px]">STEP 2</span>
-            <h4 class="font-bold text-white text-sm">Choose Delivery Method</h4>
-            <p>Select "Get link" for instant copying or "Send email" for automated notifications.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-500 font-mono font-bold text-[10px]">STEP 3</span>
-            <h4 class="font-bold text-white text-sm">Security Controls</h4>
-            <p>Toggle Burn-on-Read or customize link expiry up to 30 days.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-500 font-mono font-bold text-[10px]">STEP 4</span>
-            <h4 class="font-bold text-white text-sm">One-Click Dispatch</h4>
-            <p>Click Transfer. Deliverables upload directly to Cloudflare R2 edge buckets.</p>
-          </div>
         </div>
       </div>
     </div>
@@ -344,32 +305,6 @@
           <p class="text-xs leading-relaxed">Uploads automatically resume if your connection drops mid-transfer.</p>
         </div>
       </div>
-
-      <div class="guide-card p-8 sm:p-10 rounded-3xl border space-y-6">
-        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Drive Vault</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-500 font-mono font-bold text-[10px]">STEP 1</span>
-            <h4 class="font-bold text-white text-sm">Access Your Vault</h4>
-            <p>Click "Drive" in the top cockpit navigation to enter your authenticated storage space.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-500 font-mono font-bold text-[10px]">STEP 2</span>
-            <h4 class="font-bold text-white text-sm">Create Directory Structure</h4>
-            <p>Add project folders to separate raw media, masters, and client assets.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-500 font-mono font-bold text-[10px]">STEP 3</span>
-            <h4 class="font-bold text-white text-sm">Upload & Stream</h4>
-            <p>Preview raw footage, play lossless audio stems, and share secure download links.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-500 font-mono font-bold text-[10px]">STEP 4</span>
-            <h4 class="font-bold text-white text-sm">Storage Allocation</h4>
-            <p>Track storage usage in real time via the live capacity meter.</p>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 3. 4K AI STUDIO -->
@@ -394,7 +329,7 @@
           <p class="text-xs leading-relaxed">Enhance standard 1080p footage to 4K resolution using generative edge sharpening.</p>
         </div>
         <div class="guide-card p-6 rounded-3xl border space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-400/25 flex items-center justify-center text-lg">🛡️️</div>
+          <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-400/25 flex items-center justify-center text-lg">🛡️</div>
           <h3 class="text-sm font-black text-white">Anti-Screenshot Glare</h3>
           <p class="text-xs leading-relaxed">Generates client review stages that disrupt automated screen capture and OCR scrapers.</p>
         </div>
@@ -402,32 +337,6 @@
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📉</div>
           <h3 class="text-sm font-black text-white">Perceptual Lossless Compression</h3>
           <p class="text-xs leading-relaxed">Shrink archive sizes by up to 60% while preserving color fidelity and audio bitrates.</p>
-        </div>
-      </div>
-
-      <div class="guide-card p-8 sm:p-10 rounded-3xl border space-y-6">
-        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use 4K AI Studio</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-500 font-mono font-bold text-[10px]">STEP 1</span>
-            <h4 class="font-bold text-white text-sm">Select Source Asset</h4>
-            <p>Open your dashboard and choose any image, video, or deliverable asset.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-500 font-mono font-bold text-[10px]">STEP 2</span>
-            <h4 class="font-bold text-white text-sm">Choose AI Processing Model</h4>
-            <p>Select "4K Super-Resolution" or "Secure Client Review Mode".</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-500 font-mono font-bold text-[10px]">STEP 3</span>
-            <h4 class="font-bold text-white text-sm">Configure Watermark & Glare</h4>
-            <p>Embed dynamic client name watermarks across frames to prevent unauthorized distribution.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-500 font-mono font-bold text-[10px]">STEP 4</span>
-            <h4 class="font-bold text-white text-sm">Export Master Copy</h4>
-            <p>Export enhanced files directly to your Zephyr Drive or generate a protected client transfer link.</p>
-          </div>
         </div>
       </div>
     </div>
@@ -464,32 +373,6 @@
           <p class="text-xs leading-relaxed">Records IP addresses, timestamps, and browser fingerprints into an exportable audit certificate.</p>
         </div>
       </div>
-
-      <div class="guide-card p-8 sm:p-10 rounded-3xl border space-y-6">
-        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use E-Sign Studio</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-mono font-bold text-[10px]">STEP 1</span>
-            <h4 class="font-bold text-white text-sm">Upload Agreement (PDF)</h4>
-            <p>Attach your contract, licensing terms, or client release form.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-mono font-bold text-[10px]">STEP 2</span>
-            <h4 class="font-bold text-white text-sm">Attach Transfer Files</h4>
-            <p>Select the deliverables that should remain locked behind the signature.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-mono font-bold text-[10px]">STEP 3</span>
-            <h4 class="font-bold text-white text-sm">Client Signature Flow</h4>
-            <p>Your recipient signs via stylus, mouse, or typed cryptographic key verification.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-mono font-bold text-[10px]">STEP 4</span>
-            <h4 class="font-bold text-white text-sm">Automated Release</h4>
-            <p>Files unlock instantly and both parties receive a cryptographically sealed PDF receipt.</p>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 5. PAYWALL ESCROW -->
@@ -524,32 +407,6 @@
           <p class="text-xs leading-relaxed">Clients inspect project quality with protected overlay watermarks.</p>
         </div>
       </div>
-
-      <div class="guide-card p-8 sm:p-10 rounded-3xl border space-y-6">
-        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Paywall Escrow</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-mono font-bold text-[10px]">STEP 1</span>
-            <h4 class="font-bold text-white text-sm">Upload Deliverable Batch</h4>
-            <p>Upload video edits, logo packages, codebases, or raw 3D assets to Zephyr.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-mono font-bold text-[10px]">STEP 2</span>
-            <h4 class="font-bold text-white text-sm">Set Price & Currency</h4>
-            <p>Toggle "Paywall Escrow" on the transfer card and specify invoice amount.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-mono font-bold text-[10px]">STEP 3</span>
-            <h4 class="font-bold text-white text-sm">Send Client Link</h4>
-            <p>Clients open the link to inspect deliverables in a protected preview environment.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-mono font-bold text-[10px]">STEP 4</span>
-            <h4 class="font-bold text-white text-sm">Automated Settlement</h4>
-            <p>Payment settles into your account and files unlock automatically for download.</p>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 6. INBOUND PORTAL -->
@@ -582,32 +439,6 @@
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-400/25 flex items-center justify-center text-lg">📁</div>
           <h3 class="text-sm font-black text-white">Direct Vault Routing</h3>
           <p class="text-xs leading-relaxed">Incoming uploads route straight to your dedicated Inbound folder on Cloudflare R2.</p>
-        </div>
-      </div>
-
-      <div class="guide-card p-8 sm:p-10 rounded-3xl border space-y-6">
-        <h2 class="text-xl font-black text-white flex items-center gap-2"><span>📖</span> How to Use Inbound Portal</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-500 font-mono font-bold text-[10px]">STEP 1</span>
-            <h4 class="font-bold text-white text-sm">Generate Inbound Link</h4>
-            <p>Click "Request" in the top navigation or open Inbound Portals in your dashboard.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 2</span>
-            <h4 class="font-bold text-white text-sm">Send to Client</h4>
-            <p>Send your private drop-link via Slack, WhatsApp, or email.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 3</span>
-            <h4 class="font-bold text-white text-sm">Client Drops Assets</h4>
-            <p>Clients drag and drop their raw files into your branded portal page.</p>
-          </div>
-          <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 4</span>
-            <h4 class="font-bold text-white text-sm">Instant Notification</h4>
-            <p>Receive upload alerts as files appear directly inside your Zephyr Drive.</p>
-          </div>
         </div>
       </div>
     </div>
@@ -757,7 +588,7 @@
       </div>
     </div>
 
-    <!-- BOTTOM CTA BANNER -->
+    <!-- BOTTOM CALL TO ACTION -->
     <div class="guide-card p-8 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border border-sky-500/25 flex flex-col sm:flex-row items-center justify-between gap-6">
       <div>
         <h3 class="hero-title-main text-base font-black text-white">Ready to transfer your deliverables?</h3>
@@ -770,12 +601,128 @@
 
   </main>
 
-  <!-- SUB FOOTER -->
-  <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono transition-colors">
-    © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
+  <!-- ========================================================================= -->
+  <!-- MEGA DIRECTORY FOOTER (RESTORED MULTI-COLUMN GRID)                        -->
+  <!-- ========================================================================= -->
+  <footer class="relative z-20 border-t border-white/[0.08] bg-[#02050e]/95 backdrop-blur-3xl pt-16 pb-12 text-xs transition-colors">
+    <div class="max-w-7xl mx-auto px-6 space-y-12">
+      
+      <!-- Main Directory Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-6 pb-12 border-b border-white/[0.06]">
+        
+        <!-- Column 1 & 2: Brand Identity -->
+        <div class="col-span-2 space-y-4 pr-0 lg:pr-6">
+          <a href="/" class="flex items-center gap-3 group inline-flex shrink-0">
+            <div class="w-10 h-10 rounded-2xl bg-[#090d1f] border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10 transition group-hover:scale-105 shrink-0">
+              <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
+                <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
+                <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
+                <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-400 transition-colors">Zephyr</span>
+              <span class="text-[10px] text-sky-400 font-mono tracking-widest uppercase">Privacy by default</span>
+            </div>
+          </a>
+          <p class="text-slate-400 text-xs leading-relaxed max-w-sm">
+            Zero-knowledge edge transfer network, client deliverable escrow, and encrypted cloud drive built for creative production studios and privacy-conscious teams.
+          </p>
+          <div class="flex items-center gap-2 pt-1 text-slate-400">
+            <a href="https://x.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center border border-white/5 hover:border-white/10 transition"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="https://github.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center border border-white/5 hover:border-white/10 transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg></a>
+            <a href="https://linkedin.com" target="_blank" class="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center border border-white/5 hover:border-white/10 transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          </div>
+          <div class="pt-2 text-[11px] font-mono text-slate-500">
+            Zephyr Systems Inc.<br>
+            Surat, Gujarat, India • Global Edge Deployment
+          </div>
+        </div>
+
+        <!-- Column 3: Products -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>📦</span> Products</h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition flex items-center gap-1.5">Zephyr Transfer</a></li>
+            <li><a href="/products/vault" class="hover:text-sky-400 transition flex items-center gap-1.5">Zephyr Drive Vault</a></li>
+            <li><a href="/products/ai-studio" class="hover:text-sky-400 transition inline-flex items-center gap-1.5"><span>4K AI Studio</span><span class="px-1.5 py-0.2 rounded-md bg-purple-500/25 border border-purple-400/40 text-[9px] font-mono font-bold text-purple-300">New</span></a></li>
+            <li><a href="/products/esign" class="hover:text-sky-400 transition flex items-center gap-1.5">E-Sign Studio</a></li>
+            <li><a href="/products/escrow" class="hover:text-sky-400 transition flex items-center gap-1.5">Paywall Escrow</a></li>
+            <li><a href="/products/portal" class="hover:text-sky-400 transition flex items-center gap-1.5">Inbound Portal</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Privacy -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🔒</span> Privacy</h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer">Zero-Knowledge</a></li>
+            <li><a href="/products/vault" class="hover:text-sky-400 transition cursor-pointer">AES-256 Encryption</a></li>
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer">Burn-on-Read Shred</a></li>
+            <li><a href="/products/ai-studio" class="hover:text-sky-400 transition cursor-pointer">Anti-Screenshot Stage</a></li>
+            <li><a href="/products/transfer" class="hover:text-sky-400 transition cursor-pointer">Cloudflare R2 Direct</a></li>
+            <li><a href="/" class="hover:text-sky-400 transition cursor-pointer">Security Whitepaper</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 5: Company -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🏢</span> Company</h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/?action=branding" class="hover:text-sky-400 transition cursor-pointer text-sky-400 font-bold">About Us</a></li>
+            <li><a href="/#pricing" class="hover:text-sky-400 transition cursor-pointer">Pricing Plans</a></li>
+            <li><a href="/?action=branding" class="hover:text-sky-400 transition cursor-pointer">Branding Suite</a></li>
+            <li class="pt-0.5">
+              <div class="inline-flex items-center gap-2 select-none" title="We are not hiring at the moment">
+                <span class="flex items-center gap-1 text-slate-500 cursor-not-allowed"><span>🔒</span> Careers</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-amber-500/20 text-amber-400 border border-amber-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Coming Soon
+                </span>
+              </div>
+            </li>
+            <li><button type="button" onclick="alert('Zephyr v2.4 Changelog: Added local studio file picker, upgraded obsidian cockpit dock, and enhanced neural watermarking algorithms.')" class="hover:text-sky-400 transition cursor-pointer">Changelog</button></li>
+          </ul>
+        </div>
+
+        <!-- Column 6: Legal -->
+        <div class="space-y-3.5">
+          <h4 class="font-black text-white uppercase tracking-wider text-[11px] flex items-center gap-2"><span>🛡️</span> Legal & Help</h4>
+          <ul class="space-y-2.5 text-slate-300 font-medium">
+            <li><a href="/privacy" class="hover:text-sky-400 transition cursor-pointer">Privacy Policy</a></li>
+            <li><a href="/terms" class="hover:text-sky-400 transition cursor-pointer">Terms & Conditions</a></li>
+            <li><a href="/" class="hover:text-sky-400 transition cursor-pointer">DMCA Compliance</a></li>
+            <li>
+              <a href="/" class="hover:text-emerald-400 transition inline-flex items-center gap-1.5 cursor-pointer">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-emerald-400 font-bold">Systems Active</span>
+              </a>
+            </li>
+            <li><a href="mailto:priyamrana069@gmail.com" class="hover:text-sky-400 transition cursor-pointer">Contact Support</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bottom Sub-Bar -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 text-slate-400 text-xs">
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="text-slate-300 font-semibold">© 2026 Zephyr Systems Inc.</span>
+          <span class="hidden sm:inline">•</span>
+          <span>Zero-knowledge edge transfers and encrypted cloud drive</span>
+        </div>
+        <div class="flex items-center gap-4 text-[11px] font-medium">
+          <a href="/?action=branding" class="hover:text-sky-300 transition cursor-pointer">About Us</a>
+          <span class="text-slate-600">•</span>
+          <a href="/privacy" class="hover:text-slate-200 transition">Privacy</a>
+          <span class="text-slate-600">•</span>
+          <a href="/terms" class="hover:text-slate-200 transition">Terms</a>
+          <span class="text-slate-600">•</span>
+          <a href="/" class="hover:text-slate-200 transition cursor-pointer">DMCA</a>
+        </div>
+      </div>
+    </div>
   </footer>
 
-  <!-- CONTROLS & THEME SYNC SCRIPT -->
+  <!-- SCRIPT -->
   <script>
     const validProducts = ['transfer', 'vault', 'ai-studio', 'esign', 'escrow', 'portal'];
 
@@ -798,7 +745,6 @@
       window.history.replaceState(null, '', '/products/' + slug);
     }
 
-    // Synchronize Theme with Homepage Storage
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
@@ -815,7 +761,7 @@
       const isLight = document.body.classList.toggle("light-theme");
       localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
       const icon = document.getElementById("themeIcon");
-      if (icon) icon.innerText = isLight ? "🌙" : "☀️";
+      if (icon) icon.innerText = isLight ? "🌙" : "☀️️";
     }
 
     window.addEventListener('DOMContentLoaded', () => {
