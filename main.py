@@ -1244,6 +1244,11 @@ async def changelog_page(request: Request):
 async def product_detail_page(request: Request, slug: str = "transfer"):
     return render_template("product_transfer.html", request, {"active_slug": slug})
 
+@app.get("/security", response_class=HTMLResponse)
+@app.get("/whitepaper", response_class=HTMLResponse)
+async def security_page(request: Request):
+    return render_template("security.html", request)
+
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)
