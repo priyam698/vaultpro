@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <style>
     /* ========================================================================= */
-    /* 1. DARK THEME BASE (OBSIDIAN + DEEP BLUE + WARM ORANGE NEBULA)            */
+    /* 1. DARK THEME BASE (OBSIDIAN + RADIANT LIGHT BLUE SHADOW)                 */
     /* ========================================================================= */
     body {
       background-color: #03050a !important;
@@ -22,40 +22,29 @@
       background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
     }
 
+    /* RADIANT LIGHT BLUE SHADOW CONTAINER (DARK MODE) */
     .privacy-card-container {
-      background: rgba(7, 11, 24, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(7, 11, 24, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.25);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 25px 65px -12px rgba(14, 165, 233, 0.28), 0 0 35px rgba(56, 189, 248, 0.15) !important;
     }
 
-    /* Header Action Buttons (Default Dark Theme) */
-    #themeToggleBtn {
+    #themeToggleBtn, .btn-back-app {
       background-color: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: #e2e8f0;
       transition: all 0.2s ease;
     }
-    #themeToggleBtn:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .btn-back-app {
-      background-color: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #e2e8f0;
-      transition: all 0.2s ease;
-    }
-    .btn-back-app:hover {
+    #themeToggleBtn:hover, .btn-back-app:hover {
       background-color: rgba(255, 255, 255, 0.1);
       color: #ffffff;
       border-color: rgba(255, 255, 255, 0.25);
     }
 
     /* ========================================================================= */
-    /* 2. DAY THEME BASE (CRISP HIGH CONTRAST & VISIBLE CONTROLS)                */
+    /* 2. DAY THEME BASE (CRISP HIGH CONTRAST + SOFT LIGHT BLUE GLOW)            */
     /* ========================================================================= */
     body.light-theme {
       background-color: #f8fafc !important;
@@ -75,19 +64,8 @@
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
     }
 
-    /* DAY THEME HEADER BUTTONS (SOLID WHITE PILLS WITH HIGH-CONTRAST TEXT & BORDER) */
-    body.light-theme #themeToggleBtn {
-      background-color: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #0f172a !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff !important;
-    }
-    body.light-theme #themeToggleBtn:hover {
-      background-color: #f1f5f9 !important;
-      border-color: #0284c7 !important;
-      color: #0284c7 !important;
-    }
-
+    /* DAY THEME HEADER BUTTONS */
+    body.light-theme #themeToggleBtn,
     body.light-theme .btn-back-app {
       background-color: #ffffff !important;
       border: 1px solid #cbd5e1 !important;
@@ -95,25 +73,21 @@
       font-weight: 700 !important;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff !important;
     }
-    body.light-theme .btn-back-app span {
-      color: #0f172a !important;
-    }
+    body.light-theme #themeToggleBtn:hover,
     body.light-theme .btn-back-app:hover {
       background-color: #f1f5f9 !important;
       border-color: #0284c7 !important;
-    }
-    body.light-theme .btn-back-app:hover span {
       color: #0284c7 !important;
     }
 
-    /* DAY THEME MAIN DOSSIER CARD */
+    /* DAY THEME CONTAINER WITH SOFT LIGHT BLUE HALO SHADOW */
     body.light-theme .privacy-card-container {
       background: #ffffff !important;
-      border-color: #e2e8f0 !important;
-      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+      border: 1px solid rgba(56, 189, 248, 0.35) !important;
+      box-shadow: 0 25px 65px -12px rgba(56, 189, 248, 0.25), 0 0 40px rgba(186, 230, 253, 0.65) !important;
     }
 
-    /* FORCED CONTRAST FOR ALL HEADINGS AND LABELS */
+    /* FORCED HIGH-CONTRAST TYPOGRAPHY */
     body.light-theme h1,
     body.light-theme h2,
     body.light-theme h3,
@@ -124,21 +98,18 @@
       font-weight: 800 !important;
     }
 
-    /* FORCED CONTRAST FOR PARAGRAPHS AND LIST ITEMS */
     body.light-theme p,
     body.light-theme li {
       color: #334155 !important;
       font-weight: 500 !important;
     }
 
-    /* SECONDARY LABELS & MONOSPACE ANNOTATIONS */
     body.light-theme .text-slate-300,
     body.light-theme .text-slate-400,
     body.light-theme .text-slate-500 {
       color: #475569 !important;
     }
 
-    /* INNER SUBCARDS AND FEATURE PANELS */
     body.light-theme .dossier-subbox,
     body.light-theme .bg-white\/\[0\.02\] {
       background-color: #f8fafc !important;
@@ -176,14 +147,14 @@
 </head>
 <body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
 
-  <!-- BACKGROUND NEBULAS -->
+  <!-- Background Nebulas -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px] transition-all"></div>
     <div class="glow-orange absolute top-[22%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px] transition-all"></div>
     <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px] transition-all"></div>
   </div>
 
-  <!-- TOP COCKPIT HEADER -->
+  <!-- Cockpit Header -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
@@ -219,7 +190,7 @@
         <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
       </a>
 
-      <!-- Action Buttons (High Visibility in Day & Dark Themes) -->
+      <!-- Action Controls -->
       <div class="flex items-center gap-3">
         <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Day/Night Theme" class="w-9 h-9 rounded-xl flex items-center justify-center text-xs transition cursor-pointer">
           <span id="themeIcon">☀️</span>
@@ -231,12 +202,10 @@
     </div>
   </header>
 
-  <!-- MAIN ABOUT DOSSIER (COMPLETE ARCHITECTURE 0 TO 100) -->
+  <!-- Main Dossier Card -->
   <main class="max-w-4xl mx-auto px-6 py-12 space-y-12 w-full">
-
-    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
+    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border space-y-10 transition">
       
-      <!-- Top Badge & Header -->
       <div class="space-y-4">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-400 text-xs font-mono font-bold uppercase tracking-wider">
           Company Architecture & Manifesto
@@ -249,7 +218,6 @@
         </p>
       </div>
 
-      <!-- 1. The Genesis & Philosophy -->
       <section class="space-y-3">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">01.</span> Sovereign Creative Infrastructure
@@ -262,7 +230,6 @@
         </p>
       </section>
 
-      <!-- 2. Global Edge Topology -->
       <section class="space-y-3">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">02.</span> Global Edge Topology
@@ -282,7 +249,6 @@
         </div>
       </section>
 
-      <!-- 3. The 6 Product Pillars -->
       <section class="space-y-4">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">03.</span> The 6 Ecosystem Pillars
@@ -315,7 +281,6 @@
         </div>
       </section>
 
-      <!-- 4. Cryptographic Guarantees -->
       <section class="space-y-3">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">04.</span> Cryptographic Privacy Guarantees
@@ -327,7 +292,6 @@
         </ul>
       </section>
 
-      <!-- 5. Organization Details & Contact -->
       <section class="space-y-3 pt-4 border-t border-white/5">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">05.</span> Organization & Contact
@@ -344,15 +308,12 @@
       </section>
 
     </div>
-
   </main>
 
-  <!-- SUB FOOTER -->
   <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono transition-colors">
     © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
   </footer>
 
-  <!-- THEME SYNC SCRIPT -->
   <script>
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";

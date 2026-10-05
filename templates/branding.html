@@ -7,21 +7,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/style.css">
   <style>
+    /* ========================================================================= */
+    /* 1. DARK THEME BASE (OBSIDIAN + RADIANT LIGHT BLUE SHADOW)                 */
+    /* ========================================================================= */
     body {
       background-color: #03050a !important;
       color: #e2e8f0 !important;
     }
+
     .glow-blue {
       background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, rgba(30, 64, 175, 0.12) 45%, transparent 75%);
     }
     .glow-orange {
       background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
     }
+
+    /* RADIANT LIGHT BLUE SHADOW CONTAINER (DARK MODE) */
     .privacy-card-container {
-      background: rgba(7, 11, 24, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(7, 11, 24, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.25);
       backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 25px 65px -12px rgba(14, 165, 233, 0.28), 0 0 35px rgba(56, 189, 248, 0.15) !important;
     }
+
     #themeToggleBtn, .btn-back-app {
       background-color: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -33,53 +42,95 @@
       color: #ffffff;
       border-color: rgba(255, 255, 255, 0.25);
     }
+
+    /* ========================================================================= */
+    /* 2. DAY THEME BASE (CRISP HIGH CONTRAST + SOFT LIGHT BLUE GLOW)            */
+    /* ========================================================================= */
     body.light-theme {
       background-color: #f8fafc !important;
       color: #0f172a !important;
     }
+
     body.light-theme .glow-blue {
       background: radial-gradient(circle, rgba(186, 230, 253, 0.65) 0%, rgba(224, 242, 254, 0.35) 50%, transparent 80%) !important;
     }
     body.light-theme .glow-orange {
       background: radial-gradient(circle, rgba(254, 215, 170, 0.35) 0%, rgba(255, 237, 213, 0.15) 50%, transparent 75%) !important;
     }
+
     body.light-theme header {
       background-color: rgba(255, 255, 255, 0.95) !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
     }
-    body.light-theme #themeToggleBtn, body.light-theme .btn-back-app {
+
+    body.light-theme #themeToggleBtn,
+    body.light-theme .btn-back-app {
       background-color: #ffffff !important;
       border: 1px solid #cbd5e1 !important;
       color: #0f172a !important;
       font-weight: 700 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff !important;
     }
-    body.light-theme #themeToggleBtn:hover, body.light-theme .btn-back-app:hover {
+    body.light-theme #themeToggleBtn:hover,
+    body.light-theme .btn-back-app:hover {
       background-color: #f1f5f9 !important;
       border-color: #0284c7 !important;
       color: #0284c7 !important;
     }
+
+    /* DAY THEME CONTAINER WITH SOFT LIGHT BLUE HALO SHADOW */
     body.light-theme .privacy-card-container {
       background: #ffffff !important;
-      border-color: #e2e8f0 !important;
-      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08) !important;
+      border: 1px solid rgba(56, 189, 248, 0.35) !important;
+      box-shadow: 0 25px 65px -12px rgba(56, 189, 248, 0.25), 0 0 40px rgba(186, 230, 253, 0.65) !important;
     }
-    body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme strong, body.light-theme .text-white {
+
+    body.light-theme h1,
+    body.light-theme h2,
+    body.light-theme h3,
+    body.light-theme h4,
+    body.light-theme strong,
+    body.light-theme .text-white {
       color: #0f172a !important;
       font-weight: 800 !important;
     }
-    body.light-theme p, body.light-theme li {
+
+    body.light-theme p,
+    body.light-theme li {
       color: #334155 !important;
       font-weight: 500 !important;
     }
-    body.light-theme .text-slate-300, body.light-theme .text-slate-400, body.light-theme .text-slate-500 {
+
+    body.light-theme .text-slate-300,
+    body.light-theme .text-slate-400,
+    body.light-theme .text-slate-500 {
       color: #475569 !important;
     }
-    body.light-theme .brand-subbox {
+
+    body.light-theme .brand-subbox,
+    body.light-theme .bg-white\/\[0\.02\] {
       background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
     }
+
+    body.light-theme code {
+      background-color: #f1f5f9 !important;
+      color: #0284c7 !important;
+      border: 1px solid #cbd5e1 !important;
+      padding: 2px 6px !important;
+      border-radius: 6px !important;
+      font-weight: 600 !important;
+    }
+
+    body.light-theme .brand-title {
+      color: #0f172a !important;
+    }
+    body.light-theme a:hover .brand-title {
+      color: #0284c7 !important;
+    }
+
     body.light-theme footer {
       background-color: #ffffff !important;
       border-top-color: #e2e8f0 !important;
@@ -89,14 +140,18 @@
 </head>
 <body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
 
+  <!-- Background Nebulas -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px]"></div>
     <div class="glow-orange absolute top-[22%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px]"></div>
     <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px]"></div>
   </div>
 
+  <!-- Cockpit Header -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      
+      <!-- Unified Squircle Brand Logo Mark -->
       <a href="/" class="flex items-center gap-3 group shrink-0">
         <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent p-0.5 border border-white/10 group-hover:border-sky-400/50 shadow-lg shadow-sky-500/10 transition-all duration-300 flex items-center justify-center overflow-hidden shrink-0">
           <div class="w-full h-full rounded-[14px] bg-[#070b18] flex items-center justify-center p-2">
@@ -109,6 +164,8 @@
         </div>
         <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
       </a>
+
+      <!-- Action Controls -->
       <div class="flex items-center gap-3">
         <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Day/Night Theme" class="w-9 h-9 rounded-xl flex items-center justify-center text-xs transition cursor-pointer">
           <span id="themeIcon">☀️</span>
@@ -120,8 +177,10 @@
     </div>
   </header>
 
+  <!-- Main Branding Card -->
   <main class="max-w-4xl mx-auto px-6 py-12 space-y-12 w-full">
-    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
+    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border space-y-10 transition">
+      
       <div class="space-y-4">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/10 border border-teal-400/25 text-teal-400 text-xs font-mono font-bold uppercase tracking-wider">
           Studio Identity & Customization
@@ -139,7 +198,7 @@
           <span class="text-teal-400 font-mono">01.</span> Custom Studio Wallpapers & Themes
         </h2>
         <p class="text-sm text-slate-300 leading-relaxed">
-          Make client file delivery look distinctly yours. Replace standard nebulas with your agency’s custom 4K background images, studio lookbooks, or client campaign key art during transfer downloads.
+          Make client file delivery look distinctly yours. Replace standard background nebulas with your agency’s custom 4K background images, studio lookbooks, or client campaign key art during transfer downloads and client review sessions.
         </p>
       </section>
 
@@ -148,16 +207,16 @@
           <span class="text-teal-400 font-mono">02.</span> White-Label Domains & Inbound Drops
         </h2>
         <p class="text-sm text-slate-300 leading-relaxed">
-          Subscribers to Zephyr Plus and Pro Studio can map custom domains like <code>transfer.yourstudio.com</code> and deploy branded inbound asset portals. Clients upload directly to your edge bucket without seeing third-party logos.
+          Subscribers to Zephyr Plus and Pro Studio can map custom domains like <code>transfer.yourstudio.com</code> and deploy branded inbound asset portals. Clients upload directly to your edge bucket without ever encountering third-party platform branding.
         </p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <div class="brand-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <h4 class="font-bold text-white text-xs">Custom Email Receipts</h4>
-            <p class="text-xs text-slate-400">Dispatch download links and escrow receipts using your studio name and email address.</p>
+            <p class="text-xs text-slate-400">Dispatch download links and escrow receipts authenticated using your studio name and email address.</p>
           </div>
           <div class="brand-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
             <h4 class="font-bold text-white text-xs">Neural Watermark Presets</h4>
-            <p class="text-xs text-slate-400">Embed diagonal dynamic client identifiers over video review stages to deter unauthorized leaks.</p>
+            <p class="text-xs text-slate-400">Embed diagonal dynamic client identifiers over video review stages to deter unauthorized distribution.</p>
           </div>
         </div>
       </section>
@@ -167,18 +226,19 @@
           <span class="text-teal-400 font-mono">03.</span> Official Brand Assets
         </h2>
         <p class="text-sm text-slate-300 leading-relaxed">
-          Need official Zephyr badges for security compliance callouts or partnership decks? Use our approved vector assets:
+          Need official Zephyr badges for security compliance callouts, documentation, or partnership decks? Use our approved vector assets:
         </p>
         <div class="p-4 rounded-2xl brand-subbox bg-white/[0.02] border border-white/5 flex items-center justify-between">
           <div>
             <div class="text-white text-xs font-bold">Zephyr Sovereign Mark (SVG & PNG)</div>
-            <div class="text-slate-400 text-[11px] font-mono">Gradient Sheen Squircle • Transparent Background</div>
+            <div class="text-slate-400 text-[11px] font-mono">Gradient Sheen Squircle • Vector Sharpness</div>
           </div>
           <a href="/" class="px-4 py-2 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-400/30 hover:bg-teal-500/30 text-xs font-bold transition">
             Download Kit
           </a>
         </div>
       </section>
+
     </div>
   </main>
 
@@ -198,13 +258,16 @@
         if (icon) icon.innerText = "☀️";
       }
     }
+
     function toggleTheme() {
       const isLight = document.body.classList.toggle("light-theme");
       localStorage.setItem("zephyr_theme", isLight ? "light" : "dark");
       const icon = document.getElementById("themeIcon");
       if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
+
     window.addEventListener('DOMContentLoaded', initTheme);
   </script>
+
 </body>
 </html>

@@ -7,6 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/style.css">
   <style>
+    /* ========================================================================= */
+    /* 1. DARK THEME BASE (OBSIDIAN + LIGHT BLUE SHADOW)                         */
+    /* ========================================================================= */
     body {
       background-color: #03050a !important;
       color: #e2e8f0 !important;
@@ -17,11 +20,16 @@
     .glow-orange {
       background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(249, 115, 22, 0.05) 50%, transparent 75%);
     }
+
+    /* CARD CONTAINER WITH RADIANT LIGHT BLUE SHADOW */
     .privacy-card-container {
-      background: rgba(7, 11, 24, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(7, 11, 24, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.25);
       backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 25px 65px -12px rgba(14, 165, 233, 0.28), 0 0 35px rgba(56, 189, 248, 0.15) !important;
     }
+
     #themeToggleBtn, .btn-back-app {
       background-color: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -33,6 +41,10 @@
       color: #ffffff;
       border-color: rgba(255, 255, 255, 0.25);
     }
+
+    /* ========================================================================= */
+    /* 2. DAY THEME BASE (CRISP WHITE + GLOWING LIGHT BLUE SHADOW)               */
+    /* ========================================================================= */
     body.light-theme {
       background-color: #f8fafc !important;
       color: #0f172a !important;
@@ -48,6 +60,7 @@
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
     }
+
     body.light-theme #themeToggleBtn, body.light-theme .btn-back-app {
       background-color: #ffffff !important;
       border: 1px solid #cbd5e1 !important;
@@ -60,25 +73,30 @@
       border-color: #0284c7 !important;
       color: #0284c7 !important;
     }
+
+    /* DAY THEME CONTAINER WITH SOFT LIGHT BLUE SHADOW */
     body.light-theme .privacy-card-container {
       background: #ffffff !important;
-      border-color: #e2e8f0 !important;
-      box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08) !important;
+      border: 1px solid rgba(56, 189, 248, 0.35) !important;
+      box-shadow: 0 25px 65px -12px rgba(56, 189, 248, 0.25), 0 0 40px rgba(186, 230, 253, 0.65) !important;
     }
+
     body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme strong, body.light-theme .text-white {
       color: #0f172a !important;
       font-weight: 800 !important;
     }
-    body.light-theme p, body.light-theme li {
-      color: #334155 !important;
+    body.light-theme p {
+      color: #475569 !important;
       font-weight: 500 !important;
     }
-    body.light-theme .text-slate-300, body.light-theme .text-slate-400, body.light-theme .text-slate-500 {
-      color: #475569 !important;
-    }
     body.light-theme .tier-box {
-      background-color: #f8fafc !important;
+      background-color: #ffffff !important;
       border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.08) !important;
+    }
+    body.light-theme .tier-box li {
+      color: #334155 !important;
+      font-weight: 500 !important;
     }
     body.light-theme footer {
       background-color: #ffffff !important;
@@ -89,12 +107,14 @@
 </head>
 <body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
 
+  <!-- Ambient Nebulas -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px]"></div>
     <div class="glow-orange absolute top-[22%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px]"></div>
     <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px]"></div>
   </div>
 
+  <!-- Header -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group shrink-0">
@@ -120,88 +140,138 @@
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-6 py-12 space-y-12 w-full">
-    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
-      <div class="space-y-4">
+  <!-- Main Pricing Card -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-12 w-full">
+    <div class="privacy-card-container rounded-3xl p-6 sm:p-10 border space-y-10 transition">
+      
+      <div class="text-center space-y-3 max-w-3xl mx-auto">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-400 text-xs font-mono font-bold uppercase tracking-wider">
           Transparent Infrastructure Pricing
         </div>
         <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-          Sovereign Edge Plans & Capacity
+          Choose Your Transfer & Storage Plan
         </h1>
-        <p class="text-slate-400 text-xs font-mono">
-          Zero-Knowledge Transfers • Cloudflare R2 Direct Pipes • No Egress Tolls
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
+          Start free or scale to our 15 GB, 30 GB, 80 GB, or 200 GB vaults. Mid-cycle upgrades are seamlessly prorated (+ $0.50 processing fee) with our 20-day retention grace policy.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <!-- Free Tier -->
-        <div class="tier-box p-6 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col justify-between space-y-6">
+      <!-- 5-Column Pricing Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 items-stretch">
+        
+        <!-- 1. Free Starter -->
+        <div class="tier-box p-5 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col justify-between space-y-6">
           <div class="space-y-3">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Community</span>
-            <div class="text-2xl font-black text-white">Free</div>
-            <p class="text-xs text-slate-400">For individual transfers and client review proofs.</p>
-            <ul class="space-y-2 text-xs text-slate-300 pt-2 border-t border-white/5">
-              <li>• <strong>2 GB</strong> Transfer Cap</li>
-              <li>• <strong>2 GB</strong> Drive Vault</li>
-              <li>• Burn-on-Read shred</li>
-              <li>• 5% Escrow fee</li>
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">Free Starter</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white/10 text-slate-300">Forever</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">Zero-knowledge drive vault & transfer pipeline.</p>
+            <div class="pt-2">
+              <div class="text-3xl font-black text-white">$0 <span class="text-xs text-slate-400 font-normal">/forever</span></div>
+            </div>
+            <ul class="space-y-2 text-xs text-slate-300 pt-3 border-t border-white/5">
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span><strong>5 GB</strong> Cloud Drive vault</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span><strong>2 GB</strong> per single transfer</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span><strong>7</strong> E-Sign documents / day</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span>Burn-on-Read self-destruct</span></li>
             </ul>
           </div>
-          <a href="/" class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center transition">Active Default</a>
+          <a href="/" class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center transition">Use Free</a>
         </div>
 
-        <!-- Lite Tier -->
-        <div class="tier-box p-6 rounded-2xl bg-white/[0.02] border border-sky-500/30 flex flex-col justify-between space-y-6">
+        <!-- 2. Zephyr Micro -->
+        <div class="tier-box p-5 rounded-2xl bg-white/[0.02] border border-sky-400/30 flex flex-col justify-between space-y-6">
           <div class="space-y-3">
-            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Zephyr Lite</span>
-            <div class="text-2xl font-black text-white">$9 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-            <p class="text-xs text-slate-400">For freelance editors and design specialists.</p>
-            <ul class="space-y-2 text-xs text-slate-300 pt-2 border-t border-white/5">
-              <li>• <strong>5 GB</strong> Transfer Cap</li>
-              <li>• <strong>20 GB</strong> Drive Vault</li>
-              <li>• 1080p AI Enhance</li>
-              <li>• 3.5% Escrow fee</li>
-              <li>• Custom wallpapers</li>
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">Zephyr Micro</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-400 border border-sky-400/30">Starter Plus</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">Extra lightweight storage for documents & personal archives.</p>
+            <div class="pt-2">
+              <div class="text-3xl font-black text-sky-400">$1.80 <span class="text-xs text-slate-400 font-normal">/month</span></div>
+            </div>
+            <ul class="space-y-2 text-xs text-slate-300 pt-3 border-t border-white/5">
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span><strong>15 GB</strong> Cloud Drive vault</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span><strong>5 GB</strong> per single transfer</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span><strong>15</strong> E-Sign documents / day</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-sky-400 font-bold">✓</span> <span>20-Day Retention Grace</span></li>
             </ul>
           </div>
-          <a href="/" class="w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs text-center transition">Upgrade to Lite</a>
+          <button type="button" onclick="openDodoCheckout('micro')" class="w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs text-center transition shadow-lg shadow-sky-500/25">Get Micro ($1.80)</button>
         </div>
 
-        <!-- Plus Tier -->
-        <div class="tier-box p-6 rounded-2xl bg-white/[0.02] border border-indigo-500/40 relative flex flex-col justify-between space-y-6">
+        <!-- 3. Zephyr Lite -->
+        <div class="tier-box p-5 rounded-2xl bg-white/[0.02] border border-blue-500/30 flex flex-col justify-between space-y-6">
           <div class="space-y-3">
-            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Zephyr Plus</span>
-            <div class="text-2xl font-black text-white">$19 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-            <p class="text-xs text-slate-400">For boutique studios handling master raw assets.</p>
-            <ul class="space-y-2 text-xs text-slate-300 pt-2 border-t border-white/5">
-              <li>• <strong>20 GB</strong> Transfer Cap</li>
-              <li>• <strong>50 GB</strong> Drive Vault</li>
-              <li>• 4K Neural Scaler</li>
-              <li>• 2.5% Escrow fee</li>
-              <li>• 25 E-Sign NDAs/mo</li>
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">Zephyr Lite</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/20 text-blue-400 border border-blue-400/30">Essential</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">Dedicated vault for students, photos, and project sharing.</p>
+            <div class="pt-2">
+              <div class="text-3xl font-black text-blue-400">$2.50 <span class="text-xs text-slate-400 font-normal">/month</span></div>
+            </div>
+            <ul class="space-y-2 text-xs text-slate-300 pt-3 border-t border-white/5">
+              <li class="flex items-start gap-1.5"><span class="text-blue-400 font-bold">✓</span> <span><strong>30 GB</strong> Cloud Drive vault</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-blue-400 font-bold">✓</span> <span><strong>10 GB</strong> per single transfer</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-blue-400 font-bold">✓</span> <span><strong>30</strong> E-Sign documents / day</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-blue-400 font-bold">✓</span> <span>4K Ultra HD AI Upscaler (15 runs/mo)</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-blue-400 font-bold">✓</span> <span>Client Drop & QR links</span></li>
             </ul>
           </div>
-          <a href="/" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs text-center transition">Upgrade to Plus</a>
+          <button type="button" onclick="openDodoCheckout('lite')" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs text-center transition shadow-lg shadow-blue-500/25">Get Lite ($2.50)</button>
         </div>
 
-        <!-- Pro Studio Tier -->
-        <div class="tier-box p-6 rounded-2xl bg-white/[0.02] border border-purple-500/40 flex flex-col justify-between space-y-6">
+        <!-- 4. Zephyr Plus -->
+        <div class="tier-box p-5 rounded-2xl bg-white/[0.02] border border-purple-500/30 flex flex-col justify-between space-y-6">
           <div class="space-y-3">
-            <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Pro Studio</span>
-            <div class="text-2xl font-black text-white">$39 <span class="text-xs text-slate-400 font-normal">/mo</span></div>
-            <p class="text-xs text-slate-400">For commercial VFX and full production houses.</p>
-            <ul class="space-y-2 text-xs text-slate-300 pt-2 border-t border-white/5">
-              <li>• <strong>50 GB</strong> Transfer Cap</li>
-              <li>• <strong>200 GB</strong> Drive Vault</li>
-              <li>• Unlimited 4K AI Studio</li>
-              <li>• <strong>0% Escrow fee</strong></li>
-              <li>• White-label custom domain</li>
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">Zephyr Plus</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-400 border border-purple-400/30">Creator</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">High capacity for creators, media files, and active teams.</p>
+            <div class="pt-2">
+              <div class="text-3xl font-black text-purple-400">$4.50 <span class="text-xs text-slate-400 font-normal">/month</span></div>
+            </div>
+            <ul class="space-y-2 text-xs text-slate-300 pt-3 border-t border-white/5">
+              <li class="flex items-start gap-1.5"><span class="text-purple-400 font-bold">✓</span> <span><strong>80 GB</strong> Cloud Drive vault</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-purple-400 font-bold">✓</span> <span><strong>25 GB</strong> per single transfer</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-purple-400 font-bold">✓</span> <span><strong>50</strong> E-Sign documents / day</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-purple-400 font-bold">✓</span> <span>4K Ultra HD AI Upscaler (60 runs/mo)</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-purple-400 font-bold">✓</span> <span>Studio Branding Suite</span></li>
             </ul>
           </div>
-          <a href="/" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs text-center transition">Upgrade to Pro</a>
+          <button type="button" onclick="openDodoCheckout('plus')" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs text-center transition shadow-lg shadow-purple-500/25">Get Plus ($4.50)</button>
         </div>
+
+        <!-- 5. Zephyr Pro (POPULAR) -->
+        <div class="tier-box p-5 rounded-2xl bg-white/[0.03] border-2 border-indigo-500 relative flex flex-col justify-between space-y-6 shadow-xl shadow-indigo-500/10">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-600 text-white shadow-md">
+            POPULAR
+          </div>
+          <div class="space-y-3 pt-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">Zephyr Pro</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">Pro Member</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">Complete professional studio setup with full edge capabilities.</p>
+            <div class="pt-2">
+              <div class="text-3xl font-black text-indigo-400">$7.00 <span class="text-xs text-slate-400 font-normal">/month</span></div>
+            </div>
+            <ul class="space-y-2 text-xs text-slate-300 pt-3 border-t border-white/5">
+              <li class="flex items-start gap-1.5"><span class="text-indigo-400 font-bold">✓</span> <span><strong>200 GB</strong> Cloud Drive vault</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-indigo-400 font-bold">✓</span> <span><strong>50 GB</strong> per single transfer</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-indigo-400 font-bold">✓</span> <span>Unlimited 4K Ultra HD AI Upscaler</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-indigo-400 font-bold">✓</span> <span>Unlimited daily E-Signs</span></li>
+              <li class="flex items-start gap-1.5"><span class="text-indigo-400 font-bold">✓</span> <span>Studio Branding & Paywalls</span></li>
+            </ul>
+          </div>
+          <button type="button" onclick="openDodoCheckout('pro')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs text-center transition shadow-lg shadow-indigo-500/25">Upgrade to Pro ($7.00)</button>
+        </div>
+
       </div>
+
     </div>
   </main>
 
@@ -228,6 +298,29 @@
       if (icon) icon.innerText = isLight ? "🌙" : "☀️";
     }
     window.addEventListener('DOMContentLoaded', initTheme);
+
+    const ACTIVE_PAYMENT_ENV = "test"; 
+    const DODO_CONFIG = {
+      test: {
+        domain: "https://test.checkout.dodopayments.com/buy",
+        products: {
+          micro: "pdt_0NoSL8gp9FUEk5GKWdB10",
+          lite: "pdt_0NoSLFQICnqD2weSbr0d",
+          plus: "pdt_0NoSKxDY49vabp31shvd1",
+          pro: "pdt_0NoSL3f1qb5yIZTPZv71H"
+        }
+      }
+    };
+
+    function openDodoCheckout(tier = "pro") {
+      const envConfig = DODO_CONFIG[ACTIVE_PAYMENT_ENV] || DODO_CONFIG.test;
+      const productId = envConfig.products[tier] || envConfig.products["pro"];
+      let targetUrl = `${envConfig.domain}/${productId}`;
+      const params = new URLSearchParams();
+      params.append("tier", tier);
+      params.append("env", ACTIVE_PAYMENT_ENV);
+      window.location.href = targetUrl + "?" + params.toString();
+    }
   </script>
 </body>
 </html>
