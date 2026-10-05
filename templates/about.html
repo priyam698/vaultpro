@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Zephyr — Zero-Knowledge Sovereign Infrastructure</title>
+  <title>About Zephyr — Sovereign Infrastructure & Zero-Knowledge Architecture</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/style.css">
   <style>
@@ -29,8 +29,33 @@
       -webkit-backdrop-filter: blur(24px);
     }
 
+    /* Header Action Buttons (Default Dark Theme) */
+    #themeToggleBtn {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      transition: all 0.2s ease;
+    }
+    #themeToggleBtn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-back-app {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      transition: all 0.2s ease;
+    }
+    .btn-back-app:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
     /* ========================================================================= */
-    /* 2. DAY THEME BASE (CRISP MIDNIGHT NAVY & HIGH CONTRAST)                   */
+    /* 2. DAY THEME BASE (CRISP HIGH CONTRAST & VISIBLE CONTROLS)                */
     /* ========================================================================= */
     body.light-theme {
       background-color: #f8fafc !important;
@@ -45,32 +70,50 @@
     }
 
     body.light-theme header {
-      background-color: rgba(255, 255, 255, 0.9) !important;
+      background-color: rgba(255, 255, 255, 0.95) !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
     }
 
-    body.light-theme #themeToggleBtn,
-    body.light-theme .btn-back-app {
+    /* DAY THEME HEADER BUTTONS (SOLID WHITE PILLS WITH HIGH-CONTRAST TEXT & BORDER) */
+    body.light-theme #themeToggleBtn {
       background-color: #ffffff !important;
-      border-color: #cbd5e1 !important;
+      border: 1px solid #cbd5e1 !important;
       color: #0f172a !important;
-      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff !important;
     }
-    body.light-theme #themeToggleBtn:hover,
-    body.light-theme .btn-back-app:hover {
+    body.light-theme #themeToggleBtn:hover {
       background-color: #f1f5f9 !important;
+      border-color: #0284c7 !important;
       color: #0284c7 !important;
-      border-color: #94a3b8 !important;
     }
 
+    body.light-theme .btn-back-app {
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff !important;
+    }
+    body.light-theme .btn-back-app span {
+      color: #0f172a !important;
+    }
+    body.light-theme .btn-back-app:hover {
+      background-color: #f1f5f9 !important;
+      border-color: #0284c7 !important;
+    }
+    body.light-theme .btn-back-app:hover span {
+      color: #0284c7 !important;
+    }
+
+    /* DAY THEME MAIN DOSSIER CARD */
     body.light-theme .privacy-card-container {
       background: #ffffff !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04) !important;
     }
 
-    /* FIX: Force all headings, titles, and text-white elements to Midnight Navy */
+    /* FORCED CONTRAST FOR ALL HEADINGS AND LABELS */
     body.light-theme h1,
     body.light-theme h2,
     body.light-theme h3,
@@ -81,21 +124,21 @@
       font-weight: 800 !important;
     }
 
-    /* FIX: Force body paragraphs & list items to deep Slate-700 for sharp legibility */
+    /* FORCED CONTRAST FOR PARAGRAPHS AND LIST ITEMS */
     body.light-theme p,
     body.light-theme li {
       color: #334155 !important;
       font-weight: 500 !important;
     }
 
-    /* FIX: Secondary text & descriptions */
+    /* SECONDARY LABELS & MONOSPACE ANNOTATIONS */
     body.light-theme .text-slate-300,
     body.light-theme .text-slate-400,
     body.light-theme .text-slate-500 {
       color: #475569 !important;
     }
 
-    /* FIX: Inner boxes and cards */
+    /* INNER SUBCARDS AND FEATURE PANELS */
     body.light-theme .dossier-subbox,
     body.light-theme .bg-white\/\[0\.02\] {
       background-color: #f8fafc !important;
@@ -120,6 +163,9 @@
     body.light-theme .brand-title {
       color: #0f172a !important;
     }
+    body.light-theme a:hover .brand-title {
+      color: #0284c7 !important;
+    }
 
     body.light-theme footer {
       background-color: #ffffff !important;
@@ -137,7 +183,7 @@
     <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px] transition-all"></div>
   </div>
 
-  <!-- TOP HEADER (IDENTICAL TO PRIVACY PAGE COCKPIT) -->
+  <!-- TOP COCKPIT HEADER -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
@@ -173,56 +219,56 @@
         <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">Zephyr</span>
       </a>
 
-      <!-- Action Buttons -->
+      <!-- Action Buttons (High Visibility in Day & Dark Themes) -->
       <div class="flex items-center gap-3">
-        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Day/Night Theme" class="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Day/Night Theme" class="w-9 h-9 rounded-xl flex items-center justify-center text-xs transition cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <a href="/" class="btn-back-hub px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-bold text-slate-200 transition inline-flex items-center gap-1.5 cursor-pointer">
+        <a href="/" class="btn-back-app px-4 py-2 rounded-xl text-xs font-bold transition inline-flex items-center gap-1.5 cursor-pointer">
           <span>←</span> <span>Back to App</span>
         </a>
       </div>
     </div>
   </header>
 
-  <!-- MAIN ABOUT CONTENT CONTAINER (0 TO 100 DOSSIER) -->
+  <!-- MAIN ABOUT DOSSIER (COMPLETE ARCHITECTURE 0 TO 100) -->
   <main class="max-w-4xl mx-auto px-6 py-12 space-y-12 w-full">
 
-    <div class="dossier-card rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
+    <div class="privacy-card-container rounded-3xl p-8 sm:p-12 border shadow-2xl space-y-10 transition">
       
-      <!-- Header Badge & Title -->
+      <!-- Top Badge & Header -->
       <div class="space-y-4">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-400 text-xs font-mono font-bold uppercase tracking-wider">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-400 text-xs font-mono font-bold uppercase tracking-wider">
           Company Architecture & Manifesto
         </div>
         <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
           About Zephyr Systems
         </h1>
         <p class="text-slate-400 text-xs font-mono">
-          Headquarters: Surat, Gujarat, India • Deployment: Global Anycast Edge Network • Founded: 2026
+          Headquarters: Surat, Gujarat, India • Global Anycast Edge Network • Founded: 2026
         </p>
       </div>
 
-      <!-- Section 1: The Genesis -->
+      <!-- 1. The Genesis & Philosophy -->
       <section class="space-y-3">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
-          <span class="text-sky-400 font-mono">01.</span> The Genesis & Philosophy
+          <span class="text-sky-400 font-mono">01.</span> Sovereign Creative Infrastructure
         </h2>
         <p class="text-sm text-slate-300 leading-relaxed">
-          Zephyr was conceived with a single non-negotiable premise: <strong>creative independence requires absolute cryptographic privacy.</strong> Traditional file-sharing platforms ingest, scan, index, and monetize user assets to train machine learning models, build advertiser profiles, and inspect raw client media.
+          Zephyr was conceived with a single non-negotiable premise: <strong>creative independence requires absolute cryptographic privacy.</strong> Traditional cloud file-sharing platforms ingest, scan, index, and monetize user assets to train machine learning models, build advertiser profiles, and inspect raw client media.
         </p>
         <p class="text-sm text-slate-300 leading-relaxed">
           Zephyr replaces centralized surveillance pipelines with zero-knowledge math. By executing AES-256 encryption in-browser before bytes leave your local storage, Zephyr ensures that neither network intermediaries, storage hosting vendors, nor internal platform operators can ever inspect your deliverables.
         </p>
       </section>
 
-      <!-- Section 2: Global Infrastructure -->
+      <!-- 2. Global Edge Topology -->
       <section class="space-y-3">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
-          <span class="text-sky-400 font-mono">02.</span> Edge Network Infrastructure
+          <span class="text-sky-400 font-mono">02.</span> Global Edge Topology
         </h2>
         <p class="text-sm text-slate-300 leading-relaxed">
-          Headquartered in Surat, Gujarat, India, Zephyr coordinates high-throughput edge nodes spanning 300+ global data centers. Our direct-stream architecture links directly to Cloudflare R2 object storage buckets, bypassing traditional monolithic web server bottlenecks entirely:
+          Operating from Surat, Gujarat, India, Zephyr coordinates high-throughput edge nodes spanning 300+ global data centers. Our direct-stream architecture links directly to Cloudflare R2 object storage buckets and Supabase encrypted metadata vaults, bypassing monolithic origin server bottlenecks entirely:
         </p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <div class="dossier-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
@@ -230,70 +276,70 @@
             <p class="text-xs text-slate-400">Files stream via presigned multi-part chunk uploads straight to edge storage, achieving unthrottled gigabit speeds.</p>
           </div>
           <div class="dossier-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
-            <h4 class="font-bold text-white text-xs">Zero Egress Penalties</h4>
+            <h4 class="font-bold text-white text-xs">Zero Egress Tolls</h4>
             <p class="text-xs text-slate-400">Recipients download assets without bandwidth limits, throttle caps, or third-party tracking scripts.</p>
           </div>
         </div>
       </section>
 
-      <!-- Section 3: The 6 Pillars -->
+      <!-- 3. The 6 Product Pillars -->
       <section class="space-y-4">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">03.</span> The 6 Ecosystem Pillars
         </h2>
         <div class="space-y-3 text-sm text-slate-300">
-          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+          <div class="dossier-subbox p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
             <strong class="text-white text-xs flex items-center gap-1.5"><span>⚡</span> 1. Zephyr Transfer</strong>
             <p class="text-xs text-slate-400">Zero-knowledge link dispatching with automated Burn-on-Read shredding and custom expiry timers.</p>
           </div>
-          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+          <div class="dossier-subbox p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
             <strong class="text-white text-xs flex items-center gap-1.5"><span>🗄️</span> 2. Drive Vault</strong>
             <p class="text-xs text-slate-400">Persistent encrypted cloud directory trees with inline media streaming and granular access control.</p>
           </div>
-          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+          <div class="dossier-subbox p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
             <strong class="text-white text-xs flex items-center gap-1.5"><span>✨</span> 3. 4K AI Studio</strong>
-            <p class="text-xs text-slate-400">Next-gen neural upscaling and dynamic anti-screenshot glare protection to safeguard client review previews.</p>
+            <p class="text-xs text-slate-400">Next-gen neural upscaling and dynamic anti-screenshot glare protection to safeguard client review stages.</p>
           </div>
-          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+          <div class="dossier-subbox p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
             <strong class="text-white text-xs flex items-center gap-1.5"><span>✍️</span> 4. E-Sign Studio</strong>
             <p class="text-xs text-slate-400">Cryptographically sealed non-disclosure and release agreements locked as mandatory pre-download gateways.</p>
           </div>
-          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+          <div class="dossier-subbox p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
             <strong class="text-white text-xs flex items-center gap-1.5"><span>💳</span> 5. Paywall Escrow</strong>
             <p class="text-xs text-slate-400">Eliminates creative invoice ghosting: master assets unlock automatically only upon successful payment settlement.</p>
           </div>
-          <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+          <div class="dossier-subbox p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
             <strong class="text-white text-xs flex items-center gap-1.5"><span>📥</span> 6. Inbound Portal</strong>
             <p class="text-xs text-slate-400">Branded standalone drop-boxes enabling clients to upload multi-gigabyte raw footage directly into your Drive.</p>
           </div>
         </div>
       </section>
 
-      <!-- Section 4: Cryptographic Guarantee -->
+      <!-- 4. Cryptographic Guarantees -->
       <section class="space-y-3">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
-          <span class="text-sky-400 font-mono">04.</span> Cryptographic Guarantee
+          <span class="text-sky-400 font-mono">04.</span> Cryptographic Privacy Guarantees
         </h2>
         <ul class="space-y-2 text-xs text-slate-300 list-disc pl-5 leading-relaxed">
-          <li><strong>Keys in Hash Fragments:</strong> URL decryption keys reside solely after the <code>#</code> symbol. RFC standards strictly prevent browsers from ever sending hash fragments to our origin servers.</li>
-          <li><strong>Burn-on-Read Mechanics:</strong> Once the recipient downloads the first byte payload, our edge workers schedule immediate block unmapping.</li>
-          <li><strong>No Content Logging:</strong> Server logs strip client IP addresses, MIME headers, and file identification metadata at ingress.</li>
+          <li><strong>Keys Held in Hash Fragments:</strong> URL decryption keys reside solely after the <code>#</code> symbol. RFC standards strictly prevent browsers from ever transmitting hash fragments to HTTP servers.</li>
+          <li><strong>Burn-on-Read Mechanics:</strong> Once the recipient downloads the first byte payload, our edge workers schedule immediate block unmapping and cryptographic bucket shredding.</li>
+          <li><strong>Zero User Profiling:</strong> We maintain zero advertising trackers, zero fingerprinting scripts, and zero analytical beacons.</li>
         </ul>
       </section>
 
-      <!-- Section 5: Governance & Headquarters -->
-      <section class="space-y-3 pt-2 border-t border-white/5">
+      <!-- 5. Organization Details & Contact -->
+      <section class="space-y-3 pt-4 border-t border-white/5">
         <h2 class="text-lg font-black text-white flex items-center gap-2">
           <span class="text-sky-400 font-mono">05.</span> Organization & Contact
         </h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Zephyr Systems Inc. operates as an independent infrastructure engineering firm based in Surat, Gujarat, India. For security whitepapers, enterprise white-labeling, or architectural audits:
+          Zephyr Systems Inc. operates as an independent zero-knowledge infrastructure entity based in Surat, Gujarat, India.
         </p>
-        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs font-mono space-y-1">
+        <div class="dossier-subbox p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs font-mono space-y-1">
           <div class="text-white font-bold">Zephyr Systems Inc.</div>
           <div class="text-slate-400">Headquarters: Surat, Gujarat, India • 395003</div>
           <div class="text-slate-400">Security Inquiries: <a href="mailto:priyamrana069@gmail.com" class="text-sky-400 hover:underline">priyamrana069@gmail.com</a></div>
-          <div class="text-slate-400">Status: Fully Operational Global Edge Nodes</div>
+          <div class="text-slate-400">Status: Edge Network Operational</div>
         </div>
       </section>
 
@@ -306,8 +352,8 @@
     © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
   </footer>
 
+  <!-- THEME SYNC SCRIPT -->
   <script>
-    // Theme Engine: Auto-syncs with Homepage & Privacy pages
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
