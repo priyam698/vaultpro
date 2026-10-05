@@ -8,16 +8,15 @@
   <link rel="stylesheet" href="/static/style.css">
   <style>
     /* ========================================================================= */
-    /* 1. DARK THEME: BLACK + DEEP BLUE + WARM ORANGE GLOW ATMOSPHERE           */
+    /* 1. DARK THEME: BLACK + DEEP BLUE + WARM ORANGE ATMOSPHERE                */
     /* ========================================================================= */
     body {
       background-color: #030712 !important;
       color: #e2e8f0 !important;
     }
 
-    /* Cosmic Background Nebulas: Dark Mode */
     .glow-blue {
-      background: radial-gradient(circle, rgba(30, 64, 175, 0.35) 0%, rgba(14, 165, 233, 0.15) 45%, transparent 75%);
+      background: radial-gradient(circle, rgba(30, 64, 175, 0.38) 0%, rgba(14, 165, 233, 0.16) 45%, transparent 75%);
     }
     .glow-orange {
       background: radial-gradient(circle, rgba(234, 88, 12, 0.22) 0%, rgba(249, 115, 22, 0.08) 50%, transparent 75%);
@@ -42,16 +41,15 @@
     }
 
     /* ========================================================================= */
-    /* 2. DAY THEME: EXACT HOMEPAGE (WHITE + SKY BLUE + MULTI-COLOR ACCENTS)     */
+    /* 2. DAY THEME: HOMEPAGE REPLICA (WHITE + SKY BLUE + RICH CONTRAST)         */
     /* ========================================================================= */
     body.light-theme {
       background-color: #f0f7ff !important;
       color: #1e293b !important;
     }
 
-    /* Day Mode Nebulas (Matches Homepage Soft Blue/Cyan wash) */
     body.light-theme .glow-blue {
-      background: radial-gradient(circle, rgba(186, 230, 253, 0.7) 0%, rgba(224, 242, 254, 0.4) 50%, transparent 80%) !important;
+      background: radial-gradient(circle, rgba(186, 230, 253, 0.75) 0%, rgba(224, 242, 254, 0.45) 50%, transparent 80%) !important;
     }
     body.light-theme .glow-orange {
       background: radial-gradient(circle, rgba(254, 215, 170, 0.45) 0%, rgba(255, 237, 213, 0.2) 50%, transparent 75%) !important;
@@ -60,19 +58,43 @@
       background: radial-gradient(circle, rgba(165, 243, 252, 0.6) 0%, transparent 70%) !important;
     }
 
-    /* Day Mode Navigation Header & Dock */
     body.light-theme header {
-      background-color: rgba(255, 255, 255, 0.88) !important;
+      background-color: rgba(255, 255, 255, 0.9) !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
     }
 
+    /* FIX: Back to Hub & Theme Toggle Day Visibility */
+    body.light-theme #themeToggleBtn {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-theme #themeToggleBtn:hover {
+      background-color: #f1f5f9 !important;
+      border-color: #94a3b8 !important;
+    }
+
+    body.light-theme .btn-back-hub {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-theme .btn-back-hub:hover {
+      background-color: #f1f5f9 !important;
+      color: #0284c7 !important;
+      border-color: #0284c7 !important;
+    }
+
+    /* Product Navigation Switcher Dock */
     body.light-theme .nav-dock-container {
       background-color: #ffffff !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
     }
-
     body.light-theme .product-tab {
       color: #475569 !important;
     }
@@ -87,9 +109,9 @@
       box-shadow: 0 2px 10px rgba(14, 165, 233, 0.15) !important;
     }
 
-    /* Day Mode Headings: Multi-Color & Rich Contrast (NOT PURE BLACK) */
+    /* Day Mode Typography & Headings (Multi-Colored, No Washed-Out Text) */
     body.light-theme .hero-title-main {
-      color: #0f172a !important; /* Midnight Navy */
+      color: #0f172a !important;
     }
     body.light-theme .hero-title-gradient {
       background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%) !important;
@@ -97,10 +119,9 @@
       -webkit-text-fill-color: transparent !important;
     }
     body.light-theme .hero-desc {
-      color: #334155 !important; /* Deep Slate (Very readable) */
+      color: #334155 !important;
     }
 
-    /* Day Mode Cards */
     body.light-theme .guide-card {
       background: #ffffff !important;
       border-color: #e2e8f0 !important;
@@ -122,7 +143,7 @@
       border-color: #e2e8f0 !important;
     }
 
-    /* Day Mode Comparison Table */
+    /* Day Mode Table */
     body.light-theme .table-wrap {
       background: #ffffff !important;
       border-color: #e2e8f0 !important;
@@ -148,12 +169,14 @@
       color: #0f172a !important;
     }
 
-    /* Brand Logo Text */
+    /* Logo Text in Light Theme */
     body.light-theme .brand-title {
       color: #0f172a !important;
     }
+    body.light-theme a:hover .brand-title {
+      color: #0284c7 !important;
+    }
 
-    /* Footer */
     body.light-theme footer {
       background-color: #ffffff !important;
       border-top-color: #e2e8f0 !important;
@@ -163,29 +186,21 @@
 </head>
 <body class="min-h-screen text-slate-200 selection:bg-sky-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden transition-colors duration-300">
 
-  <!-- ========================================================================= -->
-  <!-- ATMOSPHERIC BACKGROUND NEBULAS (BLACK + BLUE + WARM ORANGE IN DARK MODE)  -->
-  <!-- ========================================================================= -->
+  <!-- BACKGROUND NEBULAS -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-    <!-- Top Cosmic Blue Nebula -->
     <div class="glow-blue absolute -top-[160px] left-1/2 -translate-x-1/2 w-[1100px] h-[550px] rounded-full blur-[140px] transition-all"></div>
-    <!-- Left Warm Orange Glow (Adds Depth to the Black Base) -->
     <div class="glow-orange absolute top-[20%] -left-[160px] w-[650px] h-[650px] rounded-full blur-[160px] transition-all"></div>
-    <!-- Right Cyan Studio Wash -->
     <div class="glow-cyan absolute top-[48%] -right-[160px] w-[700px] h-[700px] rounded-full blur-[160px] transition-all"></div>
-    <!-- Bottom Deep Blue Anchor -->
     <div class="glow-blue absolute bottom-[-100px] left-[20%] w-[850px] h-[450px] rounded-full blur-[150px] transition-all"></div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- TOP OBSIDIAN NAVIGATION BAR (MATCHED SQUIRCLE LOGO & THEME SWITCHER)      -->
-  <!-- ========================================================================= -->
+  <!-- TOP HEADER (MATCHED SQUIRCLE LOGO & PROPERLY VISIBLE CONTROLS) -->
   <header class="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] transition-colors">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       
-      <!-- Unified Squircle Logo (Matches Homepage Perfectly) -->
-      <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-2xl bg-[#090d1f] border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10 transition group-hover:scale-105">
+      <!-- Unified Squircle Logo Mark -->
+      <a href="/" class="flex items-center gap-3 group shrink-0">
+        <div class="w-10 h-10 rounded-2xl bg-[#090d1f] border border-white/10 flex items-center justify-center p-2 shadow-lg shadow-sky-500/10 transition group-hover:scale-105 shrink-0">
           <svg viewBox="0 0 100 100" fill="none" class="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
             <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
             <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#c084fc"/>
@@ -195,13 +210,13 @@
         <span class="brand-title font-black text-xl tracking-tight text-white group-hover:text-sky-400 transition-colors">Zephyr</span>
       </a>
 
-      <!-- Actions & Theme Toggle -->
+      <!-- Visible Action Controls & Theme Toggle -->
       <div class="flex items-center gap-3">
-        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Theme" class="w-9 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+        <button id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Theme" class="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-200 hover:text-white flex items-center justify-center text-sm transition shadow-sm cursor-pointer">
           <span id="themeIcon">☀️</span>
         </button>
-        <a href="/" class="px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-semibold text-slate-200 transition">
-          ← Back to Hub
+        <a href="/" class="btn-back-hub px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-bold text-slate-200 transition shadow-sm inline-flex items-center gap-1.5 cursor-pointer">
+          <span>←</span> <span>Back to Hub</span>
         </a>
         <a href="/" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:opacity-95 text-xs font-bold text-white shadow-lg shadow-sky-500/20 transition">
           Start Transfer
@@ -210,16 +225,14 @@
     </div>
   </header>
 
-  <!-- ========================================================================= -->
-  <!-- INTERACTIVE PRODUCT DOCK SWITCHER                                         -->
-  <!-- ========================================================================= -->
+  <!-- PRODUCT DOCK SWITCHER -->
   <div class="max-w-5xl mx-auto px-6 pt-10 w-full">
     <div class="nav-dock-container p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto custom-scroll shadow-2xl transition">
       <button onclick="switchProduct('transfer')" id="tab-transfer" class="product-tab tab-active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-400/30">
         <span>⚡</span> <span>Zephyr Transfer</span>
       </button>
       <button onclick="switchProduct('vault')" id="tab-vault" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
-        <span>🗄️</span> <span>Drive Vault</span>
+        <span>🗄️️</span> <span>Drive Vault</span>
       </button>
       <button onclick="switchProduct('ai-studio')" id="tab-ai-studio" class="product-tab px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-white hover:bg-white/[0.05]">
         <span>✨</span> <span>4K AI Studio</span>
@@ -236,9 +249,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MAIN DOCUMENTATION CONTAINER                                              -->
-  <!-- ========================================================================= -->
+  <!-- MAIN DOCUMENTATION CONTAINER -->
   <main class="max-w-5xl mx-auto px-6 py-12 space-y-16 w-full">
 
     <!-- 1. ZEPHYR TRANSFER -->
@@ -383,7 +394,7 @@
           <p class="text-xs leading-relaxed">Enhance standard 1080p footage to 4K resolution using generative edge sharpening.</p>
         </div>
         <div class="guide-card p-6 rounded-3xl border space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-400/25 flex items-center justify-center text-lg">🛡️</div>
+          <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-400/25 flex items-center justify-center text-lg">🛡️️</div>
           <h3 class="text-sm font-black text-white">Anti-Screenshot Glare</h3>
           <p class="text-xs leading-relaxed">Generates client review stages that disrupt automated screen capture and OCR scrapers.</p>
         </div>
@@ -583,17 +594,17 @@
             <p>Click "Request" in the top navigation or open Inbound Portals in your dashboard.</p>
           </div>
           <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-500 font-mono font-bold text-[10px]">STEP 2</span>
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 2</span>
             <h4 class="font-bold text-white text-sm">Send to Client</h4>
             <p>Send your private drop-link via Slack, WhatsApp, or email.</p>
           </div>
           <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-500 font-mono font-bold text-[10px]">STEP 3</span>
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 3</span>
             <h4 class="font-bold text-white text-sm">Client Drops Assets</h4>
             <p>Clients drag and drop their raw files into your branded portal page.</p>
           </div>
           <div class="guide-subcard p-4 rounded-2xl border space-y-1.5">
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-500 font-mono font-bold text-[10px]">STEP 4</span>
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[10px]">STEP 4</span>
             <h4 class="font-bold text-white text-sm">Instant Notification</h4>
             <p>Receive upload alerts as files appear directly inside your Zephyr Drive.</p>
           </div>
@@ -601,9 +612,7 @@
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- UNIFIED PLATFORM COMPARISON MATRIX                                        -->
-    <!-- ========================================================================= -->
+    <!-- COMPARISON TABLE -->
     <div class="space-y-6 pt-6">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
@@ -748,9 +757,7 @@
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- BOTTOM CALL TO ACTION                                                     -->
-    <!-- ========================================================================= -->
+    <!-- BOTTOM CTA BANNER -->
     <div class="guide-card p-8 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border border-sky-500/25 flex flex-col sm:flex-row items-center justify-between gap-6">
       <div>
         <h3 class="hero-title-main text-base font-black text-white">Ready to transfer your deliverables?</h3>
@@ -763,16 +770,12 @@
 
   </main>
 
-  <!-- ========================================================================= -->
-  <!-- SUB FOOTER                                                                -->
-  <!-- ========================================================================= -->
+  <!-- SUB FOOTER -->
   <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500 font-mono transition-colors">
     © 2026 Zephyr Systems Inc. • Surat, Gujarat, India • Zero-Knowledge Delivery Protocol
   </footer>
 
-  <!-- ========================================================================= -->
-  <!-- THEME TOGGLER, TAB SWITCHER & PAYMENT LOGIC                               -->
-  <!-- ========================================================================= -->
+  <!-- CONTROLS & THEME SYNC SCRIPT -->
   <script>
     const validProducts = ['transfer', 'vault', 'ai-studio', 'esign', 'escrow', 'portal'];
 
@@ -795,7 +798,7 @@
       window.history.replaceState(null, '', '/products/' + slug);
     }
 
-    // Theme Engine: Reads exact saved theme from Homepage
+    // Synchronize Theme with Homepage Storage
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
       const icon = document.getElementById("themeIcon");
