@@ -1,4 +1,5 @@
 import os
+import asyncio
 import sys
 from dotenv import load_dotenv
 
@@ -2209,6 +2210,14 @@ async def share_page(request: Request, share_id: str):
         "file_count": file_count
     })
 
+async def delayed_r2_shred(bucket_name: str, object_key: str, delay_seconds: int = 60):
+    """Gives the recipient 60s to stream and finish downloading before purging from R2."""
+    await asyncio.sleep(delay_seconds)
+    try:
+        s3_client.delete_object(Bucket=bucket_name, Key=object_key)
+    except Exception:
+        pass
+
 @app.get("/share/{share_id}/download")
 @app.get("/api/download/{share_id}")
 @app.post("/share/{share_id}/download")
@@ -2312,10 +2321,8 @@ async def process_download(
     conn.commit()
 
     if max_downloads > 0 and new_count >= max_downloads:
-        try:
-            s3_client.delete_object(Bucket=R2_BUCKET_NAME, Key=target_s3_key)
-        except Exception:
-            pass
+        # Schedule edge shredding after 60s so recipient's download finishes first
+        asyncio.create_task(delayed_r2_shred(R2_BUCKET_NAME, target_s3_key, delay_seconds=60))
 
     conn.close()
 
