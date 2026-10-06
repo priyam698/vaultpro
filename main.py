@@ -1271,6 +1271,10 @@ async def anti_screenshot_page(request: Request):
 async def r2_direct_page(request: Request):
     return render_template("r2_direct.html", request)
 
+@app.get("/dmca", response_class=HTMLResponse)
+async def dmca_page(request: Request):
+    return render_template("dmca.html", request)
+
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)
