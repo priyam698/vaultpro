@@ -1023,9 +1023,10 @@
 
               <div>
   <div class="flex items-center justify-between mb-1">
-    <label class="block text-xs font-bold">Message</label>
-    <button type="button" onclick="openMailDraft()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 cursor-pointer transition">
-      <span>✉️ Open in Gmail Draft</span>
+    <label class="block text-xs font-bold text-slate-300">Message</label>
+    <button type="button" onclick="openZephyrDraftModal()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 hover:border-indigo-500/40 transition cursor-pointer">
+      <span id="draftBtnIcon">📝</span>
+      <span id="draftBtnText">Zephyr Draft</span>
     </button>
   </div>
   <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..."
@@ -3019,24 +3020,50 @@
 
     initTheme();
 
-    // --- Quick Mail Draft Composer ---
-function openMailDraft() {
-  const recipientInput = document.getElementById("emailTo") || document.querySelector('input[placeholder*="client@company.com"]');
-  const titleInput = document.getElementById("transferTitle");
-  const msgInput = document.getElementById("transferMessage");
+ // --- Zephyr Long Draft Controller ---
+function openZephyrDraftModal() {
+  const mainMsg = document.getElementById("transferMessage");
+  const draftText = document.getElementById("zephyrDraftTextarea");
+  if (mainMsg && draftText) {
+    draftText.value = mainMsg.value;
+    updateDraftWordCount();
+  }
+  document.getElementById("zephyrDraftModal")?.classList.remove("hidden");
+}
 
-  const to = recipientInput && recipientInput.value ? encodeURIComponent(recipientInput.value.trim()) : "";
-  const titleVal = titleInput && titleInput.value.trim() ? titleInput.value.trim() : "Project Deliverables";
-  const subject = encodeURIComponent(`Secure Transfer: ${titleVal}`);
-  
-  const msgVal = msgInput && msgInput.value.trim() 
-    ? msgInput.value.trim() 
-    : "Attached are the finalized assets for client review.";
-  const body = encodeURIComponent(`${msgVal}\n\nShared securely via Zephyr Drive.`);
+function closeZephyrDraftModal() {
+  document.getElementById("zephyrDraftModal")?.classList.add("hidden");
+}
 
-  // Opens the official Gmail web composer in a clean draft window
-  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
-  window.open(gmailUrl, "_blank", "width=740,height=620");
+function updateDraftWordCount() {
+  const draftText = document.getElementById("zephyrDraftTextarea");
+  const counter = document.getElementById("draftWordCounter");
+  if (!draftText || !counter) return;
+  const val = draftText.value.trim();
+  const words = val.length > 0 ? val.split(/\s+/).length : 0;
+  counter.innerText = `${words} words • ${draftText.value.length} characters`;
+}
+
+document.getElementById("zephyrDraftTextarea")?.addEventListener("input", updateDraftWordCount);
+
+function saveZephyrDraft() {
+  const draftText = document.getElementById("zephyrDraftTextarea");
+  const mainMsg = document.getElementById("transferMessage");
+  const btnText = document.getElementById("draftBtnText");
+  const btnIcon = document.getElementById("draftBtnIcon");
+
+  if (draftText && mainMsg) {
+    mainMsg.value = draftText.value;
+    const words = draftText.value.trim().length > 0 ? draftText.value.trim().split(/\s+/).length : 0;
+    if (words > 0) {
+      if (btnText) btnText.innerText = `Draft Attached (${words}w)`;
+      if (btnIcon) btnIcon.innerText = "✓";
+    } else {
+      if (btnText) btnText.innerText = "Zephyr Draft";
+      if (btnIcon) btnIcon.innerText = "📝";
+    }
+  }
+  closeZephyrDraftModal();
 }
 
 // --- 1. About Us Modal Helpers ---
@@ -4284,5 +4311,45 @@ function openMailDraft() {
       </div>
     </div>
   </div>
+  <!-- ========================================================================= -->
+<!-- MODAL: ZEPHYR LONG DRAFT & MEMO STUDIO                                   -->
+<!-- ========================================================================= -->
+<div id="zephyrDraftModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+  <div class="obsidian-card max-w-2xl w-full rounded-3xl p-6 sm:p-8 border border-indigo-500/30 shadow-2xl relative text-left">
+    
+    <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm">
+          📝
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-white">Zephyr Draft & Transfer Memo</h3>
+          <p class="text-[11px] text-slate-400">Write long-form handover instructions, project terms, or private notes.</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeZephyrDraftModal()" class="text-slate-400 hover:text-white text-base cursor-pointer">✕</button>
+    </div>
+
+    <div class="space-y-3">
+      <textarea id="zephyrDraftTextarea" rows="11" placeholder="Type your full letter, project memo, deliverables checklist, or confidential handover notes here..."
+        class="w-full rounded-2xl bg-[#050711] border border-white/10 focus:border-indigo-400 p-4 text-xs text-slate-100 placeholder-slate-500 leading-relaxed focus:outline-none transition custom-scroll resize-y min-h-[240px]"></textarea>
+      
+      <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        <span id="draftWordCounter">0 words • 0 characters</span>
+        <span class="text-indigo-400 font-semibold">🔒 Saves directly with this transfer link</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 mt-6 pt-3 border-t border-white/10">
+      <button type="button" onclick="closeZephyrDraftModal()" class="px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300 font-semibold text-xs transition cursor-pointer">
+        Cancel
+      </button>
+      <button type="button" onclick="saveZephyrDraft()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer">
+        Attach Draft to Transfer
+      </button>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
