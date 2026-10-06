@@ -1283,10 +1283,9 @@ async def dmca_page(request: Request):
 async def sign_page(request: Request):
     return render_template("sign.html", request)
 
-# --- ZEPHYR CONTACT PAGE & SUPPORT INQUIRIES API ---
+# --- ZEPHYR CONTACT PAGE & SUPPORT INQUIRIES API (BREVO POWERED) ---
 @app.get("/contact", response_class=HTMLResponse)
 async def contact_page(request: Request):
-    # Detect logged in user email from cookies or session
     user_email = (
         request.cookies.get("user_email")
         or request.cookies.get("email")
@@ -1301,9 +1300,8 @@ async def contact_page(request: Request):
 
 @app.post("/api/contact")
 async def api_contact_submit(request: Request):
-    import os, smtplib
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
+    import json
+    import urllib.request
     from fastapi.responses import JSONResponse
 
     try:
@@ -1313,17 +1311,13 @@ async def api_contact_submit(request: Request):
         reason = data.get("reason", "General Inquiry").strip()
         user_message = data.get("message", "").strip()
 
-        # Enforce that user must be logged in with a valid email
         if not user_email or "@" not in user_email:
-            return JSONResponse({
-                "status": "error", 
-                "message": "Authentication required. Please sign in to submit a support query."
-            }, status_code=401)
+            return JSONResponse({"status": "error", "message": "Authentication required. Please sign in to submit a support query."}, status_code=401)
 
         if not user_message:
             return JSONResponse({"status": "error", "message": "Message content cannot be empty."}, status_code=400)
 
-        # 1. Log query to database
+        # 1. Save query to vault.db
         try:
             conn = get_db()
             cursor = conn.cursor()
@@ -1346,45 +1340,54 @@ async def api_contact_submit(request: Request):
         except Exception as db_err:
             print(f"[Contact DB Error] {db_err}")
 
-        # 2. Dispatch email to priyamrana069@gmail.com
-        smtp_user = os.getenv("SMTP_USER") or os.getenv("EMAIL_USER") or os.getenv("SMTP_EMAIL")
-        smtp_pass = os.getenv("SMTP_PASSWORD") or os.getenv("EMAIL_PASSWORD") or os.getenv("SMTP_PASS")
-        smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-        smtp_port = int(os.getenv("SMTP_PORT", 587))
+        # 2. Dispatch to priyamrana069@gmail.com via Brevo API
+        active_brevo_key = os.getenv("BREVO_API_KEY") or globals().get("brevo_api_key", "")
+        active_sender = os.getenv("SENDER_EMAIL") or globals().get("sender_email", "support@zephyr-drive.com")
 
-        if smtp_user and smtp_pass:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = f"🔔 Zephyr Query: [{reason}] from {name or user_email}"
-            msg["From"] = f"Zephyr Support <{smtp_user}>"
-            msg["To"] = "priyamrana069@gmail.com"
-            msg["Reply-To"] = user_email
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 25px; background: #070913; color: #f8fafc; border-radius: 16px; border: 1px solid #38bdf8;">
+            <h2 style="color: #38bdf8; margin-top: 0;">New User Query on Zephyr Drive</h2>
+            <p style="font-size: 14px; margin: 6px 0;"><strong>Sender Name:</strong> {name or 'N/A'}</p>
+            <p style="font-size: 14px; margin: 6px 0;"><strong>Verified Account Email:</strong> <a href="mailto:{user_email}" style="color: #818cf8;">{user_email}</a></p>
+            <p style="font-size: 14px; margin: 6px 0;"><strong>Reason / Topic:</strong> {reason}</p>
+            <hr style="border: none; border-top: 1px solid #1e293b; margin: 18px 0;" />
+            <h4 style="color: #94a3b8; font-size: 12px; text-transform: uppercase; margin-bottom: 8px;">Message:</h4>
+            <div style="background: #030408; padding: 16px; border-radius: 10px; border: 1px solid #1e293b; line-height: 1.6; white-space: pre-wrap; font-size: 13px;">{user_message}</div>
+            <p style="font-size: 12px; color: #64748b; margin-top: 20px;">You can hit Reply in Gmail to respond straight to {user_email}. SLA: 24 hours.</p>
+        </div>
+        """
 
-            html_body = f"""
-            <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 24px; background: #070913; color: #f8fafc; border-radius: 16px; border: 1px solid #38bdf8;">
-                <h2 style="color: #38bdf8; margin-top: 0;">New Inquiry on Zephyr Drive</h2>
-                <p style="font-size: 14px; margin: 6px 0;"><strong>Sender Name:</strong> {name or 'N/A'}</p>
-                <p style="font-size: 14px; margin: 6px 0;"><strong>Verified Account Email:</strong> <a href="mailto:{user_email}" style="color: #818cf8;">{user_email}</a></p>
-                <p style="font-size: 14px; margin: 6px 0;"><strong>Category:</strong> {reason}</p>
-                <hr style="border: none; border-top: 1px solid #1e293b; margin: 18px 0;" />
-                <h4 style="color: #94a3b8; font-size: 12px; text-transform: uppercase; margin-bottom: 8px;">Message:</h4>
-                <div style="background: #030408; padding: 16px; border-radius: 10px; border: 1px solid #1e293b; line-height: 1.6; white-space: pre-wrap; font-size: 13px;">{user_message}</div>
-                <p style="font-size: 12px; color: #64748b; margin-top: 20px;">Direct reply will send to {user_email}. SLA: Response within 24 hours.</p>
-            </div>
-            """
-            msg.attach(MIMEText(html_body, "html"))
+        brevo_payload = {
+            "sender": {"name": "Zephyr Inquiries", "email": active_sender},
+            "to": [{"email": "priyamrana069@gmail.com", "name": "Priyam Rana"}],
+            "replyTo": {"email": user_email, "name": name or user_email},
+            "subject": f"🔔 Zephyr Query: [{reason}] from {name or user_email}",
+            "htmlContent": html_content
+        }
 
-            with smtplib.SMTP(smtp_host, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_pass)
-                server.sendmail(smtp_user, "priyamrana069@gmail.com", msg.as_string())
+        req_data = json.dumps(brevo_payload).encode("utf-8")
+        http_req = urllib.request.Request(
+            "https://api.brevo.com/v3/smtp/email",
+            data=req_data,
+            headers={
+                "api-key": active_brevo_key,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            method="POST"
+        )
+
+        with urllib.request.urlopen(http_req, timeout=15) as response:
+            pass
 
         return JSONResponse({
             "status": "success",
             "message": "Your query has been submitted successfully. You will receive a response within 24 hours at your email address."
         })
+
     except Exception as e:
-        print(f"[Contact API Error] {e}")
-        return JSONResponse({"status": "error", "message": "Failed to send message. Please try again."}, status_code=500)
+        print(f"[Contact API Error via Brevo] {e}")
+        return JSONResponse({"status": "error", "message": f"Failed to dispatch inquiry: {str(e)}"}, status_code=500)
     
 # ----------------- Pay-to-Unlock Escrow API -----------------
 @app.get("/api/paywall/check-email")
