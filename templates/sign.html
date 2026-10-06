@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Zephyr Sign | Multi-Envelope E-Signature Studio & Dashboard</title>
   
   <!-- Supersonic Monogram Favicon -->
@@ -219,6 +219,13 @@
       user-select: none !important;
       box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px 2px rgba(99, 102, 241, 0.4);
       z-index: 50 !important;
+    }
+
+    /* Cross-device canvas touch-action fix */
+    #sigCanvas {
+      touch-action: none !important;
+      -webkit-touch-callout: none !important;
+      user-select: none !important;
     }
 
     @keyframes pulseGlow {
@@ -1162,7 +1169,7 @@
       document.getElementById("fontFamilyLabel").innerText = `Font: ${fontNames[fontStyleChoice]} Cursive`;
     }
 
-    // 6. DRAWING CANVAS ENGINE
+    // 6. DRAWING CANVAS ENGINE (Fully optimized for mobile/tablet touch & stylus)
     const drawCanvas = document.getElementById("sigCanvas");
     const dCtx = drawCanvas.getContext("2d");
 
@@ -1174,8 +1181,8 @@
 
       const getPos = (e) => {
         const rect = drawCanvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
         return {
           x: (clientX - rect.left) * (drawCanvas.width / rect.width),
           y: (clientY - rect.top) * (drawCanvas.height / rect.height)
@@ -1199,12 +1206,18 @@
         if (e.cancelable) e.preventDefault();
       };
 
-      const stop = () => { isDrawing = false; };
+      const stop = (e) => {
+        isDrawing = false;
+        if (e && e.cancelable) e.preventDefault();
+      };
 
-      drawCanvas.onmousedown = start;
-      drawCanvas.onmousemove = move;
-      window.onmouseup = stop;
+      // Pointer events cover mouse, fingers, and styluses (Apple Pencil / S-Pen) natively
+      drawCanvas.onpointerdown = start;
+      drawCanvas.onpointermove = move;
+      window.onpointerup = stop;
+      window.onpointercancel = stop;
 
+      // Fallback touch events for legacy mobile webviews
       drawCanvas.addEventListener("touchstart", start, { passive: false });
       drawCanvas.addEventListener("touchmove", move, { passive: false });
       window.addEventListener("touchend", stop);
@@ -1545,7 +1558,7 @@
       document.getElementById("documentStage").style.transformOrigin = "top center";
     }
 
-    // 13. DRAG AND DROP HANDLERS (FOR BOTH SIGNATURE & DATE BOXES)
+    // 13. DRAG AND DROP HANDLERS (OPTIMIZED FOR TOUCH & MOUSE)
     function attachBoxDrag(element, onCoordChange) {
       let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
       let isDragging = false;
