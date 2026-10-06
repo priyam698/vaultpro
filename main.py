@@ -1162,14 +1162,29 @@ async def support_chat(req: SupportChatRequest):
             )
         }
 
+# 7.5 Password, Reset & Transfer Passcode Guidance
+    if any(k in q for k in ["password", "change password", "reset password", "forgot password", "update password"]):
+        return {
+            "reply": (
+                "**🔐 Zephyr Password & Authentication Architecture:**\n\n"
+                "• **Account Logins (Passwordless OTP):** Zephyr does not use permanent static passwords. "
+                "Your account is secured via one-time cryptographically generated OTP verification codes sent directly to your email, "
+                "eliminating the risk of credential stuffing and forgotten passwords.\n\n"
+                "• **Transfer Passcodes:** If you set a passcode on a shared file, it is derived locally using AES-256 in your browser. "
+                "Because Zephyr operates on Zero-Knowledge principles, a transfer passcode **cannot be modified** once the link has been created. "
+                "To change a file's passcode, simply shred the active link and create a new transfer with your desired passcode.\n\n"
+                "• **Need Assistance?** Contact our core engineering desk at **priyamrana069@gmail.com** or submit a query at **/contact**."
+            )
+        }
+
     # 8. Zero-Knowledge Encryption & Burn-on-Read
-    if any(k in q for k in ["security", "encryption", "zero-knowledge", "burn", "shred", "aes", "r2", "privacy", "passcode", "password"]):
+    if any(k in q for k in ["security", "encryption", "zero-knowledge", "burn", "shred", "aes", "r2", "privacy", "passcode"]):
         return {
             "reply": (
                 "**Zero-Knowledge Architecture & Self-Shredding:**\n\n"
                 "• **Client-Side AES-256:** Key derivation and file hashing execute entirely inside your browser. No unencrypted passcodes or raw master keys are ever written to server logs or databases.\n"
                 "• **Cloudflare R2 Direct Pipe:** Files stream straight through edge nodes with zero intermediary inspection.\n"
-                "• **Burn-on-Read (🔥):** Setting max downloads to 1 triggers instant edge purging the millisecond a recipient finishes downloading, destroying the link permanently."
+                "• **Burn-on-Read (🔥):** Setting max downloads to 1 triggers instant edge purging the millisecond a recipient finishes downloading.\n"
             )
         }
 
