@@ -1070,7 +1070,7 @@ async def support_chat(req: SupportChatRequest):
         return {
             "reply": (
                 "**Contact Zephyr Human Support:**\n\n"
-                "• **Direct Email:** Reach our core engineering & billing desk at **`support@zephyr-drive.com`**.\n"
+                "• **Direct Email:** Reach our core engineering & billing desk at **`priyamrana069@gmail.com`**.\n"
                 "• **Response Times:**\n"
                 "  - **Zephyr Pro & Plus:** Priority queue (average response < 2 hours).\n"
                 "  - **Lite & Micro:** Under 12 hours.\n"
@@ -1091,7 +1091,7 @@ async def support_chat(req: SupportChatRequest):
                 "• **If your payment succeeded but you didn't receive a receipt:**\n"
                 "  1. Check your email spam/promotions folder for a confirmation receipt sent from our payment processors (**Dodo Payments** or **Stripe**).\n"
                 "  2. Allow 60–90 seconds for automated webhook provisioning to update your account status.\n"
-                "  3. If your tier has not updated after 5 minutes, email **`support@zephyr-drive.com`** with your registered account email and bank transaction time. Our team will verify and activate your tier manually."
+                "  3. If your tier has not updated after 5 minutes, email **`priyamrana069@gmail.com`** with your registered account email and bank transaction time. Our team will verify and activate your tier manually."
             )
         }
 
@@ -1195,7 +1195,7 @@ async def support_chat(req: SupportChatRequest):
             "• **Pay-to-Unlock Escrow** (88% payouts, Stripe Connect, forensic viewers)\n"
             "• **Client Drop & QR Portals** (Direct client deposit links)\n"
             "• **Zero-Knowledge Security & 20-Day Grace Retention**\n"
-            "• **Contacting Human Support** (`support@zephyr-drive.com`)\n\n"
+            "• **Contacting Human Support** (`priyamrana069@gmail.com`)\n\n"
             "What would you like to explore?"
         )
     }
@@ -1342,7 +1342,7 @@ async def api_contact_submit(request: Request):
 
         # 2. Dispatch to priyamrana069@gmail.com via Brevo API
         active_brevo_key = os.getenv("BREVO_API_KEY") or globals().get("brevo_api_key", "")
-        active_sender = os.getenv("SENDER_EMAIL") or globals().get("sender_email", "support@zephyr-drive.com")
+        active_sender = os.getenv("SENDER_EMAIL") or globals().get("sender_email", "priyamrana069@gmail.com")
 
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 25px; background: #070913; color: #f8fafc; border-radius: 16px; border: 1px solid #38bdf8;">
