@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Zephyr Support & Core Team</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rc)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #06070b;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .site-mountain-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #06070b;
+      background-image: 
+        radial-gradient(ellipse at 18% 14%, rgba(56, 189, 248, 0.16) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.22) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 85%, rgba(14, 165, 233, 0.14) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(168, 85, 247, 0.12) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .obsidian-card {
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.90) 0%, rgba(9, 12, 22, 0.98) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    .nav-pill {
+      background: rgba(13, 17, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-sky-500 selection:text-white">
+  <div class="site-mountain-backdrop"></div>
+
+  <!-- Header -->
+  <header class="border-b border-white/[0.08] bg-[#030408]/75 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center">
+        <svg viewBox="0 0 100 100" fill="none" class="w-full h-full">
+          <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
+          <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#818cf8"/>
+          <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
+        </svg>
+      </div>
+      <span class="text-xs font-bold tracking-tight text-white">Zephyr <span class="text-sky-400">Support</span></span>
+    </a>
+    <div class="flex items-center gap-4 text-xs font-semibold">
+      <a href="/security" class="text-slate-400 hover:text-white transition">Whitepaper</a>
+      <a href="/dmca" class="text-slate-400 hover:text-white transition">DMCA</a>
+      <a href="/" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold transition shadow-lg shadow-sky-500/20">Launch Transfer</a>
+    </div>
+  </header>
+
+  <!-- Page Body -->
+  <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-12 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left Sidebar: On This Page -->
+      <aside class="hidden lg:block lg:col-span-3 sticky top-24 space-y-4">
+        <div class="nav-pill rounded-2xl p-5 space-y-3">
+          <p class="text-[10px] font-mono uppercase tracking-wider text-sky-400 font-bold">On This Page</p>
+          <ul class="space-y-2 text-xs font-medium">
+            <li>
+              <a href="#sendMessageSection" class="text-slate-300 hover:text-sky-400 flex items-center gap-2 transition">
+                <span class="w-5 h-5 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-sky-300 font-mono">1</span>
+                Send a Message
+              </a>
+            </li>
+            <li>
+              <a href="#directContactSection" class="text-slate-300 hover:text-sky-400 flex items-center gap-2 transition">
+                <span class="w-5 h-5 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-sky-300 font-mono">2</span>
+                Direct Contact Info
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Column -->
+      <div class="lg:col-span-9 space-y-6">
+        
+        <!-- Header Note -->
+        <div class="obsidian-card rounded-3xl p-6 sm:p-7 border border-white/10">
+          <p class="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+            Have a question, found a bug, or want to suggest a new security feature? Support submissions are routed directly to our priority engineering inbox. All verified inquiries receive an answer within 24 hours.
+          </p>
+        </div>
+
+        <!-- 2-Column Split -->
+        <div class="obsidian-card rounded-3xl p-6 sm:p-10">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10">
+            
+            <!-- Left Form Area -->
+            <div id="sendMessageSection" class="md:col-span-7 space-y-5">
+              <div>
+                <h2 class="text-lg font-bold text-white tracking-tight">Send a Message</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Responses are delivered straight to your registered account email.</p>
+              </div>
+
+              <!-- Unauthenticated Warning Banner (Hidden by default, shown if no login found) -->
+              <div id="authRequiredBanner" class="hidden p-4 rounded-2xl bg-amber-950/40 border border-amber-500/30 text-amber-200 text-xs space-y-2">
+                <div class="flex items-center gap-2 font-bold text-amber-400 text-sm">
+                  <span>🔒</span> Sign In Required
+                </div>
+                <p class="leading-relaxed">
+                  You must be logged into your Zephyr account to submit a support query. This ensures our team can verify your identity and reply directly to your account.
+                </p>
+                <div class="pt-1">
+                  <a href="/auth" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition">
+                    Sign In to Continue →
+                  </a>
+                </div>
+              </div>
+
+              <!-- Contact Form -->
+              <form id="zephyrContactForm" onsubmit="handleContactSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Your Name</label>
+                    <input type="text" id="contactName" placeholder="e.g. Priyam Rana"
+                      class="w-full rounded-xl bg-[#080c18] border border-white/10 focus:border-sky-400 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="block text-xs font-semibold text-slate-300">Your Email</label>
+                      <span id="lockedBadge" class="hidden text-[10px] font-mono text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">🔒 Locked</span>
+                    </div>
+                    <!-- Auto-filled and locked email input -->
+                    <input type="email" id="contactEmail" readonly required placeholder="Checking account login..."
+                      class="w-full rounded-xl bg-[#050811] border border-sky-500/20 px-3.5 py-2.5 text-xs text-sky-300 font-mono focus:outline-none transition cursor-not-allowed select-none">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Reason for Contact</label>
+                  <select id="contactReason" required
+                    class="w-full rounded-xl bg-[#080c18] border border-white/10 focus:border-sky-400 px-3.5 py-2.5 text-xs text-white focus:outline-none transition cursor-pointer">
+                    <option value="General Inquiry">General Inquiry</option>
+                    <option value="Bug Report">Bug Report</option>
+                    <option value="Feature Request / Suggestion">Feature Request / Suggestion</option>
+                    <option value="Zero-Knowledge / Data Privacy Concern">Zero-Knowledge / Data Privacy Concern</option>
+                    <option value="Partnership / Enterprise">Partnership / Enterprise</option>
+                    <option value="DMCA / Copyright">DMCA / Copyright Notice</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Message</label>
+                  <textarea id="contactMessage" rows="5" required placeholder="Type your query, issue description, or request here..."
+                    class="w-full rounded-xl bg-[#080c18] border border-white/10 focus:border-sky-400 p-3.5 text-xs text-white placeholder-slate-500 focus:outline-none transition resize-y"></textarea>
+                </div>
+
+                <!-- Status & Confirmation Notification Box -->
+                <div id="statusNotification" class="hidden p-4 rounded-2xl border transition-all text-xs"></div>
+
+                <div class="pt-1">
+                  <button type="submit" id="submitBtn"
+                    class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs tracking-wide shadow-lg shadow-sky-500/20 transition cursor-pointer flex items-center justify-center gap-2">
+                    <span id="btnText">Send Message</span>
+                    <span id="btnSpinner" class="hidden animate-spin">◌</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Right Info Area -->
+            <div id="directContactSection" class="md:col-span-5 md:border-l md:border-white/10 md:pl-8 space-y-6">
+              <div>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Direct Contact</h3>
+                <p class="text-[11px] text-slate-400">Direct engineering channels & platform headquarters.</p>
+              </div>
+
+              <div class="space-y-4 text-xs">
+                <div>
+                  <p class="text-slate-400 font-semibold mb-0.5">Email</p>
+                  <a href="mailto:priyamrana069@gmail.com" class="text-sky-400 hover:text-sky-300 font-mono break-all transition">
+                    priyamrana069@gmail.com
+                  </a>
+                </div>
+
+                <div>
+                  <p class="text-slate-400 font-semibold mb-0.5">Headquarters</p>
+                  <p class="text-slate-200">Surat, Gujarat, India • Global Edge Deployment</p>
+                </div>
+
+                <div>
+                  <p class="text-slate-400 font-semibold mb-0.5">Response SLA</p>
+                  <p class="text-emerald-400 font-medium">Guaranteed response within 24 hours</p>
+                </div>
+
+                <div>
+                  <p class="text-slate-400 font-semibold mb-0.5">Platform Network</p>
+                  <p class="text-sky-400 font-mono">zephyr-drive.onrender.com</p>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-white/10 space-y-2 text-[11px] text-slate-400 leading-relaxed">
+                <p>
+                  For copyright or takedown notices, consult the 
+                  <a href="/dmca" class="text-sky-400 hover:underline">DMCA Compliance Policy</a>.
+                </p>
+                <p>
+                  For protocol architecture audits, review the 
+                  <a href="/security" class="text-sky-400 hover:underline">Security Whitepaper</a>.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/[0.08] py-8 text-center text-xs text-slate-500 relative z-10">
+    <p>© 2026 Zephyr Systems Inc. • Direct Engineering Support</p>
+  </footer>
+
+  <script>
+    // Discover authenticated email from Jinja context, localStorage, or cookies
+    function resolveLoggedInEmail() {
+      // 1. Jinja backend context
+      const serverEmail = "{{ user_email or '' }}".trim();
+      if (serverEmail && serverEmail.includes('@')) return serverEmail;
+
+      // 2. LocalStorage inspection
+      const storageKeys = ['zephyr_user_email', 'user_email', 'email', 'zephyr_user', 'user', 'currentUser'];
+      for (const k of storageKeys) {
+        const val = localStorage.getItem(k);
+        if (val) {
+          if (val.startsWith('{')) {
+            try {
+              const obj = JSON.parse(val);
+              if (obj.email && obj.email.includes('@')) return obj.email;
+            } catch(e) {}
+          } else if (val.includes('@')) {
+            return val;
+          }
+        }
+      }
+
+      // 3. Document cookie inspection
+      const match = document.cookie.match(/(?:^|;\s*)(?:user_email|email|zephyr_email)=([^;]+)/);
+      if (match) {
+        return decodeURIComponent(match[1]);
+      }
+
+      return null;
+    }
+
+    // Run auth check on initialization
+    let activeUserEmail = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      activeUserEmail = resolveLoggedInEmail();
+      const emailInput = document.getElementById('contactEmail');
+      const lockedBadge = document.getElementById('lockedBadge');
+      const submitBtn = document.getElementById('submitBtn');
+      const authBanner = document.getElementById('authRequiredBanner');
+      const formFields = document.querySelectorAll('#zephyrContactForm input:not(#contactEmail), #zephyrContactForm select, #zephyrContactForm textarea');
+
+      if (activeUserEmail) {
+        // Logged-in state: fill & lock email input
+        emailInput.value = activeUserEmail;
+        emailInput.readOnly = true;
+        lockedBadge.classList.remove('hidden');
+        authBanner.classList.add('hidden');
+      } else {
+        // Unauthenticated state: lock entire form and prompt login
+        emailInput.value = "";
+        emailInput.placeholder = "Sign in required to submit queries";
+        lockedBadge.classList.add('hidden');
+        authBanner.classList.remove('hidden');
+
+        // Disable submission
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        formFields.forEach(el => {
+          el.disabled = true;
+          el.classList.add('opacity-50', 'cursor-not-allowed');
+        });
+      }
+    });
+
+    // Form submission handler
+    async function handleContactSubmit(e) {
+      e.preventDefault();
+
+      if (!activeUserEmail) {
+        alert("Authentication required. Please sign in to submit a support query.");
+        window.location.href = "/auth";
+        return;
+      }
+
+      const name = document.getElementById('contactName').value.trim();
+      const email = activeUserEmail;
+      const reason = document.getElementById('contactReason').value;
+      const message = document.getElementById('contactMessage').value.trim();
+
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const statusBox = document.getElementById('statusNotification');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-75');
+      btnText.innerText = 'Dispatching Query...';
+      btnSpinner.classList.remove('hidden');
+      statusBox.classList.add('hidden');
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, reason, message })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Success banner guaranteeing response in 24 hours
+          statusBox.className = "p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs space-y-1 block";
+          statusBox.innerHTML = `
+            <div class="flex items-center gap-2 font-bold text-emerald-400 text-sm">
+              <span>✓</span> Query Dispatched Successfully!
+            </div>
+            <p>Thank you for reaching out, <strong>${name || 'User'}</strong>. Your query has been forwarded to our core engineering team. You will receive a response within <strong>24 hours</strong> at <strong>${email}</strong>.</p>
+          `;
+          
+          document.getElementById('contactName').value = '';
+          document.getElementById('contactMessage').value = '';
+        } else {
+          throw new Error(result.message || 'Failed to dispatch query');
+        }
+      } catch (err) {
+        statusBox.className = "p-4 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-xs block";
+        statusBox.innerHTML = `⚠️ <strong>Error:</strong> ${err.message}.`;
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-75');
+        btnText.innerText = 'Send Message';
+        btnSpinner.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
