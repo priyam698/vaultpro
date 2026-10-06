@@ -1250,6 +1250,27 @@ async def product_detail_page(request: Request, slug: str = "transfer"):
 async def security_page(request: Request):
     return render_template("security.html", request)
 
+# --- ZEPHYR PRIVACY DEEP-DIVE PAGES ---
+@app.get("/zero-knowledge", response_class=HTMLResponse)
+async def zero_knowledge_page(request: Request):
+    return render_template("zero_knowledge.html", request)
+
+@app.get("/encryption", response_class=HTMLResponse)
+async def encryption_page(request: Request):
+    return render_template("encryption.html", request)
+
+@app.get("/burn-on-read", response_class=HTMLResponse)
+async def burn_on_read_page(request: Request):
+    return render_template("burn_on_read.html", request)
+
+@app.get("/anti-screenshot", response_class=HTMLResponse)
+async def anti_screenshot_page(request: Request):
+    return render_template("anti_screenshot.html", request)
+
+@app.get("/r2-direct", response_class=HTMLResponse)
+async def r2_direct_page(request: Request):
+    return render_template("r2_direct.html", request)
+
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_page(request: Request):
     return render_template("sign.html", request)

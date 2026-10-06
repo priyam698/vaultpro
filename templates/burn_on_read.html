@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burn-on-Read Shredding | Zephyr Privacy Suite</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rc)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #06070b;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .site-mountain-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #06070b;
+      background-image: 
+        radial-gradient(ellipse at 18% 14%, rgba(56, 189, 248, 0.16) 0%, transparent 45%),
+        radial-gradient(ellipse at 84% 14%, rgba(99, 102, 241, 0.22) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 85%, rgba(14, 165, 233, 0.14) 0%, transparent 55%),
+        radial-gradient(ellipse at 78% 65%, rgba(244, 63, 94, 0.14) 0%, transparent 45%),
+        linear-gradient(180deg, #07090f 0%, #030407 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .obsidian-card {
+      background: linear-gradient(180deg, rgba(16, 22, 38, 0.88) 0%, rgba(9, 12, 22, 0.96) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-rose-500 selection:text-white">
+  <div class="site-mountain-backdrop"></div>
+
+  <!-- Header -->
+  <header class="border-b border-white/[0.08] bg-[#030408]/75 backdrop-blur-xl sticky top-0 z-30 px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-[#080a16] border border-white/10 p-1.5 flex items-center justify-center">
+        <svg viewBox="0 0 100 100" fill="none" class="w-full h-full">
+          <path d="M 18,22 C 36,16 74,16 86,22 C 70,32 40,34 18,34 Z" fill="#38bdf8"/>
+          <path d="M 86,22 L 30,76 L 46,76 L 86,34 Z" fill="#f43f5e"/>
+          <path d="M 14,78 C 26,68 58,66 82,76 C 66,84 32,84 14,78 Z" fill="#38bdf8"/>
+        </svg>
+      </div>
+      <span class="text-xs font-bold tracking-tight text-white">Zephyr <span class="text-rose-400">Burn-on-Read</span></span>
+    </a>
+    <div class="flex items-center gap-4 text-xs font-semibold">
+      <a href="/security" class="text-slate-400 hover:text-white transition">Whitepaper</a>
+      <a href="/" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold transition shadow-lg shadow-rose-500/20">Launch Transfer</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="relative z-10 max-w-5xl mx-auto px-6 py-14 flex-1 w-full space-y-12">
+    <div class="text-center space-y-4 max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] font-mono">
+        <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+        NIST SP 800-88 Sanitization Protocol
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+        One Read. One Download. <br>
+        <span class="bg-gradient-to-r from-rose-400 via-orange-400 to-amber-400 bg-clip-text text-transparent">Permanent Cloud Purge.</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+        Burn-on-Read enforces single-delivery access. The moment a recipient starts the download stream, the link is permanently locked and a 60-second shred pipeline completely erases the object from Cloudflare R2.
+      </p>
+    </div>
+
+    <!-- 3-Phase Lifecycle Card -->
+    <div class="obsidian-card rounded-3xl p-6 sm:p-10 space-y-8">
+      <h2 class="text-xs font-bold text-rose-400 uppercase tracking-wider text-center font-mono">The 3-Phase Self-Destruction Lifecycle</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5">
+          <div class="text-xs font-mono text-sky-400 font-bold">PHASE 01 • ATOMIC LOCK</div>
+          <h3 class="text-sm font-bold text-white">Database Link Invalidation</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            The instant byte streaming initiates, the database download counter increments to its threshold. Subsequent API calls or page refreshes are immediately denied with HTTP 403.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5">
+          <div class="text-xs font-mono text-amber-400 font-bold">PHASE 02 • STREAM GRACE</div>
+          <h3 class="text-sm font-bold text-white">60-Second Background Grace</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            A background task initiates a 60-second window. This ensures uninterrupted delivery across high-latency networks before storage destruction is executed.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2.5">
+          <div class="text-xs font-mono text-rose-400 font-bold">PHASE 03 • ZEROIZATION</div>
+          <h3 class="text-sm font-bold text-white">R2 Edge Object Shredding</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            `delayed_r2_shred` calls Cloudflare S3 API to issue an irreversible delete command. Replicas and edge caches across global PoPs are purged without backups.
+          </p>
+        </div>
+      </div>
+
+      <!-- Core Guarantees -->
+      <div class="pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+        <div class="space-y-1.5">
+          <h4 class="text-xs font-bold text-white">Browser RAM Sanitization</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            On the recipient side, single-file downloads wipe the in-memory array (`packageFiles = []`) immediately, blocking subsequent bundling attempts.
+          </p>
+        </div>
+        <div class="space-y-1.5">
+          <h4 class="text-xs font-bold text-white">Zero Metadata Retention</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Once shredded, transfer UUIDs cannot be resolved by administrators, senders, or recipients. Residual encrypted blocks cannot be reconstructed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/[0.08] py-8 text-center text-xs text-slate-500 relative z-10">
+    <p>© 2026 Zephyr Systems Inc. • Burn-on-Read Self-Destruction Protocol</p>
+  </footer>
+</body>
+</html>
