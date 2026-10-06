@@ -1317,14 +1317,57 @@
       }
     }
 
-    // 1. DOWNLOAD THIS FILE
-    function downloadActiveFile() {
-      const f = packageFiles[activeFileIdx];
-      if (!f) return;
-      const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
-      const tokenParam = currentToken ? `&access_token=${encodeURIComponent(currentToken)}` : "";
-      window.location.href = `/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}${tokenParam}`;
+    // 1. DOWNLOAD THIS FILE (SMOOTH IN-PAGE TRIGGER)
+async function downloadActiveFile() {
+  const f = packageFiles[activeFileIdx];
+  if (!f) return;
+  const passParam = validatedPasscode ? `&password=${encodeURIComponent(validatedPasscode)}` : "";
+  const tokenParam = currentToken ? `&access_token=${encodeURIComponent(currentToken)}` : "";
+
+  const btn = document.getElementById("downloadThisFileBtn");
+  const originalText = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span>⏳</span> <span>Downloading...</span>`;
+  }
+
+  try {
+    const res = await fetch(`/api/download/${shareId}?file=${encodeURIComponent(f.filename)}${passParam}${tokenParam}`, {
+      headers: { "Accept": "application/json" }
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.detail || "This transfer has reached its download limit and burned.");
+      if (btn) {
+        btn.innerHTML = `<span>🔥</span> <span>Burned (Limit Reached)</span>`;
+      }
+      return;
     }
+
+    // Trigger download without navigating the current page away
+    const dlLink = document.createElement("a");
+    dlLink.href = data.download_url;
+    dlLink.download = f.filename;
+    document.body.appendChild(dlLink);
+    dlLink.click();
+    document.body.removeChild(dlLink);
+
+    if (btn) {
+      btn.innerHTML = `<span>✅</span> <span>Downloaded!</span>`;
+      setTimeout(() => {
+        btn.innerHTML = `<span>🔥</span> <span>Burned (1/1 Complete)</span>`;
+      }, 2500);
+    }
+  } catch (err) {
+    console.error("Download error:", err);
+    alert("Download failed or link reached its limit.");
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+}
 
     // 2. DOWNLOAD ALL FILES (.ZIP VIA JSZip)
     async function downloadAllFilesAsZip() {
