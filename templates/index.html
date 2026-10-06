@@ -1022,10 +1022,15 @@
               </div>
 
               <div>
-                <label class="block text-xs font-bold mb-1">Message</label>
-                <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..." 
-                          class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
-              </div>
+  <div class="flex items-center justify-between mb-1">
+    <label class="block text-xs font-bold">Message</label>
+    <button type="button" onclick="openMailDraft()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 cursor-pointer transition">
+      <span>✉️ Open in Gmail Draft</span>
+    </button>
+  </div>
+  <textarea id="transferMessage" rows="2" placeholder="Attached are the finalized assets for client review..."
+            class="w-full rounded-xl px-4 py-2 text-xs focus:outline-none transition resize-none"></textarea>
+</div>
 
               <!-- Expiry & Security Row -->
               <div class="flex items-center gap-2 pt-1">
@@ -3013,6 +3018,26 @@
     }
 
     initTheme();
+
+    // --- Quick Mail Draft Composer ---
+function openMailDraft() {
+  const recipientInput = document.getElementById("emailTo") || document.querySelector('input[placeholder*="client@company.com"]');
+  const titleInput = document.getElementById("transferTitle");
+  const msgInput = document.getElementById("transferMessage");
+
+  const to = recipientInput && recipientInput.value ? encodeURIComponent(recipientInput.value.trim()) : "";
+  const titleVal = titleInput && titleInput.value.trim() ? titleInput.value.trim() : "Project Deliverables";
+  const subject = encodeURIComponent(`Secure Transfer: ${titleVal}`);
+  
+  const msgVal = msgInput && msgInput.value.trim() 
+    ? msgInput.value.trim() 
+    : "Attached are the finalized assets for client review.";
+  const body = encodeURIComponent(`${msgVal}\n\nShared securely via Zephyr Drive.`);
+
+  // Opens the official Gmail web composer in a clean draft window
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+  window.open(gmailUrl, "_blank", "width=740,height=620");
+}
 
 // --- 1. About Us Modal Helpers ---
     function openAboutModal() {
