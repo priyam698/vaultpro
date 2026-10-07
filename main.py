@@ -1225,7 +1225,21 @@ async def index_page(request: Request):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    return render_template("dashboard.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
+    user_email = (
+        request.cookies.get("user_email")
+        or request.cookies.get("email")
+        or request.cookies.get("zephyr_email")
+        or request.cookies.get("auth_email")
+        or ""
+    )
+    if not user_email and hasattr(request, "session"):
+        user_email = request.session.get("user_email", "")
+
+    return render_template("dashboard.html", request, {
+        "supabase_url": SUPABASE_URL, 
+        "supabase_anon": SUPABASE_ANON_KEY,
+        "user_email": user_email
+    })
 
 @app.get("/auth", response_class=HTMLResponse)
 async def auth_page(request: Request):
@@ -1429,7 +1443,18 @@ async def check_paywall_email(share_id: str = Query(...), email: str = Query(...
     return {"has_paid": False, "email": clean_email, "has_password": False}
 
 @app.post("/api/create-share")
-async def create_share(payload: CreateShareRequest):
+async def create_share(payload: CreateShareRequest, request: Request):
+    # Enforce sign-in: guests cannot create transfers
+    user_auth = (
+        getattr(payload, "user_id", None)
+        or request.cookies.get("user_email")
+        or request.cookies.get("email")
+        or request.cookies.get("zephyr_email")
+        or request.cookies.get("auth_email")
+    )
+    if not user_auth:
+        raise HTTPException(status_code=401, detail="Authentication required. Please sign in to initiate transfers.")
+
     conn = get_db()
     cursor = conn.cursor()
     user_tier = "free"

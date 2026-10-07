@@ -4351,5 +4351,115 @@ function saveZephyrDraft() {
 
   </div>
 </div>
+
+<!-- ================= ZEPHYR SERVICE AUTHENTICATION GATEWAY ================= -->
+<script>
+  (function() {
+    // 1. Helper to verify if the user has an active authenticated session
+    function isUserAuthenticated() {
+      // Check cookies
+      const cookieMatch = document.cookie.match(/(?:^|;\s*)(?:user_email|email|zephyr_email|auth_token)=([^;]+)/);
+      const hasCookie = cookieMatch && cookieMatch[1] && cookieMatch[1].trim() !== '""';
+
+      // Check localStorage
+      const localEmail = localStorage.getItem('zephyr_user_email') 
+        || localStorage.getItem('user_email') 
+        || localStorage.getItem('email')
+        || localStorage.getItem('zephyr_user');
+
+      return Boolean(hasCookie || localEmail);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const authenticated = isUserAuthenticated();
+
+      // If user is already logged in, do not intercept actions
+      if (authenticated) return;
+
+      // Interception handler: redirects guest to /auth
+      function triggerAuthGate(e) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        // Save current location so the user can be returned after login
+        sessionStorage.setItem('zephyr_post_login_redirect', window.location.href);
+        window.location.href = '/auth';
+      }
+
+      // 1. Intercept file input click triggers (Add files / Add folders)
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('click', triggerAuthGate, true);
+      });
+
+      // 2. Intercept drag-and-drop into transfer boxes
+      window.addEventListener('dragover', function(e) {
+        if (!authenticated) e.preventDefault();
+      }, false);
+
+      window.addEventListener('drop', function(e) {
+        if (!authenticated) {
+          e.preventDefault();
+          e.stopPropagation();
+          triggerAuthGate();
+        }
+      }, false);
+
+      // 3. Intercept clicks across all service buttons and cards
+      document.addEventListener('click', function(e) {
+        const target = e.target.closest('button, a, div[onclick], label');
+        if (!target) return;
+
+        const text = (target.innerText || '').toLowerCase().trim();
+        const href = (target.getAttribute('href') || '').toLowerCase().trim();
+
+        // Whitelist public/informational links that guests CAN view
+        const isPublicNav = 
+          target.closest('footer') ||
+          href.startsWith('/terms') ||
+          href.startsWith('/privacy') ||
+          href.startsWith('/dmca') ||
+          href.startsWith('/contact') ||
+          href.startsWith('/security') ||
+          href.startsWith('/pricing') ||
+          href.startsWith('/zero-knowledge') ||
+          href.startsWith('/encryption') ||
+          href.startsWith('/burn-on-read') ||
+          href.startsWith('/anti-screenshot') ||
+          href.startsWith('/r2-direct') ||
+          href.startsWith('/auth') ||
+          text.includes('sign in') ||
+          text.includes('features') ||
+          text.includes('pricing') ||
+          text.includes('whitepaper');
+
+        if (isPublicNav) return;
+
+        // Catch all core product services
+        const isCoreService = 
+          text.includes('add files') ||
+          text.includes('add folders') ||
+          text.includes('transfer files') ||
+          text.includes('send email') ||
+          text.includes('get link') ||
+          text.includes('4k ai studio') ||
+          text.includes('drive') ||
+          text.includes('request') ||
+          text.includes('branding') ||
+          text.includes('receive client files') ||
+          text.includes('cloud drive vault') ||
+          text.includes('e-sign studio') ||
+          href.includes('/dashboard') ||
+          href.includes('/sign') ||
+          href.includes('/products/');
+
+        if (isCoreService) {
+          triggerAuthGate(e);
+        }
+      }, true);
+    });
+  })();
+</script>
+
 </body>
 </html>
