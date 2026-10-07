@@ -5,8 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zephyr Drive | Cloud Storage & Advanced Studio Workspace</title>
   
- <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rc)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/></svg>">
-  <script src="https://cdn.tailwindcss.com"></script>
+ <!-- Instant Guest Redirect Guard -->
+  <script>
+    (function() {
+      const hasLocalAuth = localStorage.getItem('zephyr_user_email') 
+        || localStorage.getItem('user_email') 
+        || localStorage.getItem('email')
+        || localStorage.getItem('zephyr_user')
+        || localStorage.getItem('currentUser');
+      const hasCookieAuth = document.cookie.match(/(?:^|;\s*)(?:user_email|email|zephyr_email|auth_token)=([^;]+)/);
+
+      // If visitor is not logged in, immediately redirect to /auth
+      if (!hasLocalAuth && !hasCookieAuth) {
+        sessionStorage.setItem('zephyr_post_login_redirect', window.location.href);
+        window.location.replace('/auth');
+      }
+    })();
+  </script>
+
+  <!-- Complete Zephyr Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='rc' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='60%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%234338ca'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M18 22C36 16 74 16 86 22C70 32 40 34 18 34Z' fill='url(%23rc)'/><path d='M86 22L30 76L46 76L86 34Z' fill='url(%23rc)'/><path d='M14 78C26 68 58 66 82 76C66 84 32 84 14 78Z' fill='url(%23rc)'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
