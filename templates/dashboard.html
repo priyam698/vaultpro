@@ -32,6 +32,10 @@ const hasCookieAuth = document.cookie.match(/(?:^|;\s*)(?:user_email|email|zephy
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
 
+#saveChangesModal.hidden,
+  #driveStudioModal.hidden {
+    display: none !important;
+  }
     
     body.light-theme #filesTableBody button.btn-share-file {
       background: #e0f2fe !important;
