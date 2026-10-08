@@ -301,31 +301,33 @@
     }
 
     function persistAuthSession(userId, userEmail, sessionToken = null) {
-      const remember = document.getElementById("rememberMeCheckbox")?.checked || false;
-      
-      localStorage.removeItem("user_id");
-      localStorage.removeItem("user_email");
-      localStorage.removeItem("vp_user_id");
-      localStorage.removeItem("vp_user_email");
-      localStorage.removeItem("vp_token");
-      sessionStorage.clear();
+  const remember = document.getElementById("rememberMeCheckbox")?.checked || false;
 
-      if (remember) {
-        localStorage.setItem("zephyr_remember_me", "true");
-        localStorage.setItem("user_id", userId);
-        localStorage.setItem("user_email", userEmail);
-        localStorage.setItem("vp_user_id", userId);
-        localStorage.setItem("vp_user_email", userEmail);
-        if (sessionToken) localStorage.setItem("vp_token", sessionToken);
-      } else {
-        localStorage.setItem("zephyr_remember_me", "false");
-        sessionStorage.setItem("user_id", userId);
-        sessionStorage.setItem("user_email", userEmail);
-        sessionStorage.setItem("vp_user_id", userId);
-        sessionStorage.setItem("vp_user_email", userEmail);
-        if (sessionToken) sessionStorage.setItem("vp_token", sessionToken);
-      }
-    }
+  // 1. Set cookies so dashboard.html's cookie guard passes immediately
+  document.cookie = `user_email=${encodeURIComponent(userEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+  document.cookie = `zephyr_user_email=${encodeURIComponent(userEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+  if (sessionToken) {
+    document.cookie = `auth_token=${encodeURIComponent(sessionToken)}; path=/; max-age=2592000; SameSite=Lax`;
+  }
+
+  // 2. Persist across all key variations expected by dashboard scripts
+  const keys = {
+    'zephyr_user_email': userEmail,
+    'user_email': userEmail,
+    'email': userEmail,
+    'user_id': userId,
+    'vp_user_id': userId,
+    'vp_user_email': userEmail
+  };
+
+  // Always write to both stores so session checks never fail
+  [localStorage, sessionStorage].forEach(store => {
+    Object.entries(keys).forEach(([k, v]) => store.setItem(k, v));
+    if (sessionToken) store.setItem('vp_token', sessionToken);
+  });
+
+  localStorage.setItem("zephyr_remember_me", remember ? "true" : "false");
+}
 
     async function handleAuth() {
       const email = document.getElementById('email').value.trim();

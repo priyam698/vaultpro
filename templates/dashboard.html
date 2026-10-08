@@ -8,12 +8,14 @@
  <!-- Instant Guest Redirect Guard -->
   <script>
     (function() {
-      const hasLocalAuth = localStorage.getItem('zephyr_user_email') 
-        || localStorage.getItem('user_email') 
-        || localStorage.getItem('email')
-        || localStorage.getItem('zephyr_user')
-        || localStorage.getItem('currentUser');
-      const hasCookieAuth = document.cookie.match(/(?:^|;\s*)(?:user_email|email|zephyr_email|auth_token)=([^;]+)/);
+      const hasLocalAuth = localStorage.getItem('zephyr_user_email')
+  || localStorage.getItem('email')
+  || localStorage.getItem('user_email')
+  || sessionStorage.getItem('zephyr_user_email')
+  || sessionStorage.getItem('user_email')
+  || localStorage.getItem('zephyr_user')
+  || localStorage.getItem('currentUser');
+const hasCookieAuth = document.cookie.match(/(?:^|;\s*)(?:user_email|email|zephyr_email|auth_token)=([^;]+)/);
 
       // If visitor is not logged in, immediately redirect to /auth
       if (!hasLocalAuth && !hasCookieAuth) {
