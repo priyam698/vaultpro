@@ -4536,6 +4536,12 @@ function saveZephyrDraft() {
       }
     }, 1000);
   }
+  function startTransferWithUndo() {
+  if (undoTimer) return; // Prevents spam clicking while counting down
+  triggerUndoSend(null, () => {
+    initiateTransfer();
+  });
+}
 </script>
 
 </body>
