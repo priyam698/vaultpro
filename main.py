@@ -70,6 +70,19 @@ app = FastAPI(
     swagger_favicon_url="/favicon.ico"
 )
 
+import os
+from starlette.middleware.sessions import SessionMiddleware
+
+# Add SessionMiddleware right after initializing 'app'
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", "zephyr-secure-session-fallback-secret-key-2026"),
+    session_cookie="zephyr_session",
+    max_age=14 * 86400,  # 14 days
+    same_site="lax",
+    https_only=False  # Set to True if testing strictly over HTTPS in production
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
