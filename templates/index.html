@@ -1112,7 +1112,7 @@
                 </div>
               </div>
 
-              <button id="transferBtn" onclick="initiateTransfer()" 
+              <button id="transferBtn" onclick="startTransferWithUndo()" 
                       class="w-full bg-gradient-to-r from-indigo-600 hover:from-indigo-500 via-purple-600 hover:via-purple-500 to-cyan-600 hover:to-cyan-500 text-white font-black text-sm py-4 rounded-xl shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition duration-200 cursor-pointer">
                 Transfer Files
               </button>
@@ -4483,6 +4483,59 @@ function saveZephyrDraft() {
       }, true);
     });
   })();
+</script>
+
+<!-- Zephyr Undo Send Buffer -->
+<script>
+  let undoTimer = null;
+  let undoCountdown = 10;
+
+  function triggerUndoSend(payload, commitCallback, cancelCallback) {
+    undoCountdown = 10;
+
+    // Remove existing toast if present
+    let existingToast = document.getElementById('zephyr-undo-toast');
+    if (existingToast) existingToast.remove();
+
+    // Create floating toast
+    const toast = document.createElement('div');
+    toast.id = 'zephyr-undo-toast';
+    toast.className = 'fixed bottom-6 right-6 z-50 flex items-center gap-4 bg-slate-900/95 border border-sky-500/40 text-white px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl animate-bounce-short';
+    
+    const updateToastDisplay = () => {
+      toast.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-xs font-mono font-medium text-slate-200">
+            Dispatching transfer in <span class="text-sky-400 font-bold">${undoCountdown}s</span>...
+          </span>
+        </div>
+        <button id="undo-cancel-btn" type="button" class="px-3 py-1 text-xs font-semibold bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded-xl border border-red-500/30 transition-all cursor-pointer">
+          Undo Send
+        </button>
+      `;
+
+      document.getElementById('undo-cancel-btn').onclick = () => {
+        clearInterval(undoTimer);
+        toast.remove();
+        if (cancelCallback) cancelCallback();
+      };
+    };
+
+    document.body.appendChild(toast);
+    updateToastDisplay();
+
+    undoTimer = setInterval(() => {
+      undoCountdown--;
+      if (undoCountdown <= 0) {
+        clearInterval(undoTimer);
+        toast.remove();
+        commitCallback(payload);
+      } else {
+        updateToastDisplay();
+      }
+    }, 1000);
+  }
 </script>
 
 </body>
