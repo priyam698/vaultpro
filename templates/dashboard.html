@@ -1004,6 +1004,27 @@ body {
         </div>
       </div>
 
+      <!-- Client-Side Zero-Knowledge Search Bar -->
+        <div class="relative w-full max-w-md mb-4">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            id="zkSearchInput" 
+            placeholder="Search encrypted files privately (Ctrl + K)..." 
+            class="w-full pl-10 pr-24 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all backdrop-blur-md"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-2 pointer-events-none">
+            <span id="zkSearchCount" class="text-[11px] text-cyan-400 font-mono hidden">0 found</span>
+            <kbd class="px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded">Ctrl K</kbd>
+          </div>
+        </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
@@ -1042,6 +1063,65 @@ body {
         if (icon) icon.innerText = "☀️";
       }
     }
+
+    // --- Zephyr Zero-Knowledge Search Engine ---
+function initZKSearch() {
+  const searchInput = document.getElementById('zkSearchInput');
+  const countBadge = document.getElementById('zkSearchCount');
+  if (!searchInput) return;
+
+  // Real-time zero-knowledge search: runs strictly in browser memory
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    const tokens = query.split(/\s+/).filter(Boolean);
+    const rows = document.querySelectorAll('#filesTableBody tr');
+    let matchesCount = 0;
+    let totalFileRows = 0;
+
+    rows.forEach(row => {
+      // Ignore loading or placeholder rows that span all columns
+      if (row.querySelector('td[colspan]')) return;
+      totalFileRows++;
+
+      // Reads row text (filename, extension, size, date) directly from client memory
+      const content = row.innerText.toLowerCase();
+      const isMatch = tokens.length === 0 || tokens.every(token => content.includes(token));
+
+      row.style.display = isMatch ? '' : 'none';
+      if (isMatch) matchesCount++;
+    });
+
+    if (countBadge) {
+      if (tokens.length > 0 && totalFileRows > 0) {
+        countBadge.textContent = `${matchesCount} found`;
+        countBadge.classList.remove('hidden');
+      } else {
+        countBadge.classList.add('hidden');
+      }
+    }
+  });
+
+  // Keyboard shortcut: Ctrl + K (or Cmd + K) to focus, Esc to clear
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+      searchInput.blur();
+    }
+  });
+}
+
+// Initialize on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initZKSearch);
+} else {
+  initZKSearch();
+}
 
     function toggleTheme() {
       const isLight = document.body.classList.toggle("light-theme");
