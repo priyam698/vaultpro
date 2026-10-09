@@ -1406,6 +1406,20 @@ async function downloadActiveFile() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        // Send download notification email to sender
+    const ownerEmail = (typeof serverConfig !== 'undefined' && (serverConfig.dataset.ownerEmail || serverConfig.dataset.senderEmail)) || "{{ owner_email | default('') }}";
+    if (ownerEmail) {
+        fetch('/api/email/transfer-downloaded', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                owner_email: ownerEmail,
+                file_name: (typeof serverConfig !== 'undefined' && serverConfig.dataset.filename) || `Zephyr_Transfer_${shareId}.zip`,
+                timestamp: new Date().toLocaleString()
+            }),
+            keepalive: true
+        }).catch(err => console.error("Transfer alert dispatch failed:", err));
+    }
       } catch(err) {
         alert("Failed to create ZIP: " + err.message);
       } finally {
