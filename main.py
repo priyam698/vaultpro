@@ -3983,7 +3983,74 @@ def send_zephyr_email(to_email: str, subject: str, html_content: str) -> bool:
         return False
 
 
+# ----------------------------------------------------
+# TRANSACTIONAL EMAIL TRIGGERS
+# ----------------------------------------------------
 
+@app.post("/api/email/welcome")
+async def email_welcome_kit(payload: dict):
+    """Sends account confirmation and zero-knowledge security guidelines."""
+    email = payload.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Missing recipient email")
+    
+    html = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #05070d; color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #6366f1; margin-top: 0;">Welcome to Zephyr Drive</h2>
+        <p style="color: #cbd5e1; line-height: 1.6;">Your private vault is active. All files uploaded to your drive are encrypted client-side using AES-256 before reaching Cloudflare R2 edge nodes.</p>
+        <div style="background: rgba(255,255,255,0.03); border-left: 4px solid #6366f1; padding: 14px 18px; margin: 20px 0; border-radius: 4px;">
+            <p style="color: #e2e8f0; font-size: 13px; margin: 0;"><strong>Zero-Knowledge Reminder:</strong> Only you hold your encryption keys. Never lose your master credentials—lost keys cannot be recovered by server administrators.</p>
+        </div>
+        <p style="color: #64748b; font-size: 12px; margin-top: 24px;">© 2026 Zephyr Systems. Zero-Knowledge Edge Storage.</p>
+    </div>
+    """
+    success = send_zephyr_email(email, "Welcome to Zephyr Drive — Security & Setup", html)
+    return {"success": success}
+
+@app.post("/api/email/transfer-downloaded")
+async def email_transfer_notification(payload: dict):
+    """Notifies the file owner when a shared payload is unlocked or downloaded."""
+    owner_email = payload.get("owner_email")
+    file_name = payload.get("file_name", "Encrypted File")
+    download_time = payload.get("timestamp", "Just now")
+    if not owner_email:
+        raise HTTPException(status_code=400, detail="Missing owner email")
+
+    html = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #05070d; color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #10b981; margin-top: 0;">Transfer Downloaded</h2>
+        <p style="color: #cbd5e1; line-height: 1.6;">Your shared file has been successfully decrypted and downloaded by the recipient.</p>
+        <ul style="color: #94a3b8; font-size: 14px; line-height: 1.8;">
+            <li><strong>File:</strong> {file_name}</li>
+            <li><strong>Timestamp:</strong> {download_time}</li>
+            <li><strong>Transfer Security:</strong> Verified End-to-End</li>
+        </ul>
+        <p style="color: #64748b; font-size: 12px; margin-top: 24px;">© 2026 Zephyr Systems. Zero-Knowledge Edge Storage.</p>
+    </div>
+    """
+    success = send_zephyr_email(owner_email, f"Transfer Accessed: {file_name}", html)
+    return {"success": success}
+
+@app.post("/api/email/contact-relay")
+async def email_contact_relay(payload: dict):
+    """Relays visitor inquiries from contact.html directly to administrator email."""
+    visitor_email = payload.get("email")
+    subject = payload.get("subject", "General Inquiry")
+    message = payload.get("message", "")
+    
+    html = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #05070d; color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #38bdf8; margin-top: 0;">New Inbound Support Inquiry</h2>
+        <p style="color: #94a3b8;"><strong>From:</strong> {visitor_email}</p>
+        <p style="color: #94a3b8;"><strong>Subject:</strong> {subject}</p>
+        <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; color: #f1f5f9; margin-top: 16px;">
+            {message}
+        </div>
+    </div>
+    """
+    admin_target = os.getenv("ADMIN_EMAIL", "priyamrana069@gmail.com")
+    success = send_zephyr_email(admin_target, f"[Zephyr Support] {subject}", html)
+    return {"success": success}
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
