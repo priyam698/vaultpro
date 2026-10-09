@@ -24,6 +24,9 @@ from typing import Optional, List, Dict, Any
 
 import boto3
 import stripe
+import resend
+
+resend.api_key = os.getenv("RESEND_API_KEY")
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from pydantic import BaseModel
@@ -3958,7 +3961,40 @@ async def ai_upscale_endpoint(
                 os.remove(tmp_path)
             except Exception:
                 pass
+def send_zephyr_email(to_email: str, subject: str, html_content: str) -> bool:
+    """Dispatches transactional email via Resend API."""
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        print("[Resend] Skipped dispatch: RESEND_API_KEY environment variable is missing.")
+        return False
+    resend.api_key = api_key
+    try:
+        params = {
+            "from": "Zephyr Drive <onboarding@resend.dev>",
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content,
+        }
+        resend.Emails.send(params)
+        print(f"[Resend] Email successfully sent to {to_email}")
+        return True
+    except Exception as e:
+        print(f"[Resend] Failed to send email to {to_email}: {e}")
+        return False
 
+
+@app.post("/api/test-email")
+async def trigger_test_email(email: str):
+    html = """
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #05070d; color: #f8fafc; padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+        <h2 style="color: #6366f1; margin-top: 0;">Zephyr Drive Notification Pipeline Active</h2>
+        <p style="color: #cbd5e1; line-height: 1.6;">Your zero-knowledge cloud vault email dispatch system is operational and connected via Resend.</p>
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;" />
+        <p style="color: #64748b; font-size: 12px; margin-bottom: 0;">© 2026 Zephyr Systems. Zero-Knowledge Edge Infrastructure.</p>
+    </div>
+    """
+    success = send_zephyr_email(email, "Zephyr Drive — Notification Pipeline Active", html)
+    return {"success": success, "recipient": email}
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -11,3 +11,4 @@ python-dotenv
 requests
 replicate
 itsdangerous>=2.1.2
+resend>=2.0.0
