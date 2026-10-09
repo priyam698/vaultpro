@@ -352,8 +352,19 @@
         const token = res.data?.session?.access_token || null;
 
         if (userId) {
-          persistAuthSession(userId, userEmail, token);
+            persistAuthSession(userId, userEmail, token);
         }
+
+        // Trigger welcome email for new signups
+        if (isSignup && userEmail) {
+            fetch('/api/email/welcome', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail }),
+                keepalive: true
+            }).catch(err => console.error("Welcome email dispatch failed:", err));
+        }
+
         window.location.href = "/";
       }
     }
