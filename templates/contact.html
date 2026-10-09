@@ -330,10 +330,14 @@
       statusBox.classList.add('hidden');
 
       try {
-        const response = await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, reason, message })
+       const response = await fetch('/api/email/contact-relay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: email,
+                subject: `[${reason}] Inquiry from${name || 'User'}`,
+                message: message
+            })
         });
 
         const result = await response.json();
