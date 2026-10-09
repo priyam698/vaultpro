@@ -1011,9 +1011,14 @@ body {
           <p class="text-xs text-slate-400 mt-0.5">Stored with zero-knowledge encryption across Cloudflare R2 edge nodes.</p>
         </div>
 
-        <div class="relative w-full sm:w-64">
-          
-        </div>
+        <div class="flex items-center justify-start sm:justify-end">
+                <button id="zephyrInstallBtn" onclick="triggerAppInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sky-300 hover:text-white bg-sky-950/40 hover:bg-sky-500/20 border border-sky-500/30 hover:border-sky-400/50 rounded-xl transition-all duration-200 active:scale-95 shadow-[0_0_10px_rgba(56,189,248,0.12)] cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span>Install App</span>
+                </button>
+            </div>
       </div>
 
       <!-- Client-Side Zero-Knowledge Search Bar -->
@@ -4242,5 +4247,31 @@ async function saveBrandingPreferences() {
 
     loadDriveData();
   </script>
+  <script>
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+});
+
+async function triggerAppInstall() {
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('App install accepted');
+        }
+        deferredInstallPrompt = null;
+    } else {
+        alert('To install Zephyr on your device:\n\n• On Chrome/Edge (Desktop): Click the install icon (⊕) in the browser address bar.\n• On iOS (Safari): Tap Share (📤) → "Add to Home Screen".\n• On Android (Chrome): Tap Menu (⋮) → "Install app".');
+    }
+}
+
+window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('zephyrInstallBtn');
+    if (btn) btn.style.display = 'none';
+});
+</script>
 </body>
 </html>

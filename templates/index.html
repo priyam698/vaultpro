@@ -2775,7 +2775,27 @@
         </div>
 
       </div>
+<!-- Install Zephyr Lower Panel Card -->
+        <div class="my-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-950/30 via-slate-900/40 to-slate-900/20 border border-sky-500/20 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+            <div class="flex items-center gap-3.5 text-left">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-center text-sky-400 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-white tracking-wide">Install Zephyr on your device</h4>
+                    <p class="text-xs text-slate-400">Launch zero-knowledge transfers directly from your desktop dock or mobile home screen.</p>
+                </div>
+            </div>
 
+            <button id="zephyrInstallBtn" onclick="triggerAppInstall()" class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-sky-300 bg-sky-950/60 hover:bg-sky-500/20 border border-sky-500/30 hover:border-sky-400/60 rounded-xl transition-all duration-200 active:scale-95 shadow-[0_0_12px_rgba(56,189,248,0.15)] cursor-pointer">
+                <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span>Install App</span>
+            </button>
+        </div>
       <!-- Bottom Sub-Bar -->
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 text-slate-400 text-xs">
         <div class="flex items-center gap-4 flex-wrap">
@@ -4543,6 +4563,31 @@ function saveZephyrDraft() {
   });
 }
 </script>
+<script>
+let deferredInstallPrompt = null;
 
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+});
+
+async function triggerAppInstall() {
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('App install accepted');
+        }
+        deferredInstallPrompt = null;
+    } else {
+        alert('To install Zephyr on your device:\n\n• On Chrome/Edge (Desktop): Click the install icon (⊕) in the browser address bar.\n• On iOS (Safari): Tap Share (📤) → "Add to Home Screen".\n• On Android: Tap Menu (⋮) → "Install app".');
+    }
+}
+
+window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('zephyrInstallBtn');
+    if (btn) btn.style.display = 'none';
+});
+</script>
 </body>
 </html>
