@@ -4060,6 +4060,11 @@ DODO_PRODUCT_IDS = {
     "pro":   "pdt_0NoSL3l1qb5yIZTPzv71H",
 }
 
+# --- Free Keep-Alive Health Check (Prevents Render spin-down) ---
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 @app.post("/api/dodo/create-checkout-session")
 async def create_dodo_checkout(payload: dict):
     user_id = payload.get("user_id")
