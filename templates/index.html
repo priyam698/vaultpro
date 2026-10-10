@@ -1830,50 +1830,64 @@
 
                 </div>
 
-                <!-- Right: Text & Action Button (Theme Optimized) -->
+                <!-- Right: Text & Action Button (Compiler-Bypass Optimized) -->
                 <div class="lg:col-span-6 space-y-6 text-left">
+                    
+                    <!-- Brute-Force Style Block to bypass Tailwind build cache -->
+                    <style>
+                        /* Light Mode (Default) - Forced Dark Text */
+                        #showcase-title { color: #0f172a !important; }
+                        .showcase-desc { color: #334155 !important; }
+                        .showcase-tick { color: #0284c7 !important; }
+
+                        /* Dark Mode - Forced Light Text */
+                        .dark #showcase-title, html[data-theme="dark"] #showcase-title, body.dark #showcase-title { color: #ffffff !important; }
+                        .dark .showcase-desc, html[data-theme="dark"] .showcase-desc, body.dark .showcase-desc { color: #cbd5e1 !important; }
+                        .dark .showcase-tick, html[data-theme="dark"] .showcase-tick, body.dark .showcase-tick { color: #38bdf8 !important; }
+                    </style>
+
                     <!-- PWA Badge -->
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 dark:border-sky-500/25 text-sky-600 dark:text-sky-400 text-xs font-semibold">
-                        <span class="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse"></span>
-                        Progressive Web App
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                        <span class="showcase-tick">Progressive Web App</span>
                     </div>
 
-                    <!-- Title (FORCED Black in Light Mode, White in Dark Mode) -->
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight !text-black dark:!text-white leading-tight">
+                    <!-- Title -->
+                    <h2 id="showcase-title" class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight transition-colors duration-300">
                         Our app is also available — install it right now
                     </h2>
 
-                    <!-- Paragraph (FORCED Dark Gray in Light Mode, Light Gray in Dark Mode) -->
-                    <p class="!text-gray-700 dark:!text-gray-300 text-sm sm:text-base leading-relaxed">
+                    <!-- Paragraph -->
+                    <p class="showcase-desc text-sm sm:text-base leading-relaxed transition-colors duration-300">
                         Experience Zephyr as a standalone, zero-friction application. Install directly to your device dock or home screen without needing an app store account.
                     </p>
 
-                    <!-- Feature Bullets (FORCED Dark text in Light Mode) -->
+                    <!-- Feature Bullets -->
                     <div class="space-y-3 pt-2">
-                        <div class="flex items-center gap-3 text-xs sm:text-sm !text-gray-800 dark:!text-gray-200">
-                            <span class="text-sky-600 dark:text-sky-400 font-bold">✓</span>
-                            <span>Single-click installation directly from your browser</span>
+                        <div class="flex items-center gap-3 text-xs sm:text-sm">
+                            <span class="showcase-tick font-bold">✓</span>
+                            <span class="showcase-desc">Single-click installation directly from your browser</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm !text-gray-800 dark:!text-gray-200">
-                            <span class="text-sky-600 dark:text-sky-400 font-bold">✓</span>
-                            <span>Instant background syncing and zero-knowledge encryption</span>
+                        <div class="flex items-center gap-3 text-xs sm:text-sm">
+                            <span class="showcase-tick font-bold">✓</span>
+                            <span class="showcase-desc">Instant background syncing and zero-knowledge encryption</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm !text-gray-800 dark:!text-gray-200">
-                            <span class="text-sky-600 dark:text-sky-400 font-bold">✓</span>
-                            <span>Works offline for reviewing cached encrypted receipts</span>
+                        <div class="flex items-center gap-3 text-xs sm:text-sm">
+                            <span class="showcase-tick font-bold">✓</span>
+                            <span class="showcase-desc">Works offline for reviewing cached encrypted receipts</span>
                         </div>
                     </div>
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-wrap items-center gap-4 pt-4">
-                        <button onclick="triggerAppInstall()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 !text-white font-semibold text-sm shadow-[0_10px_20px_rgba(56,189,248,0.2)] dark:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-200 active:scale-95 cursor-pointer">
-                            <svg class="w-4 h-4 !text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="triggerAppInstall()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-[0_10px_20px_rgba(56,189,248,0.2)] transition-all duration-200 active:scale-95 cursor-pointer">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
-                            <span>Install App</span>
+                            <span style="color: white !important;">Install App</span>
                         </button>
 
-                        <a href="#features" class="px-6 py-3 rounded-2xl bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] border border-black/10 dark:border-white/10 !text-black dark:!text-white font-medium text-sm transition-all duration-200">
+                        <a href="#features" class="showcase-desc px-6 py-3 rounded-2xl bg-black/5 hover:bg-black/10 border border-black/10 font-medium text-sm transition-all duration-200" style="border-color: rgba(100,116,139, 0.2);">
                             Learn more
                         </a>
                     </div>
