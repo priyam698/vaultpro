@@ -1718,157 +1718,158 @@
   </section>
 
   <!-- ================================================================= -->
-    <!-- ZEPHYR DEVICE INSTALL SHOWCASE -->
+   <!-- ================================================================= -->
+    <!-- ZEPHYR DEVICE INSTALL SHOWCASE (Light & Dark Theme Optimized) -->
     <!-- ================================================================= -->
-    <section class="relative z-20 py-20 border-b border-white/[0.08]">
+    <section class="relative z-20 py-20 border-b border-black/5 dark:border-white/[0.08]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                 
                 <!-- Left: Hyper-Realistic 3D CSS Scene -->
                 <div class="lg:col-span-6 relative flex justify-center items-center w-full min-h-[500px] overflow-hidden rounded-3xl" style="perspective: 1000px;">
                     
-                    <!-- 1. Cyberpunk Grid Floor (Matches your reference image) -->
-                    <div class="absolute bottom-[-100px] left-[-50%] w-[200%] h-[300px] opacity-30 z-0 pointer-events-none" 
-                         style="background-image: linear-gradient(to right, rgba(56,189,248,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(56,189,248,0.3) 1px, transparent 1px); background-size: 30px 30px; transform: rotateX(75deg); transform-origin: top center; mask-image: linear-gradient(to bottom, transparent, black 10%, transparent 90%);"></div>
+                    <!-- 1. Cyberpunk Grid Floor -->
+                    <div class="absolute bottom-[-100px] left-[-50%] w-[200%] h-[300px] opacity-40 dark:opacity-30 z-0 pointer-events-none" 
+                         style="background-image: linear-gradient(to right, rgba(56,189,248,0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(56,189,248,0.4) 1px, transparent 1px); background-size: 30px 30px; transform: rotateX(75deg); transform-origin: top center; mask-image: linear-gradient(to bottom, transparent, black 10%, transparent 90%);"></div>
 
                     <!-- Ambient Core Light -->
-                    <div class="absolute w-[400px] h-[400px] bg-sky-500/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
+                    <div class="absolute w-[400px] h-[400px] bg-sky-400/20 dark:bg-sky-500/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
                     <!-- 2. Neon Floating Icons -->
                     <!-- Download Arrow -->
                     <div class="absolute top-[80px] left-[30px] z-30 animate-[bounce_4s_ease-in-out_infinite]">
-                        <div class="w-14 h-14 rounded-2xl border border-sky-400 bg-[#060b14]/80 backdrop-blur-md shadow-[0_0_30px_rgba(56,189,248,0.5),inset_0_0_15px_rgba(56,189,248,0.3)] flex items-center justify-center">
-                            <svg class="w-7 h-7 text-sky-400 drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <div class="w-14 h-14 rounded-2xl border border-sky-200 dark:border-sky-400 bg-white/90 dark:bg-[#060b14]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(56,189,248,0.3)] dark:shadow-[0_0_30px_rgba(56,189,248,0.5),inset_0_0_15px_rgba(56,189,248,0.3)] flex items-center justify-center">
+                            <svg class="w-7 h-7 text-sky-500 dark:text-sky-400 drop-shadow-sm dark:drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         </div>
                     </div>
                     <!-- Secure Lock -->
                     <div class="absolute top-[180px] right-[40px] z-30 animate-[bounce_5s_ease-in-out_infinite_reverse]">
-                        <div class="w-12 h-12 rounded-2xl border border-emerald-400 bg-[#060b14]/80 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.4),inset_0_0_15px_rgba(16,185,129,0.2)] flex items-center justify-center">
-                            <svg class="w-5 h-5 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        <div class="w-12 h-12 rounded-2xl border border-emerald-200 dark:border-emerald-400 bg-white/90 dark:bg-[#060b14]/80 backdrop-blur-md shadow-[0_10px_20px_rgba(16,185,129,0.2)] dark:shadow-[0_0_30px_rgba(16,185,129,0.4),inset_0_0_15px_rgba(16,185,129,0.2)] flex items-center justify-center">
+                            <svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 drop-shadow-sm dark:drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                         </div>
                     </div>
 
-                    <!-- 3. LAPTOP MOCKUP (Silver metallic edge, angled into the background) -->
+                    <!-- 3. LAPTOP MOCKUP -->
                     <div class="absolute top-[70px] left-[80px] w-[360px] sm:w-[400px] z-10 transition-transform duration-700 hover:-translate-y-2 group cursor-default"
                          style="transform: rotateY(-15deg) translateZ(-50px);">
                         <!-- Screen Base -->
-                        <div class="w-full h-[240px] bg-[#02050a] rounded-t-2xl p-1.5 relative border-[3px] border-slate-600 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+                        <div class="w-full h-[240px] bg-slate-300 dark:bg-[#02050a] rounded-t-2xl p-1.5 relative border-[3px] border-slate-400 dark:border-slate-600 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_0_50px_rgba(0,0,0,0.8)]">
                             <!-- Inner Screen -->
-                            <div class="w-full h-full bg-[#0a1120] rounded-xl overflow-hidden border border-slate-800 relative flex flex-col">
-                                <div class="h-6 bg-slate-900 border-b border-slate-800 flex items-center px-2 gap-1.5">
-                                    <div class="w-2 h-2 rounded-full bg-slate-700"></div><div class="w-2 h-2 rounded-full bg-slate-700"></div><div class="w-2 h-2 rounded-full bg-slate-700"></div>
+                            <div class="w-full h-full bg-slate-50 dark:bg-[#0a1120] rounded-xl overflow-hidden border border-slate-300 dark:border-slate-800 relative flex flex-col">
+                                <div class="h-6 bg-slate-200 dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 flex items-center px-2 gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-700"></div><div class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-700"></div><div class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-700"></div>
                                     <span class="text-[9px] text-slate-500 ml-2 font-mono">dashboard</span>
                                 </div>
-                                <div class="flex-1 p-3 flex flex-col items-center justify-center bg-gradient-to-br from-[#0a1120] to-[#04070e]">
-                                    <div class="w-14 h-14 bg-sky-500/10 rounded-2xl border border-sky-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.2)] mb-3 group-hover:scale-110 transition-transform">
-                                        <span class="text-3xl font-black text-sky-400">Z</span>
+                                <div class="flex-1 p-3 flex flex-col items-center justify-center bg-gradient-to-br from-white to-slate-100 dark:from-[#0a1120] dark:to-[#04070e]">
+                                    <div class="w-14 h-14 bg-sky-50 dark:bg-sky-500/10 rounded-2xl border border-sky-200 dark:border-sky-500/30 flex items-center justify-center shadow-sm dark:shadow-[0_0_20px_rgba(56,189,248,0.2)] mb-3 group-hover:scale-110 transition-transform">
+                                        <span class="text-3xl font-black text-sky-500 dark:text-sky-400">Z</span>
                                     </div>
-                                    <h4 class="text-white text-[12px] font-bold">Zephyr Encrypted Drive</h4>
-                                    <div class="w-32 h-1.5 bg-slate-800 rounded-full mt-3 overflow-hidden">
-                                        <div class="w-2/3 h-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,1)]"></div>
+                                    <h4 class="text-slate-800 dark:text-white text-[12px] font-bold">Zephyr Encrypted Drive</h4>
+                                    <div class="w-32 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mt-3 overflow-hidden">
+                                        <div class="w-2/3 h-full bg-sky-500 dark:bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_rgba(56,189,248,1)]"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <!-- Silver Laptop Chassis -->
-                        <div class="w-[104%] h-[14px] bg-gradient-to-b from-slate-300 to-slate-500 rounded-b-xl relative -left-[2%] shadow-[0_25px_40px_rgba(0,0,0,0.9)] flex justify-center">
-                            <div class="w-24 h-[4px] bg-slate-200/80 rounded-b-md"></div>
+                        <div class="w-[104%] h-[14px] bg-gradient-to-b from-slate-200 to-slate-400 dark:from-slate-300 dark:to-slate-500 rounded-b-xl relative -left-[2%] shadow-[0_25px_40px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_40px_rgba(0,0,0,0.9)] flex justify-center">
+                            <div class="w-24 h-[4px] bg-white/80 dark:bg-slate-200/80 rounded-b-md"></div>
                         </div>
                     </div>
 
-                    <!-- 4. PHONE MOCKUP (Metallic iPhone body, popping out in foreground) -->
+                    <!-- 4. PHONE MOCKUP -->
                     <div class="absolute bottom-[20px] left-[30px] sm:left-[50px] w-[200px] h-[410px] z-20 transition-transform duration-700 hover:-translate-y-4 group cursor-default"
                          style="transform: rotateY(12deg) translateZ(80px);">
                         <!-- Metallic Outer Frame -->
-                        <div class="w-full h-full rounded-[44px] p-[3px] bg-gradient-to-br from-slate-300 via-slate-600 to-slate-800 shadow-[20px_20px_40px_rgba(0,0,0,0.8),-10px_-10px_30px_rgba(56,189,248,0.15)]">
+                        <div class="w-full h-full rounded-[44px] p-[3px] bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500 dark:from-slate-300 dark:via-slate-600 dark:to-slate-800 shadow-[20px_20px_40px_rgba(0,0,0,0.25)] dark:shadow-[20px_20px_40px_rgba(0,0,0,0.8),-10px_-10px_30px_rgba(56,189,248,0.15)]">
                             <!-- Screen Bezel -->
-                            <div class="w-full h-full rounded-[41px] bg-black p-[5px] relative overflow-hidden">
+                            <div class="w-full h-full rounded-[41px] bg-[#050811] dark:bg-black p-[5px] relative overflow-hidden">
                                 <!-- Dynamic Island -->
-                                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-[70px] h-[18px] bg-black rounded-full z-30 border border-white/5"></div>
+                                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-[70px] h-[18px] bg-black rounded-full z-30 border border-white/10 dark:border-white/5"></div>
                                 
                                 <!-- Screen Glass & UI -->
-                                <div class="w-full h-full rounded-[36px] bg-gradient-to-b from-[#0b1426] to-[#040812] relative flex flex-col items-center pt-20 px-4 border border-white/5 overflow-hidden">
+                                <div class="w-full h-full rounded-[36px] bg-gradient-to-b from-white to-slate-100 dark:from-[#0b1426] dark:to-[#040812] relative flex flex-col items-center pt-20 px-4 border border-slate-200 dark:border-white/5 overflow-hidden">
                                     
                                     <!-- Angled Glass Reflection -->
-                                    <div class="absolute -top-10 -right-10 w-[200px] h-[150px] bg-white/5 rotate-45 pointer-events-none z-10"></div>
-                                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoNTYsMTg5LDI0OCwwLjA1KSIvPjwvc3ZnPg==')] opacity-50 z-0"></div>
+                                    <div class="absolute -top-10 -right-10 w-[200px] h-[150px] bg-white/40 dark:bg-white/5 rotate-45 pointer-events-none z-10"></div>
+                                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoNTYsMTg5LDI0OCwwLjA1KSIvPjwvc3ZnPg==')] opacity-30 dark:opacity-50 z-0"></div>
 
-                                    <!-- Giant 3D App Icon Box -->
-                                    <div class="w-28 h-28 bg-gradient-to-tr from-sky-400 to-indigo-500 p-[1.5px] rounded-[28px] shadow-[0_0_50px_rgba(56,189,248,0.5)] relative z-20 group-hover:scale-110 transition-transform duration-500">
-                                        <div class="w-full h-full bg-[#0a1120] rounded-[26px] flex items-center justify-center relative overflow-hidden">
-                                            <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-                                            <span class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-indigo-300">Z</span>
+                                    <!-- App Icon -->
+                                    <div class="w-28 h-28 bg-gradient-to-tr from-sky-400 to-indigo-500 p-[1.5px] rounded-[28px] shadow-[0_15px_30px_rgba(56,189,248,0.3)] dark:shadow-[0_0_50px_rgba(56,189,248,0.5)] relative z-20 group-hover:scale-110 transition-transform duration-500">
+                                        <div class="w-full h-full bg-white dark:bg-[#0a1120] rounded-[26px] flex items-center justify-center relative overflow-hidden">
+                                            <div class="absolute inset-0 bg-gradient-to-br from-white/40 dark:from-white/10 to-transparent"></div>
+                                            <span class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-sky-500 to-indigo-600 dark:from-sky-300 dark:to-indigo-300">Z</span>
                                         </div>
                                     </div>
 
-                                    <h3 class="text-white font-bold text-[18px] mt-8 z-20 tracking-wide">Zephyr App</h3>
-                                    <p class="text-slate-400 text-[10px] text-center mt-1 mb-8 z-20 leading-relaxed">Zero-Knowledge<br>Edge File Transfers.</p>
+                                    <h3 class="text-slate-900 dark:text-white font-bold text-[18px] mt-8 z-20 tracking-wide">Zephyr App</h3>
+                                    <p class="text-slate-500 dark:text-slate-400 text-[10px] text-center mt-1 mb-8 z-20 leading-relaxed">Zero-Knowledge<br>Edge File Transfers.</p>
 
-                                    <!-- Glowing Install Button -->
-                                    <div class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-400 text-white font-bold text-[13px] shadow-[0_0_25px_rgba(56,189,248,0.6)] text-center relative z-20">
+                                    <!-- Install Button -->
+                                    <div class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-sky-400 text-white font-bold text-[13px] shadow-[0_10px_20px_rgba(56,189,248,0.3)] dark:shadow-[0_0_25px_rgba(56,189,248,0.6)] text-center relative z-20">
                                         Install Now
                                     </div>
 
                                     <!-- Home Bar -->
-                                    <div class="w-28 h-1.5 bg-white/20 rounded-full absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20"></div>
+                                    <div class="w-28 h-1.5 bg-slate-300 dark:bg-white/20 rounded-full absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 5. System Status Badge (Matches bottom right of your reference) -->
-                    <div class="absolute bottom-[30px] right-[20px] z-40 bg-[#060b14]/90 backdrop-blur-md border border-sky-500/30 rounded-2xl py-2.5 px-5 shadow-[0_10px_30px_rgba(0,0,0,0.5)] animate-[bounce_5s_ease-in-out_infinite]"
+                    <!-- 5. System Status Badge -->
+                    <div class="absolute bottom-[30px] right-[20px] z-40 bg-white/90 dark:bg-[#060b14]/90 backdrop-blur-md border border-sky-200 dark:border-sky-500/30 rounded-2xl py-2.5 px-5 shadow-[0_15px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] animate-[bounce_5s_ease-in-out_infinite]"
                          style="transform: translateZ(30px);">
-                        <div class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-1.5 border-b border-sky-500/20 pb-1">Supported Systems</div>
+                        <div class="text-[9px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1.5 border-b border-sky-200 dark:border-sky-500/20 pb-1">Supported Systems</div>
                         <div class="flex items-center gap-3">
-                            <span class="text-white text-xs font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Windows</span>
-                            <span class="text-white text-xs font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400"></span>macOS</span>
-                            <span class="text-white text-xs font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Mobile</span>
+                            <span class="text-slate-800 dark:text-white text-xs font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400"></span>Windows</span>
+                            <span class="text-slate-800 dark:text-white text-xs font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-500 dark:bg-indigo-400"></span>macOS</span>
+                            <span class="text-slate-800 dark:text-white text-xs font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>Mobile</span>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Right: Text & Action Button -->
+                <!-- Right: Text & Action Button (Theme Optimized) -->
                 <div class="lg:col-span-6 space-y-6 text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/25 text-sky-400 text-xs font-semibold">
-                        <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 dark:border-sky-500/25 text-sky-600 dark:text-sky-400 text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse"></span>
                         Progressive Web App
                     </div>
 
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                         Our app is also available — install it right now
                     </h2>
 
-                    <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                    <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
                         Experience Zephyr as a standalone, zero-friction application. Install directly to your device dock or home screen without needing an app store account.
                     </p>
 
                     <div class="space-y-3 pt-2">
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-300">
-                            <span class="text-sky-400 font-bold">✓</span>
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <span class="text-sky-500 dark:text-sky-400 font-bold">✓</span>
                             <span>Single-click installation directly from your browser</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-300">
-                            <span class="text-sky-400 font-bold">✓</span>
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <span class="text-sky-500 dark:text-sky-400 font-bold">✓</span>
                             <span>Instant background syncing and zero-knowledge encryption</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-300">
-                            <span class="text-sky-400 font-bold">✓</span>
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <span class="text-sky-500 dark:text-sky-400 font-bold">✓</span>
                             <span>Works offline for reviewing cached encrypted receipts</span>
                         </div>
                     </div>
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-wrap items-center gap-4 pt-4">
-                        <button onclick="triggerAppInstall()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-200 active:scale-95 cursor-pointer">
+                        <button onclick="triggerAppInstall()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-[0_10px_20px_rgba(56,189,248,0.2)] dark:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-200 active:scale-95 cursor-pointer">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
                             <span>Install App</span>
                         </button>
 
-                        <a href="#features" class="px-6 py-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white font-medium text-sm transition-all duration-200">
+                        <a href="#features" class="px-6 py-3 rounded-2xl bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-sm transition-all duration-200">
                             Learn more
                         </a>
                     </div>
@@ -1877,7 +1878,6 @@
             </div>
         </div>
     </section>
-
   <!-- ========================================================================= -->
   <!-- SECTION 2: PROTECT YOUR FAVORITE MEMORIES                                 -->
   <!-- ========================================================================= -->
