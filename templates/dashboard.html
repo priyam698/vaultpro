@@ -915,21 +915,21 @@ body {
         <span id="tierBadge" class="badge-pro text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">★ PRO</span>
       </div>
 
-     <!-- Header Actions Group -->
+    <!-- Header Actions Group -->
         <div class="flex items-center gap-3">
-            <button onclick="openPlansModal()" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition">
+            <button onclick="openPlansModal()" class="btn-plans text-xs font-bold px-3 py-1.5 rounded-full transition flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/25 hover:border-indigo-500/40">
                 <span>⚡</span> <span>Your Plans</span>
             </button>
 
-            <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition">
+            <button onclick="openBrandingModal()" class="btn-branding text-xs font-bold px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/25 hover:border-purple-500/40">
                 <span>🍄</span> <span>Branding</span>
             </button>
 
-            <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition">
+            <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/5 transition">
                 <span id="themeIcon">🌙</span>
             </button>
 
-            <button onclick="signOut()" class="btn-signout text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 px-3.5 py-1.5 rounded-full transition font-bold">
+            <button onclick="signOut()" class="btn-signout text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/20 px-3.5 py-1.5 rounded-full transition font-bold">
                 Sign Out
             </button>
         </div>
@@ -4293,41 +4293,41 @@ async function triggerAppInstall() {
     });
 
    function openPlansModal() {
-        // 1. Fetch & render active subscriptions with Auto-renew label
+        // 1. Fetch & render active subscriptions (adapts to light and dark mode)
         fetch(`/api/user-subscriptions?user_id=${currentUserId}`)
             .then(r => r.json())
             .then(subs => {
                 const list = document.getElementById("activeSubsList");
                 if (!subs || !subs.length) {
-                    list.innerHTML = `<div class="p-3 text-xs opacity-60">No active subscriptions found.</div>`;
-                    return;
-                }
-                let stackedGb = 0;
-                list.innerHTML = subs.map(s => {
-                    if (s.is_active) stackedGb += s.gb;
-                    return `
-                        <div class="plans-active-box p-3.5 rounded-2xl flex items-center justify-between border border-white/5 bg-white/[0.02]">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-black text-white">${s.name} (${s.gb} GB)</span>
-                                    <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded ${s.is_active ? 'plans-badge-active bg-emerald-500/10 text-emerald-400' : 'plans-badge-inactive bg-rose-500/10 text-rose-400'}">${s.is_active ? 'Active' : 'Expired'}</span>
+                    list.innerHTML = `<div class="p-3 text-xs text-slate-500 dark:text-slate-400">No active subscriptions found.</div>`;
+                } else {
+                    let stackedGb = 0;
+                    list.innerHTML = subs.map(s => {
+                        if (s.is_active) stackedGb += s.gb;
+                        return `
+                            <div class="plans-active-box p-3.5 rounded-2xl flex items-center justify-between border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.02]">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-black text-slate-900 dark:text-white">${s.name} (${s.gb} GB)</span>
+                                        <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded ${s.is_active ? 'plans-badge-active bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'plans-badge-inactive bg-rose-500/15 text-rose-600 dark:text-rose-400'}">${s.is_active ? 'Active' : 'Expired'}</span>
+                                    </div>
+                                    <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">$${s.price.toFixed(2)} / month • Ends ${s.subscription_end_at}</span>
                                 </div>
-                                <span class="text-[10px] opacity-75 font-mono text-slate-400">$${s.price.toFixed(2)} / month • Ends ${s.subscription_end_at}</span>
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-[10px] uppercase font-mono tracking-wider font-semibold text-slate-500 dark:text-slate-400 select-none">Auto-renew</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" onchange="toggleAutoRenew('${s.id}', this.checked)" ${s.auto_renew ? 'checked' : ''} class="sr-only peer">
+                                        <div class="w-8 h-4 bg-slate-300 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    </label>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] uppercase font-mono tracking-wider text-slate-400 select-none">Auto-renew</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" onchange="toggleAutoRenew('${s.id}', this.checked)" ${s.auto_renew ? 'checked' : ''} class="sr-only peer">
-                                    <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                document.getElementById("stackedCapacityBadge").innerText = `Total: ${stackedGb} GB`;
+                        `;
+                    }).join('');
+                    document.getElementById("stackedCapacityBadge").innerText = `Total: ${stackedGb} GB`;
+                }
             });
 
-        // 2. Populate available plans to add / upgrade (matched with homepage)
+        // 2. Populate available plans to add / upgrade (high-contrast light & dark support)
         const availableList = document.getElementById("availablePlansList");
         if (availableList) {
             const plans = [
@@ -4365,17 +4365,16 @@ async function triggerAppInstall() {
                 }
             ];
 
-            // 2x2 grid layout fits cleanly in both light and dark modes
             availableList.className = "grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs";
             availableList.innerHTML = plans.map(p => `
-                <div class="p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] flex flex-col justify-between hover:border-indigo-500/50 transition">
+                <div class="p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] flex flex-col justify-between hover:border-indigo-500/50 shadow-sm transition">
                     <div>
                         <div class="flex items-center justify-between gap-1">
                             <span class="font-bold text-slate-900 dark:text-white text-xs">${p.name}</span>
                             <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 font-bold">${p.gb}</span>
                         </div>
-                        <span class="text-[9px] uppercase tracking-wider font-mono font-bold text-indigo-500 mt-0.5 block">${p.badge}</span>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">${p.desc}</p>
+                        <span class="text-[9px] uppercase tracking-wider font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 block">${p.badge}</span>
+                        <p class="text-[10px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">${p.desc}</p>
                         <p class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-2">${p.price}</p>
                     </div>
                     <button onclick="addOrUpgradePlan('${p.id}')" class="mt-3 w-full py-1.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] transition shadow-sm">
@@ -4392,52 +4391,6 @@ async function triggerAppInstall() {
             modal.setAttribute("style", "display: flex !important;");
         }
     }
-
-    function addOrUpgradePlan(planId) {
-        closePlansModal();
-        if (typeof openUpgradeModal === "function") {
-            if (typeof selectUpgradeTarget === "function") {
-                selectUpgradeTarget(planId);
-            }
-            openUpgradeModal();
-        } else {
-            window.location.href = "/pricing.html";
-        }
-    }
-
-    function closePlansModal() {
-        const modal = document.getElementById("plansModal");
-        if (modal) {
-            modal.classList.add("hidden");
-            modal.setAttribute("style", "display: none !important;");
-        }
-    }
-
-    function openBrandingModal() {
-        const modal = document.getElementById("brandingModal");
-        if (modal) {
-            modal.classList.remove("hidden");
-            modal.setAttribute("style", "display: flex !important;");
-        }
-    }
-
-    function closeBrandingModal() {
-        const modal = document.getElementById("brandingModal");
-        if (modal) {
-            modal.classList.add("hidden");
-            modal.setAttribute("style", "display: none !important;");
-        }
-    }
-      
-      async function toggleAutoRenew(subId, isAuto) {
-    try {
-        await fetch("/api/user-subscriptions/toggle-auto-renew", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
-        });
-    } catch (e) {}
-}
 
 </script>
 
