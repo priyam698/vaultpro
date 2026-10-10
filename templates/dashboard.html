@@ -4295,22 +4295,34 @@ window.addEventListener('appinstalled', () => {
 });
 function openPlansModal() {
     const modal = document.getElementById("plansModal");
-    if (modal) modal.classList.remove("hidden");
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+    }
 }
 
 function closePlansModal() {
     const modal = document.getElementById("plansModal");
-    if (modal) modal.classList.add("hidden");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+    }
 }
 
 function openBrandingModal() {
     const modal = document.getElementById("brandingModal");
-    if (modal) modal.classList.remove("hidden");
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+    }
 }
 
 function closeBrandingModal() {
     const modal = document.getElementById("brandingModal");
-    if (modal) modal.classList.add("hidden");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+    }
 }
 </script>
 
