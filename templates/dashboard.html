@@ -4048,14 +4048,12 @@ async function shareFile(fileId, filename) {
       }
     }
 
-    function openPlansModal() {
-  const modal = document.getElementById("plansModal");
-  if (modal) modal.classList.remove("hidden");
-}
-
-function closePlansModal() {
-  const modal = document.getElementById("plansModal");
-  if (modal) modal.classList.add("hidden");
+   function closePlansModal() {
+    const modal = document.getElementById("plansModal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.setAttribute("style", "display: none !important;");
+    }
 }
 
 async function subscribePlan(subId, isAuto = true) {
