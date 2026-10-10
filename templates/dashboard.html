@@ -4277,53 +4277,95 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 async function triggerAppInstall() {
-    if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        const { outcome } = await deferredInstallPrompt.userChoice;
-        if (outcome === 'accepted') {
-            console.log('App install accepted');
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('App install accepted');
+            }
+            deferredInstallPrompt = null;
+        } else {
+            alert('To install Zephyr on your device:\n\n• On Chrome/Edge (Desktop): Click the install icon (⊕) in the browser address bar.\n• On Mobile: Tap Share/Menu, then "Add to Home Screen".');
         }
-        deferredInstallPrompt = null;
-    } else {
-        alert('To install Zephyr on your device:\n\n• On Chrome/Edge (Desktop): Click the install icon (⊕) in the browser address bar.\n• On Mobile: Tap Share/Menu, then "Add to Home Screen".');
     }
-}
 
-window.addEventListener('appinstalled', () => {
-    const btn = document.getElementById('zephyrInstallBtn');
-    if (btn) btn.style.display = 'none';
-});
-function openPlansModal() {
-    const modal = document.getElementById("plansModal");
-    if (modal) {
-        modal.classList.remove("hidden");
-        modal.style.display = "flex";
-    }
-}
+    window.addEventListener('appinstalled', () => {
+        const btn = document.getElementById('zephyrInstallBtn');
+        if (btn) btn.style.display = 'none';
+    });
 
-function closePlansModal() {
-    const modal = document.getElementById("plansModal");
-    if (modal) {
-        modal.classList.add("hidden");
-        modal.style.display = "none";
-    }
-}
+    function openPlansModal() {
+        fetch(`/api/user-subscriptions?user_id=${currentUserId}`)
+            .then(r => r.json())
+            .then(subs => {
+                const list = document.getElementById("activeSubsList");
+                if (!subs || !subs.length) {
+                    list.innerHTML = `<div class="p-3 text-xs opacity-60">No active subscriptions found.</div>`;
+                    return;
+                }
+                let stackedGb = 0;
+                list.innerHTML = subs.map(s => {
+                    if (s.is_active) stackedGb += s.gb;
+                    return `
+                        <div class="plans-active-box p-3.5 rounded-2xl flex items-center justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-black text-white">${s.name} (${s.gb} GB)</span>
+                                    <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded ${s.is_active ? 'plans-badge-active' : 'plans-badge-inactive'}">${s.is_active ? 'Active' : 'Expired'}</span>
+                                </div>
+                                <span class="text-[10px] opacity-75 font-mono">$${s.price.toFixed(2)} / month • Ends ${s.subscription_end_at}</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" onchange="toggleAutoRenew('${s.id}', this.checked)" ${s.auto_renew ? 'checked' : ''} class="sr-only peer">
+                                <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById("stackedCapacityBadge").innerText = `Total: ${stackedGb} GB`;
+            });
 
-function openBrandingModal() {
-    const modal = document.getElementById("brandingModal");
-    if (modal) {
-        modal.classList.remove("hidden");
-        modal.style.display = "flex";
+        const modal = document.getElementById("plansModal");
+        if (modal) {
+            modal.classList.remove("hidden");
+            modal.style.display = "flex";
+        }
     }
-}
 
-function closeBrandingModal() {
-    const modal = document.getElementById("brandingModal");
-    if (modal) {
-        modal.classList.add("hidden");
-        modal.style.display = "none";
+    function closePlansModal() {
+        const modal = document.getElementById("plansModal");
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.style.display = "none";
+        }
     }
-}
+
+    function openBrandingModal() {
+        const modal = document.getElementById("brandingModal");
+        if (modal) {
+            modal.classList.remove("hidden");
+            modal.style.display = "flex";
+        }
+    }
+
+    function closeBrandingModal() {
+        const modal = document.getElementById("brandingModal");
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.style.display = "none";
+        }
+    }
+
+    async function toggleAutoRenew(subId, isAuto) {
+        try {
+            await fetch("/api/user-subscriptions/toggle-auto-renew", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
+            });
+        } catch (e) {}
+    }
+      
 </script>
 
 
