@@ -916,17 +916,15 @@ body {
       </div>
 
       <div class="flex items-center gap-2.5">
-        <button onclick="openPlansModal()" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
+        <button onclick="document.getElementById('plansModal').classList.remove('hidden')" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
           <span>⚡</span><span>Your Plans</span>
         </button>
 
-        <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
+        <button onclick="document.getElementById('brandingModal').classList.remove('hidden')" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
           <span>🎨</span><span>Branding</span>
         </button>
 
-        <a href="/" class="btn-pipeline header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-sky-500/10 text-sky-300 border-sky-500/25 hover:border-sky-400/50">
-          <span>Transfer Pipeline</span>
-        </a>
+        
 
         <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Day Mode" class="w-8 h-8 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs transition cursor-pointer">
           <span id="themeIcon">☀️</span>
