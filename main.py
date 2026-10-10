@@ -4052,55 +4052,54 @@ async def email_contact_relay(payload: dict):
     success = send_zephyr_email(admin_target, f"[Zephyr Support] {subject}", html)
     return {"success": success}
 
-PLAN_TIERS = {
-    "micro": {"name": "Zephyr Micro", "cents": 180, "gb": 15},
-    "lite":  {"name": "Zephyr Lite",  "cents": 250, "gb": 30},
-    "plus":  {"name": "Zephyr Plus",  "cents": 450, "gb": 80},
-    "pro":   {"name": "Zephyr Pro",   "cents": 700, "gb": 200},
+# Mapped directly to your active Dodo Payments Product IDs
+DODO_PRODUCT_IDS = {
+    "micro": "pdt_0NoSL8gp9fUEk5GKwdB1O",
+    "lite":  "pdt_0NoSLFQFlcnqD2weSbr0d",
+    "plus":  "pdt_0NoSKxDY49vabp3lshvdI",
+    "pro":   "pdt_0NoSL3l1qb5yIZTPzv71H",
 }
 
-@app.post("/api/stripe/create-checkout-session")
-async def create_storage_checkout(payload: dict):
+@app.post("/api/dodo/create-checkout-session")
+async def create_dodo_checkout(payload: dict):
     user_id = payload.get("user_id")
     plan_id = payload.get("plan_id")
-    plan = PLAN_TIERS.get(plan_id)
+    storage_gb = payload.get("storage_gb")
 
-    if not plan:
+    product_id = DODO_PRODUCT_IDS.get(plan_id)
+    if not product_id:
         raise HTTPException(status_code=400, detail="Invalid plan selected")
 
-    stripe_key = os.getenv("STRIPE_SECRET_KEY")
-    if not stripe_key:
-        raise HTTPException(status_code=500, detail="Stripe API key not configured")
-
-    stripe.api_key = stripe_key
+    dodo_api_key = os.getenv("DODO_PAYMENTS_API_KEY")
+    dodo_base = os.getenv("DODO_API_URL", "https://test.dodopayments.com")
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com")
 
+    headers = {
+        "Authorization": f"Bearer {dodo_api_key}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "product_id": product_id,
+        "quantity": 1,
+        "metadata": {
+            "user_id": str(user_id),
+            "plan_id": str(plan_id),
+            "storage_gb": str(storage_gb),
+            "is_stackable": "true"
+        },
+        "return_url": f"{base_url}/dashboard?payment=success"
+    }
+
     try:
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            mode="subscription",
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {
-                        "name": f"{plan['name']} (+{plan['gb']} GB)",
-                        "description": f"Zephyr Drive Stackable Vault Tier (+{plan['gb']} GB)",
-                    },
-                    "unit_amount": plan["cents"],
-                    "recurring": {"interval": "month"},
-                },
-                "quantity": 1,
-            }],
-            metadata={
-                "user_id": str(user_id),
-                "plan_id": str(plan_id),
-                "storage_gb": str(plan["gb"]),
-                "is_stackable": "true",
-            },
-            success_url=f"{base_url}/dashboard?payment=success",
-            cancel_url=f"{base_url}/dashboard?payment=cancelled",
-        )
-        return {"url": session.url}
+        import requests
+        response = requests.post(f"{dodo_base}/checkouts", json=body, headers=headers)
+        res_data = response.json()
+
+        if response.status_code in [200, 201]:
+            return {"checkout_url": res_data.get("payment_link") or res_data.get("url")}
+        else:
+            raise HTTPException(status_code=response.status_code, detail=res_data.get("message", "Dodo error"))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 if __name__ == "__main__":

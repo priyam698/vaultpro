@@ -4436,26 +4436,26 @@ async function triggerAppInstall() {
         `;
     }
 
-    async function startPlanCheckout(planId, planGb, planName, btnElem) {
+   async function startPlanCheckout(planId, planGb, planName, btnElem) {
         const MAX_STORAGE_GB = 3000;
         const currentGb = window.currentStackedGb || 245;
 
-        // 1. Storage ceiling check
+        // 1. Storage ceiling check (3 TB max)
         if ((currentGb + planGb) > MAX_STORAGE_GB) {
-           alert(`Upgrade restricted: Maximum storage stacking limit is 3 TB (3,000 GB) per user account. You currently have ${currentGb} GB.`);
+            alert(`Upgrade restricted: Maximum storage stacking limit is 3 TB (3,000 GB) per user account. You currently have ${currentGb} GB.`);
             return;
         }
 
-        // 2. Loading state on button
-        const originalHtml = btnElem ? btnElem.innerHTML : "+ Add / Upgrade";
+        // 2. Button loading state
+        const originalHtml = btnElem ? btnElem.innerHTML : `Pay & Add`;
         if (btnElem) {
             btnElem.disabled = true;
-            btnElem.innerHTML = `<span class="animate-pulse">Connecting to Stripe...</span>`;
+            btnElem.innerHTML = `<span class="animate-pulse">Connecting to Dodo...</span>`;
         }
 
         try {
-            // 3. Request Stripe Checkout Session
-            const res = await fetch("/api/stripe/create-checkout-session", {
+            // 3. Request Dodo Payments Checkout Session
+            const res = await fetch("/api/dodo/create-checkout-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -4469,19 +4469,20 @@ async function triggerAppInstall() {
 
             const data = await res.json();
 
-            if (res.ok && (data.url || data.checkout_url)) {
-                // Redirect user directly to Stripe Hosted Checkout
-                window.location.href = data.url || data.checkout_url;
+            // Redirect to test.checkout.dodopayments.com / checkout.dodopayments.com
+            const checkoutUrl = data.checkout_url || data.url || data.payment_link;
+            if (res.ok && checkoutUrl) {
+                window.location.href = checkoutUrl;
             } else {
-                alert(data.detail || data.error || "Unable to initiate payment session. Please try again.");
+                alert(data.detail || data.error || "Unable to initiate Dodo checkout session.");
                 if (btnElem) {
                     btnElem.disabled = false;
                     btnElem.innerHTML = originalHtml;
                 }
             }
         } catch (err) {
-            console.error("Payment error:", err);
-            alert("Payment gateway connection error. Please try again.");
+            console.error("Dodo payment error:", err);
+            alert("Payment gateway error. Please try again.");
             if (btnElem) {
                 btnElem.disabled = false;
                 btnElem.innerHTML = originalHtml;
