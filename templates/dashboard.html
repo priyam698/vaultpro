@@ -4327,27 +4327,58 @@ async function triggerAppInstall() {
                 document.getElementById("stackedCapacityBadge").innerText = `Total: ${stackedGb} GB`;
             });
 
-        // 2. Populate available plans to add / upgrade
+        // 2. Populate available plans to add / upgrade (matched with homepage)
         const availableList = document.getElementById("availablePlansList");
         if (availableList) {
             const plans = [
-                { id: "micro", name: "Zephyr Micro", gb: "15 GB", price: "$1.80/mo", desc: "+15 GB Stackable" },
-                { id: "pro", name: "Zephyr Pro", gb: "200 GB", price: "$7.00/mo", desc: "Full Pro Cloud Vault" },
-                { id: "ultra", name: "Zephyr Ultra", gb: "1 TB", price: "$18.00/mo", desc: "+1,000 GB High Speed" }
+                { 
+                    id: "micro", 
+                    name: "Zephyr Micro", 
+                    badge: "Starter Plus", 
+                    gb: "15 GB", 
+                    price: "$1.80/mo", 
+                    desc: "Extra lightweight storage for personal archives." 
+                },
+                { 
+                    id: "lite", 
+                    name: "Zephyr Lite", 
+                    badge: "Essential", 
+                    gb: "30 GB", 
+                    price: "$2.50/mo", 
+                    desc: "Dedicated vault for students & project sharing." 
+                },
+                { 
+                    id: "plus", 
+                    name: "Zephyr Plus", 
+                    badge: "Creator", 
+                    gb: "80 GB", 
+                    price: "$4.50/mo", 
+                    desc: "High capacity for creators & active teams." 
+                },
+                { 
+                    id: "pro", 
+                    name: "Zephyr Pro", 
+                    badge: "Pro Member", 
+                    gb: "200 GB", 
+                    price: "$7.00/mo", 
+                    desc: "Complete studio setup with full edge capabilities." 
+                }
             ];
 
-            availableList.className = "grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs";
+            // 2x2 grid layout fits cleanly in both light and dark modes
+            availableList.className = "grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs";
             availableList.innerHTML = plans.map(p => `
-                <div class="p-3 rounded-2xl border border-white/10 bg-white/[0.03] flex flex-col justify-between hover:border-indigo-500/40 transition">
+                <div class="p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] flex flex-col justify-between hover:border-indigo-500/50 transition">
                     <div>
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-white">${p.name}</span>
-                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">${p.gb}</span>
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="font-bold text-slate-900 dark:text-white text-xs">${p.name}</span>
+                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 font-bold">${p.gb}</span>
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-1">${p.desc}</p>
-                        <p class="text-xs font-mono font-bold text-indigo-400 mt-1">${p.price}</p>
+                        <span class="text-[9px] uppercase tracking-wider font-mono font-bold text-indigo-500 mt-0.5 block">${p.badge}</span>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">${p.desc}</p>
+                        <p class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-2">${p.price}</p>
                     </div>
-                    <button onclick="addOrUpgradePlan('${p.id}')" class="mt-3 w-full py-1.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] transition">
+                    <button onclick="addOrUpgradePlan('${p.id}')" class="mt-3 w-full py-1.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] transition shadow-sm">
                         + Add / Upgrade
                     </button>
                 </div>
