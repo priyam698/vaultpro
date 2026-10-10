@@ -1724,91 +1724,125 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                 
-                <!-- Left: Premium Pure CSS 3D Showcase (No Image File Needed) -->
-                <div class="lg:col-span-6 relative flex justify-center items-center w-full min-h-[450px]">
-                    <!-- Dynamic Neon Ambient Glows -->
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-sky-500/15 rounded-full blur-[100px] pointer-events-none"></div>
-                    <div class="absolute bottom-10 right-10 w-[200px] h-[200px] bg-indigo-500/15 rounded-full blur-[80px] pointer-events-none"></div>
+                <!-- Left: Ultra-Premium True 3D CSS Scene -->
+                <div class="lg:col-span-6 relative flex justify-center items-center w-full min-h-[500px]" style="perspective: 1200px;">
+                    <!-- Ambient Core Glow -->
+                    <div class="absolute w-[450px] h-[450px] bg-sky-500/20 rounded-full blur-[120px] pointer-events-none -translate-x-10 translate-y-10"></div>
+                    <div class="absolute w-[300px] h-[300px] bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none right-0 bottom-0"></div>
 
-                    <div class="relative w-full max-w-[500px] h-[400px]">
+                    <!-- LAPTOP MOCKUP (Background, angled left into the screen) -->
+                    <div class="absolute w-[380px] sm:w-[420px] h-[260px] bg-[#090e17] rounded-2xl border border-slate-700/60 shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-10 transition-transform duration-700 hover:-translate-y-2 group cursor-default"
+                         style="transform: rotateY(-18deg) rotateX(12deg) translateZ(-60px) translateX(40px) translateY(-20px); transform-style: preserve-3d;">
                         
-                        <!-- Floating Neon Badge 1: Cross-Platform -->
-                        <div class="absolute top-[40px] right-[20px] bg-[#070d18]/80 backdrop-blur-xl border border-sky-400/40 rounded-2xl p-2.5 px-4 shadow-[0_0_20px_rgba(56,189,248,0.2)] z-10 animate-[bounce_4s_ease-in-out_infinite]">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span class="text-[11px] font-bold text-white tracking-wide">Cross-Platform PWA</span>
-                            </div>
-                        </div>
-
-                        <!-- CSS 3D Laptop Mockup (Background) -->
-                        <div class="absolute top-[80px] left-[20px] w-[340px] h-[220px] z-20 transform -rotate-3 transition-transform duration-700 hover:rotate-0 hover:-translate-y-2 group cursor-default">
-                            <!-- Laptop Screen -->
-                            <div class="w-full h-[210px] bg-[#050811] rounded-t-2xl border-[3px] border-slate-700/60 shadow-2xl relative overflow-hidden flex flex-col">
-                                <div class="w-full h-4 bg-slate-800/80 border-b border-slate-700/50 flex items-center px-2 gap-1.5">
-                                    <div class="w-2 h-2 rounded-full bg-rose-500/80"></div>
-                                    <div class="w-2 h-2 rounded-full bg-amber-500/80"></div>
-                                    <div class="w-2 h-2 rounded-full bg-emerald-500/80"></div>
+                        <!-- Laptop Screen -->
+                        <div class="w-full h-[245px] bg-[#03060a] rounded-t-xl p-2 relative overflow-hidden border-b-[4px] border-slate-800 flex flex-col">
+                            <!-- Webcam -->
+                            <div class="absolute top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-slate-700 rounded-full"></div>
+                            
+                            <!-- Screen Content UI -->
+                            <div class="w-full h-full bg-[#0a1120] rounded-lg mt-1 border border-white/5 relative overflow-hidden flex flex-col shadow-inner">
+                                <!-- Top Bar -->
+                                <div class="h-8 bg-white/[0.02] border-b border-white/5 flex items-center px-3 gap-2">
+                                    <div class="w-5 h-5 rounded bg-sky-500/20 text-sky-400 flex items-center justify-center text-[10px] font-black">Z</div>
+                                    <div class="text-[10px] text-slate-300 font-medium">Zephyr Drive Client</div>
                                 </div>
-                                <!-- Laptop Screen Content -->
-                                <div class="flex-1 relative bg-gradient-to-br from-[#0a1122] to-[#04070e] flex flex-col items-center justify-center p-6">
-                                    <!-- Grid Pattern -->
-                                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
-                                    <!-- App Icon -->
-                                    <div class="w-14 h-14 rounded-2xl bg-[#0a0f1c] border border-white/5 flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(56,189,248,0.15)] group-hover:scale-110 transition-transform duration-500">
-                                        <span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-sky-400 to-indigo-500">Z</span>
+                                <!-- Dashboard Grid Mockup -->
+                                <div class="flex-1 p-4 flex gap-4">
+                                    <div class="w-16 h-full bg-white/[0.02] rounded-lg border border-white/5 space-y-2.5 p-2">
+                                        <div class="w-full h-2 bg-slate-700/50 rounded-full"></div>
+                                        <div class="w-full h-2 bg-slate-700/50 rounded-full"></div>
+                                        <div class="w-2/3 h-2 bg-slate-700/50 rounded-full"></div>
                                     </div>
-                                    <h4 class="text-white text-xs font-bold z-10">Zephyr Desktop Client</h4>
-                                    <!-- Fake Progress Bar -->
-                                    <div class="w-32 h-1.5 bg-slate-800 rounded-full mt-4 overflow-hidden relative z-10">
-                                        <div class="absolute top-0 left-0 h-full w-2/3 bg-sky-400 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.8)]"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Laptop Base -->
-                            <div class="w-[380px] h-[10px] bg-slate-400 rounded-b-xl border-t border-slate-500 relative -left-[20px] shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
-                                <div class="w-24 h-[3px] bg-slate-300 mx-auto rounded-b-md"></div>
-                            </div>
-                        </div>
-
-                        <!-- CSS 3D Phone Mockup (Foreground) -->
-                        <div class="absolute bottom-[20px] right-[40px] w-[170px] h-[340px] z-30 transform rotate-6 transition-transform duration-700 hover:rotate-3 hover:-translate-y-4 group cursor-default">
-                            <!-- Phone Frame -->
-                            <div class="w-full h-full bg-[#050811] rounded-[34px] border-[5px] border-slate-700/80 shadow-[0_25px_50px_rgba(0,0,0,0.8),_0_0_40px_rgba(56,189,248,0.2)] relative overflow-hidden">
-                                <!-- Phone Notch -->
-                                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[70px] h-[18px] bg-slate-700/80 rounded-b-xl z-20"></div>
-                                <!-- Phone Screen Content -->
-                                <div class="w-full h-full bg-gradient-to-b from-[#0a1122] to-[#04070e] relative flex flex-col items-center justify-center p-4">
-                                    <div class="absolute top-1/4 -left-1/4 w-32 h-32 bg-sky-500/30 rounded-full blur-[40px]"></div>
-                                    
-                                    <!-- Glowing Phone App Icon -->
-                                    <div class="w-20 h-20 rounded-[22px] bg-gradient-to-tr from-sky-400 to-indigo-600 p-[1px] mb-5 shadow-[0_0_30px_rgba(56,189,248,0.4)] group-hover:scale-110 transition-transform duration-500">
-                                        <div class="w-full h-full bg-[#050811] rounded-[21px] flex items-center justify-center">
-                                            <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-sky-400 to-indigo-400">Z</span>
+                                    <div class="flex-1 space-y-3">
+                                        <div class="w-full h-20 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 rounded-xl border border-sky-500/20 flex items-center p-4 shadow-[0_0_20px_rgba(56,189,248,0.1)] group-hover:bg-sky-500/10 transition-colors">
+                                            <div class="w-12 h-12 bg-sky-500/20 rounded-lg text-sky-400 flex items-center justify-center">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            </div>
+                                            <div class="ml-3 space-y-2">
+                                                <div class="w-24 h-2 bg-slate-300 rounded-full"></div>
+                                                <div class="w-32 h-1.5 bg-slate-500 rounded-full"></div>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <h3 class="text-white font-bold text-[13px] mb-1 z-10">Install Zephyr App</h3>
-                                    <p class="text-slate-400 text-[8px] text-center mb-6 z-10">Runs in secure standalone sandbox.</p>
-
-                                    <!-- Fake Phone Install Button -->
-                                    <div class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 text-white font-bold text-[11px] shadow-[0_0_20px_rgba(56,189,248,0.5)] text-center cursor-pointer">
-                                        Install Now
+                                        <div class="w-full h-16 bg-white/[0.02] rounded-xl border border-white/5"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Laptop Base -->
+                        <div class="w-[102%] h-[12px] bg-slate-400 rounded-b-xl border-t border-slate-500 relative -left-[1%] shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
+                            <div class="w-24 h-[3px] bg-slate-300 mx-auto rounded-b-lg"></div>
+                        </div>
+                    </div>
 
-                        <!-- Floating Neon Badge 2: Supported Systems -->
-                        <div class="absolute bottom-[10px] left-[0px] bg-[#070d18]/90 backdrop-blur-xl border border-sky-500/30 rounded-2xl p-3 shadow-[0_15px_30px_rgba(0,0,0,0.5),_0_0_20px_rgba(56,189,248,0.15)] z-40 animate-[bounce_5s_ease-in-out_infinite_reverse]">
-                            <div class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-2 border-b border-sky-500/20 pb-1">Supported Systems</div>
-                            <div class="flex items-center gap-3">
-                                <div class="text-white text-xs font-semibold flex items-center gap-1">💻 Windows</div>
-                                <div class="text-white text-xs font-semibold flex items-center gap-1">🍎 macOS</div>
-                                <div class="text-white text-xs font-semibold flex items-center gap-1">📱 iOS / Android</div>
+                    <!-- PHONE MOCKUP (Foreground, popping out in 3D) -->
+                    <div class="absolute w-[200px] h-[410px] rounded-[44px] bg-[#1a2333] p-[2px] shadow-[0_40px_80px_rgba(0,0,0,0.9),0_0_50px_rgba(56,189,248,0.25)] z-30 transition-transform duration-700 hover:-translate-y-4 group cursor-default"
+                         style="transform: rotateY(15deg) rotateX(5deg) translateZ(60px) translateX(-70px) translateY(15px); transform-style: preserve-3d;">
+                        
+                        <!-- Outer Phone Bezel -->
+                        <div class="w-full h-full rounded-[42px] bg-[#050811] border-[5px] border-[#0a0f1a] relative overflow-hidden flex flex-col shadow-inner">
+                            
+                            <!-- Inner Black Border -->
+                            <div class="absolute inset-0 border-[2px] border-black rounded-[38px] pointer-events-none z-20"></div>
+                            
+                            <!-- Dynamic Island / Notch -->
+                            <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-[70px] h-[18px] bg-black rounded-full z-20 flex items-center justify-end px-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                                    <div class="w-1 h-1 rounded-full bg-sky-900"></div>
+                                </div>
+                            </div>
+
+                            <!-- Phone Screen Area -->
+                            <div class="w-full h-full bg-gradient-to-b from-[#0b1324] to-[#040812] relative flex flex-col items-center justify-center p-5">
+                                
+                                <!-- Glass Reflection Angle -->
+                                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent opacity-20 pointer-events-none z-10 -rotate-12 scale-150 transform-origin-top-left"></div>
+                                
+                                <!-- 3D App Icon Box -->
+                                <div class="w-24 h-24 bg-gradient-to-tr from-sky-400 to-indigo-500 rounded-[28px] p-[1.5px] mb-6 shadow-[0_15px_40px_rgba(56,189,248,0.4)] relative z-0 group-hover:scale-110 transition-transform duration-500 ease-out">
+                                    <div class="w-full h-full bg-[#0a1120] rounded-[27px] flex items-center justify-center relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50"></div>
+                                        <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-sky-400 to-indigo-400 drop-shadow-md">Z</span>
+                                    </div>
+                                </div>
+
+                                <h3 class="text-white font-bold text-lg mb-1 z-0">Zephyr App</h3>
+                                <p class="text-slate-400 text-[10px] text-center mb-8 z-0">Zero-Knowledge<br>Edge File Transfers.</p>
+
+                                <!-- Install Button -->
+                                <div class="w-full py-3.5 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-[13px] shadow-[0_0_25px_rgba(56,189,248,0.6)] text-center relative z-20 overflow-hidden">
+                                    <span>Install Now</span>
+                                </div>
+                                <div class="w-32 h-1 bg-white/20 rounded-full absolute bottom-2 left-1/2 -translate-x-1/2 z-20"></div>
                             </div>
                         </div>
-                        
                     </div>
+
+                    <!-- FLOATING NEON BADGE 1: PWA Status -->
+                    <div class="absolute top-[40px] right-[20px] z-20 bg-slate-900/80 backdrop-blur-md border border-sky-500/40 rounded-2xl py-2.5 px-5 shadow-[0_15px_40px_rgba(56,189,248,0.25)] animate-[bounce_4s_ease-in-out_infinite]"
+                         style="transform: translateZ(40px);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center shadow-[0_0_10px_rgba(56,189,248,0.3)]">
+                                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </div>
+                            <div>
+                                <div class="text-[9px] font-bold text-sky-400 uppercase tracking-widest leading-none mb-0.5">Status</div>
+                                <div class="text-[12px] font-bold text-white">PWA Ready</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FLOATING NEON BADGE 2: Platforms -->
+                    <div class="absolute bottom-[40px] left-[10px] z-40 bg-[#070d18]/90 backdrop-blur-md border border-indigo-500/40 rounded-2xl py-3 px-5 shadow-[0_15px_40px_rgba(99,102,241,0.25)] animate-[bounce_5s_ease-in-out_infinite_reverse]"
+                         style="transform: translateZ(90px);">
+                        <div class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Supported Systems</div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-white text-[11px] font-semibold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>Windows</span>
+                            <span class="text-white text-[11px] font-semibold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>macOS</span>
+                            <span class="text-white text-[11px] font-semibold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>Mobile</span>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Right: Text & Action Button -->
