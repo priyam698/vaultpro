@@ -1832,29 +1832,33 @@
 
                 <!-- Right: Text & Action Button (Theme Optimized) -->
                 <div class="lg:col-span-6 space-y-6 text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 dark:border-sky-500/25 text-sky-600 dark:text-sky-400 text-xs font-semibold">
+                    <!-- Progressive Web App Badge -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 dark:border-sky-500/30 text-sky-600 dark:text-sky-400 text-xs font-semibold">
                         <span class="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse"></span>
                         Progressive Web App
                     </div>
 
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                    <!-- Responsive Title (Dark in Light Mode, White in Dark Mode) -->
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight transition-colors duration-300">
                         Our app is also available — install it right now
                     </h2>
 
-                    <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
+                    <!-- Responsive Paragraph -->
+                    <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed transition-colors duration-300">
                         Experience Zephyr as a standalone, zero-friction application. Install directly to your device dock or home screen without needing an app store account.
                     </p>
 
+                    <!-- Feature Bullets -->
                     <div class="space-y-3 pt-2">
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 transition-colors duration-300">
                             <span class="text-sky-500 dark:text-sky-400 font-bold">✓</span>
                             <span>Single-click installation directly from your browser</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 transition-colors duration-300">
                             <span class="text-sky-500 dark:text-sky-400 font-bold">✓</span>
                             <span>Instant background syncing and zero-knowledge encryption</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 transition-colors duration-300">
                             <span class="text-sky-500 dark:text-sky-400 font-bold">✓</span>
                             <span>Works offline for reviewing cached encrypted receipts</span>
                         </div>
@@ -1869,14 +1873,12 @@
                             <span>Install App</span>
                         </button>
 
-                        <a href="#features" class="px-6 py-3 rounded-2xl bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-sm transition-all duration-200">
+                        <a href="#features" class="px-6 py-3 rounded-2xl bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-sm transition-all duration-300">
                             Learn more
                         </a>
                     </div>
                 </div>
-
             </div>
-        </div>
     </section>
   <!-- ========================================================================= -->
   <!-- SECTION 2: PROTECT YOUR FAVORITE MEMORIES                                 -->
