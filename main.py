@@ -4070,7 +4070,7 @@ async def create_dodo_checkout(payload: dict):
     if not product_id:
         raise HTTPException(status_code=400, detail="Invalid plan selected")
 
-    dodo_api_key = os.getenv("DODO_PAYMENTS_API_KEY")
+    dodo_api_key = os.getenv("DODO_API_KEY") or os.getenv("DODO_PAYMENTS_API_KEY")
     dodo_base = os.getenv("DODO_API_URL", "https://test.dodopayments.com")
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com")
 
