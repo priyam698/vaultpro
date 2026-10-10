@@ -4051,6 +4051,58 @@ async def email_contact_relay(payload: dict):
     admin_target = os.getenv("ADMIN_EMAIL", "priyamrana069@gmail.com")
     success = send_zephyr_email(admin_target, f"[Zephyr Support] {subject}", html)
     return {"success": success}
+
+PLAN_TIERS = {
+    "micro": {"name": "Zephyr Micro", "cents": 180, "gb": 15},
+    "lite":  {"name": "Zephyr Lite",  "cents": 250, "gb": 30},
+    "plus":  {"name": "Zephyr Plus",  "cents": 450, "gb": 80},
+    "pro":   {"name": "Zephyr Pro",   "cents": 700, "gb": 200},
+}
+
+@app.post("/api/stripe/create-checkout-session")
+async def create_storage_checkout(payload: dict):
+    user_id = payload.get("user_id")
+    plan_id = payload.get("plan_id")
+    plan = PLAN_TIERS.get(plan_id)
+
+    if not plan:
+        raise HTTPException(status_code=400, detail="Invalid plan selected")
+
+    stripe_key = os.getenv("STRIPE_SECRET_KEY")
+    if not stripe_key:
+        raise HTTPException(status_code=500, detail="Stripe API key not configured")
+
+    stripe.api_key = stripe_key
+    base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com")
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="subscription",
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": f"{plan['name']} (+{plan['gb']} GB)",
+                        "description": f"Zephyr Drive Stackable Vault Tier (+{plan['gb']} GB)",
+                    },
+                    "unit_amount": plan["cents"],
+                    "recurring": {"interval": "month"},
+                },
+                "quantity": 1,
+            }],
+            metadata={
+                "user_id": str(user_id),
+                "plan_id": str(plan_id),
+                "storage_gb": str(plan["gb"]),
+                "is_stackable": "true",
+            },
+            success_url=f"{base_url}/dashboard?payment=success",
+            cancel_url=f"{base_url}/dashboard?payment=cancelled",
+        )
+        return {"url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
