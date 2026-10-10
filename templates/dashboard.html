@@ -916,13 +916,13 @@ body {
       </div>
 
       <div class="flex items-center gap-2.5">
-        <button onclick="document.getElementById('plansModal').classList.remove('hidden')" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
-          <span>⚡</span><span>Your Plans</span>
-        </button>
+        <button onclick="openPlansModal()" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
+    <span>⚡</span><span>Your Plans</span>
+</button>
 
-        <button onclick="document.getElementById('brandingModal').classList.remove('hidden')" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
-          <span>🎨</span><span>Branding</span>
-        </button>
+        <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
+    <span>🎨</span><span>Branding</span>
+</button>
 
         
 
@@ -4293,5 +4293,39 @@ window.addEventListener('appinstalled', () => {
     if (btn) btn.style.display = 'none';
 });
 </script>
+<!-- Dashboard Modal Controllers -->
+    <script>
+        // Plans Modal
+        function openPlansModal() {
+            const modal = document.getElementById('plansModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex'; // Brute-force open
+            }
+        }
+        function closePlansModal() {
+            const modal = document.getElementById('plansModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none'; // Brute-force close
+            }
+        }
+
+        // Branding Modal
+        function openBrandingModal() {
+            const modal = document.getElementById('brandingModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex'; // Brute-force open
+            }
+        }
+        function closeBrandingModal() {
+            const modal = document.getElementById('brandingModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none'; // Brute-force close
+            }
+        }
+    </script>
 </body>
 </html>
