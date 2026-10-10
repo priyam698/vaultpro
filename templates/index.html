@@ -1838,27 +1838,27 @@
                         Progressive Web App
                     </div>
 
-                    <!-- Title (Dark Gray in Light Mode, White in Dark Mode) -->
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                    <!-- Title (FORCED Black in Light Mode, White in Dark Mode) -->
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight !text-black dark:!text-white leading-tight">
                         Our app is also available — install it right now
                     </h2>
 
-                    <!-- Paragraph (Gray in Light Mode, Light Gray in Dark Mode) -->
-                    <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
+                    <!-- Paragraph (FORCED Dark Gray in Light Mode, Light Gray in Dark Mode) -->
+                    <p class="!text-gray-700 dark:!text-gray-300 text-sm sm:text-base leading-relaxed">
                         Experience Zephyr as a standalone, zero-friction application. Install directly to your device dock or home screen without needing an app store account.
                     </p>
 
-                    <!-- Feature Bullets -->
+                    <!-- Feature Bullets (FORCED Dark text in Light Mode) -->
                     <div class="space-y-3 pt-2">
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm !text-gray-800 dark:!text-gray-200">
                             <span class="text-sky-600 dark:text-sky-400 font-bold">✓</span>
                             <span>Single-click installation directly from your browser</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm !text-gray-800 dark:!text-gray-200">
                             <span class="text-sky-600 dark:text-sky-400 font-bold">✓</span>
                             <span>Instant background syncing and zero-knowledge encryption</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm !text-gray-800 dark:!text-gray-200">
                             <span class="text-sky-600 dark:text-sky-400 font-bold">✓</span>
                             <span>Works offline for reviewing cached encrypted receipts</span>
                         </div>
@@ -1866,14 +1866,14 @@
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-wrap items-center gap-4 pt-4">
-                        <button onclick="triggerAppInstall()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-[0_10px_20px_rgba(56,189,248,0.2)] dark:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-200 active:scale-95 cursor-pointer">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="triggerAppInstall()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 !text-white font-semibold text-sm shadow-[0_10px_20px_rgba(56,189,248,0.2)] dark:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-200 active:scale-95 cursor-pointer">
+                            <svg class="w-4 h-4 !text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
                             <span>Install App</span>
                         </button>
 
-                        <a href="#features" class="px-6 py-3 rounded-2xl bg-slate-200/60 dark:bg-white/[0.04] hover:bg-slate-300/80 dark:hover:bg-white/[0.08] border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-sm transition-all duration-200">
+                        <a href="#features" class="px-6 py-3 rounded-2xl bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] border border-black/10 dark:border-white/10 !text-black dark:!text-white font-medium text-sm transition-all duration-200">
                             Learn more
                         </a>
                     </div>
