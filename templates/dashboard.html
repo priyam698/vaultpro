@@ -915,13 +915,15 @@ body {
         <span id="tierBadge" class="badge-pro text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">★ PRO</span>
       </div>
 
-      <button onclick="openPlansModal(); document.getElementById('plansModal').setAttribute('style', 'display: flex !important;');" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
-    <span>⚡</span><span>Your Plans</span>
-</button>
+     <div class="flex items-center gap-2.5">
+    <button onclick="openPlansModal()" class="btn-plans header-pill text-xs font-bold border px-3 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-indigo-500/10 text-indigo-300 border-indigo-500/25 hover:border-indigo-400/50">
+        <span>⚡</span><span>Your Plans</span>
+    </button>
 
-<button onclick="openBrandingModal(); document.getElementById('brandingModal').setAttribute('style', 'display: flex !important;');" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
-    <span>🎨</span><span>Branding</span>
-</button>
+    <button onclick="openBrandingModal()" class="btn-branding header-pill text-xs font-bold border px-3.5 py-1.5 rounded-full transition flex items-center gap-1.5 cursor-pointer bg-purple-500/10 text-purple-300 border-purple-500/25 hover:border-purple-400/50">
+        <span>🎨</span><span>Branding</span>
+    </button>
+</div>
 
         
 
@@ -4291,7 +4293,27 @@ window.addEventListener('appinstalled', () => {
     const btn = document.getElementById('zephyrInstallBtn');
     if (btn) btn.style.display = 'none';
 });
+function openPlansModal() {
+    const modal = document.getElementById("plansModal");
+    if (modal) modal.classList.remove("hidden");
+}
+
+function closePlansModal() {
+    const modal = document.getElementById("plansModal");
+    if (modal) modal.classList.add("hidden");
+}
+
+function openBrandingModal() {
+    const modal = document.getElementById("brandingModal");
+    if (modal) modal.classList.remove("hidden");
+}
+
+function closeBrandingModal() {
+    const modal = document.getElementById("brandingModal");
+    if (modal) modal.classList.add("hidden");
+}
 </script>
+
 
 </body>
 </html>
