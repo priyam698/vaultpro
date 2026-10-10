@@ -1724,20 +1724,90 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                 
-                <!-- Left: Premium 3D Device Showcase Graphic -->
-                <div class="lg:col-span-6 relative flex justify-center items-center w-full min-h-[400px] group">
-                    <!-- Dynamic Ambient Glows (Matches the neon vibe of the image) -->
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-sky-500/20 rounded-full blur-[100px] group-hover:bg-sky-500/30 transition-colors duration-700"></div>
-                        <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-indigo-500/20 rounded-full blur-[100px] group-hover:bg-indigo-500/30 transition-colors duration-700"></div>
-                    </div>
+                <!-- Left: Premium Pure CSS 3D Showcase (No Image File Needed) -->
+                <div class="lg:col-span-6 relative flex justify-center items-center w-full min-h-[450px]">
+                    <!-- Dynamic Neon Ambient Glows -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-sky-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div class="absolute bottom-10 right-10 w-[200px] h-[200px] bg-indigo-500/15 rounded-full blur-[80px] pointer-events-none"></div>
 
-                    <!-- The Premium Image Element -->
-                    <div class="relative z-10 w-full max-w-[550px] transform transition-all duration-700 hover:-translate-y-2 hover:scale-[1.02]">
-                        <!-- Links to the image in your static folder -->
-                        <img src="/static/pwa-showcase.png" 
-                             alt="Zephyr Standalone App Features" 
-                             class="w-full h-auto object-contain drop-shadow-[0_20px_40px_rgba(8,145,178,0.2)]" />
+                    <div class="relative w-full max-w-[500px] h-[400px]">
+                        
+                        <!-- Floating Neon Badge 1: Cross-Platform -->
+                        <div class="absolute top-[40px] right-[20px] bg-[#070d18]/80 backdrop-blur-xl border border-sky-400/40 rounded-2xl p-2.5 px-4 shadow-[0_0_20px_rgba(56,189,248,0.2)] z-10 animate-[bounce_4s_ease-in-out_infinite]">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span class="text-[11px] font-bold text-white tracking-wide">Cross-Platform PWA</span>
+                            </div>
+                        </div>
+
+                        <!-- CSS 3D Laptop Mockup (Background) -->
+                        <div class="absolute top-[80px] left-[20px] w-[340px] h-[220px] z-20 transform -rotate-3 transition-transform duration-700 hover:rotate-0 hover:-translate-y-2 group cursor-default">
+                            <!-- Laptop Screen -->
+                            <div class="w-full h-[210px] bg-[#050811] rounded-t-2xl border-[3px] border-slate-700/60 shadow-2xl relative overflow-hidden flex flex-col">
+                                <div class="w-full h-4 bg-slate-800/80 border-b border-slate-700/50 flex items-center px-2 gap-1.5">
+                                    <div class="w-2 h-2 rounded-full bg-rose-500/80"></div>
+                                    <div class="w-2 h-2 rounded-full bg-amber-500/80"></div>
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500/80"></div>
+                                </div>
+                                <!-- Laptop Screen Content -->
+                                <div class="flex-1 relative bg-gradient-to-br from-[#0a1122] to-[#04070e] flex flex-col items-center justify-center p-6">
+                                    <!-- Grid Pattern -->
+                                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+                                    <!-- App Icon -->
+                                    <div class="w-14 h-14 rounded-2xl bg-[#0a0f1c] border border-white/5 flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(56,189,248,0.15)] group-hover:scale-110 transition-transform duration-500">
+                                        <span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-sky-400 to-indigo-500">Z</span>
+                                    </div>
+                                    <h4 class="text-white text-xs font-bold z-10">Zephyr Desktop Client</h4>
+                                    <!-- Fake Progress Bar -->
+                                    <div class="w-32 h-1.5 bg-slate-800 rounded-full mt-4 overflow-hidden relative z-10">
+                                        <div class="absolute top-0 left-0 h-full w-2/3 bg-sky-400 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.8)]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Laptop Base -->
+                            <div class="w-[380px] h-[10px] bg-slate-400 rounded-b-xl border-t border-slate-500 relative -left-[20px] shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
+                                <div class="w-24 h-[3px] bg-slate-300 mx-auto rounded-b-md"></div>
+                            </div>
+                        </div>
+
+                        <!-- CSS 3D Phone Mockup (Foreground) -->
+                        <div class="absolute bottom-[20px] right-[40px] w-[170px] h-[340px] z-30 transform rotate-6 transition-transform duration-700 hover:rotate-3 hover:-translate-y-4 group cursor-default">
+                            <!-- Phone Frame -->
+                            <div class="w-full h-full bg-[#050811] rounded-[34px] border-[5px] border-slate-700/80 shadow-[0_25px_50px_rgba(0,0,0,0.8),_0_0_40px_rgba(56,189,248,0.2)] relative overflow-hidden">
+                                <!-- Phone Notch -->
+                                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[70px] h-[18px] bg-slate-700/80 rounded-b-xl z-20"></div>
+                                <!-- Phone Screen Content -->
+                                <div class="w-full h-full bg-gradient-to-b from-[#0a1122] to-[#04070e] relative flex flex-col items-center justify-center p-4">
+                                    <div class="absolute top-1/4 -left-1/4 w-32 h-32 bg-sky-500/30 rounded-full blur-[40px]"></div>
+                                    
+                                    <!-- Glowing Phone App Icon -->
+                                    <div class="w-20 h-20 rounded-[22px] bg-gradient-to-tr from-sky-400 to-indigo-600 p-[1px] mb-5 shadow-[0_0_30px_rgba(56,189,248,0.4)] group-hover:scale-110 transition-transform duration-500">
+                                        <div class="w-full h-full bg-[#050811] rounded-[21px] flex items-center justify-center">
+                                            <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-sky-400 to-indigo-400">Z</span>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="text-white font-bold text-[13px] mb-1 z-10">Install Zephyr App</h3>
+                                    <p class="text-slate-400 text-[8px] text-center mb-6 z-10">Runs in secure standalone sandbox.</p>
+
+                                    <!-- Fake Phone Install Button -->
+                                    <div class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 text-white font-bold text-[11px] shadow-[0_0_20px_rgba(56,189,248,0.5)] text-center cursor-pointer">
+                                        Install Now
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating Neon Badge 2: Supported Systems -->
+                        <div class="absolute bottom-[10px] left-[0px] bg-[#070d18]/90 backdrop-blur-xl border border-sky-500/30 rounded-2xl p-3 shadow-[0_15px_30px_rgba(0,0,0,0.5),_0_0_20px_rgba(56,189,248,0.15)] z-40 animate-[bounce_5s_ease-in-out_infinite_reverse]">
+                            <div class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-2 border-b border-sky-500/20 pb-1">Supported Systems</div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-white text-xs font-semibold flex items-center gap-1">💻 Windows</div>
+                                <div class="text-white text-xs font-semibold flex items-center gap-1">🍎 macOS</div>
+                                <div class="text-white text-xs font-semibold flex items-center gap-1">📱 iOS / Android</div>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
 
