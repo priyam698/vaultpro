@@ -2940,33 +2940,57 @@
 
       </div>
 <!-- ========================================== -->
-    <!-- FOOTER INSTALL BANNER (Size & Theme Fixed) -->
+    <!-- ========================================== -->
+    <!-- FOOTER INSTALL BANNER (Compiler-Bypass Fixed) -->
     <!-- ========================================== -->
     <div class="my-8 max-w-4xl mx-auto px-4 sm:px-6 w-full">
-        <!-- Banner Container: Forced White in Day, Dark in Night -->
-        <div class="relative p-5 sm:p-6 rounded-3xl !bg-white dark:!bg-[#0b1120] border !border-slate-200 dark:!border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col sm:flex-row items-center justify-between gap-5 overflow-hidden">
+        
+        <!-- Raw CSS to force Light Theme colors (bypasses Tailwind compiler) -->
+        <style>
+            body.light-theme #bottom-install-card {
+                background-color: #ffffff !important;
+                border-color: #e2e8f0 !important;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
+            }
+            body.light-theme #bottom-install-card h4 { color: #0f172a !important; }
+            body.light-theme #bottom-install-card p { color: #475569 !important; }
+            
+            body.light-theme #bottom-install-card .app-icon-bg {
+                background-color: #f0f9ff !important;
+                border-color: #bae6fd !important;
+            }
+            body.light-theme #bottom-install-card .app-icon-svg { color: #0ea5e9 !important; }
+            
+            body.light-theme #bottom-install-card button {
+                background: #0f172a !important; /* Jet Black button in Day mode */
+                color: #ffffff !important;
+            }
+        </style>
+
+        <!-- Banner Container (Defaults to Dark Mode styles, overridden by CSS above in Day mode) -->
+        <div id="bottom-install-card" class="relative p-5 sm:p-6 rounded-3xl bg-[#0b1120] border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-5 overflow-hidden transition-all duration-300">
             
             <!-- Icon & Text -->
             <div class="flex items-center gap-4 relative z-10 w-full sm:w-auto text-left">
                 <!-- App Icon -->
-                <div class="w-12 h-12 rounded-xl !bg-sky-500/10 border !border-sky-500/20 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 !text-sky-500 dark:!text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="app-icon-bg w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="app-icon-svg w-6 h-6 text-sky-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                 </div>
                 <!-- Copy -->
                 <div>
-                    <h4 class="text-base sm:text-lg font-bold !text-slate-900 dark:!text-white mb-0.5 tracking-tight">
+                    <h4 class="text-base sm:text-lg font-bold text-white mb-0.5 tracking-tight transition-colors">
                         Install Zephyr on your device
                     </h4>
-                    <p class="text-xs sm:text-sm !text-slate-500 dark:!text-slate-400">
+                    <p class="text-xs sm:text-sm text-slate-400 transition-colors">
                         Launch zero-knowledge transfers directly from your desktop or mobile.
                     </p>
                 </div>
             </div>
 
-            <!-- Install Button: Forced Black in Day, Gradient in Night -->
-            <button onclick="triggerAppInstall()" class="w-full sm:w-auto shrink-0 px-6 py-2.5 rounded-xl !bg-slate-900 dark:!bg-gradient-to-r dark:from-sky-500 dark:to-indigo-600 !text-white font-semibold text-sm shadow-md transition-transform active:scale-95 relative z-10">
+            <!-- Install Button -->
+            <button onclick="triggerAppInstall()" class="w-full sm:w-auto shrink-0 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-semibold text-sm shadow-md transition-all active:scale-95 relative z-10">
                 Install App
             </button>
             
