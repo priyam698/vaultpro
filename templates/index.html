@@ -2940,38 +2940,33 @@
 
       </div>
 <!-- ========================================== -->
-    <!-- FOOTER INSTALL BANNER (Theme Optimized) -->
+    <!-- FOOTER INSTALL BANNER (Size & Theme Fixed) -->
     <!-- ========================================== -->
-    <div class="my-12 max-w-6xl mx-auto px-6 w-full">
-        <!-- Banner Container -->
-        <div class="relative p-6 sm:p-8 rounded-[2rem] bg-white dark:bg-[#070b14] border border-slate-200 dark:border-white/5 shadow-[0_10px_40px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-300 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden">
+    <div class="my-8 max-w-4xl mx-auto px-4 sm:px-6 w-full">
+        <!-- Banner Container: Forced White in Day, Dark in Night -->
+        <div class="relative p-5 sm:p-6 rounded-3xl !bg-white dark:!bg-[#0b1120] border !border-slate-200 dark:!border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col sm:flex-row items-center justify-between gap-5 overflow-hidden">
             
-            <!-- Dark Mode Ambient Glow (Hidden in Light Mode) -->
-            <div class="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
-                <div class="absolute -top-20 -right-20 w-64 h-64 bg-transparent dark:bg-sky-500/10 rounded-full blur-3xl"></div>
-            </div>
-
             <!-- Icon & Text -->
-            <div class="flex items-center gap-5 relative z-10 w-full sm:w-auto text-left">
+            <div class="flex items-center gap-4 relative z-10 w-full sm:w-auto text-left">
                 <!-- App Icon -->
-                <div class="w-14 h-14 rounded-2xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 flex items-center justify-center shrink-0 transition-colors duration-300">
-                    <svg class="w-7 h-7 text-sky-500 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-12 h-12 rounded-xl !bg-sky-500/10 border !border-sky-500/20 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 !text-sky-500 dark:!text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                 </div>
                 <!-- Copy -->
                 <div>
-                    <h4 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white transition-colors duration-300 mb-0.5">
+                    <h4 class="text-base sm:text-lg font-bold !text-slate-900 dark:!text-white mb-0.5 tracking-tight">
                         Install Zephyr on your device
                     </h4>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
-                        Launch zero-knowledge transfers directly from your desktop dock or mobile home screen.
+                    <p class="text-xs sm:text-sm !text-slate-500 dark:!text-slate-400">
+                        Launch zero-knowledge transfers directly from your desktop or mobile.
                     </p>
                 </div>
             </div>
 
-            <!-- Dynamic Install Button -->
-            <button onclick="triggerAppInstall()" class="w-full sm:w-auto shrink-0 px-8 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-gradient-to-r dark:from-sky-500 dark:to-indigo-600 dark:hover:from-sky-400 dark:hover:to-indigo-500 text-white font-semibold text-sm shadow-xl dark:shadow-[0_10px_20px_rgba(56,189,248,0.2)] transition-all duration-200 active:scale-95 relative z-10">
+            <!-- Install Button: Forced Black in Day, Gradient in Night -->
+            <button onclick="triggerAppInstall()" class="w-full sm:w-auto shrink-0 px-6 py-2.5 rounded-xl !bg-slate-900 dark:!bg-gradient-to-r dark:from-sky-500 dark:to-indigo-600 !text-white font-semibold text-sm shadow-md transition-transform active:scale-95 relative z-10">
                 Install App
             </button>
             
