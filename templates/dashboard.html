@@ -1003,6 +1003,42 @@ body {
       </div>
     </div>
 
+    <!-- ========================================== -->
+<!-- ZEPHYR APP IS AVAILABLE BANNER -->
+<!-- ========================================== -->
+<div id="zephyrAppInstallBanner" class="p-4 sm:p-5 rounded-2xl bg-[#090d16] border border-sky-500/25 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+    <div class="flex items-center gap-3.5 text-left w-full sm:w-auto">
+        <!-- Glowing Device Icon -->
+        <div class="w-11 h-11 rounded-xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-center text-sky-400 shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        
+        <!-- Attractive Title & Subtitle -->
+        <div>
+            <div class="flex items-center gap-2">
+                <h4 class="text-sm sm:text-base font-bold text-white tracking-wide">
+                    Our App Is Also Available — Install It Right Now
+                </h4>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                    PWA Ready
+                </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">
+                Launch zero-knowledge transfers directly from your desktop dock or mobile home screen.
+            </p>
+        </div>
+    </div>
+
+    <!-- Small Attractive Install Button -->
+    <button id="zephyrInstallBtn" onclick="triggerAppInstall()" class="shrink-0 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-sky-300 bg-sky-950/60 hover:bg-sky-500/20 border border-sky-500/35 hover:border-sky-400/60 rounded-xl transition-all duration-200 active:scale-95 shadow-[0_0_15px_rgba(56,189,248,0.2)] cursor-pointer group">
+        <svg class="w-4 h-4 text-sky-400 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        <span>Install App</span>
+    </button>
+</div>
     <!-- Encrypted Vault Files Table -->
     <div class="obsidian-card rounded-3xl p-6 sm:p-8 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -1011,14 +1047,7 @@ body {
           <p class="text-xs text-slate-400 mt-0.5">Stored with zero-knowledge encryption across Cloudflare R2 edge nodes.</p>
         </div>
 
-        <div class="flex items-center justify-start sm:justify-end">
-                <button id="zephyrInstallBtn" onclick="triggerAppInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sky-300 hover:text-white bg-sky-950/40 hover:bg-sky-500/20 border border-sky-500/30 hover:border-sky-400/50 rounded-xl transition-all duration-200 active:scale-95 shadow-[0_0_10px_rgba(56,189,248,0.12)] cursor-pointer">
-                    <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    <span>Install App</span>
-                </button>
-            </div>
+        
       </div>
 
       <!-- Client-Side Zero-Knowledge Search Bar -->
