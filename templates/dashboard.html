@@ -4294,7 +4294,7 @@ async function triggerAppInstall() {
         if (btn) btn.style.display = 'none';
     });
 
-    function openPlansModal() {
+   function openPlansModal() {
         fetch(`/api/user-subscriptions?user_id=${currentUserId}`)
             .then(r => r.json())
             .then(subs => {
@@ -4328,7 +4328,7 @@ async function triggerAppInstall() {
         const modal = document.getElementById("plansModal");
         if (modal) {
             modal.classList.remove("hidden");
-            modal.style.display = "flex";
+            modal.setAttribute("style", "display: flex !important;");
         }
     }
 
@@ -4336,7 +4336,7 @@ async function triggerAppInstall() {
         const modal = document.getElementById("plansModal");
         if (modal) {
             modal.classList.add("hidden");
-            modal.style.display = "none";
+            modal.setAttribute("style", "display: none !important;");
         }
     }
 
@@ -4344,7 +4344,7 @@ async function triggerAppInstall() {
         const modal = document.getElementById("brandingModal");
         if (modal) {
             modal.classList.remove("hidden");
-            modal.style.display = "flex";
+            modal.setAttribute("style", "display: flex !important;");
         }
     }
 
@@ -4352,20 +4352,20 @@ async function triggerAppInstall() {
         const modal = document.getElementById("brandingModal");
         if (modal) {
             modal.classList.add("hidden");
-            modal.style.display = "none";
+            modal.setAttribute("style", "display: none !important;");
         }
     }
-
-    async function toggleAutoRenew(subId, isAuto) {
-        try {
-            await fetch("/api/user-subscriptions/toggle-auto-renew", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
-            });
-        } catch (e) {}
-    }
       
+      async function toggleAutoRenew(subId, isAuto) {
+    try {
+        await fetch("/api/user-subscriptions/toggle-auto-renew", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
+        });
+    } catch (e) {}
+}
+
 </script>
 
 
