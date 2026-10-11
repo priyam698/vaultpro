@@ -4433,25 +4433,68 @@ async function triggerAppInstall() {
                     document.getElementById("stackedCapacityBadge").innerText = `Total: ${stackedGb} GB`;
                 }
 
-                // Sync main dashboard widget to stacked total (245 GB)
-                updateDashboardVaultDisplay(stackedGb);
+                // Sync main dashboard widget to stacked total
+        updateDashboardVaultDisplay(stackedGb);
 
-                // Render available plans with 3 TB ceiling check
-                renderAvailablePlans(stackedGb);
-            });
-
-        const modal = document.getElementById("plansModal");
-        if (modal) {
-            modal.classList.remove("hidden");
-            modal.setAttribute("style", "display: flex !important;");
+        // Check if user has reached the 3 TB (3,000 GB) limit
+        if (stackedGb >= 3000) {
+            flashSubscriptionLimitBanner();
         }
+
+        // Render available plans with 3 TB ceiling check
+        renderAvailablePlans(stackedGb);
+      });
+
+    const modal = document.getElementById("plansModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.setAttribute("style", "display: flex !important;");
     }
+}
 
-    function renderAvailablePlans(currentStackedGb) {
-        const availableList = document.getElementById("availablePlansList");
-        if (!availableList) return;
+// 1. Function to flash the warning banner on screen
+function flashSubscriptionLimitBanner() {
+    let existingBanner = document.getElementById("subLimitFlashBanner");
+    if (existingBanner) existingBanner.remove();
 
-        const MAX_STORAGE_GB = 3000; // 3 TB Lifetime Stacking Ceiling
+    const banner = document.createElement("div");
+    banner.id = "subLimitFlashBanner";
+    banner.className = "animate-bounce";
+    banner.style.cssText = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999999; background: #dc2626; color: #ffffff; padding: 14px 24px; border-radius: 16px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.6); display: flex; items-center; gap: 12px; border: 1px solid rgba(255,255,255,0.3);";
+    banner.innerHTML = `
+        <span style="font-size: 20px;">🛑</span>
+        <span>Subscription limit reached: Maximum vault capacity of 3 TB (3,000 GB) reached.</span>
+        <button onclick="this.parentElement.remove()" style="margin-left: 12px; background: rgba(0,0,0,0.25); border: none; color: white; border-radius: 8px; padding: 2px 8px; cursor: pointer;">✕</button>
+    `;
+    document.body.appendChild(banner);
+
+    // Auto-dismiss after 6 seconds
+    setTimeout(() => {
+        if (banner) banner.remove();
+    }, 6000);
+}
+
+// 2. Stop new subscription demand when rendering available plans
+function renderAvailablePlans(currentStackedGb) {
+    const availableList = document.getElementById("availablePlansList");
+    if (!availableList) return;
+
+    const MAX_STORAGE_GB = 3000; // 3 TB Lifetime Stacking Ceiling
+
+    // If already at or above 3 TB, stop purchase options and display limit banner
+    if (currentStackedGb >= MAX_STORAGE_GB) {
+        availableList.innerHTML = `
+            <div class="col-span-full p-6 rounded-2xl bg-red-950/40 border border-red-500/50 text-center animate-pulse">
+                <div class="text-3xl mb-2">🛑</div>
+                <h4 class="text-white font-bold text-base mb-1">Subscription Limit Reached</h4>
+                <p class="text-red-200/80 text-xs leading-relaxed max-w-md mx-auto">
+                    You have reached the maximum vault storage limit of <strong class="text-white">3 TB (3,000 GB)</strong>. 
+                    New subscription requests for this account have been paused.
+                </p>
+            </div>
+        `;
+        return;
+    }
         const plans = [
             { id: "micro", name: "Zephyr Micro", badge: "Starter Plus", gb: 15, price: "$1.80/mo", priceUsd: 1.80, desc: "Extra lightweight storage for personal archives." },
             { id: "lite", name: "Zephyr Lite", badge: "Essential", gb: 30, price: "$2.50/mo", priceUsd: 2.50, desc: "Dedicated vault for students & project sharing." },

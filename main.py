@@ -157,7 +157,7 @@ PLAN_CONFIG = {
     "pro":   {"name": "Zephyr Pro",   "price": 7.00, "quota": 200 * 1024**3, "single_mb": 50000, "esign_daily": -1}
 }
 
-MAX_VAULT_BYTES = 600 * 1024**3  # Strict 600 GB Maximum Ceiling
+MAX_VAULT_BYTES = 3000 * 1024**3  # Strict 3000 GB (3 TB) Maximum Ceiling
 
 DODO_PRODUCT_MAP = {
     "pdt_0NoSL8gp9fUEk5GKwdB1O": "micro",
@@ -3622,7 +3622,7 @@ async def calculate_prorated_upgrade(payload: UpgradeQuoteRequest):
         if new_total_quota > MAX_VAULT_BYTES:
             raise HTTPException(
                 status_code=400,
-                detail=f"Maximum storage limit reached. Net cumulative vault storage cannot exceed 600 GB."
+                detail="Subscription limit reached. Net cumulative vault storage cannot exceed 3 TB (3000 GB)."
             )
         final_amount = round(target["price"] + surcharge, 2)
     else:
