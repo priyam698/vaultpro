@@ -1419,9 +1419,15 @@ async function shareFile(fileId, filename) {
       renderFiles(filtered);
     }
 
+   
+
     async function openDriveStudio(fileId) {
-      const file = allFiles.find(f => f.id === fileId);
-      if (!file) return;
+      const file = allFiles.find(f => f.id == fileId);
+    if (!file) {
+        // Fallback for non-studio files (like .exe or installers)
+        window.open(`/api/drive/stream/${encodeURIComponent(fileId)}?user_id=${encodeURIComponent(currentUserId)}`, '_blank');
+        return;
+    }
 
       activeStudioFile = file;
       isStudioModified = false;
@@ -4018,14 +4024,27 @@ async function shareFile(fileId, filename) {
       }
     }
 
-    function closeRenameModal() { document.getElementById("renameModal").classList.add("hidden"); }
-    let renamingFileId = null;
-
-    function openRenameModal(fileId, currentName) {
-      renamingFileId = fileId;
-      document.getElementById("renameInput").value = currentName;
-      document.getElementById("renameModal").classList.remove("hidden");
+   function closeRenameModal() {
+    const modal = document.getElementById("renameModal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
     }
+    renamingFileId = null;
+}
+
+let renamingFileId = null;
+
+function openRenameModal(fileId, currentName) {
+    renamingFileId = fileId;
+    const input = document.getElementById("renameInput");
+    if (input) input.value = currentName || "";
+    const modal = document.getElementById("renameModal");
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+    }
+}
 
     async function submitRename() {
       const newName = document.getElementById("renameInput").value.trim();
