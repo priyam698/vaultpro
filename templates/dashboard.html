@@ -4028,7 +4028,7 @@ async function shareFile(fileId, filename) {
     const modal = document.getElementById("renameModal");
     if (modal) {
         modal.classList.add("hidden");
-        modal.style.display = "none";
+        modal.style.cssText = "display: none !important;";
     }
     renamingFileId = null;
 }
@@ -4039,10 +4039,15 @@ function openRenameModal(fileId, currentName) {
     renamingFileId = fileId;
     const input = document.getElementById("renameInput");
     if (input) input.value = currentName || "";
+
     const modal = document.getElementById("renameModal");
     if (modal) {
+        // Moves modal directly to <body> so no parent container can hide it
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
         modal.classList.remove("hidden");
-        modal.style.display = "flex";
+        modal.style.cssText = "display: flex !important; z-index: 99999 !important; position: fixed !important; inset: 0 !important;";
     }
 }
 
