@@ -935,6 +935,18 @@ body {
         </div>
     </div>
   </header>
+  <!-- Flashing Storage & Expiration Warning Banner -->
+<div id="storageAlertBanner" class="hidden mx-auto max-w-7xl px-6 pt-4">
+    <div class="p-4 rounded-2xl border border-red-500/60 bg-red-950/80 text-red-200 text-sm flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md shadow-2xl animate-pulse">
+        <div class="flex items-center gap-3 text-center sm:text-left">
+            <span class="text-2xl">⚠️</span>
+            <span id="storageAlertText" class="font-semibold text-xs sm:text-sm"></span>
+        </div>
+        <button onclick="openPlansModal()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs whitespace-nowrap shadow-lg transition-transform active:scale-95">
+            Upgrade Plan
+        </button>
+    </div>
+</div>
 
   <!-- Main Content -->
   <main class="relative z-20 max-w-7xl mx-auto px-6 py-8 flex-1 space-y-6 w-full">
@@ -983,7 +995,7 @@ body {
 
     <!-- Compact Drop Zone -->
     <div id="dropZoneContainer" class="obsidian-card rounded-2xl py-3.5 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer border-2 border-dashed border-white/15 hover:border-indigo-400/60 transition duration-200 group" onclick="document.getElementById('driveFileInput').click()">
-      <input type="file" id="driveFileInput" multiple class="hidden">
+      <input type="file" id="driveFileInput" multiple accept="*/*" class="hidden">
       
       <div class="flex items-center gap-3.5 text-center sm:text-left">
         <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition shrink-0">☁️</div>
@@ -4615,16 +4627,64 @@ function renderAvailablePlans(currentStackedGb) {
         }
     }
 
-    async function toggleAutoRenew(subId, isAuto) {
-        try {
-            await fetch("/api/user-subscriptions/toggle-auto-renew", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: currentUserId, subscription_id: subId, auto_renew: isAuto })
-            });
-        } catch (e) {}
-    }
+   async function toggleAutoRenew(subscriptionId, isChecked) {
+    try {
+        const res = await fetch("/api/user-subscriptions/toggle-auto-renew", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                subscription_id: subscriptionId,
+                auto_renew: isChecked,
+                user_id: currentUserId
+            })
+        });
+        const data = await res.json();
 
+        if (!res.ok) {
+            throw new Error(data.detail || "Failed to update auto-renewal");
+        }
+
+        if (!isChecked) {
+            // Flash confirmation with the exact 5-day post-expiration deletion date
+            alert(
+                `⚠️ AUTO-RENEW CANCELLED\n\n` +
+                `1. No money will be auto-deducted when this plan expires.\n` +
+                `2. Plan Expiration Date: ${data.ends_at}\n` +
+                `3. Final Deletion Date: ${data.delete_date}\n\n` +
+                `Notice: You have a 5-day grace period after expiration. If you do not renew or upgrade before ${data.delete_date}, any excess data beyond your active quota will be permanently deleted.`
+            );
+        } else {
+            alert("✅ Auto-renewal enabled. Your subscription will renew automatically at expiration.");
+        }
+    } catch (err) {
+        alert("Error updating auto-renewal: " + err.message);
+        if (typeof openPlansModal === "function") openPlansModal();
+    }
+}
+// Check storage capacity and grace period status on page load
+document.addEventListener("DOMContentLoaded", checkAccountStorageStatus);
+
+async function checkAccountStorageStatus() {
+    try {
+        const uid = typeof currentUserId !== "undefined" ? currentUserId : (window.currentUserId || "");
+        if (!uid) return;
+        
+        const res = await fetch(`/api/drive/storage-alert?user_id=${uid}`);
+        const data = await res.json();
+
+        const banner = document.getElementById("storageAlertBanner");
+        const bannerText = document.getElementById("storageAlertText");
+
+        if (data && data.message && banner && bannerText) {
+            bannerText.innerText = data.message;
+            banner.classList.remove("hidden");
+        } else if (banner) {
+            banner.classList.add("hidden");
+        }
+    } catch (e) {
+        console.error("Storage status check failed:", e);
+    }
+}
 </script>
 
 

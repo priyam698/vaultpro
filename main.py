@@ -885,7 +885,16 @@ async def toggle_auto_renew(req: ToggleAutoRenewRequest):
     conn.commit()
     conn.close()
 
-    return {"status": "success", "auto_renew": req.auto_renew}
+    end_dt = sub.get("subscription_end_at") or (datetime.utcnow() + timedelta(days=30))
+    end_date_str = str(end_dt)[:10]
+    delete_date = (end_dt + timedelta(days=5)).strftime("%Y-%m-%d")
+
+    return {
+        "status": "success",
+        "auto_renew": req.auto_renew,
+        "ends_at": end_date_str,
+        "delete_date": delete_date
+    }
 
 @app.get("/api/clean-duplicates")
 async def clean_duplicates(user_id: str):
@@ -913,6 +922,58 @@ async def clean_duplicates(user_id: str):
     conn.commit()
     conn.close()
     return {"status": "success", "message": "Cleaned up 2 duplicate Micro plans. Storage reduced by 30 GB!"}
+@app.get("/api/drive/storage-alert")
+async def get_storage_alert(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    now = datetime.utcnow()
+
+    # 1. Total storage used by user files
+    cursor.execute("SELECT COALESCE(SUM(file_size), 0) FROM files WHERE user_id = %s", (user_id,))
+    used_res = cursor.fetchone()
+    used_bytes = (used_res[0] if isinstance(used_res, tuple) else (used_res.get("coalesce", 0) if used_res else 0)) or 0
+
+    # 2. Total active unexpired quota
+    cursor.execute("""
+        SELECT COALESCE(SUM(quota_bytes), 0) 
+        FROM user_subscriptions 
+        WHERE user_id = %s AND subscription_end_at > %s
+    """, (user_id, now))
+    q_res = cursor.fetchone()
+    active_quota = (q_res[0] if isinstance(q_res, tuple) else (q_res.get("coalesce", 0) if q_res else 0)) or 5368709120
+
+    # 3. Check for expired plans within 5-day grace window
+    cursor.execute("""
+        SELECT tier, quota_bytes, subscription_end_at 
+        FROM user_subscriptions 
+        WHERE user_id = %s AND subscription_end_at <= %s 
+        AND subscription_end_at + INTERVAL '5 days' > %s
+        ORDER BY subscription_end_at ASC
+    """, (user_id, now, now))
+    expired_subs = cursor.fetchall()
+    conn.close()
+
+    excess_bytes = max(0, used_bytes - active_quota)
+    excess_gb = round(excess_bytes / (1024 ** 3), 1)
+
+    # Condition A: Expired/Downgraded plan with excess files pending deletion
+    if expired_subs and excess_bytes > 0:
+        first_expiry = expired_subs[0]["subscription_end_at"]
+        purge_date = (first_expiry + timedelta(days=5)).strftime("%Y-%m-%d")
+        days_left = max(1, (first_expiry + timedelta(days=5) - now).days)
+        return {
+            "type": "EXPIRATION_WARNING",
+            "message": f"Storage Alert: Your plan has expired with {excess_gb} GB excess data. Files will be deleted on {purge_date} ({days_left} days left) unless upgraded!"
+        }
+
+    # Condition B: Storage limit reached on active plan
+    if used_bytes >= active_quota and active_quota > 0:
+        return {
+            "type": "STORAGE_FULL",
+            "message": "Storage Full! You have reached your storage limit. Upgrade your plan to upload more files."
+        }
+
+    return {"type": "NORMAL", "message": None}
 # ----------------- OTP Verification Endpoints -----------------
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
