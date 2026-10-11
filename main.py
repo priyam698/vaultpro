@@ -3811,22 +3811,39 @@ async def dodo_webhook(request: Request):
 
     if event_type in ["subscription.active", "subscription.renewed", "payment.succeeded", "checkout.session.completed"]:
         sub_end = datetime.utcnow() + timedelta(days=30)
-        
-        if user_id:
-            cursor.execute("""
-                INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at)
-                VALUES (%s, %s, %s, %s, TRUE, %s)
-            """, (user_id, requested_tier, target_quota, target_price, sub_end))
+
+        # Extract unique payment/subscription ID from Dodo's payload
+        dodo_id = None
+        if isinstance(payload, dict):
+            d_data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+            dodo_id = d_data.get("subscription_id") or d_data.get("payment_id") or d_data.get("id")
 
         if user_id:
+            # 1. PREVENT DUPLICATES: If this exact payment was already recorded, skip it
+            already_added = False
+            if dodo_id:
+                cursor.execute("SELECT id FROM user_subscriptions WHERE dodo_subscription_id = %s", (str(dodo_id),))
+                if cursor.fetchone():
+                    already_added = True
+
+            # 2. STACK STORAGE: If it's a new purchase (or bought 2nd time), insert new plan
+            if not already_added:
+                cursor.execute("""
+                    INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at, dodo_subscription_id)
+                    VALUES (%s, %s, %s, %s, TRUE, %s, %s)
+                """, (user_id, requested_tier, target_quota, target_price, sub_end, str(dodo_id) if dodo_id else None))
+                conn.commit()
+
+            # 3. SUM TOTAL QUOTA: Stacks active plans (15 GB + 15 GB = 30 GB)
             cursor.execute("""
-                SELECT SUM(quota_bytes) as net_q, MAX(price) as top_price 
-                FROM user_subscriptions 
+                SELECT COALESCE(SUM(quota_bytes), 0) as net_q
+                FROM user_subscriptions
                 WHERE user_id = %s AND subscription_end_at > CURRENT_TIMESTAMP
             """, (user_id,))
             sum_row = cursor.fetchone()
-            net_quota = min(MAX_VAULT_BYTES, sum_row["net_q"] or target_quota)
+            net_quota = min(MAX_VAULT_BYTES, sum_row["net_q"] if sum_row and sum_row["net_q"] else target_quota)
 
+            
             cursor.execute("""
                 SELECT tier FROM user_subscriptions 
                 WHERE user_id = %s AND subscription_end_at > CURRENT_TIMESTAMP
