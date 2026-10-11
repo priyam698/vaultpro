@@ -902,12 +902,13 @@ async def clean_duplicates(user_id: str):
         )
     """, (user_id,))
     
-    # 2. Subtract the accidental 30 GB (2 x 15 GB) from your user quota
+    # 2. Subtract 30 GB (calculated in Python to prevent SQL integer overflow)
+    thirty_gb_bytes = 30 * 1024 * 1024 * 1024  # 32,212,254,720 bytes
     cursor.execute("""
         UPDATE users 
-        SET storage_quota_bytes = GREATEST(5368709120, storage_quota_bytes - (30 * 1024 * 1024 * 1024))
+        SET storage_quota_bytes = GREATEST(5368709120::bigint, COALESCE(storage_quota_bytes, 5368709120::bigint) - %s::bigint)
         WHERE user_id = %s
-    """, (user_id,))
+    """, (thirty_gb_bytes, user_id))
     
     conn.commit()
     conn.close()
