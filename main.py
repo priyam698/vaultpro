@@ -887,6 +887,31 @@ async def toggle_auto_renew(req: ToggleAutoRenewRequest):
 
     return {"status": "success", "auto_renew": req.auto_renew}
 
+@app.get("/api/clean-duplicates")
+async def clean_duplicates(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # 1. Delete the 2 extra duplicate Zephyr Micro rows
+    cursor.execute("""
+        DELETE FROM user_subscriptions 
+        WHERE id IN (
+            SELECT id FROM user_subscriptions 
+            WHERE user_id = %s AND tier = 'micro' 
+            ORDER BY id DESC LIMIT 2
+        )
+    """, (user_id,))
+    
+    # 2. Subtract the accidental 30 GB (2 x 15 GB) from your user quota
+    cursor.execute("""
+        UPDATE users 
+        SET storage_quota_bytes = GREATEST(5368709120, storage_quota_bytes - (30 * 1024 * 1024 * 1024))
+        WHERE user_id = %s
+    """, (user_id,))
+    
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Cleaned up 2 duplicate Micro plans. Storage reduced by 30 GB!"}
 # ----------------- OTP Verification Endpoints -----------------
 @app.post("/api/send-otp")
 async def send_verification_otp(req: SendOtpRequest):
