@@ -1449,7 +1449,12 @@ async function shareFile(fileId, filename) {
       codeEditor.classList.add("hidden");
       fallbackStage.classList.add("hidden");
 
-      document.getElementById("driveStudioModal").classList.remove("hidden");
+      const studioModal = document.getElementById("driveStudioModal");
+if (studioModal.parentElement !== document.body) {
+    document.body.appendChild(studioModal);
+}
+studioModal.classList.remove("hidden");
+studioModal.style.cssText = "display: flex !important; z-index: 99999 !important; position: fixed !important; inset: 0 !important;";
 
       if (IMAGE_EXTS.includes(ext)) {
         imgStage.classList.remove("hidden");
@@ -3913,16 +3918,28 @@ async function shareFile(fileId, filename) {
       document.getElementById("studioUnsavedBadge").classList.remove("hidden");
     }
 
-    function attemptCloseStudio() {
-      if (isStudioModified || studioTextObjects.length || studioRedactObjects.length) {
-        pendingDecisionAction = () => {
-          document.getElementById("driveStudioModal").classList.add("hidden");
-        };
-        document.getElementById("saveChangesModal").classList.remove("hidden");
+   function attemptCloseStudio() {
+    const hideStudio = () => {
+        const modal = document.getElementById("driveStudioModal");
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.style.cssText = "display: none !important;";
+        }
+        activeStudioFile = null;
+    };
+
+    if (isStudioModified || (window.studioTextObjects && studioTextObjects.length) || (window.studioRedactObjects && studioRedactObjects.length)) {
+        pendingDecisionAction = hideStudio;
+        const saveModal = document.getElementById("saveChangesModal");
+        if (saveModal) saveModal.classList.remove("hidden");
         return;
-      }
-      document.getElementById("driveStudioModal").classList.add("hidden");
     }
+    hideStudio();
+}
+
+// Aliases so all header close buttons trigger it reliably
+window.closeStudio = attemptCloseStudio;
+window.closeDriveStudio = attemptCloseStudio;
 
     function confirmSaveDecision(save) {
       document.getElementById("saveChangesModal").classList.add("hidden");
