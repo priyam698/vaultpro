@@ -753,7 +753,7 @@ body {
       </div>
       <div>
         <label class="block text-[11px] font-bold opacity-75 mb-1.5">New Filename</label>
-        <input id="renameInput" type="text" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-mono focus:outline-none transition">
+       <input id="renameInput" type="text" class="w-full rounded-xl px-3.5 py-2.5 text-xs font-mono focus:outline-none transition bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500" style="background-color: #0f172a !important; color: #ffffff !important;" placeholder="Enter new filename" autocomplete="off" spellcheck="false" />
       </div>
       <div class="flex items-center gap-2 pt-2">
         <button type="button" onclick="closeRenameModal()" class="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold transition">Cancel</button>
@@ -4052,25 +4052,49 @@ function openRenameModal(fileId, currentName) {
 }
 
     async function submitRename() {
-      const newName = document.getElementById("renameInput").value.trim();
-      if (!newName || !renamingFileId) return;
+    const input = document.getElementById("renameInput");
+    const newName = input ? input.value.trim() : "";
+    if (!newName || !renamingFileId) return;
 
-      try {
-        const res = await fetch("/api/drive/rename-file", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ file_id: renamingFileId, new_filename: newName, user_id: currentUserId })
-        });
-        if (res.ok) {
-          closeRenameModal();
-          loadDriveData();
-        } else {
-          alert("Failed to rename file.");
-        }
-      } catch(e) {
-        alert("Rename error.");
-      }
+    const targetId = renamingFileId;
+    const file = (allFiles || []).find(f => String(f.id) === String(targetId));
+    const previousName = file ? file.filename : "";
+
+    // 1. Instant local update (closes modal & updates table in 0ms)
+    if (file) {
+        file.filename = newName;
+        renderFiles(allFiles);
     }
+    closeRenameModal();
+
+    // 2. Persist to server silently in background
+    try {
+        const res = await fetch("/api/drive/rename-file", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                file_id: targetId,
+                new_filename: newName,
+                user_id: currentUserId
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok || (data.status !== "success" && !data.success)) {
+            if (file) {
+                file.filename = previousName;
+                renderFiles(allFiles);
+            }
+            alert(data.detail || "Failed to rename file.");
+        }
+    } catch (err) {
+        if (file) {
+            file.filename = previousName;
+            renderFiles(allFiles);
+        }
+        alert("Network error: " + err.message);
+    }
+}
 
    function closePlansModal() {
     const modal = document.getElementById("plansModal");
