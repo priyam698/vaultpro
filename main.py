@@ -760,23 +760,23 @@ async def get_exchange_rates():
 # ---------------- Feature Deep-Dive & Info Page Routes ----------------
 @app.get("/download")
 async def download_page(request: Request):
-    return templates.TemplateResponse("app.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="app.html")
 
 @app.get("/zero-knowledge")
 async def zero_knowledge_page(request: Request):
-    return templates.TemplateResponse("zero_knowledge.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="zero_knowledge.html")
 
 @app.get("/product-transfer")
 async def product_transfer_page(request: Request):
-    return templates.TemplateResponse("product_transfer.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="product_transfer.html")
 
 @app.get("/encryption")
 async def encryption_page(request: Request):
-    return templates.TemplateResponse("encryption.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="encryption.html")
 
 @app.get("/security")
 async def security_page(request: Request):
-    return templates.TemplateResponse("security.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="security.html")
 # ----------------- User Subscriptions & Multi-Plan API -----------------
 def cancel_dodo_gateway_subscription(dodo_sub_id: str) -> bool:
     if not DODO_API_KEY or not dodo_sub_id or dodo_sub_id.startswith("local_"):
