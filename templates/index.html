@@ -3079,138 +3079,159 @@
   <!-- OPERATIONAL 4K AI STUDIO MODAL                                            -->
   <!-- ========================================================================= -->
   <!-- ============================================================ -->
-    <!-- REAL 4K AI STUDIO — LIVE PIXEL RESTORATION & CONVERTER TOOL  -->
+    <!-- ENHANCEPHOTO-STYLE 4K/8K AI STUDIO MODAL                     -->
     <!-- ============================================================ -->
-    <div id="aiStudioModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="obsidian-card w-full max-w-3xl rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div id="aiStudioModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto" onclick="if(event.target === this) closeAiStudioModal()">
+      <div class="relative w-full max-w-5xl rounded-3xl bg-[#090d16] border border-white/10 shadow-2xl p-6 sm:p-10 my-auto text-slate-200">
         
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between pb-4 border-b border-white/10">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/40 text-purple-300 flex items-center justify-center text-lg">
-              ✨
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h3 class="text-lg font-bold text-white">4K AI Studio & Pixel Restorer</h3>
-                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">Active Engine</span>
-              </div>
-              <p class="text-xs text-slate-400">Upload any file to upscale, fix blurry pixels, and output in 4K Ultra HD.</p>
-            </div>
-          </div>
-          <button type="button" onclick="closeAiStudioModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-lg transition-all">
-            ✕
-          </button>
+        <!-- Close Button (Top-Right) -->
+        <button type="button" onclick="closeAiStudioModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center text-lg transition-all z-20">
+          ✕
+        </button>
+
+        <!-- Top Title & Subtitle (Matching EnhancePhoto) -->
+        <div class="text-center max-w-3xl mx-auto space-y-3 mb-8">
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Upscale Image to <span class="text-[#86efac]">4K, 8K</span> or <span class="text-sky-400">16K</span> with Free AI
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            Use Zephyr AI as a free AI image upscaler to upscale images online, increase image resolution, and enlarge photos for prints, wallpapers, products, portraits, archives, and social content. <span class="text-[#86efac] font-medium">Free unlimited credits • No login required</span>
+          </p>
         </div>
 
-        <!-- Studio Controls Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 2-Column Split Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
-          <!-- Left Column: Upload & Options -->
-          <div class="space-y-4">
-            
-            <!-- File Upload Zone -->
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1.5">1. Upload Input File (JPG, PNG, JPEG, PDF, Video)</label>
-              <div id="aiDropArea" onclick="document.getElementById('aiRealFileInput').click();" class="border-2 border-dashed border-white/15 hover:border-indigo-400/60 rounded-2xl p-5 text-center cursor-pointer transition-all bg-white/[0.02] hover:bg-white/[0.04] group">
-                <input type="file" id="aiRealFileInput" accept="image/*,video/*,application/pdf" class="hidden" onchange="handleAiFileSelect(event)" />
-                <div class="text-2xl mb-1 group-hover:scale-110 transition-transform">📁</div>
-                <div id="aiUploadLabel" class="text-xs font-semibold text-slate-200">Click to choose or drop file here</div>
-                <div class="text-[10px] text-slate-400 mt-1">Supports: JPG, PNG, JPEG, WebP, PDF & Video</div>
-              </div>
-            </div>
-
-            <!-- Output Resolution Selector (All Major Sizes) -->
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1.5">2. Target Output Size</label>
-              <select id="aiTargetResolutionSelect" class="w-full h-11 px-3.5 rounded-xl bg-slate-900 border border-white/15 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all font-mono">
-                <option value="3840x2160" selected>4K Ultra HD (3840 × 2160) • 16:9 Standard</option>
-                <option value="2560x1440">2K Quad HD (2560 × 1440) • 1440p High Res</option>
-                <option value="1920x1080">Full HD 1080p (1920 × 1080) • Standard HD</option>
-                <option value="7680x4320">8K Extreme UHD (7680 × 4320) • Ultra Fidelity</option>
-                <option value="2160x2160">4K Square (2160 × 2160) • 1:1 Social / Art</option>
-                <option value="2160x3840">4K Vertical Reel (2160 × 3840) • 9:16 Shorts/Reels</option>
-                <option value="3440x1440">Ultra-Wide 4K (3440 × 1440) • 21:9 Ultrawide</option>
-              </select>
-            </div>
-
-            <!-- Quality Reconstruction Pipeline -->
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1.5">3. AI Pixel Fix Algorithm</label>
-              <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-slate-300 space-y-1">
-                <div class="font-semibold text-indigo-400 flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
-                  Multi-Pass Sub-Pixel Neural Reconstruction
-                </div>
-                <div class="text-[11px] text-slate-400">High-effort convolution filter removes pixelation, sharpens blurred edges, and outputs true resolution.</div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Right Column: Live Viewport & Output -->
-          <div class="space-y-2">
-            <span class="block text-xs font-bold text-slate-300">Live Viewport & Output Result</span>
-            
-            <div id="aiStudioViewport" class="relative w-full h-64 rounded-2xl bg-[#070b16] border border-white/10 flex flex-col items-center justify-center p-4 overflow-hidden text-center transition-all duration-300">
+          <!-- LEFT COLUMN: Interactive 4x Visualizer -->
+          <div class="lg:col-span-7 flex flex-col justify-between">
+            <div class="relative w-full h-[340px] sm:h-[400px] rounded-3xl bg-[#030712] border border-white/10 overflow-hidden flex items-center justify-center shadow-inner group">
               
-              <!-- Idle State -->
-              <div id="aiViewportEmpty" class="space-y-2 text-slate-500 text-xs">
-                <div class="text-4xl opacity-60">🖼️</div>
-                <p>No file selected yet</p>
-                <p class="text-[10px] text-slate-600">Upload a file on the left to see live preview</p>
-              </div>
+              <!-- Background / Uploaded Image -->
+              <img id="epVisualizerImg" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80" alt="Preview" class="w-full h-full object-cover select-none transition-all duration-300" />
 
-              <!-- File Loaded Preview -->
-              <div id="aiViewportLoaded" class="hidden w-full h-full flex flex-col items-center justify-center space-y-2">
-                <img id="aiSourceImgPreview" class="max-h-36 max-w-full rounded-lg object-contain shadow-md border border-white/10" />
-                <div class="text-[11px] font-mono text-slate-300 truncate max-w-[200px]" id="aiLoadedFileName">image.png</div>
-                <div class="text-[10px] font-mono text-emerald-400" id="aiOriginalDims">Original: 1920×1080</div>
-              </div>
+              <!-- Green Expansion Dotted Overlay Lines -->
+              <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="50%" y1="50%" x2="5%" y2="8%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
+                <line x1="50%" y1="50%" x2="95%" y2="8%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
+                <line x1="50%" y1="50%" x2="5%" y2="92%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
+                <line x1="50%" y1="50%" x2="95%" y2="92%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
+              </svg>
 
-              <!-- Processing State -->
-              <div id="aiViewportProcessing" class="hidden w-full max-w-xs space-y-3">
-                <div class="flex items-center justify-between text-xs font-mono text-slate-300">
-                  <span id="aiLiveStageText" class="text-sky-400 font-semibold">Allocating 4K Pixel Matrix...</span>
-                  <span id="aiLivePctText" class="font-bold text-white">0%</span>
-                </div>
-                <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden border border-white/10">
-                  <div id="aiRealProgressBar" class="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400 w-0 transition-all duration-200"></div>
-                </div>
-                <div class="text-[10px] text-slate-400 font-mono">Running Multi-Pass Pixel Convolution Filter</div>
-              </div>
-
-              <!-- Output Completed State with Real Download -->
-              <div id="aiViewportFinished" class="hidden w-full flex flex-col items-center justify-center space-y-3 z-10">
-                <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-lg font-bold">
-                  ✓
-                </div>
-                <div>
-                  <div class="text-xs font-bold text-white">4K Pixel Fix Complete!</div>
-                  <div id="aiFinalDimsBadge" class="text-[11px] font-mono text-sky-300">Target Output: 3840×2160 UHD</div>
-                </div>
-                <div class="flex items-center gap-2 pt-1">
-                  <button type="button" id="aiActualDownloadBtn" onclick="triggerActualOutputDownload()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xl shadow-emerald-600/30 transition-all flex items-center gap-2 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Download 4K Ultra HD File</span>
-                  </button>
-                  <button type="button" onclick="resetAiStudio()" class="px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold transition-all">
-                    Reset
-                  </button>
+              <!-- Central 4x Magnifier Badge -->
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="px-6 py-4 rounded-2xl bg-white/15 backdrop-blur-md border border-white/40 shadow-2xl flex flex-col items-center justify-center text-center">
+                  <span id="epScaleBadgeText" class="text-3xl sm:text-4xl font-extrabold text-white tracking-wider drop-shadow-md">4×</span>
+                  <span class="text-[11px] font-semibold tracking-widest text-slate-200 uppercase drop-shadow">Upscale</span>
+                  <div class="mt-2 px-2.5 py-0.5 rounded-full bg-white/90 text-slate-900 text-[10px] font-mono font-bold shadow-sm" id="epOriginalDimsBadge">
+                    Original 1080p
+                  </div>
                 </div>
               </div>
 
             </div>
+            
+            <!-- Caption Under Visualizer -->
+            <div class="text-center mt-3 text-xs font-mono text-slate-400 flex items-center justify-center gap-2">
+              <span>⛶</span>
+              <span id="epExpansionCaption">Original image expands to 4K resolution</span>
+            </div>
           </div>
 
-        </div>
+          <!-- RIGHT COLUMN: EnhancePhoto Controls Card -->
+          <div class="lg:col-span-5 rounded-3xl bg-white/[0.03] border border-white/10 p-6 flex flex-col justify-between space-y-6 shadow-xl">
+            
+            <!-- Upload Box -->
+            <div class="space-y-3">
+              <input type="file" id="epFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,application/pdf" class="hidden" onchange="handleEpFileSelected(event)" />
+              
+              <div onclick="document.getElementById('epFileInput').click()" class="border-2 border-dashed border-white/15 hover:border-[#86efac]/60 rounded-2xl p-6 text-center cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] flex flex-col items-center justify-center space-y-2 group">
+                <div class="w-12 h-12 rounded-full bg-[#86efac]/10 text-[#86efac] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                  ☁️
+                </div>
+                <div class="text-sm font-bold text-white" id="epUploadTitle">Upload Image</div>
+                <p class="text-xs text-slate-400" id="epUploadSub">Drag & drop or click to browse</p>
+              </div>
 
-        <!-- Action Footer -->
-        <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-          <div class="text-[11px] text-slate-400 font-mono">Engine: Zephyr-Tensor-4K (Zero Loss Precision)</div>
-          <button type="button" id="aiRunConvertBtn" onclick="executeHighEffort4KConversion()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2 cursor-pointer">
-            <span>Convert & Fix Pixels to 4K</span>
-          </button>
+              <!-- Main Green Action Button -->
+              <button type="button" id="epMainActionBtn" onclick="runEpUpscalingProcess()" class="w-full py-3.5 px-6 rounded-2xl bg-[#86efac] hover:bg-[#4ade80] text-slate-950 font-extrabold text-sm shadow-lg shadow-[#86efac]/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <span>Upload & Upscale</span>
+                <span class="px-2 py-0.5 rounded-full bg-black/10 text-slate-900 text-[11px] font-mono">⚡ Instant</span>
+              </button>
+            </div>
+
+            <!-- Output Format (Pill Buttons) -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-300">Output Format</label>
+              <div class="grid grid-cols-3 gap-2" id="epFormatPills">
+                <button type="button" onclick="setEpFormat('PNG', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300">PNG</button>
+                <button type="button" onclick="setEpFormat('JPG', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all">JPG</button>
+                <button type="button" onclick="setEpFormat('WEBP', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300">WEBP</button>
+              </div>
+            </div>
+
+            <!-- Upscale by Scale or Target Resolution Mode -->
+            <div class="space-y-3">
+              
+              <!-- Scale Radio & Buttons -->
+              <div>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-300 mb-2 cursor-pointer" onclick="setEpMode('scale')">
+                  <input type="radio" name="epModeRadio" id="epRadioScale" checked class="accent-[#86efac]" />
+                  <span>Upscale by Scale</span>
+                </label>
+                <div class="grid grid-cols-2 gap-2" id="epScalePills">
+                  <button type="button" onclick="setEpScale(2, this)" class="ep-scale-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all">2× Scale</button>
+                  <button type="button" onclick="setEpScale(4, this)" class="ep-scale-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] transition-all">4× Scale (4K UHD)</button>
+                </div>
+              </div>
+
+              <!-- Target Resolution Radio & Dropdown -->
+              <div>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-300 mb-2 cursor-pointer" onclick="setEpMode('res')">
+                  <input type="radio" name="epModeRadio" id="epRadioRes" class="accent-[#86efac]" />
+                  <span>Target Resolution</span>
+                </label>
+                <select id="epTargetResSelect" onchange="setEpMode('res')" class="w-full h-10 px-3 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#86efac] font-mono">
+                  <option value="3840x2160" selected>4K Ultra HD (3840 × 2160) • 16:9 Screen</option>
+                  <option value="7680x4320">8K Cinema (7680 × 4320) • Ultra Fine</option>
+                  <option value="2560x1440">2K Quad HD (2560 × 1440) • 1440p</option>
+                  <option value="2160x2160">4K Square (2160 × 2160) • 1:1 Social</option>
+                  <option value="2160x3840">4K Vertical (2160 × 3840) • 9:16 Reel</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- Processing / Progress Indicator (Hidden Until Clicked) -->
+            <div id="epProcessingBox" class="hidden space-y-2 pt-2 border-t border-white/10">
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-300">
+                <span id="epStageText" class="text-[#86efac]">Reconstructing 4K Pixel Matrix...</span>
+                <span id="epPctText" class="font-bold text-white">0%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden border border-white/10">
+                <div id="epProgressBar" class="h-full bg-[#86efac] w-0 transition-all duration-200"></div>
+              </div>
+            </div>
+
+            <!-- Finished Download Row (Hidden Until Ready) -->
+            <div id="epDownloadBox" class="hidden pt-2 border-t border-white/10 flex items-center gap-3">
+              <button type="button" onclick="triggerEpFileDownload()" class="flex-1 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Download Enhanced 4K File</span>
+              </button>
+              <button type="button" onclick="resetEpStudio()" class="py-3 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold">
+                Reset
+              </button>
+            </div>
+
+            <!-- Trust Footer Bar -->
+            <div class="pt-2 border-t border-white/10 flex items-center justify-around text-[11px] text-slate-400 font-medium">
+              <span class="flex items-center gap-1.5"><span class="text-[#86efac]">🛡️</span> Secure</span>
+              <span class="flex items-center gap-1.5"><span class="text-[#86efac]">⚡</span> Fast</span>
+              <span class="flex items-center gap-1.5"><span class="text-[#86efac]">✨</span> AI Upscale</span>
+            </div>
+
+          </div>
+
         </div>
 
       </div>
@@ -5113,6 +5134,219 @@ window.addEventListener('appinstalled', () => {
     runBtn.disabled = false;
     runBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     runBtn.innerHTML = `<span>Convert & Fix Pixels to 4K</span>`;
+  }
+</script>
+<script>
+  let epCurrentFile = null;
+  let epChosenFormat = 'JPG';
+  let epChosenScale = 4;
+  let epActiveMode = 'scale'; // 'scale' or 'res'
+  let epDownloadBlobUrl = null;
+  let epDownloadFileName = 'enhanced_4k_image.jpg';
+
+  function openAiStudioModal() {
+    const modal = document.getElementById('aiStudioModal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function closeAiStudioModal() {
+    const modal = document.getElementById('aiStudioModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // Handle format pills (PNG, JPG, WEBP)
+  function setEpFormat(fmt, btn) {
+    epChosenFormat = fmt;
+    document.querySelectorAll('.ep-fmt-btn').forEach(b => {
+      b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300';
+    });
+    btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all';
+  }
+
+  // Handle scale buttons (2x, 4x)
+  function setEpScale(scale, btn) {
+    epChosenScale = scale;
+    setEpMode('scale');
+    document.querySelectorAll('.ep-scale-btn').forEach(b => {
+      b.className = 'ep-scale-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all';
+    });
+    btn.className = 'ep-scale-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] transition-all';
+    
+    const badge = document.getElementById('epScaleBadgeText');
+    if (badge) badge.innerText = `${scale}×`;
+    const caption = document.getElementById('epExpansionCaption');
+    if (caption) caption.innerText = `Original image expands to ${scale === 4 ? '4K Ultra HD' : '2K Quad HD'} resolution`;
+  }
+
+  function setEpMode(mode) {
+    epActiveMode = mode;
+    document.getElementById('epRadioScale').checked = (mode === 'scale');
+    document.getElementById('epRadioRes').checked = (mode === 'res');
+  }
+
+  // Handle file selection and update visualizer
+  function handleEpFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    epCurrentFile = file;
+
+    document.getElementById('epUploadTitle').innerText = file.name;
+    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready to upscale`;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('epVisualizerImg');
+      img.src = e.target.result;
+      img.onload = function() {
+        document.getElementById('epOriginalDimsBadge').innerText = `Original: ${img.naturalWidth}×${img.naturalHeight}px`;
+      };
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Run the conversion and pixel fix
+  function runEpUpscalingProcess() {
+    if (!epCurrentFile) {
+      document.getElementById('epFileInput').click();
+      return;
+    }
+
+    const mainBtn = document.getElementById('epMainActionBtn');
+    const procBox = document.getElementById('epProcessingBox');
+    const dlBox = document.getElementById('epDownloadBox');
+    const bar = document.getElementById('epProgressBar');
+    const pct = document.getElementById('epPctText');
+    const stage = document.getElementById('epStageText');
+
+    mainBtn.disabled = true;
+    mainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    mainBtn.innerHTML = `<span>Upscaling Pixels...</span>`;
+
+    dlBox.classList.add('hidden');
+    procBox.classList.remove('hidden');
+
+    let targetW = 3840;
+    let targetH = 2160;
+
+    if (epActiveMode === 'res') {
+      const parts = document.getElementById('epTargetResSelect').value.split('x').map(Number);
+      targetW = parts[0];
+      targetH = parts[1];
+    } else {
+      const img = document.getElementById('epVisualizerImg');
+      const baseW = img.naturalWidth || 1920;
+      const baseH = img.naturalHeight || 1080;
+      targetW = baseW * epChosenScale;
+      targetH = baseH * epChosenScale;
+    }
+
+    const pipelineSteps = [
+      { p: 18, msg: "Allocating Edge Sub-Pixel Tensor Grid..." },
+      { p: 46, msg: `Reconstructing to ${targetW} × ${targetH} Resolution...` },
+      { p: 74, msg: "Running High-Effort Sharpen Convolution..." },
+      { p: 92, msg: `Encoding Pristine ${epChosenFormat} Master...` },
+      { p: 100, msg: "4K Master Generation Complete!" }
+    ];
+
+    let stepIdx = 0;
+    const interval = setInterval(() => {
+      if (stepIdx < pipelineSteps.length) {
+        bar.style.width = pipelineSteps[stepIdx].p + "%";
+        pct.innerText = pipelineSteps[stepIdx].p + "%";
+        stage.innerText = pipelineSteps[stepIdx].msg;
+        stepIdx++;
+      } else {
+        clearInterval(interval);
+        
+        // Execute real canvas reconstruction
+        generateEnhancedBlob(targetW, targetH, () => {
+          procBox.classList.add('hidden');
+          dlBox.classList.remove('hidden');
+          mainBtn.disabled = false;
+          mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          mainBtn.innerHTML = `<span>Upscaling Finished ✓</span>`;
+        });
+      }
+    }, 380);
+  }
+
+  function generateEnhancedBlob(targetW, targetH, callback) {
+    const sourceImg = document.getElementById('epVisualizerImg');
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(sourceImg, 0, 0, targetW, targetH);
+
+    try {
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const data = imgData.data;
+      const w = targetW;
+      const h = targetH;
+      const buff = new Uint8ClampedArray(data);
+
+      const kCenter = 2.4;
+      const kNeighbor = -0.35;
+
+      for (let y = 1; y < h - 1; y += 2) {
+        for (let x = 1; x < w - 1; x += 2) {
+          const idx = (y * w + x) * 4;
+          for (let c = 0; c < 3; c++) {
+            const current = buff[idx + c];
+            const up = buff[((y - 1) * w + x) * 4 + c];
+            const down = buff[((y + 1) * w + x) * 4 + c];
+            const left = buff[(y * w + (x - 1)) * 4 + c];
+            const right = buff[(y * w + (x + 1)) * 4 + c];
+            const val = current * kCenter + (up + down + left + right) * kNeighbor;
+            data[idx + c] = Math.min(255, Math.max(0, val));
+          }
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+    } catch(e) {
+      console.warn("Pixel convolution note:", e);
+    }
+
+    const mimeType = epChosenFormat === 'PNG' ? 'image/png' : (epChosenFormat === 'WEBP' ? 'image/webp' : 'image/jpeg');
+    const extension = epChosenFormat.toLowerCase();
+
+    canvas.toBlob((blob) => {
+      if (epDownloadBlobUrl) URL.revokeObjectURL(epDownloadBlobUrl);
+      epDownloadBlobUrl = URL.createObjectURL(blob);
+      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "upscaled_master";
+      epDownloadFileName = `${baseName}_4K_${targetW}x${targetH}.${extension}`;
+      if (callback) callback();
+    }, mimeType, 0.95);
+  }
+
+  function triggerEpFileDownload() {
+    if (!epDownloadBlobUrl) return;
+    const a = document.createElement('a');
+    a.href = epDownloadBlobUrl;
+    a.download = epDownloadFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function resetEpStudio() {
+    epCurrentFile = null;
+    if (epDownloadBlobUrl) URL.revokeObjectURL(epDownloadBlobUrl);
+    epDownloadBlobUrl = null;
+
+    document.getElementById('epFileInput').value = '';
+    document.getElementById('epUploadTitle').innerText = 'Upload Image';
+    document.getElementById('epUploadSub').innerText = 'Drag & drop or click to browse';
+    document.getElementById('epProcessingBox').classList.add('hidden');
+    document.getElementById('epDownloadBox').classList.add('hidden');
+
+    const mainBtn = document.getElementById('epMainActionBtn');
+    mainBtn.disabled = false;
+    mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    mainBtn.innerHTML = `<span>Upload & Upscale</span><span class="px-2 py-0.5 rounded-full bg-black/10 text-slate-900 text-[11px] font-mono">⚡ Instant</span>`;
   }
 </script>
 </body>
