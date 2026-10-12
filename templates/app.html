@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zephyr App — Full A to Z Guide & Installation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #060911; color: #f8fafc; }
+    .glass-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 border-b border-white/[0.08] bg-[#060911]/80 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-indigo-500/30">Z</div>
+        <span class="text-xl font-extrabold tracking-tight text-white">Zephyr <span class="text-indigo-400">Drive</span></span>
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="/dashboard" class="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold border border-white/10 transition-all">My Drive</a>
+        <button onclick="triggerPwaInstall()" class="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all">Install App</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-7xl mx-auto px-6 py-16 space-y-20">
+    <div class="text-center max-w-3xl mx-auto space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-mono font-semibold">
+        <span>⚡ Standalone Progressive Web App (PWA)</span>
+      </div>
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
+        Zephyr App A to Z Guide <br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400">Universal File Storage & Cloud Vault</span>
+      </h1>
+      <p class="text-base sm:text-lg text-slate-400 leading-relaxed">
+        Everything you need to know about the Zephyr platform: storing all file formats, client-side zero-knowledge encryption, subscription stacking up to 3 TB, and installing the app on Windows, macOS, Android, and iOS.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+        <button id="pwaHeroBtn" onclick="triggerPwaInstall()" class="px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 flex items-center gap-3 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Install Zephyr App
+        </button>
+        <a href="#features" class="px-8 py-4 rounded-2xl glass-card hover:bg-white/5 text-slate-300 font-semibold text-sm transition-all">
+          Browse Features A to Z ↓
+        </a>
+      </div>
+    </div>
+
+    <!-- Supported Platforms -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="glass-card p-5 rounded-2xl text-center space-y-2">
+        <div class="text-3xl">🪟</div>
+        <div class="text-sm font-bold text-white">Windows 11 / 10</div>
+        <p class="text-[11px] text-slate-400 font-mono">Chrome / Edge / Brave</p>
+      </div>
+      <div class="glass-card p-5 rounded-2xl text-center space-y-2">
+        <div class="text-3xl">🍎</div>
+        <div class="text-sm font-bold text-white">macOS</div>
+        <p class="text-[11px] text-slate-400 font-mono">Safari / Chrome / Arc</p>
+      </div>
+      <div class="glass-card p-5 rounded-2xl text-center space-y-2">
+        <div class="text-3xl">🤖</div>
+        <div class="text-sm font-bold text-white">Android</div>
+        <p class="text-[11px] text-slate-400 font-mono">Chrome / WebAPK</p>
+      </div>
+      <div class="glass-card p-5 rounded-2xl text-center space-y-2">
+        <div class="text-3xl">📱</div>
+        <div class="text-sm font-bold text-white">iOS & iPadOS</div>
+        <p class="text-[11px] text-slate-400 font-mono">Safari Add to Home</p>
+      </div>
+    </div>
+
+    <!-- A to Z Features Breakdown -->
+    <div id="features" class="space-y-8 pt-8 border-t border-white/[0.08]">
+      <div class="space-y-2">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Zephyr Platform: A to Z Breakdown</h2>
+        <p class="text-sm text-slate-400">Complete overview of capabilities, security protocols, and vault limits.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Any File Type -->
+        <div class="glass-card p-6 rounded-3xl space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-mono font-bold">A</div>
+          <h3 class="text-base font-bold text-white">Any File Type Storage</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Acts like your native File Explorer. Store applications (<code class="text-emerald-400">.exe</code>, <code class="text-emerald-400">.msi</code>), disk images (<code class="text-emerald-400">.iso</code>), Android packages (<code class="text-emerald-400">.apk</code>), games, browser extensions, and archives without MIME-type blocks.
+          </p>
+        </div>
+
+        <!-- 3 TB Limit -->
+        <div class="glass-card p-6 rounded-3xl space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-mono font-bold">C</div>
+          <h3 class="text-base font-bold text-white">3 TB Storage Capacity Ceiling</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Stack subscription tiers up to a hard maximum of <strong class="text-white">3 TB (3,000 GB)</strong>. When an account reaches 3 TB, checkout requests are paused and on-screen alerts inform the user that capacity is capped.
+          </p>
+        </div>
+
+        <!-- Zero-Knowledge -->
+        <div class="glass-card p-6 rounded-3xl space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-mono font-bold">E</div>
+          <h3 class="text-base font-bold text-white">End-to-End Zero Knowledge</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            All files are encrypted client-side using military-grade AES-256 before upload. Zephyr never stores your private decryption passphrases or unencrypted content.
+          </p>
+        </div>
+
+        <!-- Escrow Monetization -->
+        <div class="glass-card p-6 rounded-3xl space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-mono font-bold">M</div>
+          <h3 class="text-base font-bold text-white">Monetize Deliverables (Paywalls)</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Set custom prices on client deliverables. Buyers can preview low-resolution protected media in our anti-screenshot viewer and unlock original downloads after checkout via Stripe.
+          </p>
+        </div>
+
+        <!-- 5-Day Grace Period -->
+        <div class="glass-card p-6 rounded-3xl space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-mono font-bold">G</div>
+          <h3 class="text-base font-bold text-white">5-Day Grace Period Safety</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Cancelling auto-renew will never purge files immediately. Users receive an explicit 5-day grace period post-expiration to renew or export excess data before cleanup occurs.
+          </p>
+        </div>
+
+        <!-- Global Edge Streaming -->
+        <div class="glass-card p-6 rounded-3xl space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-mono font-bold">S</div>
+          <h3 class="text-base font-bold text-white">Streaming & Edge Replication</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Powered by Cloudflare R2 edge storage. Instant byte-range seeking enables direct playback of 4K/8K video without waiting for multi-gigabyte downloads to complete.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step-by-Step Install Guide -->
+    <div class="glass-card p-8 rounded-3xl space-y-6">
+      <h2 class="text-2xl font-bold text-white">How to Install Zephyr on Your Devices</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
+        <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+          <div class="font-bold text-white text-sm">Windows, Mac & Linux Desktop</div>
+          <ol class="list-decimal list-inside space-y-2 text-slate-400">
+            <li>Open Zephyr Drive in Chrome, Edge, or Brave.</li>
+            <li>Click the <strong class="text-white">"Install App"</strong> button above (or the screen icon 🖥️ in your browser's address bar).</li>
+            <li>Click <strong class="text-indigo-400">Install</strong> to pin Zephyr directly to your Taskbar or Desktop.</li>
+          </ol>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+          <div class="font-bold text-white text-sm">iOS & Android Mobile</div>
+          <ol class="list-decimal list-inside space-y-2 text-slate-400">
+            <li>Open this URL in mobile Safari (iOS) or Chrome (Android).</li>
+            <li>On iOS: Tap the <strong class="text-white">Share</strong> button &rarr; tap <strong class="text-indigo-400">"Add to Home Screen"</strong>.</li>
+            <li>On Android: Tap the 3 dots menu &rarr; tap <strong class="text-indigo-400">"Install app"</strong>.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/[0.08] py-8 text-center text-xs text-slate-500 font-mono">
+    Zephyr Drive © 2026. Zero-Knowledge Edge Cloud Architecture.
+  </footer>
+
+  <script>
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwaHeroBtn');
+      if (btn) btn.classList.add('animate-pulse');
+    });
+
+    function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+      } else {
+        alert("To install Zephyr App:\n\n• On Chrome/Edge: Click the install icon in your browser URL address bar.\n• On Mobile: Tap Share → Add to Home Screen.");
+      }
+    }
+  </script>
+</body>
+</html>

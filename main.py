@@ -757,7 +757,26 @@ def fetch_live_global_fx() -> dict:
 async def get_exchange_rates():
     data = fetch_live_global_fx()
     return JSONResponse(content=data)
+# ---------------- Feature Deep-Dive & Info Page Routes ----------------
+@app.get("/download")
+async def download_page(request: Request):
+    return templates.TemplateResponse("app.html", {"request": request})
 
+@app.get("/zero-knowledge")
+async def zero_knowledge_page(request: Request):
+    return templates.TemplateResponse("zero_knowledge.html", {"request": request})
+
+@app.get("/product-transfer")
+async def product_transfer_page(request: Request):
+    return templates.TemplateResponse("product_transfer.html", {"request": request})
+
+@app.get("/encryption")
+async def encryption_page(request: Request):
+    return templates.TemplateResponse("encryption.html", {"request": request})
+
+@app.get("/security")
+async def security_page(request: Request):
+    return templates.TemplateResponse("security.html", {"request": request})
 # ----------------- User Subscriptions & Multi-Plan API -----------------
 def cancel_dodo_gateway_subscription(dodo_sub_id: str) -> bool:
     if not DODO_API_KEY or not dodo_sub_id or dodo_sub_id.startswith("local_"):
