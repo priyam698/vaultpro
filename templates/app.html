@@ -30,7 +30,7 @@
   <header class="sticky top-0 z-50 border-b border-white/[0.08] bg-[#060911]/80 backdrop-blur-xl">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-indigo-500/30">Z</div>
+        <img src="/static/logo.png" alt="Zephyr" class="w-9 h-9 object-contain drop-shadow-[0_0_14px_rgba(99,102,241,0.55)]" />
         <span class="text-xl font-extrabold tracking-tight text-white">Zephyr <span class="text-indigo-400">Drive</span></span>
       </a>
       <div class="flex items-center gap-4">
@@ -64,7 +64,7 @@
       </div>
     </div>
 
-    <!-- Supported Platforms -->
+    <!-- Supported Platforms Grid -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div class="glass-card p-5 rounded-2xl text-center space-y-2">
         <div class="text-3xl">🪟</div>
@@ -88,7 +88,7 @@
       </div>
     </div>
 
-    <!-- A to Z Features Breakdown -->
+    <!-- Features Breakdown A to Z -->
     <div id="features" class="space-y-8 pt-8 border-t border-white/[0.08]">
       <div class="space-y-2">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Zephyr Platform: A to Z Breakdown</h2>
@@ -96,25 +96,22 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Any File Type -->
         <div class="glass-card p-6 rounded-3xl space-y-3">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-mono font-bold">A</div>
           <h3 class="text-base font-bold text-white">Any File Type Storage</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Acts like your native File Explorer. Store applications (<code class="text-emerald-400">.exe</code>, <code class="text-emerald-400">.msi</code>), disk images (<code class="text-emerald-400">.iso</code>), Android packages (<code class="text-emerald-400">.apk</code>), games, browser extensions, and archives without MIME-type blocks.
+            Acts like your native File Explorer. Store applications (<code class="text-emerald-400">.exe</code>, <code class="text-emerald-400">.msi</code>), disk images (<code class="text-emerald-400">.iso</code>), packages (<code class="text-emerald-400">.apk</code>), games, browser extensions, and archives without restriction.
           </p>
         </div>
 
-        <!-- 3 TB Limit -->
         <div class="glass-card p-6 rounded-3xl space-y-3">
           <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-mono font-bold">C</div>
           <h3 class="text-base font-bold text-white">3 TB Storage Capacity Ceiling</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Stack subscription tiers up to a hard maximum of <strong class="text-white">3 TB (3,000 GB)</strong>. When an account reaches 3 TB, checkout requests are paused and on-screen alerts inform the user that capacity is capped.
+            Stack subscription tiers up to a hard ceiling of <strong class="text-white">3 TB (3,000 GB)</strong>. When an account reaches 3 TB, checkout requests are paused and on-screen alerts inform the user that capacity is capped.
           </p>
         </div>
 
-        <!-- Zero-Knowledge -->
         <div class="glass-card p-6 rounded-3xl space-y-3">
           <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-mono font-bold">E</div>
           <h3 class="text-base font-bold text-white">End-to-End Zero Knowledge</h3>
@@ -123,7 +120,6 @@
           </p>
         </div>
 
-        <!-- Escrow Monetization -->
         <div class="glass-card p-6 rounded-3xl space-y-3">
           <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-mono font-bold">M</div>
           <h3 class="text-base font-bold text-white">Monetize Deliverables (Paywalls)</h3>
@@ -132,16 +128,14 @@
           </p>
         </div>
 
-        <!-- 5-Day Grace Period -->
         <div class="glass-card p-6 rounded-3xl space-y-3">
           <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-mono font-bold">G</div>
           <h3 class="text-base font-bold text-white">5-Day Grace Period Safety</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Cancelling auto-renew will never purge files immediately. Users receive an explicit 5-day grace period post-expiration to renew or export excess data before cleanup occurs.
+            Cancelling auto-renew will never purge files immediately. Users receive an explicit 5-day grace period post-expiration to renew or safely export excess data before cleanup occurs.
           </p>
         </div>
 
-        <!-- Global Edge Streaming -->
         <div class="glass-card p-6 rounded-3xl space-y-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-mono font-bold">S</div>
           <h3 class="text-base font-bold text-white">Streaming & Edge Replication</h3>
@@ -152,7 +146,7 @@
       </div>
     </div>
 
-    <!-- Step-by-Step Install Guide -->
+    <!-- Step-by-Step Installation Instructions -->
     <div class="glass-card p-8 rounded-3xl space-y-6">
       <h2 class="text-2xl font-bold text-white">How to Install Zephyr on Your Devices</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
@@ -160,7 +154,7 @@
           <div class="font-bold text-white text-sm">Windows, Mac & Linux Desktop</div>
           <ol class="list-decimal list-inside space-y-2 text-slate-400">
             <li>Open Zephyr Drive in Chrome, Edge, or Brave.</li>
-            <li>Click the <strong class="text-white">"Install App"</strong> button above (or the screen icon 🖥️ in your browser's address bar).</li>
+            <li>Click the <strong class="text-white">"Install App"</strong> button above (or the screen icon 🖥️ in your browser address bar).</li>
             <li>Click <strong class="text-indigo-400">Install</strong> to pin Zephyr directly to your Taskbar or Desktop.</li>
           </ol>
         </div>
@@ -176,7 +170,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="border-t border-white/[0.08] py-8 text-center text-xs text-slate-500 font-mono">
     Zephyr Drive © 2026. Zero-Knowledge Edge Cloud Architecture.
   </footer>
