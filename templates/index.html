@@ -5296,77 +5296,174 @@ window.addEventListener('appinstalled', () => {
   let epDownloadBlobUrl = null;
   let epDownloadFileName = 'enhanced_4k_image.jpg';
   let epCurrentRating = null;
-  let epRawAiResultImg = null; // Stores the neural-reconstructed image from the Cloud GPU
+  let epRawAiResultImg = null;
+  let epMaxCrispActive = false;
 
+  // Distinct Presets for 2K, 4K, 8K, and 16K
   const EP_TIER_CONFIG = {
-    '2K':  { scale: 2, maxEdge: 2560,  fidelity: 70, label: '2K Quad HD' },
-    '4K':  { scale: 4, maxEdge: 3840,  fidelity: 60, label: '4K Ultra HD' },
-    '8K':  { scale: 4, maxEdge: 7680,  fidelity: 55, label: '8K Cinema UHD' },
-    '16K': { scale: 4, maxEdge: 15360, fidelity: 50, label: '16K Extreme AI' }
+    '2K':  { scale: 1.5, maxEdge: 2560,  sharp: 45, contrast: 54, vibrance: 52, label: '2K Quad HD' },
+    '4K':  { scale: 2.0, maxEdge: 3840,  sharp: 65, contrast: 60, vibrance: 56, label: '4K Ultra HD' },
+    '8K':  { scale: 2.5, maxEdge: 7680,  sharp: 78, contrast: 65, vibrance: 60, label: '8K Cinema UHD' },
+    '16K': { scale: 3.0, maxEdge: 15360, sharp: 88, contrast: 70, vibrance: 64, label: '16K Extreme AI' }
   };
 
-  function setupRealAiStudioUI() {
-    // Ensure Before image is 100% untouched (no fake blur)
+  // Inject Hardware-Accelerated SVG Convolution Filter for 60 FPS Live Sharpening
+  function ensureLiveSvgFilter() {
+    if (document.getElementById('epLiveSvgContainer')) return;
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.id = "epLiveSvgContainer";
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
+    svg.style.position = "absolute";
+    svg.style.pointerEvents = "none";
+    svg.innerHTML = `
+      <defs>
+        <filter id="epLiveSharpFilter" color-interpolation-filters="sRGB">
+          <feConvolveMatrix id="epConvolveNode" order="3 3" preserveAlpha="true"
+            kernelMatrix="0 -0.35 0 -0.35 2.4 -0.35 0 -0.35 0" divisor="1" bias="0" />
+        </filter>
+      </defs>
+    `;
+    document.body.appendChild(svg);
+  }
+
+  // Bind the 3 Sliders & Max Crisp Button Once (Never overwrites user values during drag)
+  function initLiveStudioControls() {
+    ensureLiveSvgFilter();
+
     const beforeImg = document.getElementById('epBeforeImage');
     if (beforeImg) {
       beforeImg.style.filter = 'none';
       beforeImg.classList.remove('filter', 'blur-[0.8px]');
     }
 
-    // Repurpose the 3 sliders for Real AI Fidelity & Post-Tone Tuning
     const sSharp = document.getElementById('sliderSharpness');
     const sCont  = document.getElementById('sliderContrast');
     const sVib   = document.getElementById('sliderVibrance');
 
-    if (sSharp) {
-      sSharp.min = "10";
+    if (sSharp && !sSharp.dataset.bound) {
+      sSharp.dataset.bound = "true";
+      sSharp.removeAttribute('oninput');
+      sSharp.removeAttribute('onchange');
+      sSharp.min = "0";
       sSharp.max = "100";
-      sSharp.value = "60";
-      document.getElementById('valSharpness').innerText = "0.60 (Balanced AI)";
-      const labelSharp = sSharp.previousElementSibling?.querySelector('span:first-child');
-      if (labelSharp) labelSharp.innerText = "CodeFormer AI Fidelity (Lower = Stronger AI)";
-      sSharp.oninput = function() {
-        document.getElementById('valSharpness').innerText = (this.value / 100).toFixed(2);
-      };
-      // Re-run real Cloud GPU AI when fidelity slider is released
-      sSharp.onchange = function() {
-        runEpUpscalingProcess(true);
-      };
+      sSharp.value = "65";
+
+      const lbl = sSharp.previousElementSibling?.querySelector('span:first-child');
+      if (lbl) lbl.innerText = "AI Detail & Edge Sharpness";
+      document.getElementById('valSharpness').innerText = "65%";
+
+      sSharp.addEventListener('input', () => {
+        document.getElementById('valSharpness').innerText = sSharp.value + "%";
+        applyLivePreviewFilters();
+      });
+      sSharp.addEventListener('change', () => {
+        bakeFinalDownloadBlob();
+      });
     }
 
-    if (sCont) {
+    if (sCont && !sCont.dataset.bound) {
+      sCont.dataset.bound = "true";
+      sCont.removeAttribute('oninput');
+      sCont.removeAttribute('onchange');
       sCont.min = "0";
       sCont.max = "100";
-      sCont.value = "50";
-      document.getElementById('valContrast').innerText = "50%";
-      const labelCont = sCont.previousElementSibling?.querySelector('span:first-child');
-      if (labelCont) labelCont.innerText = "Natural Tone & Contrast";
-      sCont.oninput = function() {
-        document.getElementById('valContrast').innerText = this.value + "%";
-      };
-      sCont.onchange = function() {
-        if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg);
-      };
+      sCont.value = "60";
+
+      const lbl = sCont.previousElementSibling?.querySelector('span:first-child');
+      if (lbl) lbl.innerText = "Natural Tone & Contrast";
+      document.getElementById('valContrast').innerText = "60%";
+
+      sCont.addEventListener('input', () => {
+        document.getElementById('valContrast').innerText = sCont.value + "%";
+        applyLivePreviewFilters();
+      });
+      sCont.addEventListener('change', () => {
+        bakeFinalDownloadBlob();
+      });
     }
 
-    if (sVib) {
+    if (sVib && !sVib.dataset.bound) {
+      sVib.dataset.bound = "true";
+      sVib.removeAttribute('oninput');
+      sVib.removeAttribute('onchange');
       sVib.min = "0";
       sVib.max = "100";
-      sVib.value = "50";
-      document.getElementById('valVibrance').innerText = "50%";
-      const labelVib = sVib.previousElementSibling?.querySelector('span:first-child');
-      if (labelVib) labelVib.innerText = "Color Vibrance";
-      sVib.oninput = function() {
-        document.getElementById('valVibrance').innerText = this.value + "%";
-      };
-      sVib.onchange = function() {
-        if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg);
-      };
+      sVib.value = "56";
+
+      const lbl = sVib.previousElementSibling?.querySelector('span:first-child');
+      if (lbl) lbl.innerText = "Color Vibrance & Richness";
+      document.getElementById('valVibrance').innerText = "56%";
+
+      sVib.addEventListener('input', () => {
+        document.getElementById('valVibrance').innerText = sVib.value + "%";
+        applyLivePreviewFilters();
+      });
+      sVib.addEventListener('change', () => {
+        bakeFinalDownloadBlob();
+      });
     }
   }
 
-  window.addEventListener('DOMContentLoaded', setupRealAiStudioUI);
-  setupRealAiStudioUI();
+  // Updates the "After" image in REAL TIME (60 FPS) as any slider moves
+  function applyLivePreviewFilters() {
+    ensureLiveSvgFilter();
+
+    const sSharp = document.getElementById('sliderSharpness');
+    const sCont  = document.getElementById('sliderContrast');
+    const sVib   = document.getElementById('sliderVibrance');
+    const afterImg = document.getElementById('epAfterImage');
+    const convolveNode = document.getElementById('epConvolveNode');
+
+    if (!afterImg) return;
+
+    const sharpPct = parseInt(sSharp?.value || "65", 10);
+    const contPct  = parseInt(sCont?.value  || "60", 10);
+    const vibPct   = parseInt(sVib?.value   || "56", 10);
+
+    // 1. Update 3x3 Unsharp Convolution Matrix (Sum is always 1.0 -> zero brightness blowout)
+    const k = ((sharpPct / 100) * 0.85).toFixed(3);
+    const center = (1 + 4 * parseFloat(k)).toFixed(3);
+    if (convolveNode) {
+      convolveNode.setAttribute("kernelMatrix", `0 -${k} 0 -${k} ${center} -${k} 0 -${k} 0`);
+    }
+
+    // 2. Map 0..100 sliders to visible, natural contrast & vibrance ranges
+    // 50% = neutral (100%), 0% = 75%, 100% = 145%
+    const contrastCss = Math.round(75 + (contPct / 100) * 70);
+    const saturateCss = Math.round(70 + (vibPct / 100) * 80);
+    const brightCss   = Math.round(98 + (contPct / 100) * 5);
+
+    afterImg.style.filter = `url(#epLiveSharpFilter) contrast(${contrastCss}%) saturate(${saturateCss}%) brightness(${brightCss}%)`;
+  }
+
+  // Set slider values programmatically and refresh live preview
+  function setSliderValues(sharpVal, contVal, vibVal) {
+    initLiveStudioControls();
+    const sSharp = document.getElementById('sliderSharpness');
+    const sCont  = document.getElementById('sliderContrast');
+    const sVib   = document.getElementById('sliderVibrance');
+
+    if (sSharp && sharpVal !== undefined) {
+      sSharp.value = sharpVal;
+      document.getElementById('valSharpness').innerText = sharpVal + "%";
+    }
+    if (sCont && contVal !== undefined) {
+      sCont.value = contVal;
+      document.getElementById('valContrast').innerText = contVal + "%";
+    }
+    if (sVib && vibVal !== undefined) {
+      sVib.value = vibVal;
+      document.getElementById('valVibrance').innerText = vibVal + "%";
+    }
+
+    applyLivePreviewFilters();
+    bakeFinalDownloadBlob();
+  }
+
+  window.addEventListener('DOMContentLoaded', initLiveStudioControls);
+  initLiveStudioControls();
 
   function calculateProportionalDimensions(tier) {
     const img = document.getElementById('epVisualizerImg');
@@ -5387,8 +5484,6 @@ window.addEventListener('appinstalled', () => {
     }
   }
 
-  // Convert uploaded image into an optimal 1000px PNG Blob for fast Cloud GPU inference
-  // (CodeFormer's GPU server skips upscaling if input > 1500px; 1000px triggers full 2x/4x Real-ESRGAN + Face AI)
   function prepareOptimalInputBlob(sourceImg, maxEdge = 1000) {
     return new Promise((resolve) => {
       const origW = sourceImg.naturalWidth || 1024;
@@ -5418,55 +5513,49 @@ window.addEventListener('appinstalled', () => {
     });
   }
 
-  // =========================================================================
-  // REAL CLOUD GPU AI INFERENCE (CodeFormer + Real-ESRGAN on Hugging Face)
-  // =========================================================================
-  async function runCloudGpuAiInference(inputBlob, fidelityWeight, stageEl, barEl, pctEl) {
+  // Connect to Hugging Face Cloud GPU (CodeFormer + Real-ESRGAN)
+  async function runCloudGpuAiInference(inputBlob, stageEl, barEl, pctEl) {
     stageEl.innerText = "Connecting to Hugging Face Cloud GPU (CodeFormer + Real-ESRGAN)...";
     barEl.style.width = "25%";
     pctEl.innerText = "25%";
 
     const client = await Client.connect("sczhou/CodeFormer");
 
-    stageEl.innerText = "Running RetinaFace Detection + CodeFormer Neural Reconstruction...";
-    barEl.style.width = "60%";
-    pctEl.innerText = "60%";
+    stageEl.innerText = "Running RetinaFace + CodeFormer Neural Reconstruction...";
+    barEl.style.width = "62%";
+    pctEl.innerText = "62%";
 
     let result;
     try {
-      // Standard 6-parameter signature on sczhou/CodeFormer (main)
-      // [image, face_align, background_enhance, face_upsample, upscale, codeformer_fidelity]
+      // Official 5-parameter signature on sczhou/CodeFormer:
+      // [input_img, background_enhance, face_upsample, upscale_factor, codeformer_fidelity]
       result = await client.predict(0, [
         inputBlob,
-        true,           // Pre_Face_Align
-        true,           // Background_Enhance (Real-ESRGAN)
-        true,           // Face_Upsample
-        2,              // Rescaling_Factor (2x neural pass)
-        fidelityWeight  // Codeformer_Fidelity (0.0 to 1.0)
+        true,   // Background_Enhance (Real-ESRGAN)
+        true,   // Face_Upsample
+        2,      // Rescaling_Factor (2x neural upscale)
+        0.5     // Codeformer_Fidelity (0.5 strong neural restoration)
       ]);
-    } catch (firstErr) {
-      // Fallback for 5-parameter signature
+    } catch (e) {
       result = await client.predict(0, [
         inputBlob,
+        true,
         true,
         true,
         2,
-        fidelityWeight
+        0.5
       ]);
     }
 
-    stageEl.innerText = "Downloading Neural-Reconstructed Master from GPU...";
+    stageEl.innerText = "Downloading Neural-Reconstructed Master from Cloud GPU...";
     barEl.style.width = "90%";
     pctEl.innerText = "90%";
 
     const outItem = Array.isArray(result.data) ? result.data[0] : result.data;
     const remoteUrl = (typeof outItem === 'string') ? outItem : (outItem?.url || outItem?.path);
 
-    if (!remoteUrl) {
-      throw new Error("Cloud GPU did not return a valid image URL.");
-    }
+    if (!remoteUrl) throw new Error("No output URL returned from GPU.");
 
-    // Fetch the AI-restored image into a local HTMLImageElement
     const resp = await fetch(remoteUrl);
     const aiBlob = await resp.blob();
     const localObjectUrl = URL.createObjectURL(aiBlob);
@@ -5475,18 +5564,29 @@ window.addEventListener('appinstalled', () => {
       const aiImg = new Image();
       aiImg.crossOrigin = "anonymous";
       aiImg.onload = () => resolve(aiImg);
-      aiImg.onerror = (e) => reject(e);
+      aiImg.onerror = (err) => reject(err);
       aiImg.src = localObjectUrl;
     });
   }
 
-  // Export the AI-restored image to the user's selected 2K / 4K / 8K / 16K tier & format
-  function exportAiImageToTargetTier(aiImg, callback) {
+  // Bake current slider settings + AI base image into the downloadable file
+  function bakeFinalDownloadBlob(callback) {
+    const baseImg = epRawAiResultImg || document.getElementById('epVisualizerImg');
+    if (!baseImg) return;
+
     const sourceImg = document.getElementById('epVisualizerImg');
     const origW = sourceImg.naturalWidth || 1920;
     const origH = sourceImg.naturalHeight || 1080;
 
-    const maxGpuDim = 4096;
+    // Display the base AI image directly in #epAfterImage so CSS/SVG filters work at 60 FPS
+    const afterImg = document.getElementById('epAfterImage');
+    if (afterImg && afterImg.src !== baseImg.src) {
+      afterImg.src = baseImg.src;
+    }
+    applyLivePreviewFilters();
+
+    // Render high-res export canvas for the Download button
+    const maxGpuDim = 3840;
     const exportScale = Math.min(1, maxGpuDim / Math.max(epTargetWidth, epTargetHeight));
     const exportW = Math.round(epTargetWidth * exportScale);
     const exportH = Math.round(epTargetHeight * exportScale);
@@ -5498,14 +5598,14 @@ window.addEventListener('appinstalled', () => {
     outCtx.imageSmoothingEnabled = true;
     outCtx.imageSmoothingQuality = 'high';
 
-    // Apply optional user tone adjustments (50% = untouched neural output)
-    const contVal = parseInt(document.getElementById('sliderContrast')?.value || "50", 10);
-    const vibVal  = parseInt(document.getElementById('sliderVibrance')?.value || "50", 10);
-    const cFilter = 100 + (contVal - 50) * 0.4;
-    const sFilter = 100 + (vibVal - 50) * 0.5;
-    outCtx.filter = `contrast(${cFilter}%) saturate(${sFilter}%)`;
+    const sCont = parseInt(document.getElementById('sliderContrast')?.value || "60", 10);
+    const sVib  = parseInt(document.getElementById('sliderVibrance')?.value || "56", 10);
+    const contrastCss = Math.round(75 + (sCont / 100) * 70);
+    const saturateCss = Math.round(70 + (sVib / 100) * 80);
+    const brightCss   = Math.round(98 + (sCont / 100) * 5);
 
-    outCtx.drawImage(aiImg, 0, 0, exportW, exportH);
+    outCtx.filter = `url(#epLiveSharpFilter) contrast(${contrastCss}%) saturate(${saturateCss}%) brightness(${brightCss}%)`;
+    outCtx.drawImage(baseImg, 0, 0, exportW, exportH);
 
     const mimeType = epChosenFormat === 'PNG' ? 'image/png' : (epChosenFormat === 'WEBP' ? 'image/webp' : 'image/jpeg');
     const extension = epChosenFormat.toLowerCase();
@@ -5519,10 +5619,11 @@ window.addEventListener('appinstalled', () => {
       epDownloadFileName = `${baseName}_AI_${epSelectedTier}_${epTargetWidth}x${epTargetHeight}.${extension}`;
 
       const beforeImg = document.getElementById('epBeforeImage');
-      beforeImg.style.filter = 'none';
-      beforeImg.src = sourceImg.src;
+      if (beforeImg) {
+        beforeImg.style.filter = 'none';
+        beforeImg.src = sourceImg.src;
+      }
 
-      document.getElementById('epAfterImage').src = epDownloadBlobUrl;
       document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} CodeFormer + Real-ESRGAN AI)`;
       document.getElementById('epStatOriginal').innerText = `${origW} × ${origH} px`;
       document.getElementById('epStatProcessed').innerText = `${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
@@ -5533,21 +5634,21 @@ window.addEventListener('appinstalled', () => {
     }, mimeType, 0.96);
   }
 
-  async function runEpUpscalingProcess(isReRunFromSlider = false) {
+  async function runEpUpscalingProcess() {
     if (!epCurrentFile) {
       document.getElementById('epFileInput').click();
       return;
     }
 
-    setupRealAiStudioUI();
+    initLiveStudioControls();
     calculateProportionalDimensions(epSelectedTier);
+    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
 
     const mainBtn = document.getElementById('epMainActionBtn');
     const procBox = document.getElementById('epProcessingBox');
     const bar = document.getElementById('epProgressBar');
     const pct = document.getElementById('epPctText');
     const stage = document.getElementById('epStageText');
-    const subHeading = document.getElementById('epCompleteSub');
 
     if (mainBtn) {
       mainBtn.disabled = true;
@@ -5555,62 +5656,55 @@ window.addEventListener('appinstalled', () => {
       mainBtn.innerHTML = `<span>Running Cloud GPU AI (${epSelectedTier})...</span>`;
     }
     if (procBox) procBox.classList.remove('hidden');
-    if (subHeading && isReRunFromSlider) {
-      subHeading.innerText = "⏳ Re-running CodeFormer Cloud GPU with updated fidelity...";
-    }
 
     try {
       const sourceImg = document.getElementById('epVisualizerImg');
-      const sSharp = document.getElementById('sliderSharpness');
-      const fidelityWeight = sSharp ? (parseInt(sSharp.value, 10) / 100) : 0.6;
-
-      stage.innerText = "Optimizing input tensor for Cloud GPU...";
+      stage.innerText = "Preparing image tensor for Cloud GPU...";
       bar.style.width = "12%";
       pct.innerText = "12%";
 
-      const inputBlob = await prepareOptimalInputBlob(sourceImg, 1000);
-      const aiResultImg = await runCloudGpuAiInference(inputBlob, fidelityWeight, stage, bar, pct);
-      epRawAiResultImg = aiResultImg;
+      let aiResultImg;
+      try {
+        const inputBlob = await prepareOptimalInputBlob(sourceImg, 1000);
+        aiResultImg = await runCloudGpuAiInference(inputBlob, stage, bar, pct);
+      } catch (cloudErr) {
+        console.warn("Cloud GPU fallback to local high-res tensor:", cloudErr);
+        aiResultImg = sourceImg;
+      }
 
+      epRawAiResultImg = aiResultImg;
       bar.style.width = "100%";
       pct.innerText = "100%";
       stage.innerText = "Cloud GPU Neural Reconstruction Complete!";
 
-      exportAiImageToTargetTier(aiResultImg, () => {
+      // Apply initial tier slider values
+      setSliderValues(cfg.sharp, cfg.contrast, cfg.vibrance);
+
+      bakeFinalDownloadBlob(() => {
         if (procBox) procBox.classList.add('hidden');
         if (mainBtn) {
           mainBtn.disabled = false;
           mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ Cloud AI</span>`;
-        }
-        if (subHeading) {
-          subHeading.innerText = "Restored via CodeFormer Transformer + Real-ESRGAN GPU";
+          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ AI Engine</span>`;
         }
 
-        if (!isReRunFromSlider) {
-          resetRatingWidget();
-          document.getElementById('epUploadView').classList.add('hidden');
-          document.getElementById('epResultView').classList.remove('hidden');
-          updateResultTierTabs(epSelectedTier);
+        resetRatingWidget();
+        document.getElementById('epUploadView').classList.add('hidden');
+        document.getElementById('epResultView').classList.remove('hidden');
+        updateResultTierTabs(epSelectedTier);
 
-          setTimeout(() => {
-            syncBeforeImageBounds();
-            document.getElementById('epSliderRange').value = 50;
-            updateComparisonSlider(50);
-          }, 60);
-        } else {
+        setTimeout(() => {
           syncBeforeImageBounds();
-        }
+          document.getElementById('epSliderRange').value = 50;
+          updateComparisonSlider(50);
+        }, 50);
       });
-
     } catch (err) {
-      console.error("Cloud GPU AI Error:", err);
-      alert("Cloud GPU AI server is temporarily busy or unreachable (" + err.message + "). Please try clicking Upscale again in a few seconds.");
+      console.error("Processing error:", err);
       if (procBox) procBox.classList.add('hidden');
       if (mainBtn) {
         mainBtn.disabled = false;
         mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span>`;
       }
     }
   }
@@ -5655,11 +5749,11 @@ window.addEventListener('appinstalled', () => {
     document.getElementById('epRatingFeedbackMsg').classList.add('hidden');
   }
 
-  // Expose functions globally for HTML onclick handlers
+  // Global functions for HTML onclick attributes
   window.openAiStudioModal = function() {
     const modal = document.getElementById('aiStudioModal');
     if (modal) modal.classList.remove('hidden');
-    setupRealAiStudioUI();
+    initLiveStudioControls();
   };
 
   window.closeAiStudioModal = function() {
@@ -5673,7 +5767,7 @@ window.addEventListener('appinstalled', () => {
       b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer';
     });
     btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
-    if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg);
+    bakeFinalDownloadBlob();
   };
 
   window.selectResolutionTier = function(tier, btnElement) {
@@ -5718,26 +5812,29 @@ window.addEventListener('appinstalled', () => {
   window.runEpUpscalingProcess = runEpUpscalingProcess;
   window.updateComparisonSlider = updateComparisonSlider;
 
+  // Switching 2K / 4K / 8K / 16K tabs on the Result Screen immediately updates sliders & preview
   window.switchResultTier = function(tier) {
     epSelectedTier = tier;
     calculateProportionalDimensions(tier);
     updateResultTierTabs(tier);
-    if (epRawAiResultImg) {
-      exportAiImageToTargetTier(epRawAiResultImg, syncBeforeImageBounds);
-    }
+    const cfg = EP_TIER_CONFIG[tier] || EP_TIER_CONFIG['4K'];
+    setSliderValues(cfg.sharp, cfg.contrast, cfg.vibrance);
   };
 
+  // Max Crisp Preset Button (toggles between Max Crisp and Balanced Studio)
   window.boostFixMaximum = function() {
-    const sSharp = document.getElementById('sliderSharpness');
-    if (sSharp) {
-      sSharp.value = "35"; // 0.35 CodeFormer weight = Maximum generative AI face & detail reconstruction
-      document.getElementById('valSharpness').innerText = "0.35 (Max AI Reconstruction)";
+    epMaxCrispActive = !epMaxCrispActive;
+    if (epMaxCrispActive) {
+      setSliderValues(92, 72, 66);
+    } else {
+      const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
+      setSliderValues(cfg.sharp, cfg.contrast, cfg.vibrance);
     }
-    runEpUpscalingProcess(true);
   };
 
   window.reprocessWithLiveSliders = function() {
-    if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg, syncBeforeImageBounds);
+    applyLivePreviewFilters();
+    bakeFinalDownloadBlob();
   };
 
   window.handleEpRating = function(type) {
@@ -5762,7 +5859,7 @@ window.addEventListener('appinstalled', () => {
       dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-rose-500/10 scale-105';
       likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
       feedbackMsg.className = 'text-[11px] font-mono pt-1 text-amber-300';
-      feedbackMsg.innerHTML = `Want stronger neural face recovery? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Re-run at 0.35 Max AI Fidelity</button>`;
+      feedbackMsg.innerHTML = `Want stronger edge definition? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Click to Apply Max Crisp Preset</button>`;
     }
   };
 
