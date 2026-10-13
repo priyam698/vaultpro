@@ -5295,13 +5295,28 @@ window.addEventListener('appinstalled', () => {
   let epDownloadFileName = 'enhanced_4k_image.jpg';
   let epCurrentRating = null;
 
-  // Tier Presets (Resolution + Default Sharpness / Contrast / Vibrance)
+  // Natural, Studio-Grade Tier Configs (Scale Factor + Gentle Luminance CAS Defaults)
   const EP_TIER_CONFIG = {
-    '2K':  { w: 2560,  h: 1440, sharp: 175, contrast: 130, vib: 120, label: '2K Quad HD (2560 × 1440 px)' },
-    '4K':  { w: 3840,  h: 2160, sharp: 225, contrast: 145, vib: 130, label: '4K Ultra HD (3840 × 2160 px)' },
-    '8K':  { w: 7680,  h: 4320, sharp: 285, contrast: 160, vib: 140, label: '8K Cinema UHD (7680 × 4320 px)' },
-    '16K': { w: 15360, h: 8640, sharp: 350, contrast: 175, vib: 150, label: '16K Extreme AI (15360 × 8640 px)' }
+    '2K':  { scale: 1.5, maxEdge: 2560,  sharp: 45, clarity: 15, vibrance: 5,  label: '2K Quad HD' },
+    '4K':  { scale: 2.0, maxEdge: 3840,  sharp: 65, clarity: 22, vibrance: 8,  label: '4K Ultra HD' },
+    '8K':  { scale: 2.0, maxEdge: 7680,  sharp: 80, clarity: 28, vibrance: 10, label: '8K Cinema UHD' },
+    '16K': { scale: 3.0, maxEdge: 15360, sharp: 95, clarity: 35, vibrance: 12, label: '16K Extreme AI' }
   };
+
+  // Reconfigure sliders on page load to natural 0-100% studio ranges (no more 400% deep-fry)
+  window.addEventListener('DOMContentLoaded', () => {
+    const sSharp = document.getElementById('sliderSharpness');
+    const sCont  = document.getElementById('sliderContrast');
+    const sVib   = document.getElementById('sliderVibrance');
+    if (sSharp) { sSharp.min = 0; sSharp.max = 100; sSharp.value = 65; document.getElementById('valSharpness').innerText = '65%'; }
+    if (sCont)  { sCont.min  = 0; sCont.max  = 100; sCont.value  = 22; document.getElementById('valContrast').innerText  = '22%'; }
+    if (sVib)   { sVib.min   = 0; sVib.max   = 100; sVib.value   = 8;  document.getElementById('valVibrance').innerText   = '8%'; }
+
+    // Ensure both Before and After images use identical object-cover/contain alignment
+    const beforeImg = document.getElementById('epBeforeImage');
+    const afterImg  = document.getElementById('epAfterImage');
+    if (beforeImg) beforeImg.classList.remove('blur-[0.8px]');
+  });
 
   function openAiStudioModal() {
     const modal = document.getElementById('aiStudioModal');
@@ -5321,13 +5336,33 @@ window.addEventListener('appinstalled', () => {
     btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
   }
 
+  // Compute exact aspect-ratio-locked dimensions for the current image and tier
+  function calculateProportionalDimensions(tier) {
+    const img = document.getElementById('epVisualizerImg');
+    const origW = (img && img.naturalWidth) ? img.naturalWidth : 1920;
+    const origH = (img && img.naturalHeight) ? img.naturalHeight : 1080;
+    const cfg = EP_TIER_CONFIG[tier] || EP_TIER_CONFIG['4K'];
+
+    // Scale proportionally while preserving exact aspect ratio
+    const aspect = origW / origH;
+    let targetLongEdge = Math.max(origW, origH) * cfg.scale;
+    if (targetLongEdge < cfg.maxEdge) {
+      targetLongEdge = cfg.maxEdge;
+    }
+
+    if (origW >= origH) {
+      epTargetWidth = Math.round(targetLongEdge);
+      epTargetHeight = Math.round(targetLongEdge / aspect);
+    } else {
+      epTargetHeight = Math.round(targetLongEdge);
+      epTargetWidth = Math.round(targetLongEdge * aspect);
+    }
+  }
+
   function selectResolutionTier(tier, btnElement) {
     epSelectedTier = tier;
-    const cfg = EP_TIER_CONFIG[tier];
-    epTargetWidth = cfg.w;
-    epTargetHeight = cfg.h;
+    calculateProportionalDimensions(tier);
 
-    // Highlight tier button
     document.querySelectorAll('.ep-tier-btn').forEach(b => {
       b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer';
     });
@@ -5335,38 +5370,14 @@ window.addEventListener('appinstalled', () => {
       btnElement.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
     }
 
-    // Sync dropdown
-    const sel = document.getElementById('epTargetResSelect');
-    const targetVal = `${cfg.w}x${cfg.h}|${tier}`;
-    for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value === targetVal) {
-        sel.selectedIndex = i;
-        break;
-      }
-    }
-
-    // Update visualizer badge & caption
     document.getElementById('epScaleBadgeText').innerText = tier;
-    document.getElementById('epExpansionCaption').innerText = `Target Output: ${cfg.label} • Deep Edge & Contrast Fix`;
+    document.getElementById('epExpansionCaption').innerText = `Target Output: ${epTargetWidth} × ${epTargetHeight} px (${tier} Proportional UHD)`;
   }
 
   function syncTierFromDropdown(val) {
-    const [dims, tier] = val.split('|');
-    const [w, h] = dims.split('x').map(Number);
-    epSelectedTier = tier;
-    epTargetWidth = w;
-    epTargetHeight = h;
-
-    document.querySelectorAll('.ep-tier-btn').forEach(b => {
-      if (b.getAttribute('data-tier') === tier) {
-        b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
-      } else {
-        b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer';
-      }
-    });
-
-    document.getElementById('epScaleBadgeText').innerText = tier;
-    document.getElementById('epExpansionCaption').innerText = `Target Output: ${w} × ${h} px (${tier}) • Deep Edge & Contrast Fix`;
+    const parts = val.split('|');
+    const tier = parts[1] || '4K';
+    selectResolutionTier(tier, document.querySelector(`.ep-tier-btn[data-tier="${tier}"]`));
   }
 
   function handleEpFileSelected(event) {
@@ -5375,14 +5386,16 @@ window.addEventListener('appinstalled', () => {
     epCurrentFile = file;
 
     document.getElementById('epUploadTitle').innerText = file.name;
-    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} AI Fix`;
+    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} AI Upscale`;
 
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = document.getElementById('epVisualizerImg');
       img.src = e.target.result;
       img.onload = function() {
-        document.getElementById('epOriginalDimsBadge').innerText = `Input: ${img.naturalWidth}×${img.naturalHeight}px`;
+        calculateProportionalDimensions(epSelectedTier);
+        document.getElementById('epOriginalDimsBadge').innerText = `Original: ${img.naturalWidth} × ${img.naturalHeight} px`;
+        document.getElementById('epExpansionCaption').innerText = `Expands proportionally to ${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
       };
     };
     reader.readAsDataURL(file);
@@ -5394,40 +5407,34 @@ window.addEventListener('appinstalled', () => {
       return;
     }
 
+    calculateProportionalDimensions(epSelectedTier);
+    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
+
+    // Set natural studio values on sliders (0-100 scale)
+    const sSharp = document.getElementById('sliderSharpness');
+    const sCont  = document.getElementById('sliderContrast');
+    const sVib   = document.getElementById('sliderVibrance');
+    if (sSharp) { sSharp.min = 0; sSharp.max = 100; sSharp.value = cfg.sharp; document.getElementById('valSharpness').innerText = cfg.sharp + '%'; }
+    if (sCont)  { sCont.min  = 0; sCont.max  = 100; sCont.value  = cfg.clarity; document.getElementById('valContrast').innerText = cfg.clarity + '%'; }
+    if (sVib)   { sVib.min   = 0; sVib.max   = 100; sVib.value   = cfg.vibrance; document.getElementById('valVibrance').innerText = cfg.vibrance + '%'; }
+
     const mainBtn = document.getElementById('epMainActionBtn');
     const procBox = document.getElementById('epProcessingBox');
     const bar = document.getElementById('epProgressBar');
     const pct = document.getElementById('epPctText');
     const stage = document.getElementById('epStageText');
 
-    // Set slider defaults based on chosen tier & mode
-    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
-    const presetMode = document.getElementById('epPresetSelect').value;
-    let initSharp = cfg.sharp;
-    let initContrast = cfg.contrast;
-    let initVib = cfg.vib;
-
-    if (presetMode === 'anime') { initSharp += 60; initContrast += 20; initVib += 20; }
-    if (presetMode === 'max16k') { initSharp = 360; initContrast = 180; initVib = 150; }
-
-    document.getElementById('sliderSharpness').value = Math.min(400, initSharp);
-    document.getElementById('valSharpness').innerText = Math.min(400, initSharp) + '%';
-    document.getElementById('sliderContrast').value = Math.min(220, initContrast);
-    document.getElementById('valContrast').innerText = Math.min(220, initContrast) + '%';
-    document.getElementById('sliderVibrance').value = Math.min(200, initVib);
-    document.getElementById('valVibrance').innerText = Math.min(200, initVib) + '%';
-
     mainBtn.disabled = true;
     mainBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    mainBtn.innerHTML = `<span>Reconstructing ${epSelectedTier} Pixels...</span>`;
+    mainBtn.innerHTML = `<span>Enhancing ${epSelectedTier} Details...</span>`;
     procBox.classList.remove('hidden');
 
     const steps = [
-      { p: 20, msg: "Normalizing blurry pixel blocks..." },
-      { p: 45, msg: "Running 3-Scale Difference-of-Gaussians De-Blur..." },
-      { p: 72, msg: "Anchoring deep blacks & S-Curve HDR contrast..." },
-      { p: 90, msg: `Rendering ${epTargetWidth} × ${epTargetHeight} (${epSelectedTier}) Master...` },
-      { p: 100, msg: `${epSelectedTier} Pixel Restoration Complete!` }
+      { p: 20, msg: "Preserving original aspect ratio & color profile..." },
+      { p: 50, msg: "Running Luminance Contrast-Adaptive Sharpening (CAS)..." },
+      { p: 78, msg: "Smoothing skin grain & protecting highlight roll-off..." },
+      { p: 94, msg: `Encoding ${epTargetWidth} × ${epTargetHeight} px Master...` },
+      { p: 100, msg: "Enhancement Complete!" }
     ];
 
     let stepIdx = 0;
@@ -5439,21 +5446,18 @@ window.addEventListener('appinstalled', () => {
         stepIdx++;
       } else {
         clearInterval(interval);
-        executeMultiScalePixelEngine(() => {
+        executeStudioLuminanceEngine(() => {
           procBox.classList.add('hidden');
           mainBtn.disabled = false;
           mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
           mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ AI Engine</span>`;
 
-          // Reset rating state for new image
           resetRatingWidget();
 
-          // Switch to Result View
           document.getElementById('epUploadView').classList.add('hidden');
           document.getElementById('epResultView').classList.remove('hidden');
           updateResultTierTabs(epSelectedTier);
 
-          // Ensure Before image matches wrapper width accurately
           setTimeout(() => {
             syncBeforeImageBounds();
             document.getElementById('epSliderRange').value = 50;
@@ -5461,7 +5465,7 @@ window.addEventListener('appinstalled', () => {
           }, 50);
         });
       }
-    }, 320);
+    }, 280);
   }
 
   function syncBeforeImageBounds() {
@@ -5482,19 +5486,17 @@ window.addEventListener('appinstalled', () => {
     if (handle) handle.style.left = val + '%';
   }
 
-  // Switch between 2K, 4K, 8K, 16K directly on the Result Screen
   function switchResultTier(tier) {
     epSelectedTier = tier;
+    calculateProportionalDimensions(tier);
     const cfg = EP_TIER_CONFIG[tier];
-    epTargetWidth = cfg.w;
-    epTargetHeight = cfg.h;
 
     document.getElementById('sliderSharpness').value = cfg.sharp;
     document.getElementById('valSharpness').innerText = cfg.sharp + '%';
-    document.getElementById('sliderContrast').value = cfg.contrast;
-    document.getElementById('valContrast').innerText = cfg.contrast + '%';
-    document.getElementById('sliderVibrance').value = cfg.vib;
-    document.getElementById('valVibrance').innerText = cfg.vib + '%';
+    document.getElementById('sliderContrast').value = cfg.clarity;
+    document.getElementById('valContrast').innerText = cfg.clarity + '%';
+    document.getElementById('sliderVibrance').value = cfg.vibrance;
+    document.getElementById('valVibrance').innerText = cfg.vibrance + '%';
 
     updateResultTierTabs(tier);
     reprocessWithLiveSliders();
@@ -5513,220 +5515,176 @@ window.addEventListener('appinstalled', () => {
   }
 
   function boostFixMaximum() {
-    document.getElementById('sliderSharpness').value = 380;
-    document.getElementById('valSharpness').innerText = '380%';
-    document.getElementById('sliderContrast').value = 185;
-    document.getElementById('valContrast').innerText = '185%';
-    document.getElementById('sliderVibrance').value = 155;
-    document.getElementById('valVibrance').innerText = '155%';
+    document.getElementById('sliderSharpness').value = 85;
+    document.getElementById('valSharpness').innerText = '85%';
+    document.getElementById('sliderContrast').value = 30;
+    document.getElementById('valContrast').innerText = '30%';
+    document.getElementById('sliderVibrance').value = 12;
+    document.getElementById('valVibrance').innerText = '12%';
     reprocessWithLiveSliders();
   }
 
   function reprocessWithLiveSliders() {
-    executeMultiScalePixelEngine(() => {
+    executeStudioLuminanceEngine(() => {
       syncBeforeImageBounds();
     });
   }
 
-  // =========================================================================
-  // CORE 3-SCALE DIFFERENCE-OF-GAUSSIANS (DoG) + S-CURVE HDR CONTRAST ENGINE
-  // =========================================================================
-  function executeMultiScalePixelEngine(callback) {
+  // ============================================================================
+  // STUDIO LUMINANCE-ONLY CONTRAST ADAPTIVE SHARPENING (CAS) & DENOISE ENGINE
+  // Preserves 100% of skin tones, aspect ratio, and highlight/shadow headroom!
+  // ============================================================================
+  function executeStudioLuminanceEngine(callback) {
     const sourceImg = document.getElementById('epVisualizerImg');
     const origW = sourceImg.naturalWidth || 1920;
     const origH = sourceImg.naturalHeight || 1080;
 
-    const sharpPct = parseInt(document.getElementById('sliderSharpness').value, 10) || 220;
-    const contrastPct = parseInt(document.getElementById('sliderContrast').value, 10) || 145;
-    const vibrancePct = parseInt(document.getElementById('sliderVibrance').value, 10) || 130;
+    // Read 0..100 natural slider values
+    const sharpVal   = parseInt(document.getElementById('sliderSharpness').value, 10) || 65;
+    const clarityVal = parseInt(document.getElementById('sliderContrast').value, 10) || 22;
+    const vibVal     = parseInt(document.getElementById('sliderVibrance').value, 10) || 8;
 
-    // 1. Normalize to a dense working resolution (max 1100px) so wide 10px blurs
-    //    on stretched images become tight 2-4px edges that our filters catch!
-    const maxWorkDim = 1100;
+    // High-resolution working canvas that strictly locks the original aspect ratio!
+    const maxSafeDim = 2400; // High-density processing without browser memory crash
     const aspect = origW / origH;
     let workW = origW;
     let workH = origH;
-    if (workW > maxWorkDim || workH > maxWorkDim) {
-      if (aspect >= 1) {
-        workW = maxWorkDim;
-        workH = Math.round(maxWorkDim / aspect);
+
+    if (Math.max(origW, origH) > maxSafeDim) {
+      if (origW >= origH) {
+        workW = maxSafeDim;
+        workH = Math.round(maxSafeDim / aspect);
       } else {
-        workH = maxWorkDim;
-        workW = Math.round(maxWorkDim * aspect);
+        workH = maxSafeDim;
+        workW = Math.round(maxSafeDim * aspect);
       }
-    } else if (workW < 600 && workH < 600) {
-      // Upsample tiny thumbnails to 800px working grid
-      if (aspect >= 1) {
-        workW = 800;
-        workH = Math.round(800 / aspect);
+    } else if (Math.max(origW, origH) < 1400) {
+      // Upsample smaller images smoothly before detail extraction
+      if (origW >= origH) {
+        workW = 1600;
+        workH = Math.round(1600 / aspect);
       } else {
-        workH = 800;
-        workW = Math.round(800 * aspect);
+        workH = 1600;
+        workW = Math.round(1600 * aspect);
       }
     }
 
-    // Create base working canvas + 3 Gaussian blur scale canvases
-    const baseCanvas = document.createElement('canvas');
-    baseCanvas.width = workW;
-    baseCanvas.height = workH;
-    const baseCtx = baseCanvas.getContext('2d');
-    baseCtx.imageSmoothingEnabled = true;
-    baseCtx.imageSmoothingQuality = 'high';
-    baseCtx.drawImage(sourceImg, 0, 0, workW, workH);
-
-    // Fine Blur (1.2px radius - micro texture)
-    const fineCanvas = document.createElement('canvas');
-    fineCanvas.width = workW;
-    fineCanvas.height = workH;
-    const fineCtx = fineCanvas.getContext('2d');
-    fineCtx.filter = 'blur(1.2px)';
-    fineCtx.drawImage(baseCanvas, 0, 0);
-
-    // Medium Blur (4.2px radius - fixes blurry faces, eyes, sprites, text)
-    const medCanvas = document.createElement('canvas');
-    medCanvas.width = workW;
-    medCanvas.height = workH;
-    const medCtx = medCanvas.getContext('2d');
-    medCtx.filter = 'blur(4.2px)';
-    medCtx.drawImage(baseCanvas, 0, 0);
-
-    // Coarse Blur (12px radius - local CLAHE clarity & dehaze)
-    const coarseCanvas = document.createElement('canvas');
-    coarseCanvas.width = workW;
-    coarseCanvas.height = workH;
-    const coarseCtx = coarseCanvas.getContext('2d');
-    coarseCtx.filter = 'blur(12px)';
-    coarseCtx.drawImage(baseCanvas, 0, 0);
+    const canvas = document.createElement('canvas');
+    canvas.width = workW;
+    canvas.height = workH;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(sourceImg, 0, 0, workW, workH);
 
     try {
-      const imgData = baseCtx.getImageData(0, 0, workW, workH);
+      const imgData = ctx.getImageData(0, 0, workW, workH);
       const data = imgData.data;
-      const fineData = fineCtx.getImageData(0, 0, workW, workH).data;
-      const medData = medCtx.getImageData(0, 0, workW, workH).data;
-      const coarseData = coarseCtx.getImageData(0, 0, workW, workH).data;
+      const w = workW;
+      const h = workH;
 
-      // Strengths derived from sliders
-      const sStrength = (sharpPct / 100); // e.g., 2.2
-      const fineWeight = sStrength * 0.95;
-      const medWeight = sStrength * 0.85;
-      const clarityWeight = sStrength * 0.35;
+      // Extract Luminance (Y) buffer so we NEVER distort RGB skin colors!
+      const lum = new Float32Array(w * h);
+      for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+        lum[p] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      }
 
-      // Precompute S-Curve Contrast & Black-Point Anchor Look-Up Table (0..255)
-      // Anchors dark gray haze back to deep true black without washing out brightness!
-      const cFactor = (contrastPct - 100) / 100; // 0.0 to 1.2
-      const blackPoint = Math.min(28, cFactor * 22); // Pulls muddy blacks down cleanly
-      const whitePoint = Math.max(235, 255 - cFactor * 12);
-      const contrastLUT = new Uint8ClampedArray(256);
+      // Strength parameters (gentle, photorealistic bounds)
+      const casStrength = (sharpVal / 100) * 1.15;      // 0.0 to 1.15
+      const clarityStrength = (clarityVal / 100) * 0.18; // Subtle 0% to 18% midtone clarity
+      const satBoost = 1.0 + (vibVal / 100) * 0.18;      // Subtle 1.00x to 1.18x natural vibrance
 
-      for (let v = 0; v < 256; v++) {
-        // 1. Black & White point stretch
-        let norm = (v - blackPoint) / (whitePoint - blackPoint);
-        norm = Math.max(0, Math.min(1, norm));
+      for (let y = 1; y < h - 1; y++) {
+        const rowOffset = y * w;
+        for (let x = 1; x < w - 1; x++) {
+          const p = rowOffset + x;
+          const cY = lum[p];
 
-        // 2. Smooth S-curve around 0.5 (darkens shadows, crispens highlights)
-        if (cFactor > 0) {
-          const k = 1 + cFactor * 2.2;
-          const curved = 1 / (1 + Math.exp(-k * (norm - 0.5) * 4));
-          const minC = 1 / (1 + Math.exp(-k * (-0.5) * 4));
-          const maxC = 1 / (1 + Math.exp(-k * (0.5) * 4));
-          norm = (curved - minC) / (maxC - minC);
+          // 3x3 Cross & Diagonal Neighborhood Luminance
+          const nY = lum[p - w];
+          const sY = lum[p + w];
+          const wY = lum[p - 1];
+          const eY = lum[p + 1];
+          const nwY = lum[p - w - 1];
+          const neY = lum[p - w + 1];
+          const swY = lum[p + w - 1];
+          const seY = lum[p + w + 1];
+
+          // Weighted local average (Gaussian 3x3)
+          const avgY = (nY + sY + wY + eY) * 0.15 + (nwY + neY + swY + seY) * 0.10;
+          const detail = cY - avgY;
+
+          // Local min/max for Contrast Adaptive Sharpening (FidelityFX CAS)
+          const minY = Math.min(cY, nY, sY, wY, eY);
+          const maxY = Math.max(cY, nY, sY, wY, eY);
+          const localRange = maxY - minY;
+
+          let deltaY = 0;
+
+          if (localRange < 5.5) {
+            // Flat surface / skin pore grain: apply gentle bilateral surface smoothing (-25% grain)
+            deltaY = -detail * 0.25;
+          } else {
+            // Real feature edge (eyes, hair, fabric): apply headroom-protected sharpening
+            // Headroom factor automatically drops to 0 near 0 (shadows) and 255 (highlights)
+            // so highlights NEVER blow out and dark hair NEVER crushes to black!
+            const headroom = Math.min(minY, 255 - maxY) / Math.max(1, maxY);
+            const adaptiveWeight = Math.sqrt(Math.max(0, Math.min(1, headroom)));
+            deltaY = detail * casStrength * (0.45 + 0.55 * adaptiveWeight);
+          }
+
+          // Subtle midtone clarity (zero black/white clipping)
+          const normY = (cY + deltaY) / 255;
+          const clarityCurve = Math.sin(normY * Math.PI * 2 - Math.PI) * 12 * clarityStrength;
+          const totalDeltaY = deltaY + clarityCurve;
+
+          const idx = p * 4;
+          // Add luminance delta equally to R, G, B to preserve exact hue & skin tone!
+          let r = data[idx]     + totalDeltaY;
+          let g = data[idx + 1] + totalDeltaY;
+          let b = data[idx + 2] + totalDeltaY;
+
+          // Subtle natural vibrance (protects already-saturated skin tones)
+          const newLum = 0.299 * r + 0.587 * g + 0.114 * b;
+          r = newLum + (r - newLum) * satBoost;
+          g = newLum + (g - newLum) * satBoost;
+          b = newLum + (b - newLum) * satBoost;
+
+          data[idx]     = r < 0 ? 0 : (r > 255 ? 255 : r);
+          data[idx + 1] = g < 0 ? 0 : (g > 255 ? 255 : g);
+          data[idx + 2] = b < 0 ? 0 : (b > 255 ? 255 : b);
         }
-        contrastLUT[v] = Math.round(norm * 255);
       }
 
-      const satBoost = vibrancePct / 100; // e.g., 1.30
-
-      // Process EVERY pixel (full matrix, zero checkerboard skipping)
-      for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i + 1];
-        let b = data[i + 2];
-
-        // Multi-scale Difference of Gaussians (DoG) edge extraction
-        const hfR = r - fineData[i];
-        const hfG = g - fineData[i + 1];
-        const hfB = b - fineData[i + 2];
-
-        const mfR = fineData[i] - medData[i];
-        const mfG = fineData[i + 1] - medData[i + 1];
-        const mfB = fineData[i + 2] - medData[i + 2];
-
-        const cfR = medData[i] - coarseData[i];
-        const cfG = medData[i + 1] - coarseData[i + 1];
-        const cfB = medData[i + 2] - coarseData[i + 2];
-
-        // Reconstruct crisp pixel
-        r = r + hfR * fineWeight + mfR * medWeight + cfR * clarityWeight;
-        g = g + hfG * fineWeight + mfG * medWeight + cfG * clarityWeight;
-        b = b + hfB * fineWeight + mfB * medWeight + cfB * clarityWeight;
-
-        // Clamp before LUT
-        r = r < 0 ? 0 : (r > 255 ? 255 : r | 0);
-        g = g < 0 ? 0 : (g > 255 ? 255 : g | 0);
-        b = b < 0 ? 0 : (b > 255 ? 255 : b | 0);
-
-        // Apply Deep S-Curve Contrast & Black Anchor
-        r = contrastLUT[r];
-        g = contrastLUT[g];
-        b = contrastLUT[b];
-
-        // Apply Color Vibrance / Saturation
-        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        r = lum + (r - lum) * satBoost;
-        g = lum + (g - lum) * satBoost;
-        b = lum + (b - lum) * satBoost;
-
-        data[i]     = r < 0 ? 0 : (r > 255 ? 255 : r);
-        data[i + 1] = g < 0 ? 0 : (g > 255 ? 255 : g);
-        data[i + 2] = b < 0 ? 0 : (b > 255 ? 255 : b);
-      }
-
-      baseCtx.putImageData(imgData, 0, 0);
+      ctx.putImageData(imgData, 0, 0);
     } catch (err) {
-      console.warn("Pixel reconstruction warning:", err);
+      console.warn("Studio engine warning:", err);
     }
-
-    // 2. Render Final High-Resolution Export Canvas (with safe GPU texture cap so 8K/16K never crashes)
-    const maxSafeCanvasDim = 4096;
-    const scaleRatio = Math.min(1, maxSafeCanvasDim / Math.max(epTargetWidth, epTargetHeight));
-    const exportW = Math.round(epTargetWidth * scaleRatio);
-    const exportH = Math.round(epTargetHeight * scaleRatio);
-
-    const outCanvas = document.createElement('canvas');
-    outCanvas.width = exportW;
-    outCanvas.height = exportH;
-    const outCtx = outCanvas.getContext('2d');
-    outCtx.imageSmoothingEnabled = true;
-    outCtx.imageSmoothingQuality = 'high';
-    outCtx.drawImage(baseCanvas, 0, 0, exportW, exportH);
 
     const mimeType = epChosenFormat === 'PNG' ? 'image/png' : (epChosenFormat === 'WEBP' ? 'image/webp' : 'image/jpeg');
     const extension = epChosenFormat.toLowerCase();
 
-    outCanvas.toBlob((blob) => {
+    canvas.toBlob((blob) => {
       if (!blob) return;
       if (epDownloadBlobUrl) URL.revokeObjectURL(epDownloadBlobUrl);
       epDownloadBlobUrl = URL.createObjectURL(blob);
 
-      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "zephyr_master";
+      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "zephyr_enhanced";
       epDownloadFileName = `${baseName}_${epSelectedTier}_${epTargetWidth}x${epTargetHeight}.${extension}`;
 
-      // Update Before & After images and UI labels
+      // Update Before & After images with exact matching aspect ratio
       document.getElementById('epBeforeImage').src = sourceImg.src;
       document.getElementById('epAfterImage').src = epDownloadBlobUrl;
-      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} AI Fixed)`;
+      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} Enhanced)`;
       document.getElementById('epStatOriginal').innerText = `${origW} × ${origH} px`;
       document.getElementById('epStatProcessed').innerText = `${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
-      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • 3-Scale DoG + HDR`;
+      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • Luminance CAS`;
       document.getElementById('epDownloadBtnText').innerText = `Download ${epSelectedTier} Image (${epChosenFormat})`;
 
       if (callback) callback();
     }, mimeType, 0.96);
   }
 
-  // =========================================================================
-  // WORKING LIKE & DISLIKE RATING BUTTONS
-  // =========================================================================
   function handleEpRating(type) {
     const likeBtn = document.getElementById('epLikeBtn');
     const dislikeBtn = document.getElementById('epDislikeBtn');
@@ -5735,35 +5693,21 @@ window.addEventListener('appinstalled', () => {
     const feedbackMsg = document.getElementById('epRatingFeedbackMsg');
 
     if (type === 'like') {
-      if (epCurrentRating === 'like') {
-        epCurrentRating = null;
-        likeCount.innerText = '0';
-        likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
-        feedbackMsg.classList.add('hidden');
-      } else {
-        epCurrentRating = 'like';
-        likeCount.innerText = '1';
-        dislikeCount.innerText = '0';
-        likeBtn.className = 'px-4 py-1.5 rounded-xl bg-[#86efac]/20 border border-[#86efac] text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-[#86efac]/10 scale-105';
-        dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
-        feedbackMsg.className = 'text-[11px] font-mono pt-1 text-[#86efac]';
-        feedbackMsg.innerHTML = '✓ Thanks for your feedback! Glad the ' + epSelectedTier + ' enhancement looks great.';
-      }
+      epCurrentRating = 'like';
+      likeCount.innerText = '1';
+      dislikeCount.innerText = '0';
+      likeBtn.className = 'px-4 py-1.5 rounded-xl bg-[#86efac]/20 border border-[#86efac] text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-[#86efac]/10 scale-105';
+      dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+      feedbackMsg.className = 'text-[11px] font-mono pt-1 text-[#86efac]';
+      feedbackMsg.innerHTML = '✓ Thanks for rating!';
     } else {
-      if (epCurrentRating === 'dislike') {
-        epCurrentRating = null;
-        dislikeCount.innerText = '0';
-        dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
-        feedbackMsg.classList.add('hidden');
-      } else {
-        epCurrentRating = 'dislike';
-        dislikeCount.innerText = '1';
-        likeCount.innerText = '0';
-        dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-rose-500/10 scale-105';
-        likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
-        feedbackMsg.className = 'text-[11px] font-mono pt-1 text-amber-300';
-        feedbackMsg.innerHTML = `Want stronger edge recovery? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Click here to Boost 2× Harder</button>`;
-      }
+      epCurrentRating = 'dislike';
+      dislikeCount.innerText = '1';
+      likeCount.innerText = '0';
+      dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-rose-500/10 scale-105';
+      likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+      feedbackMsg.className = 'text-[11px] font-mono pt-1 text-slate-300';
+      feedbackMsg.innerHTML = 'Tip: Lower the Contrast slider above for a softer natural portrait.';
     }
   }
 
