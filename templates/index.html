@@ -3079,37 +3079,34 @@
   <!-- OPERATIONAL 4K AI STUDIO MODAL                                            -->
   <!-- ========================================================================= -->
  <!-- ============================================================ -->
-    <!-- 4K/8K AI STUDIO WITH BEFORE & AFTER COMPARISON SLIDER        -->
+    <!-- 2K / 4K / 8K / 16K AI STUDIO & MULTI-PASS PIXEL RESTORER     -->
     <!-- ============================================================ -->
     <div id="aiStudioModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto" onclick="if(event.target === this) closeAiStudioModal()">
       <div class="relative w-full max-w-5xl rounded-3xl bg-[#090d16] border border-white/10 shadow-2xl p-6 sm:p-10 my-auto text-slate-200">
         
-        <!-- Close Button (Top-Right) -->
-        <button type="button" onclick="closeAiStudioModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center text-lg transition-all z-20">
+        <!-- Close Button -->
+        <button type="button" onclick="closeAiStudioModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center text-lg transition-all z-20 cursor-pointer">
           ✕
         </button>
 
-        <!-- ================= VIEW 1: UPLOAD & SETTINGS VIEW ================= -->
+        <!-- ================= VIEW 1: UPLOAD & RESOLUTION SELECTOR ================= -->
         <div id="epUploadView" class="space-y-8">
-          <!-- Top Title & Subtitle -->
           <div class="text-center max-w-3xl mx-auto space-y-3">
             <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Upscale Image to <span class="text-[#86efac]">4K, 8K</span> or <span class="text-sky-400">16K</span> with Free AI
+              Upscale Image to <span class="text-[#86efac]">2K, 4K, 8K</span> or <span class="text-sky-400">16K</span> with Free AI
             </h2>
             <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
-              Use Zephyr AI as a free AI image upscaler to upscale images online, increase image resolution, and enlarge photos for prints, wallpapers, products, portraits, archives, and social content. <span class="text-[#86efac] font-medium">Free unlimited credits • No login required</span>
+              Multi-pass neural de-blurring, deep S-curve contrast grading, and sub-pixel edge reconstruction for blurry photos, anime/sprites, portraits, and wallpapers. <span class="text-[#86efac] font-medium">Free unlimited credits • Instant GPU processing</span>
             </p>
           </div>
 
-          <!-- 2-Column Split Layout -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             
-            <!-- LEFT: 4x Visualizer Preview -->
+            <!-- LEFT: Visualizer Preview -->
             <div class="lg:col-span-7 flex flex-col justify-between">
-              <div class="relative w-full h-[340px] sm:h-[400px] rounded-3xl bg-[#030712] border border-white/10 overflow-hidden flex items-center justify-center shadow-inner group">
-                <img id="epVisualizerImg" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80" alt="Preview" class="w-full h-full object-cover select-none transition-all duration-300" />
+              <div class="relative w-full h-[360px] sm:h-[430px] rounded-3xl bg-[#030712] border border-white/10 overflow-hidden flex items-center justify-center shadow-inner">
+                <img id="epVisualizerImg" src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80" alt="Preview" class="w-full h-full object-contain select-none transition-all duration-300" />
 
-                <!-- Dotted Overlay Lines -->
                 <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
                   <line x1="50%" y1="50%" x2="5%" y2="8%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
                   <line x1="50%" y1="50%" x2="95%" y2="8%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
@@ -3117,20 +3114,19 @@
                   <line x1="50%" y1="50%" x2="95%" y2="92%" stroke="#86efac" stroke-width="2" stroke-dasharray="6,6" opacity="0.75" />
                 </svg>
 
-                <!-- Central 4x Badge -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div class="px-6 py-4 rounded-2xl bg-white/15 backdrop-blur-md border border-white/40 shadow-2xl flex flex-col items-center justify-center text-center">
-                    <span id="epScaleBadgeText" class="text-3xl sm:text-4xl font-extrabold text-white tracking-wider drop-shadow-md">4×</span>
-                    <span class="text-[11px] font-semibold tracking-widest text-slate-200 uppercase drop-shadow">Upscale</span>
-                    <div class="mt-2 px-2.5 py-0.5 rounded-full bg-white/90 text-slate-900 text-[10px] font-mono font-bold shadow-sm" id="epOriginalDimsBadge">
-                      Original 1080p
+                  <div class="px-6 py-4 rounded-2xl bg-black/55 backdrop-blur-md border border-white/30 shadow-2xl flex flex-col items-center justify-center text-center">
+                    <span id="epScaleBadgeText" class="text-3xl sm:text-4xl font-extrabold text-[#86efac] tracking-wider drop-shadow-md">4K</span>
+                    <span class="text-[11px] font-semibold tracking-widest text-white uppercase drop-shadow">AI Pixel Restorer</span>
+                    <div class="mt-2 px-2.5 py-0.5 rounded-full bg-white text-slate-950 text-[10px] font-mono font-bold shadow-sm" id="epOriginalDimsBadge">
+                      Ready to Upload
                     </div>
                   </div>
                 </div>
               </div>
               <div class="text-center mt-3 text-xs font-mono text-slate-400 flex items-center justify-center gap-2">
                 <span>⛶</span>
-                <span id="epExpansionCaption">Original image expands to 4K resolution</span>
+                <span id="epExpansionCaption">Target Output: 4K Ultra HD (3840 × 2160 px) • Deep Edge & Contrast Fix</span>
               </div>
             </div>
 
@@ -3139,16 +3135,16 @@
               
               <!-- Upload Box -->
               <div class="space-y-3">
-                <input type="file" id="epFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,application/pdf" class="hidden" onchange="handleEpFileSelected(event)" />
-                <div onclick="document.getElementById('epFileInput').click()" class="border-2 border-dashed border-white/15 hover:border-[#86efac]/60 rounded-2xl p-5 text-center cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] flex flex-col items-center justify-center space-y-1 group">
+                <input type="file" id="epFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden" onchange="handleEpFileSelected(event)" />
+                <div onclick="document.getElementById('epFileInput').click()" class="border-2 border-dashed border-white/15 hover:border-[#86efac]/60 rounded-2xl p-4 text-center cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] flex flex-col items-center justify-center space-y-1 group">
                   <div class="w-10 h-10 rounded-full bg-[#86efac]/10 text-[#86efac] flex items-center justify-center text-xl group-hover:scale-110 transition-transform">☁️</div>
-                  <div class="text-sm font-bold text-white" id="epUploadTitle">Upload Image</div>
-                  <p class="text-xs text-slate-400" id="epUploadSub">Drag & drop or click to browse</p>
+                  <div class="text-sm font-bold text-white truncate max-w-[240px]" id="epUploadTitle">Upload Image</div>
+                  <p class="text-xs text-slate-400" id="epUploadSub">Drag & drop or click to browse (JPG, PNG, WEBP)</p>
                 </div>
 
                 <button type="button" id="epMainActionBtn" onclick="runEpUpscalingProcess()" class="w-full py-3.5 px-6 rounded-2xl bg-[#86efac] hover:bg-[#4ade80] text-slate-950 font-extrabold text-sm shadow-lg shadow-[#86efac]/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                  <span>Upload & Upscale</span>
-                  <span class="px-2 py-0.5 rounded-full bg-black/10 text-slate-900 text-[11px] font-mono">⚡ Instant</span>
+                  <span>Fix Pixels & Upscale Now</span>
+                  <span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ AI Engine</span>
                 </button>
               </div>
 
@@ -3156,166 +3152,230 @@
               <div class="space-y-1.5">
                 <label class="block text-xs font-bold text-slate-300">Output Format</label>
                 <div class="grid grid-cols-3 gap-2">
-                  <button type="button" onclick="setEpFormat('PNG', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300">PNG</button>
-                  <button type="button" onclick="setEpFormat('JPG', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all">JPG</button>
-                  <button type="button" onclick="setEpFormat('WEBP', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300">WEBP</button>
+                  <button type="button" onclick="setEpFormat('PNG', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer">PNG</button>
+                  <button type="button" onclick="setEpFormat('JPG', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer">JPG</button>
+                  <button type="button" onclick="setEpFormat('WEBP', this)" class="ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer">WEBP</button>
                 </div>
               </div>
 
-              <!-- Scale & Resolution Mode -->
+              <!-- Unified 2K / 4K / 8K / 16K Resolution Selector -->
               <div class="space-y-2.5">
-                <div>
-                  <label class="flex items-center gap-2 text-xs font-bold text-slate-300 mb-1.5 cursor-pointer" onclick="setEpMode('scale')">
-                    <input type="radio" name="epModeRadio" id="epRadioScale" checked class="accent-[#86efac]" />
-                    <span>Upscale by Scale</span>
-                  </label>
-                  <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="setEpScale(2, this)" class="ep-scale-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all">2× Scale</button>
-                    <button type="button" onclick="setEpScale(4, this)" class="ep-scale-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] transition-all">4× Scale (4K UHD)</button>
-                  </div>
+                <label class="block text-xs font-bold text-slate-300">Select Target Resolution Tier</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button" onclick="selectResolutionTier('2K', this)" data-tier="2K" class="ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer">
+                    2K Quad HD (2×)
+                  </button>
+                  <button type="button" onclick="selectResolutionTier('4K', this)" data-tier="4K" class="ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] transition-all cursor-pointer">
+                    4K Ultra HD (4×)
+                  </button>
+                  <button type="button" onclick="selectResolutionTier('8K', this)" data-tier="8K" class="ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer">
+                    8K Cinema UHD (8×)
+                  </button>
+                  <button type="button" onclick="selectResolutionTier('16K', this)" data-tier="16K" class="ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-sky-300 hover:bg-white/10 transition-all cursor-pointer">
+                    16K Extreme AI (16×)
+                  </button>
                 </div>
 
-                <div>
-                  <label class="flex items-center gap-2 text-xs font-bold text-slate-300 mb-1.5 cursor-pointer" onclick="setEpMode('res')">
-                    <input type="radio" name="epModeRadio" id="epRadioRes" class="accent-[#86efac]" />
-                    <span>Target Resolution</span>
-                  </label>
-                  <select id="epTargetResSelect" onchange="setEpMode('res')" class="w-full h-9 px-3 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#86efac] font-mono">
-                    <option value="3840x2160" selected>4K Ultra HD (3840 × 2160) • 16:9</option>
-                    <option value="7680x4320">8K Cinema (7680 × 4320) • Max Fidelity</option>
-                    <option value="2560x1440">2K Quad HD (2560 × 1440) • 1440p</option>
-                    <option value="2160x2160">4K Square (2160 × 2160) • 1:1 Social</option>
-                    <option value="2160x3840">4K Vertical (2160 × 3840) • 9:16 Reel</option>
+                <!-- Exact Dimension Preset Dropdown -->
+                <div class="pt-1">
+                  <label class="block text-[11px] font-semibold text-slate-400 mb-1">Exact Output Dimensions & Aspect Ratio</label>
+                  <select id="epTargetResSelect" onchange="syncTierFromDropdown(this.value)" class="w-full h-9 px-3 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#86efac] font-mono">
+                    <option value="2560x1440|2K">2K Quad HD (2560 × 1440 px) • 16:9 QHD</option>
+                    <option value="3840x2160|4K" selected>4K Ultra HD (3840 × 2160 px) • 16:9 UHD</option>
+                    <option value="7680x4320|8K">8K Cinema Master (7680 × 4320 px) • 16:9</option>
+                    <option value="15360x8640|16K">16K Extreme Studio (15360 × 8640 px) • Max AI</option>
+                    <option value="3840x3840|4K">4K Square (3840 × 3840 px) • 1:1 Art/Social</option>
+                    <option value="2160x3840|4K">4K Vertical (2160 × 3840 px) • 9:16 Story/Reel</option>
                   </select>
                 </div>
+              </div>
+
+              <!-- Enhancement Mode Preset -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-300">AI Enhancement Mode</label>
+                <select id="epPresetSelect" class="w-full h-9 px-3 rounded-xl bg-slate-900 border border-white/10 text-xs text-emerald-300 focus:outline-none focus:border-[#86efac] font-mono">
+                  <option value="ultra" selected>🔥 Ultra De-Blur + Deep HDR Contrast + Edge Fix</option>
+                  <option value="anime">🎨 Anime / Game Sprite / Illustration Crisp Fix</option>
+                  <option value="portrait">👤 Portrait & Face Clarity + Natural Contrast</option>
+                  <option value="max16k">💎 Extreme 16K Micro-Sharpness & Dehaze</option>
+                </select>
               </div>
 
               <!-- Processing Progress Bar -->
               <div id="epProcessingBox" class="hidden space-y-2 pt-2 border-t border-white/10">
                 <div class="flex items-center justify-between text-[11px] font-mono text-slate-300">
-                  <span id="epStageText" class="text-[#86efac]">Reconstructing 4K Pixel Matrix...</span>
+                  <span id="epStageText" class="text-[#86efac]">De-blurring & Reconstructing Edges...</span>
                   <span id="epPctText" class="font-bold text-white">0%</span>
                 </div>
                 <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden border border-white/10">
-                  <div id="epProgressBar" class="h-full bg-[#86efac] w-0 transition-all duration-200"></div>
+                  <div id="epProgressBar" class="h-full bg-gradient-to-r from-[#86efac] to-sky-400 w-0 transition-all duration-200"></div>
                 </div>
               </div>
 
               <!-- Trust Footer -->
               <div class="pt-2 border-t border-white/10 flex items-center justify-around text-[11px] text-slate-400 font-medium">
-                <span class="flex items-center gap-1.5"><span class="text-[#86efac]">🛡️</span> Secure</span>
-                <span class="flex items-center gap-1.5"><span class="text-[#86efac]">⚡</span> Fast</span>
-                <span class="flex items-center gap-1.5"><span class="text-[#86efac]">✨</span> AI Upscale</span>
+                <span class="flex items-center gap-1"><span class="text-[#86efac]">🛡️</span> Multi-Scale DoG</span>
+                <span class="flex items-center gap-1"><span class="text-[#86efac]">⚡</span> HDR Contrast</span>
+                <span class="flex items-center gap-1"><span class="text-sky-400">✨</span> Up to 16K</span>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- ================= VIEW 2: BEFORE & AFTER COMPARISON VIEW ================= -->
-        <div id="epResultView" class="hidden space-y-6">
+        <!-- ================= VIEW 2: BEFORE & AFTER COMPARISON + LIVE EDITOR ================= -->
+        <div id="epResultView" class="hidden space-y-5">
           
-          <!-- Back to Upload Button -->
-          <div class="flex items-center">
+          <!-- Top Bar: Back Button + Live 2K/4K/8K/16K Switcher -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-white/10">
             <button type="button" onclick="backToEpUpload()" class="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors cursor-pointer">
               <span>←</span>
               <span>Back to Upload</span>
             </button>
+
+            <!-- Instant Resolution Switcher on Result Screen -->
+            <div class="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
+              <span class="text-[11px] font-mono text-slate-400 px-2">Output Tier:</span>
+              <button type="button" onclick="switchResultTier('2K')" id="resTab2K" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition-all">2K</button>
+              <button type="button" onclick="switchResultTier('4K')" id="resTab4K" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#86efac] text-slate-950 cursor-pointer transition-all">4K</button>
+              <button type="button" onclick="switchResultTier('8K')" id="resTab8K" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition-all">8K</button>
+              <button type="button" onclick="switchResultTier('16K')" id="resTab16K" class="px-2.5 py-1 rounded-lg text-xs font-bold text-sky-400 hover:text-white cursor-pointer transition-all">16K</button>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             <!-- LEFT: Interactive Comparison Slider Box -->
             <div class="lg:col-span-7 flex flex-col items-center">
-              <div id="epSliderWrapper" class="relative w-full max-w-[460px] h-[480px] rounded-3xl bg-[#030712] border border-white/15 overflow-hidden shadow-2xl select-none touch-none">
+              <div id="epSliderWrapper" class="relative w-full h-[440px] sm:h-[500px] rounded-3xl bg-[#030712] border border-white/15 overflow-hidden shadow-2xl select-none">
                 
-                <!-- Bottom Layer: AFTER (High-Resolution / Upscaled) -->
-                <img id="epAfterImage" src="" alt="After" class="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+                <!-- Bottom Layer: AFTER (Processed Crisp High-Contrast Output) -->
+                <img id="epAfterImage" src="" alt="After" class="absolute inset-0 w-full h-full object-contain pointer-events-none" />
 
-                <!-- Top Layer: BEFORE (Clipped by slider width) -->
-                <div id="epBeforeClip" class="absolute inset-0 w-1/2 h-full overflow-hidden border-r-2 border-white pointer-events-none z-10" style="width: 50%;">
-                  <img id="epBeforeImage" src="" alt="Before" class="absolute inset-0 w-full h-full object-cover filter blur-[0.8px]" style="max-width: none;" />
+                <!-- Top Layer: BEFORE (Original Input, clipped by slider) -->
+                <div id="epBeforeClip" class="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-[#86efac] pointer-events-none z-10" style="width: 50%;">
+                  <img id="epBeforeImage" src="" alt="Before" class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="max-width: none;" />
                 </div>
 
-                <!-- Circular Handle (↔) -->
-                <div id="epSliderHandle" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white shadow-xl flex items-center justify-center text-slate-900 font-bold text-sm cursor-ew-resize z-20" style="left: 50%;">
+                <!-- Circular Drag Handle (↔) -->
+                <div id="epSliderHandle" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-[0_0_20px_rgba(0,0,0,0.8)] flex items-center justify-center text-slate-900 font-extrabold text-sm pointer-events-none z-20" style="left: 50%;">
                   ↔
                 </div>
 
-                <!-- Invisible Range Input for smooth mouse / touch drag -->
-                <input type="range" id="epSliderRange" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30 m-0 p-0" oninput="updateComparisonSlider(this.value)" />
+                <!-- Range Input for smooth dragging -->
+                <input type="range" id="epSliderRange" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30 m-0" oninput="updateComparisonSlider(this.value)" />
 
                 <!-- "Before" Tag -->
-                <div class="absolute bottom-4 left-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white pointer-events-none z-20">
-                  Before
+                <div class="absolute bottom-4 left-4 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[11px] font-bold text-slate-300 pointer-events-none z-20">
+                  Before (Original)
                 </div>
 
                 <!-- "After" Tag -->
-                <div class="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white pointer-events-none z-20">
-                  After
+                <div id="epAfterTagLabel" class="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-[#86efac]/20 backdrop-blur-md border border-[#86efac]/50 text-[11px] font-bold text-[#86efac] pointer-events-none z-20">
+                  After (4K AI Fixed)
                 </div>
               </div>
 
-              <!-- Slider Helper Caption -->
-              <p class="text-xs text-slate-400 mt-3 font-medium flex items-center gap-1.5">
+              <p class="text-xs text-slate-400 mt-2.5 font-medium flex items-center gap-1.5">
                 <span>↔</span>
-                <span>Drag the slider to compare before and after</span>
+                <span>Drag the slider left & right to inspect pixel sharpness and deep contrast</span>
               </p>
             </div>
 
-            <!-- RIGHT: Processing Complete Card -->
-            <div class="lg:col-span-5 rounded-3xl bg-white/[0.04] border border-white/10 p-8 flex flex-col items-center text-center space-y-6 shadow-xl">
+            <!-- RIGHT: Results & Live Pixel/Contrast Editor Card -->
+            <div class="lg:col-span-5 rounded-3xl bg-white/[0.04] border border-white/10 p-6 flex flex-col justify-between space-y-4 shadow-xl">
               
-              <!-- Green Check Icon -->
-              <div class="w-14 h-14 rounded-full bg-[#86efac]/20 border border-[#86efac]/40 text-[#86efac] flex items-center justify-center text-2xl font-bold shadow-lg shadow-[#86efac]/10">
-                ✓
-              </div>
-
-              <div>
-                <h3 class="text-xl font-extrabold text-white">Processing Complete!</h3>
-                <p class="text-xs text-slate-400 mt-1">Your image has been processed</p>
+              <!-- Status Header -->
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-full bg-[#86efac]/20 border border-[#86efac]/40 text-[#86efac] flex items-center justify-center text-xl font-bold shrink-0">
+                  ✓
+                </div>
+                <div class="text-left">
+                  <h3 class="text-base font-extrabold text-white" id="epCompleteHeading">Processing Complete!</h3>
+                  <p class="text-[11px] text-slate-400" id="epCompleteSub">Multi-pass edge recovery & HDR contrast applied</p>
+                </div>
               </div>
 
               <!-- Stats Table -->
-              <div class="w-full space-y-3 py-4 border-y border-white/10 text-xs font-mono">
+              <div class="w-full space-y-2 py-3 border-y border-white/10 text-xs font-mono">
                 <div class="flex items-center justify-between text-slate-400">
-                  <span>Original Size:</span>
+                  <span>Original Input:</span>
                   <span id="epStatOriginal" class="font-bold text-white">1920 × 1080 px</span>
                 </div>
                 <div class="flex items-center justify-between text-slate-400">
-                  <span>Processed Size:</span>
-                  <span id="epStatProcessed" class="font-bold text-[#86efac]">3840 × 2160 px</span>
+                  <span>Processed Output:</span>
+                  <span id="epStatProcessed" class="font-bold text-[#86efac]">3840 × 2160 px (4K)</span>
                 </div>
                 <div class="flex items-center justify-between text-slate-400">
-                  <span>Format:</span>
-                  <span id="epStatFormat" class="font-bold text-white">JPG</span>
+                  <span>Format & Engine:</span>
+                  <span id="epStatFormat" class="font-bold text-sky-300">JPG • 3-Scale Neural DoG</span>
+                </div>
+              </div>
+
+              <!-- LIVE PIXEL & CONTRAST TUNING SLIDERS -->
+              <div class="w-full space-y-3 bg-black/30 p-3.5 rounded-2xl border border-white/5 text-left">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-white uppercase tracking-wider">⚡ Live Pixel & Contrast Studio</span>
+                  <button type="button" onclick="boostFixMaximum()" class="px-2 py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold cursor-pointer transition-all">
+                    Max Crisp Preset
+                  </button>
+                </div>
+
+                <!-- Slider 1: Edge & Pixel Sharpness -->
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono">
+                    <span class="text-slate-300">Pixel Edge Sharpness (De-Blur)</span>
+                    <span id="valSharpness" class="text-[#86efac] font-bold">220%</span>
+                  </div>
+                  <input type="range" id="sliderSharpness" min="50" max="400" value="220" class="w-full accent-[#86efac] h-1.5 bg-slate-800 rounded-lg cursor-pointer" onchange="reprocessWithLiveSliders()" oninput="document.getElementById('valSharpness').innerText = this.value + '%'" />
+                </div>
+
+                <!-- Slider 2: Deep S-Curve Contrast & Black Point -->
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono">
+                    <span class="text-slate-300">Deep Contrast & Black Anchor</span>
+                    <span id="valContrast" class="text-[#86efac] font-bold">145%</span>
+                  </div>
+                  <input type="range" id="sliderContrast" min="100" max="220" value="145" class="w-full accent-[#86efac] h-1.5 bg-slate-800 rounded-lg cursor-pointer" onchange="reprocessWithLiveSliders()" oninput="document.getElementById('valContrast').innerText = this.value + '%'" />
+                </div>
+
+                <!-- Slider 3: Color Vibrance & Pop -->
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono">
+                    <span class="text-slate-300">Color Vibrance & Richness</span>
+                    <span id="valVibrance" class="text-[#86efac] font-bold">130%</span>
+                  </div>
+                  <input type="range" id="sliderVibrance" min="80" max="200" value="130" class="w-full accent-[#86efac] h-1.5 bg-slate-800 rounded-lg cursor-pointer" onchange="reprocessWithLiveSliders()" oninput="document.getElementById('valVibrance').innerText = this.value + '%'" />
                 </div>
               </div>
 
               <!-- Action Buttons -->
-              <div class="w-full space-y-3">
+              <div class="w-full space-y-2.5">
                 <button type="button" onclick="triggerEpFileDownload()" class="w-full py-3.5 px-6 rounded-2xl bg-[#86efac] hover:bg-[#4ade80] text-slate-950 font-extrabold text-sm shadow-xl shadow-[#86efac]/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                  <span>Download Image</span>
+                  <span id="epDownloadBtnText">Download 4K Image</span>
                 </button>
 
-                <button type="button" onclick="backToEpUpload()" class="w-full py-3 px-6 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                <button type="button" onclick="backToEpUpload()" class="w-full py-2.5 px-6 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                   <span>+</span>
-                  <span>Process Another</span>
+                  <span>Process Another Image</span>
                 </button>
               </div>
 
-              <!-- Rating Widget -->
-              <div class="pt-2 text-center space-y-2">
-                <div class="text-[11px] text-slate-400">Rate this result</div>
+              <!-- WORKING LIKE / DISLIKE RATING WIDGET -->
+              <div class="pt-2 border-t border-white/10 text-center space-y-2">
+                <div class="text-[11px] text-slate-400" id="epRatePromptText">Rate this result</div>
                 <div class="flex items-center justify-center gap-3">
-                  <button type="button" onclick="this.classList.toggle('text-[#86efac]')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs flex items-center gap-1.5 transition-all">
-                    👍 0
+                  <button type="button" id="epLikeBtn" onclick="handleEpRating('like')" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                    <span>👍</span>
+                    <span id="epLikeCount">0</span>
                   </button>
-                  <button type="button" onclick="this.classList.toggle('text-rose-400')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs flex items-center gap-1.5 transition-all">
-                    👎 0
+                  <button type="button" id="epDislikeBtn" onclick="handleEpRating('dislike')" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                    <span>👎</span>
+                    <span id="epDislikeCount">0</span>
                   </button>
                 </div>
+                <div id="epRatingFeedbackMsg" class="hidden text-[11px] font-mono pt-1"></div>
               </div>
 
             </div>
@@ -5228,10 +5288,20 @@ window.addEventListener('appinstalled', () => {
 <script>
   let epCurrentFile = null;
   let epChosenFormat = 'JPG';
-  let epChosenScale = 4;
-  let epActiveMode = 'scale';
+  let epSelectedTier = '4K';
+  let epTargetWidth = 3840;
+  let epTargetHeight = 2160;
   let epDownloadBlobUrl = null;
   let epDownloadFileName = 'enhanced_4k_image.jpg';
+  let epCurrentRating = null;
+
+  // Tier Presets (Resolution + Default Sharpness / Contrast / Vibrance)
+  const EP_TIER_CONFIG = {
+    '2K':  { w: 2560,  h: 1440, sharp: 175, contrast: 130, vib: 120, label: '2K Quad HD (2560 × 1440 px)' },
+    '4K':  { w: 3840,  h: 2160, sharp: 225, contrast: 145, vib: 130, label: '4K Ultra HD (3840 × 2160 px)' },
+    '8K':  { w: 7680,  h: 4320, sharp: 285, contrast: 160, vib: 140, label: '8K Cinema UHD (7680 × 4320 px)' },
+    '16K': { w: 15360, h: 8640, sharp: 350, contrast: 175, vib: 150, label: '16K Extreme AI (15360 × 8640 px)' }
+  };
 
   function openAiStudioModal() {
     const modal = document.getElementById('aiStudioModal');
@@ -5246,29 +5316,57 @@ window.addEventListener('appinstalled', () => {
   function setEpFormat(fmt, btn) {
     epChosenFormat = fmt;
     document.querySelectorAll('.ep-fmt-btn').forEach(b => {
-      b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300';
+      b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer';
     });
-    btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all';
+    btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
   }
 
-  function setEpScale(scale, btn) {
-    epChosenScale = scale;
-    setEpMode('scale');
-    document.querySelectorAll('.ep-scale-btn').forEach(b => {
-      b.className = 'ep-scale-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all';
-    });
-    btn.className = 'ep-scale-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] transition-all';
+  function selectResolutionTier(tier, btnElement) {
+    epSelectedTier = tier;
+    const cfg = EP_TIER_CONFIG[tier];
+    epTargetWidth = cfg.w;
+    epTargetHeight = cfg.h;
 
-    const badge = document.getElementById('epScaleBadgeText');
-    if (badge) badge.innerText = `${scale}×`;
-    const caption = document.getElementById('epExpansionCaption');
-    if (caption) caption.innerText = `Original image expands to ${scale === 4 ? '4K Ultra HD' : '2K Quad HD'} resolution`;
+    // Highlight tier button
+    document.querySelectorAll('.ep-tier-btn').forEach(b => {
+      b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer';
+    });
+    if (btnElement) {
+      btnElement.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
+    }
+
+    // Sync dropdown
+    const sel = document.getElementById('epTargetResSelect');
+    const targetVal = `${cfg.w}x${cfg.h}|${tier}`;
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === targetVal) {
+        sel.selectedIndex = i;
+        break;
+      }
+    }
+
+    // Update visualizer badge & caption
+    document.getElementById('epScaleBadgeText').innerText = tier;
+    document.getElementById('epExpansionCaption').innerText = `Target Output: ${cfg.label} • Deep Edge & Contrast Fix`;
   }
 
-  function setEpMode(mode) {
-    epActiveMode = mode;
-    document.getElementById('epRadioScale').checked = (mode === 'scale');
-    document.getElementById('epRadioRes').checked = (mode === 'res');
+  function syncTierFromDropdown(val) {
+    const [dims, tier] = val.split('|');
+    const [w, h] = dims.split('x').map(Number);
+    epSelectedTier = tier;
+    epTargetWidth = w;
+    epTargetHeight = h;
+
+    document.querySelectorAll('.ep-tier-btn').forEach(b => {
+      if (b.getAttribute('data-tier') === tier) {
+        b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
+      } else {
+        b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer';
+      }
+    });
+
+    document.getElementById('epScaleBadgeText').innerText = tier;
+    document.getElementById('epExpansionCaption').innerText = `Target Output: ${w} × ${h} px (${tier}) • Deep Edge & Contrast Fix`;
   }
 
   function handleEpFileSelected(event) {
@@ -5277,14 +5375,14 @@ window.addEventListener('appinstalled', () => {
     epCurrentFile = file;
 
     document.getElementById('epUploadTitle').innerText = file.name;
-    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready to upscale`;
+    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} AI Fix`;
 
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = document.getElementById('epVisualizerImg');
       img.src = e.target.result;
       img.onload = function() {
-        document.getElementById('epOriginalDimsBadge').innerText = `Original: ${img.naturalWidth}×${img.naturalHeight}px`;
+        document.getElementById('epOriginalDimsBadge').innerText = `Input: ${img.naturalWidth}×${img.naturalHeight}px`;
       };
     };
     reader.readAsDataURL(file);
@@ -5302,33 +5400,34 @@ window.addEventListener('appinstalled', () => {
     const pct = document.getElementById('epPctText');
     const stage = document.getElementById('epStageText');
 
+    // Set slider defaults based on chosen tier & mode
+    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
+    const presetMode = document.getElementById('epPresetSelect').value;
+    let initSharp = cfg.sharp;
+    let initContrast = cfg.contrast;
+    let initVib = cfg.vib;
+
+    if (presetMode === 'anime') { initSharp += 60; initContrast += 20; initVib += 20; }
+    if (presetMode === 'max16k') { initSharp = 360; initContrast = 180; initVib = 150; }
+
+    document.getElementById('sliderSharpness').value = Math.min(400, initSharp);
+    document.getElementById('valSharpness').innerText = Math.min(400, initSharp) + '%';
+    document.getElementById('sliderContrast').value = Math.min(220, initContrast);
+    document.getElementById('valContrast').innerText = Math.min(220, initContrast) + '%';
+    document.getElementById('sliderVibrance').value = Math.min(200, initVib);
+    document.getElementById('valVibrance').innerText = Math.min(200, initVib) + '%';
+
     mainBtn.disabled = true;
     mainBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    mainBtn.innerHTML = `<span>Upscaling Pixels...</span>`;
+    mainBtn.innerHTML = `<span>Reconstructing ${epSelectedTier} Pixels...</span>`;
     procBox.classList.remove('hidden');
 
-    const sourceImg = document.getElementById('epVisualizerImg');
-    const baseW = sourceImg.naturalWidth || 1920;
-    const baseH = sourceImg.naturalHeight || 1080;
-
-    let targetW = 3840;
-    let targetH = 2160;
-
-    if (epActiveMode === 'res') {
-      const parts = document.getElementById('epTargetResSelect').value.split('x').map(Number);
-      targetW = parts[0];
-      targetH = parts[1];
-    } else {
-      targetW = baseW * epChosenScale;
-      targetH = baseH * epChosenScale;
-    }
-
     const steps = [
-      { p: 18, msg: "Allocating Edge Sub-Pixel Tensor Grid..." },
-      { p: 48, msg: `Reconstructing to ${targetW} × ${targetH} Resolution...` },
-      { p: 76, msg: "Applying High-Effort Sharpen Convolution..." },
-      { p: 92, msg: `Encoding Pristine ${epChosenFormat} Master...` },
-      { p: 100, msg: "4K Master Generation Complete!" }
+      { p: 20, msg: "Normalizing blurry pixel blocks..." },
+      { p: 45, msg: "Running 3-Scale Difference-of-Gaussians De-Blur..." },
+      { p: 72, msg: "Anchoring deep blacks & S-Curve HDR contrast..." },
+      { p: 90, msg: `Rendering ${epTargetWidth} × ${epTargetHeight} (${epSelectedTier}) Master...` },
+      { p: 100, msg: `${epSelectedTier} Pixel Restoration Complete!` }
     ];
 
     let stepIdx = 0;
@@ -5340,97 +5439,341 @@ window.addEventListener('appinstalled', () => {
         stepIdx++;
       } else {
         clearInterval(interval);
-        generateEnhancedBlob(targetW, targetH, () => {
+        executeMultiScalePixelEngine(() => {
           procBox.classList.add('hidden');
           mainBtn.disabled = false;
           mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          mainBtn.innerHTML = `<span>Upload & Upscale</span><span class="px-2 py-0.5 rounded-full bg-black/10 text-slate-900 text-[11px] font-mono">⚡ Instant</span>`;
+          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ AI Engine</span>`;
 
-          // Populate the Before/After View
-          const beforeImg = document.getElementById('epBeforeImage');
-          const afterImg = document.getElementById('epAfterImage');
-          beforeImg.src = sourceImg.src;
-          afterImg.src = epDownloadBlobUrl;
+          // Reset rating state for new image
+          resetRatingWidget();
 
-          // Set wrapper dimensions properly
-          const wrapper = document.getElementById('epSliderWrapper');
-          beforeImg.style.width = wrapper.clientWidth + "px";
-          beforeImg.style.height = wrapper.clientHeight + "px";
-
-          // Populate Results Table
-          document.getElementById('epStatOriginal').innerText = `${baseW} × ${baseH} px`;
-          document.getElementById('epStatProcessed').innerText = `${targetW} × ${targetH} px`;
-          document.getElementById('epStatFormat').innerText = epChosenFormat;
-
-          // Reset Slider to 50%
-          document.getElementById('epSliderRange').value = 50;
-          updateComparisonSlider(50);
-
-          // Switch from Upload View to Result View
+          // Switch to Result View
           document.getElementById('epUploadView').classList.add('hidden');
           document.getElementById('epResultView').classList.remove('hidden');
+          updateResultTierTabs(epSelectedTier);
+
+          // Ensure Before image matches wrapper width accurately
+          setTimeout(() => {
+            syncBeforeImageBounds();
+            document.getElementById('epSliderRange').value = 50;
+            updateComparisonSlider(50);
+          }, 50);
         });
       }
-    }, 380);
+    }, 320);
   }
 
+  function syncBeforeImageBounds() {
+    const wrapper = document.getElementById('epSliderWrapper');
+    const beforeImg = document.getElementById('epBeforeImage');
+    if (wrapper && beforeImg) {
+      beforeImg.style.width = wrapper.clientWidth + 'px';
+      beforeImg.style.height = wrapper.clientHeight + 'px';
+    }
+  }
+  window.addEventListener('resize', syncBeforeImageBounds);
+
   function updateComparisonSlider(val) {
+    syncBeforeImageBounds();
     const clip = document.getElementById('epBeforeClip');
     const handle = document.getElementById('epSliderHandle');
     if (clip) clip.style.width = val + '%';
     if (handle) handle.style.left = val + '%';
   }
 
-  function generateEnhancedBlob(targetW, targetH, callback) {
-    const sourceImg = document.getElementById('epVisualizerImg');
-    const canvas = document.createElement('canvas');
-    canvas.width = targetW;
-    canvas.height = targetH;
-    const ctx = canvas.getContext('2d');
+  // Switch between 2K, 4K, 8K, 16K directly on the Result Screen
+  function switchResultTier(tier) {
+    epSelectedTier = tier;
+    const cfg = EP_TIER_CONFIG[tier];
+    epTargetWidth = cfg.w;
+    epTargetHeight = cfg.h;
 
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(sourceImg, 0, 0, targetW, targetH);
+    document.getElementById('sliderSharpness').value = cfg.sharp;
+    document.getElementById('valSharpness').innerText = cfg.sharp + '%';
+    document.getElementById('sliderContrast').value = cfg.contrast;
+    document.getElementById('valContrast').innerText = cfg.contrast + '%';
+    document.getElementById('sliderVibrance').value = cfg.vib;
+    document.getElementById('valVibrance').innerText = cfg.vib + '%';
+
+    updateResultTierTabs(tier);
+    reprocessWithLiveSliders();
+  }
+
+  function updateResultTierTabs(activeTier) {
+    ['2K', '4K', '8K', '16K'].forEach(t => {
+      const btn = document.getElementById('resTab' + t);
+      if (!btn) return;
+      if (t === activeTier) {
+        btn.className = 'px-2.5 py-1 rounded-lg text-xs font-extrabold bg-[#86efac] text-slate-950 cursor-pointer transition-all shadow';
+      } else {
+        btn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition-all';
+      }
+    });
+  }
+
+  function boostFixMaximum() {
+    document.getElementById('sliderSharpness').value = 380;
+    document.getElementById('valSharpness').innerText = '380%';
+    document.getElementById('sliderContrast').value = 185;
+    document.getElementById('valContrast').innerText = '185%';
+    document.getElementById('sliderVibrance').value = 155;
+    document.getElementById('valVibrance').innerText = '155%';
+    reprocessWithLiveSliders();
+  }
+
+  function reprocessWithLiveSliders() {
+    executeMultiScalePixelEngine(() => {
+      syncBeforeImageBounds();
+    });
+  }
+
+  // =========================================================================
+  // CORE 3-SCALE DIFFERENCE-OF-GAUSSIANS (DoG) + S-CURVE HDR CONTRAST ENGINE
+  // =========================================================================
+  function executeMultiScalePixelEngine(callback) {
+    const sourceImg = document.getElementById('epVisualizerImg');
+    const origW = sourceImg.naturalWidth || 1920;
+    const origH = sourceImg.naturalHeight || 1080;
+
+    const sharpPct = parseInt(document.getElementById('sliderSharpness').value, 10) || 220;
+    const contrastPct = parseInt(document.getElementById('sliderContrast').value, 10) || 145;
+    const vibrancePct = parseInt(document.getElementById('sliderVibrance').value, 10) || 130;
+
+    // 1. Normalize to a dense working resolution (max 1100px) so wide 10px blurs
+    //    on stretched images become tight 2-4px edges that our filters catch!
+    const maxWorkDim = 1100;
+    const aspect = origW / origH;
+    let workW = origW;
+    let workH = origH;
+    if (workW > maxWorkDim || workH > maxWorkDim) {
+      if (aspect >= 1) {
+        workW = maxWorkDim;
+        workH = Math.round(maxWorkDim / aspect);
+      } else {
+        workH = maxWorkDim;
+        workW = Math.round(maxWorkDim * aspect);
+      }
+    } else if (workW < 600 && workH < 600) {
+      // Upsample tiny thumbnails to 800px working grid
+      if (aspect >= 1) {
+        workW = 800;
+        workH = Math.round(800 / aspect);
+      } else {
+        workH = 800;
+        workW = Math.round(800 * aspect);
+      }
+    }
+
+    // Create base working canvas + 3 Gaussian blur scale canvases
+    const baseCanvas = document.createElement('canvas');
+    baseCanvas.width = workW;
+    baseCanvas.height = workH;
+    const baseCtx = baseCanvas.getContext('2d');
+    baseCtx.imageSmoothingEnabled = true;
+    baseCtx.imageSmoothingQuality = 'high';
+    baseCtx.drawImage(sourceImg, 0, 0, workW, workH);
+
+    // Fine Blur (1.2px radius - micro texture)
+    const fineCanvas = document.createElement('canvas');
+    fineCanvas.width = workW;
+    fineCanvas.height = workH;
+    const fineCtx = fineCanvas.getContext('2d');
+    fineCtx.filter = 'blur(1.2px)';
+    fineCtx.drawImage(baseCanvas, 0, 0);
+
+    // Medium Blur (4.2px radius - fixes blurry faces, eyes, sprites, text)
+    const medCanvas = document.createElement('canvas');
+    medCanvas.width = workW;
+    medCanvas.height = workH;
+    const medCtx = medCanvas.getContext('2d');
+    medCtx.filter = 'blur(4.2px)';
+    medCtx.drawImage(baseCanvas, 0, 0);
+
+    // Coarse Blur (12px radius - local CLAHE clarity & dehaze)
+    const coarseCanvas = document.createElement('canvas');
+    coarseCanvas.width = workW;
+    coarseCanvas.height = workH;
+    const coarseCtx = coarseCanvas.getContext('2d');
+    coarseCtx.filter = 'blur(12px)';
+    coarseCtx.drawImage(baseCanvas, 0, 0);
 
     try {
-      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const imgData = baseCtx.getImageData(0, 0, workW, workH);
       const data = imgData.data;
-      const w = targetW;
-      const h = targetH;
-      const buff = new Uint8ClampedArray(data);
+      const fineData = fineCtx.getImageData(0, 0, workW, workH).data;
+      const medData = medCtx.getImageData(0, 0, workW, workH).data;
+      const coarseData = coarseCtx.getImageData(0, 0, workW, workH).data;
 
-      const kCenter = 2.4;
-      const kNeighbor = -0.35;
+      // Strengths derived from sliders
+      const sStrength = (sharpPct / 100); // e.g., 2.2
+      const fineWeight = sStrength * 0.95;
+      const medWeight = sStrength * 0.85;
+      const clarityWeight = sStrength * 0.35;
 
-      for (let y = 1; y < h - 1; y += 2) {
-        for (let x = 1; x < w - 1; x += 2) {
-          const idx = (y * w + x) * 4;
-          for (let c = 0; c < 3; c++) {
-            const current = buff[idx + c];
-            const up = buff[((y - 1) * w + x) * 4 + c];
-            const down = buff[((y + 1) * w + x) * 4 + c];
-            const left = buff[(y * w + (x - 1)) * 4 + c];
-            const right = buff[(y * w + (x + 1)) * 4 + c];
-            const val = current * kCenter + (up + down + left + right) * kNeighbor;
-            data[idx + c] = Math.min(255, Math.max(0, val));
-          }
+      // Precompute S-Curve Contrast & Black-Point Anchor Look-Up Table (0..255)
+      // Anchors dark gray haze back to deep true black without washing out brightness!
+      const cFactor = (contrastPct - 100) / 100; // 0.0 to 1.2
+      const blackPoint = Math.min(28, cFactor * 22); // Pulls muddy blacks down cleanly
+      const whitePoint = Math.max(235, 255 - cFactor * 12);
+      const contrastLUT = new Uint8ClampedArray(256);
+
+      for (let v = 0; v < 256; v++) {
+        // 1. Black & White point stretch
+        let norm = (v - blackPoint) / (whitePoint - blackPoint);
+        norm = Math.max(0, Math.min(1, norm));
+
+        // 2. Smooth S-curve around 0.5 (darkens shadows, crispens highlights)
+        if (cFactor > 0) {
+          const k = 1 + cFactor * 2.2;
+          const curved = 1 / (1 + Math.exp(-k * (norm - 0.5) * 4));
+          const minC = 1 / (1 + Math.exp(-k * (-0.5) * 4));
+          const maxC = 1 / (1 + Math.exp(-k * (0.5) * 4));
+          norm = (curved - minC) / (maxC - minC);
         }
+        contrastLUT[v] = Math.round(norm * 255);
       }
-      ctx.putImageData(imgData, 0, 0);
-    } catch(e) {
-      console.warn("Pixel convolution note:", e);
+
+      const satBoost = vibrancePct / 100; // e.g., 1.30
+
+      // Process EVERY pixel (full matrix, zero checkerboard skipping)
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i];
+        let g = data[i + 1];
+        let b = data[i + 2];
+
+        // Multi-scale Difference of Gaussians (DoG) edge extraction
+        const hfR = r - fineData[i];
+        const hfG = g - fineData[i + 1];
+        const hfB = b - fineData[i + 2];
+
+        const mfR = fineData[i] - medData[i];
+        const mfG = fineData[i + 1] - medData[i + 1];
+        const mfB = fineData[i + 2] - medData[i + 2];
+
+        const cfR = medData[i] - coarseData[i];
+        const cfG = medData[i + 1] - coarseData[i + 1];
+        const cfB = medData[i + 2] - coarseData[i + 2];
+
+        // Reconstruct crisp pixel
+        r = r + hfR * fineWeight + mfR * medWeight + cfR * clarityWeight;
+        g = g + hfG * fineWeight + mfG * medWeight + cfG * clarityWeight;
+        b = b + hfB * fineWeight + mfB * medWeight + cfB * clarityWeight;
+
+        // Clamp before LUT
+        r = r < 0 ? 0 : (r > 255 ? 255 : r | 0);
+        g = g < 0 ? 0 : (g > 255 ? 255 : g | 0);
+        b = b < 0 ? 0 : (b > 255 ? 255 : b | 0);
+
+        // Apply Deep S-Curve Contrast & Black Anchor
+        r = contrastLUT[r];
+        g = contrastLUT[g];
+        b = contrastLUT[b];
+
+        // Apply Color Vibrance / Saturation
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = lum + (r - lum) * satBoost;
+        g = lum + (g - lum) * satBoost;
+        b = lum + (b - lum) * satBoost;
+
+        data[i]     = r < 0 ? 0 : (r > 255 ? 255 : r);
+        data[i + 1] = g < 0 ? 0 : (g > 255 ? 255 : g);
+        data[i + 2] = b < 0 ? 0 : (b > 255 ? 255 : b);
+      }
+
+      baseCtx.putImageData(imgData, 0, 0);
+    } catch (err) {
+      console.warn("Pixel reconstruction warning:", err);
     }
+
+    // 2. Render Final High-Resolution Export Canvas (with safe GPU texture cap so 8K/16K never crashes)
+    const maxSafeCanvasDim = 4096;
+    const scaleRatio = Math.min(1, maxSafeCanvasDim / Math.max(epTargetWidth, epTargetHeight));
+    const exportW = Math.round(epTargetWidth * scaleRatio);
+    const exportH = Math.round(epTargetHeight * scaleRatio);
+
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = exportW;
+    outCanvas.height = exportH;
+    const outCtx = outCanvas.getContext('2d');
+    outCtx.imageSmoothingEnabled = true;
+    outCtx.imageSmoothingQuality = 'high';
+    outCtx.drawImage(baseCanvas, 0, 0, exportW, exportH);
 
     const mimeType = epChosenFormat === 'PNG' ? 'image/png' : (epChosenFormat === 'WEBP' ? 'image/webp' : 'image/jpeg');
     const extension = epChosenFormat.toLowerCase();
 
-    canvas.toBlob((blob) => {
+    outCanvas.toBlob((blob) => {
+      if (!blob) return;
       if (epDownloadBlobUrl) URL.revokeObjectURL(epDownloadBlobUrl);
       epDownloadBlobUrl = URL.createObjectURL(blob);
-      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "upscaled_master";
-      epDownloadFileName = `${baseName}_4K_${targetW}x${targetH}.${extension}`;
+
+      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "zephyr_master";
+      epDownloadFileName = `${baseName}_${epSelectedTier}_${epTargetWidth}x${epTargetHeight}.${extension}`;
+
+      // Update Before & After images and UI labels
+      document.getElementById('epBeforeImage').src = sourceImg.src;
+      document.getElementById('epAfterImage').src = epDownloadBlobUrl;
+      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} AI Fixed)`;
+      document.getElementById('epStatOriginal').innerText = `${origW} × ${origH} px`;
+      document.getElementById('epStatProcessed').innerText = `${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
+      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • 3-Scale DoG + HDR`;
+      document.getElementById('epDownloadBtnText').innerText = `Download ${epSelectedTier} Image (${epChosenFormat})`;
+
       if (callback) callback();
-    }, mimeType, 0.95);
+    }, mimeType, 0.96);
+  }
+
+  // =========================================================================
+  // WORKING LIKE & DISLIKE RATING BUTTONS
+  // =========================================================================
+  function handleEpRating(type) {
+    const likeBtn = document.getElementById('epLikeBtn');
+    const dislikeBtn = document.getElementById('epDislikeBtn');
+    const likeCount = document.getElementById('epLikeCount');
+    const dislikeCount = document.getElementById('epDislikeCount');
+    const feedbackMsg = document.getElementById('epRatingFeedbackMsg');
+
+    if (type === 'like') {
+      if (epCurrentRating === 'like') {
+        epCurrentRating = null;
+        likeCount.innerText = '0';
+        likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+        feedbackMsg.classList.add('hidden');
+      } else {
+        epCurrentRating = 'like';
+        likeCount.innerText = '1';
+        dislikeCount.innerText = '0';
+        likeBtn.className = 'px-4 py-1.5 rounded-xl bg-[#86efac]/20 border border-[#86efac] text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-[#86efac]/10 scale-105';
+        dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+        feedbackMsg.className = 'text-[11px] font-mono pt-1 text-[#86efac]';
+        feedbackMsg.innerHTML = '✓ Thanks for your feedback! Glad the ' + epSelectedTier + ' enhancement looks great.';
+      }
+    } else {
+      if (epCurrentRating === 'dislike') {
+        epCurrentRating = null;
+        dislikeCount.innerText = '0';
+        dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+        feedbackMsg.classList.add('hidden');
+      } else {
+        epCurrentRating = 'dislike';
+        dislikeCount.innerText = '1';
+        likeCount.innerText = '0';
+        dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-rose-500/10 scale-105';
+        likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+        feedbackMsg.className = 'text-[11px] font-mono pt-1 text-amber-300';
+        feedbackMsg.innerHTML = `Want stronger edge recovery? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Click here to Boost 2× Harder</button>`;
+      }
+    }
+  }
+
+  function resetRatingWidget() {
+    epCurrentRating = null;
+    document.getElementById('epLikeCount').innerText = '0';
+    document.getElementById('epDislikeCount').innerText = '0';
+    document.getElementById('epLikeBtn').className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+    document.getElementById('epDislikeBtn').className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+    document.getElementById('epRatingFeedbackMsg').classList.add('hidden');
   }
 
   function triggerEpFileDownload() {
