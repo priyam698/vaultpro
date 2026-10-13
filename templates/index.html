@@ -5285,7 +5285,9 @@ window.addEventListener('appinstalled', () => {
     runBtn.innerHTML = `<span>Convert & Fix Pixels to 4K</span>`;
   }
 </script>
-<script>
+<script type="module">
+  import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+
   let epCurrentFile = null;
   let epChosenFormat = 'JPG';
   let epSelectedTier = '4K';
@@ -5294,68 +5296,77 @@ window.addEventListener('appinstalled', () => {
   let epDownloadBlobUrl = null;
   let epDownloadFileName = 'enhanced_4k_image.jpg';
   let epCurrentRating = null;
+  let epRawAiResultImg = null; // Stores the neural-reconstructed image from the Cloud GPU
 
-  // Studio Master Profiles (Visible Feature Sharpness + Skin Retouch + 3D Clarity)
   const EP_TIER_CONFIG = {
-    '2K':  { scale: 1.5, maxEdge: 2560,  sharp: 70, clarity: 50, vibrance: 18, label: '2K Quad HD' },
-    '4K':  { scale: 2.0, maxEdge: 3840,  sharp: 82, clarity: 60, vibrance: 22, label: '4K Ultra HD' },
-    '8K':  { scale: 2.5, maxEdge: 7680,  sharp: 90, clarity: 68, vibrance: 25, label: '8K Cinema UHD' },
-    '16K': { scale: 3.0, maxEdge: 15360, sharp: 96, clarity: 75, vibrance: 28, label: '16K Extreme AI' }
+    '2K':  { scale: 2, maxEdge: 2560,  fidelity: 70, label: '2K Quad HD' },
+    '4K':  { scale: 4, maxEdge: 3840,  fidelity: 60, label: '4K Ultra HD' },
+    '8K':  { scale: 4, maxEdge: 7680,  fidelity: 55, label: '8K Cinema UHD' },
+    '16K': { scale: 4, maxEdge: 15360, fidelity: 50, label: '16K Extreme AI' }
   };
 
-  function enforceSliderBounds(sharpVal, clarityVal, vibVal) {
+  function setupRealAiStudioUI() {
+    // Ensure Before image is 100% untouched (no fake blur)
+    const beforeImg = document.getElementById('epBeforeImage');
+    if (beforeImg) {
+      beforeImg.style.filter = 'none';
+      beforeImg.classList.remove('filter', 'blur-[0.8px]');
+    }
+
+    // Repurpose the 3 sliders for Real AI Fidelity & Post-Tone Tuning
     const sSharp = document.getElementById('sliderSharpness');
     const sCont  = document.getElementById('sliderContrast');
     const sVib   = document.getElementById('sliderVibrance');
 
     if (sSharp) {
-      sSharp.min = "0";
+      sSharp.min = "10";
       sSharp.max = "100";
-      if (sharpVal !== undefined) sSharp.value = sharpVal;
-      document.getElementById('valSharpness').innerText = sSharp.value + '%';
+      sSharp.value = "60";
+      document.getElementById('valSharpness').innerText = "0.60 (Balanced AI)";
+      const labelSharp = sSharp.previousElementSibling?.querySelector('span:first-child');
+      if (labelSharp) labelSharp.innerText = "CodeFormer AI Fidelity (Lower = Stronger AI)";
+      sSharp.oninput = function() {
+        document.getElementById('valSharpness').innerText = (this.value / 100).toFixed(2);
+      };
+      // Re-run real Cloud GPU AI when fidelity slider is released
+      sSharp.onchange = function() {
+        runEpUpscalingProcess(true);
+      };
     }
+
     if (sCont) {
       sCont.min = "0";
       sCont.max = "100";
-      if (clarityVal !== undefined) sCont.value = clarityVal;
-      document.getElementById('valContrast').innerText = sCont.value + '%';
+      sCont.value = "50";
+      document.getElementById('valContrast').innerText = "50%";
+      const labelCont = sCont.previousElementSibling?.querySelector('span:first-child');
+      if (labelCont) labelCont.innerText = "Natural Tone & Contrast";
+      sCont.oninput = function() {
+        document.getElementById('valContrast').innerText = this.value + "%";
+      };
+      sCont.onchange = function() {
+        if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg);
+      };
     }
+
     if (sVib) {
       sVib.min = "0";
       sVib.max = "100";
-      if (vibVal !== undefined) sVib.value = vibVal;
-      document.getElementById('valVibrance').innerText = sVib.value + '%';
+      sVib.value = "50";
+      document.getElementById('valVibrance').innerText = "50%";
+      const labelVib = sVib.previousElementSibling?.querySelector('span:first-child');
+      if (labelVib) labelVib.innerText = "Color Vibrance";
+      sVib.oninput = function() {
+        document.getElementById('valVibrance').innerText = this.value + "%";
+      };
+      sVib.onchange = function() {
+        if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg);
+      };
     }
-
-    // Represent raw un-upscaled input on the Before side so resolution gain is unmistakable
-    const beforeImg = document.getElementById('epBeforeImage');
-    if (beforeImg) {
-      beforeImg.style.filter = 'blur(1.4px) contrast(0.92) brightness(0.94)';
-    }
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    enforceSliderBounds(82, 60, 22);
-  });
-
-  function openAiStudioModal() {
-    const modal = document.getElementById('aiStudioModal');
-    if (modal) modal.classList.remove('hidden');
-    enforceSliderBounds();
-  }
-
-  function closeAiStudioModal() {
-    const modal = document.getElementById('aiStudioModal');
-    if (modal) modal.classList.add('hidden');
-  }
-
-  function setEpFormat(fmt, btn) {
-    epChosenFormat = fmt;
-    document.querySelectorAll('.ep-fmt-btn').forEach(b => {
-      b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer';
-    });
-    btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
-  }
+  window.addEventListener('DOMContentLoaded', setupRealAiStudioUI);
+  setupRealAiStudioUI();
 
   function calculateProportionalDimensions(tier) {
     const img = document.getElementById('epVisualizerImg');
@@ -5365,9 +5376,7 @@ window.addEventListener('appinstalled', () => {
 
     const aspect = origW / origH;
     let targetLongEdge = Math.max(origW, origH) * cfg.scale;
-    if (targetLongEdge < cfg.maxEdge) {
-      targetLongEdge = cfg.maxEdge;
-    }
+    if (targetLongEdge < cfg.maxEdge) targetLongEdge = cfg.maxEdge;
 
     if (origW >= origH) {
       epTargetWidth = Math.round(targetLongEdge);
@@ -5378,94 +5387,208 @@ window.addEventListener('appinstalled', () => {
     }
   }
 
-  function selectResolutionTier(tier, btnElement) {
-    epSelectedTier = tier;
-    calculateProportionalDimensions(tier);
+  // Convert uploaded image into an optimal 1000px PNG Blob for fast Cloud GPU inference
+  // (CodeFormer's GPU server skips upscaling if input > 1500px; 1000px triggers full 2x/4x Real-ESRGAN + Face AI)
+  function prepareOptimalInputBlob(sourceImg, maxEdge = 1000) {
+    return new Promise((resolve) => {
+      const origW = sourceImg.naturalWidth || 1024;
+      const origH = sourceImg.naturalHeight || 1024;
+      const aspect = origW / origH;
 
-    document.querySelectorAll('.ep-tier-btn').forEach(b => {
-      b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer';
+      let sendW = origW;
+      let sendH = origH;
+      if (Math.max(origW, origH) > maxEdge) {
+        if (origW >= origH) {
+          sendW = maxEdge;
+          sendH = Math.round(maxEdge / aspect);
+        } else {
+          sendH = maxEdge;
+          sendW = Math.round(maxEdge * aspect);
+        }
+      }
+
+      const c = document.createElement('canvas');
+      c.width = sendW;
+      c.height = sendH;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(sourceImg, 0, 0, sendW, sendH);
+      c.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);
     });
-    if (btnElement) {
-      btnElement.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
+  }
+
+  // =========================================================================
+  // REAL CLOUD GPU AI INFERENCE (CodeFormer + Real-ESRGAN on Hugging Face)
+  // =========================================================================
+  async function runCloudGpuAiInference(inputBlob, fidelityWeight, stageEl, barEl, pctEl) {
+    stageEl.innerText = "Connecting to Hugging Face Cloud GPU (CodeFormer + Real-ESRGAN)...";
+    barEl.style.width = "25%";
+    pctEl.innerText = "25%";
+
+    const client = await Client.connect("sczhou/CodeFormer");
+
+    stageEl.innerText = "Running RetinaFace Detection + CodeFormer Neural Reconstruction...";
+    barEl.style.width = "60%";
+    pctEl.innerText = "60%";
+
+    let result;
+    try {
+      // Standard 6-parameter signature on sczhou/CodeFormer (main)
+      // [image, face_align, background_enhance, face_upsample, upscale, codeformer_fidelity]
+      result = await client.predict(0, [
+        inputBlob,
+        true,           // Pre_Face_Align
+        true,           // Background_Enhance (Real-ESRGAN)
+        true,           // Face_Upsample
+        2,              // Rescaling_Factor (2x neural pass)
+        fidelityWeight  // Codeformer_Fidelity (0.0 to 1.0)
+      ]);
+    } catch (firstErr) {
+      // Fallback for 5-parameter signature
+      result = await client.predict(0, [
+        inputBlob,
+        true,
+        true,
+        2,
+        fidelityWeight
+      ]);
     }
 
-    document.getElementById('epScaleBadgeText').innerText = tier;
-    document.getElementById('epExpansionCaption').innerText = `Target Output: ${epTargetWidth} × ${epTargetHeight} px (${tier} Neural Studio v4)`;
+    stageEl.innerText = "Downloading Neural-Reconstructed Master from GPU...";
+    barEl.style.width = "90%";
+    pctEl.innerText = "90%";
+
+    const outItem = Array.isArray(result.data) ? result.data[0] : result.data;
+    const remoteUrl = (typeof outItem === 'string') ? outItem : (outItem?.url || outItem?.path);
+
+    if (!remoteUrl) {
+      throw new Error("Cloud GPU did not return a valid image URL.");
+    }
+
+    // Fetch the AI-restored image into a local HTMLImageElement
+    const resp = await fetch(remoteUrl);
+    const aiBlob = await resp.blob();
+    const localObjectUrl = URL.createObjectURL(aiBlob);
+
+    return new Promise((resolve, reject) => {
+      const aiImg = new Image();
+      aiImg.crossOrigin = "anonymous";
+      aiImg.onload = () => resolve(aiImg);
+      aiImg.onerror = (e) => reject(e);
+      aiImg.src = localObjectUrl;
+    });
   }
 
-  function syncTierFromDropdown(val) {
-    const parts = val.split('|');
-    const tier = parts[1] || '4K';
-    selectResolutionTier(tier, document.querySelector(`.ep-tier-btn[data-tier="${tier}"]`));
+  // Export the AI-restored image to the user's selected 2K / 4K / 8K / 16K tier & format
+  function exportAiImageToTargetTier(aiImg, callback) {
+    const sourceImg = document.getElementById('epVisualizerImg');
+    const origW = sourceImg.naturalWidth || 1920;
+    const origH = sourceImg.naturalHeight || 1080;
+
+    const maxGpuDim = 4096;
+    const exportScale = Math.min(1, maxGpuDim / Math.max(epTargetWidth, epTargetHeight));
+    const exportW = Math.round(epTargetWidth * exportScale);
+    const exportH = Math.round(epTargetHeight * exportScale);
+
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = exportW;
+    outCanvas.height = exportH;
+    const outCtx = outCanvas.getContext('2d');
+    outCtx.imageSmoothingEnabled = true;
+    outCtx.imageSmoothingQuality = 'high';
+
+    // Apply optional user tone adjustments (50% = untouched neural output)
+    const contVal = parseInt(document.getElementById('sliderContrast')?.value || "50", 10);
+    const vibVal  = parseInt(document.getElementById('sliderVibrance')?.value || "50", 10);
+    const cFilter = 100 + (contVal - 50) * 0.4;
+    const sFilter = 100 + (vibVal - 50) * 0.5;
+    outCtx.filter = `contrast(${cFilter}%) saturate(${sFilter}%)`;
+
+    outCtx.drawImage(aiImg, 0, 0, exportW, exportH);
+
+    const mimeType = epChosenFormat === 'PNG' ? 'image/png' : (epChosenFormat === 'WEBP' ? 'image/webp' : 'image/jpeg');
+    const extension = epChosenFormat.toLowerCase();
+
+    outCanvas.toBlob((blob) => {
+      if (!blob) return;
+      if (epDownloadBlobUrl) URL.revokeObjectURL(epDownloadBlobUrl);
+      epDownloadBlobUrl = URL.createObjectURL(blob);
+
+      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "zephyr_ai";
+      epDownloadFileName = `${baseName}_AI_${epSelectedTier}_${epTargetWidth}x${epTargetHeight}.${extension}`;
+
+      const beforeImg = document.getElementById('epBeforeImage');
+      beforeImg.style.filter = 'none';
+      beforeImg.src = sourceImg.src;
+
+      document.getElementById('epAfterImage').src = epDownloadBlobUrl;
+      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} CodeFormer + Real-ESRGAN AI)`;
+      document.getElementById('epStatOriginal').innerText = `${origW} × ${origH} px`;
+      document.getElementById('epStatProcessed').innerText = `${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
+      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • CodeFormer + Real-ESRGAN GPU`;
+      document.getElementById('epDownloadBtnText').innerText = `Download ${epSelectedTier} AI Image (${epChosenFormat})`;
+
+      if (callback) callback();
+    }, mimeType, 0.96);
   }
 
-  function handleEpFileSelected(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    epCurrentFile = file;
-
-    document.getElementById('epUploadTitle').innerText = file.name;
-    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} Neural Studio`;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = document.getElementById('epVisualizerImg');
-      img.src = e.target.result;
-      img.onload = function() {
-        calculateProportionalDimensions(epSelectedTier);
-        document.getElementById('epOriginalDimsBadge').innerText = `Original: ${img.naturalWidth} × ${img.naturalHeight} px`;
-        document.getElementById('epExpansionCaption').innerText = `Expands proportionally to ${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
-      };
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function runEpUpscalingProcess() {
+  async function runEpUpscalingProcess(isReRunFromSlider = false) {
     if (!epCurrentFile) {
       document.getElementById('epFileInput').click();
       return;
     }
 
+    setupRealAiStudioUI();
     calculateProportionalDimensions(epSelectedTier);
-    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
-    enforceSliderBounds(cfg.sharp, cfg.clarity, cfg.vibrance);
 
     const mainBtn = document.getElementById('epMainActionBtn');
     const procBox = document.getElementById('epProcessingBox');
     const bar = document.getElementById('epProgressBar');
     const pct = document.getElementById('epPctText');
     const stage = document.getElementById('epStageText');
+    const subHeading = document.getElementById('epCompleteSub');
 
-    mainBtn.disabled = true;
-    mainBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    mainBtn.innerHTML = `<span>Rendering ${epSelectedTier} Neural Studio...</span>`;
-    procBox.classList.remove('hidden');
+    if (mainBtn) {
+      mainBtn.disabled = true;
+      mainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      mainBtn.innerHTML = `<span>Running Cloud GPU AI (${epSelectedTier})...</span>`;
+    }
+    if (procBox) procBox.classList.remove('hidden');
+    if (subHeading && isReRunFromSlider) {
+      subHeading.innerText = "⏳ Re-running CodeFormer Cloud GPU with updated fidelity...";
+    }
 
-    const steps = [
-      { p: 22, msg: "Smoothing skin grain & camera blotches..." },
-      { p: 54, msg: "Reconstructing Multi-Band Eye, Hair & Feature Edges..." },
-      { p: 80, msg: "Applying Hue-Locked Studio Radiance & Clarity..." },
-      { p: 95, msg: `Encoding ${epTargetWidth} × ${epTargetHeight} px Master...` },
-      { p: 100, msg: "Neural Studio v4 Complete!" }
-    ];
+    try {
+      const sourceImg = document.getElementById('epVisualizerImg');
+      const sSharp = document.getElementById('sliderSharpness');
+      const fidelityWeight = sSharp ? (parseInt(sSharp.value, 10) / 100) : 0.6;
 
-    let stepIdx = 0;
-    const interval = setInterval(() => {
-      if (stepIdx < steps.length) {
-        bar.style.width = steps[stepIdx].p + "%";
-        pct.innerText = steps[stepIdx].p + "%";
-        stage.innerText = steps[stepIdx].msg;
-        stepIdx++;
-      } else {
-        clearInterval(interval);
-        executeNeuralStudioV4(() => {
-          procBox.classList.add('hidden');
+      stage.innerText = "Optimizing input tensor for Cloud GPU...";
+      bar.style.width = "12%";
+      pct.innerText = "12%";
+
+      const inputBlob = await prepareOptimalInputBlob(sourceImg, 1000);
+      const aiResultImg = await runCloudGpuAiInference(inputBlob, fidelityWeight, stage, bar, pct);
+      epRawAiResultImg = aiResultImg;
+
+      bar.style.width = "100%";
+      pct.innerText = "100%";
+      stage.innerText = "Cloud GPU Neural Reconstruction Complete!";
+
+      exportAiImageToTargetTier(aiResultImg, () => {
+        if (procBox) procBox.classList.add('hidden');
+        if (mainBtn) {
           mainBtn.disabled = false;
           mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ AI Engine</span>`;
+          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ Cloud AI</span>`;
+        }
+        if (subHeading) {
+          subHeading.innerText = "Restored via CodeFormer Transformer + Real-ESRGAN GPU";
+        }
 
+        if (!isReRunFromSlider) {
           resetRatingWidget();
-
           document.getElementById('epUploadView').classList.add('hidden');
           document.getElementById('epResultView').classList.remove('hidden');
           updateResultTierTabs(epSelectedTier);
@@ -5474,10 +5597,22 @@ window.addEventListener('appinstalled', () => {
             syncBeforeImageBounds();
             document.getElementById('epSliderRange').value = 50;
             updateComparisonSlider(50);
-          }, 50);
-        });
+          }, 60);
+        } else {
+          syncBeforeImageBounds();
+        }
+      });
+
+    } catch (err) {
+      console.error("Cloud GPU AI Error:", err);
+      alert("Cloud GPU AI server is temporarily busy or unreachable (" + err.message + "). Please try clicking Upscale again in a few seconds.");
+      if (procBox) procBox.classList.add('hidden');
+      if (mainBtn) {
+        mainBtn.disabled = false;
+        mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span>`;
       }
-    }, 250);
+    }
   }
 
   function syncBeforeImageBounds() {
@@ -5486,6 +5621,7 @@ window.addEventListener('appinstalled', () => {
     if (wrapper && beforeImg) {
       beforeImg.style.width = wrapper.clientWidth + 'px';
       beforeImg.style.height = wrapper.clientHeight + 'px';
+      beforeImg.style.filter = 'none';
     }
   }
   window.addEventListener('resize', syncBeforeImageBounds);
@@ -5496,15 +5632,6 @@ window.addEventListener('appinstalled', () => {
     const handle = document.getElementById('epSliderHandle');
     if (clip) clip.style.width = val + '%';
     if (handle) handle.style.left = val + '%';
-  }
-
-  function switchResultTier(tier) {
-    epSelectedTier = tier;
-    calculateProportionalDimensions(tier);
-    const cfg = EP_TIER_CONFIG[tier];
-    enforceSliderBounds(cfg.sharp, cfg.clarity, cfg.vibrance);
-    updateResultTierTabs(tier);
-    reprocessWithLiveSliders();
   }
 
   function updateResultTierTabs(activeTier) {
@@ -5519,214 +5646,101 @@ window.addEventListener('appinstalled', () => {
     });
   }
 
-  function boostFixMaximum() {
-    enforceSliderBounds(100, 82, 32);
-    reprocessWithLiveSliders();
+  function resetRatingWidget() {
+    epCurrentRating = null;
+    document.getElementById('epLikeCount').innerText = '0';
+    document.getElementById('epDislikeCount').innerText = '0';
+    document.getElementById('epLikeBtn').className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+    document.getElementById('epDislikeBtn').className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
+    document.getElementById('epRatingFeedbackMsg').classList.add('hidden');
   }
 
-  function reprocessWithLiveSliders() {
-    enforceSliderBounds();
-    executeNeuralStudioV4(() => {
-      syncBeforeImageBounds();
+  // Expose functions globally for HTML onclick handlers
+  window.openAiStudioModal = function() {
+    const modal = document.getElementById('aiStudioModal');
+    if (modal) modal.classList.remove('hidden');
+    setupRealAiStudioUI();
+  };
+
+  window.closeAiStudioModal = function() {
+    const modal = document.getElementById('aiStudioModal');
+    if (modal) modal.classList.add('hidden');
+  };
+
+  window.setEpFormat = function(fmt, btn) {
+    epChosenFormat = fmt;
+    document.querySelectorAll('.ep-fmt-btn').forEach(b => {
+      b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer';
     });
-  }
+    btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
+    if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg);
+  };
 
-  // ============================================================================
-  // NEURAL STUDIO V4:
-  // 1. Bilateral Skin Retouching (3.5px) + Preview-Visible Feature Crispness (9px)
-  // 2. 3D Local Studio Clarity (24px) + Studio Daylight White-Balance Clean-up
-  // 3. Hue-Locked Luminance Ratio Scaling (100% immune to orange color shift!)
-  // ============================================================================
-  function executeNeuralStudioV4(callback) {
-    const sourceImg = document.getElementById('epVisualizerImg');
-    const origW = sourceImg.naturalWidth || 1920;
-    const origH = sourceImg.naturalHeight || 1080;
-
-    enforceSliderBounds();
-    const sharpVal   = parseInt(document.getElementById('sliderSharpness').value, 10) || 82;
-    const clarityVal = parseInt(document.getElementById('sliderContrast').value, 10) || 60;
-    const vibVal     = parseInt(document.getElementById('sliderVibrance').value, 10) || 22;
-
-    // 1150px working resolution ensures 3.5px, 9px, and 24px bands are 100% visible
-    // inside the 480px preview window AND razor-sharp in the exported file!
-    const targetWorkEdge = 1150;
-    const aspect = origW / origH;
-    let workW, workH;
-    if (origW >= origH) {
-      workW = targetWorkEdge;
-      workH = Math.round(targetWorkEdge / aspect);
-    } else {
-      workH = targetWorkEdge;
-      workW = Math.round(targetWorkEdge * aspect);
+  window.selectResolutionTier = function(tier, btnElement) {
+    epSelectedTier = tier;
+    calculateProportionalDimensions(tier);
+    document.querySelectorAll('.ep-tier-btn').forEach(b => {
+      b.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all cursor-pointer';
+    });
+    if (btnElement) {
+      btnElement.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
     }
+    document.getElementById('epScaleBadgeText').innerText = tier;
+    document.getElementById('epExpansionCaption').innerText = `Target Output: ${epTargetWidth} × ${epTargetHeight} px (${tier} CodeFormer + Real-ESRGAN AI)`;
+  };
 
-    // Canvas 0: Original Base
-    const baseCanvas = document.createElement('canvas');
-    baseCanvas.width = workW;
-    baseCanvas.height = workH;
-    const baseCtx = baseCanvas.getContext('2d');
-    baseCtx.imageSmoothingEnabled = true;
-    baseCtx.imageSmoothingQuality = 'high';
-    baseCtx.drawImage(sourceImg, 0, 0, workW, workH);
+  window.syncTierFromDropdown = function(val) {
+    const parts = val.split('|');
+    const tier = parts[1] || '4K';
+    window.selectResolutionTier(tier, document.querySelector(`.ep-tier-btn[data-tier="${tier}"]`));
+  };
 
-    // Canvas 1: Bilateral Skin & Pore Smoothing Band (3.2px radius)
-    const smoothCanvas = document.createElement('canvas');
-    smoothCanvas.width = workW;
-    smoothCanvas.height = workH;
-    const smoothCtx = smoothCanvas.getContext('2d');
-    smoothCtx.filter = 'blur(3.2px)';
-    smoothCtx.drawImage(baseCanvas, 0, 0);
+  window.handleEpFileSelected = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    epCurrentFile = file;
+    document.getElementById('epUploadTitle').innerText = file.name;
+    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} Cloud GPU AI`;
 
-    // Canvas 2: Preview-Visible Feature Sharpening Band (8.5px radius - eyes, brows, hair, lips)
-    const medCanvas = document.createElement('canvas');
-    medCanvas.width = workW;
-    medCanvas.height = workH;
-    const medCtx = medCanvas.getContext('2d');
-    medCtx.filter = 'blur(8.5px)';
-    medCtx.drawImage(baseCanvas, 0, 0);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('epVisualizerImg');
+      img.src = e.target.result;
+      img.onload = function() {
+        calculateProportionalDimensions(epSelectedTier);
+        document.getElementById('epOriginalDimsBadge').innerText = `Original: ${img.naturalWidth} × ${img.naturalHeight} px`;
+        document.getElementById('epExpansionCaption').innerText = `Expands proportionally to ${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier} Cloud AI)`;
+      };
+    };
+    reader.readAsDataURL(file);
+  };
 
-    // Canvas 3: 3D Studio Lighting & Local Clarity Band (24px radius)
-    const clarityCanvas = document.createElement('canvas');
-    clarityCanvas.width = workW;
-    clarityCanvas.height = workH;
-    const clarityCtx = clarityCanvas.getContext('2d');
-    clarityCtx.filter = 'blur(24px)';
-    clarityCtx.drawImage(baseCanvas, 0, 0);
+  window.runEpUpscalingProcess = runEpUpscalingProcess;
+  window.updateComparisonSlider = updateComparisonSlider;
 
-    try {
-      const imgData     = baseCtx.getImageData(0, 0, workW, workH);
-      const data        = imgData.data;
-      const smoothData  = smoothCtx.getImageData(0, 0, workW, workH).data;
-      const medData     = medCtx.getImageData(0, 0, workW, workH).data;
-      const clarityData = clarityCtx.getImageData(0, 0, workW, workH).data;
-
-      const sharpStrength   = (sharpVal / 100);   // 0.0 to 1.0
-      const clarityStrength = (clarityVal / 100); // 0.0 to 1.0
-      const vibStrength     = (vibVal / 100);     // 0.0 to 1.0
-
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-
-        // Compute Luminance (Y) across all 4 frequency scales
-        const yOrig    = 0.299 * r + 0.587 * g + 0.114 * b;
-        const ySmooth  = 0.299 * smoothData[i]  + 0.587 * smoothData[i + 1]  + 0.114 * smoothData[i + 2];
-        const yMed     = 0.299 * medData[i]     + 0.587 * medData[i + 1]     + 0.114 * medData[i + 2];
-        const yClarity = 0.299 * clarityData[i] + 0.587 * clarityData[i + 1] + 0.114 * clarityData[i + 2];
-
-        // Multi-Band Frequency Decomposition
-        const fineBand    = yOrig - ySmooth;    // Pore noise vs. fine hair/lashes
-        const featureBand = ySmooth - yMed;     // Visible eye, brow, lip, and edge definition
-        const studioBand  = yMed - yClarity;    // 3D studio lighting & depth
-
-        // 1. Bilateral Skin Retouching vs. Fine Edge Sharpening
-        const absFine = Math.abs(fineBand);
-        let fineContrib = 0;
-        if (absFine < 5.5) {
-          // Smooth blotchy camera grain and skin pores (-60% noise reduction)
-          fineContrib = -fineBand * 0.60;
-        } else {
-          // Crisp fine hair strands and eyelashes
-          const fineMask = Math.min(1.0, (absFine - 5.5) / 12.0);
-          fineContrib = fineBand * sharpStrength * 2.1 * fineMask;
-        }
-
-        // 2. Preview-Visible Feature Sharpening (survives browser downsampling!)
-        const absFeature = Math.abs(featureBand);
-        let featureContrib = 0;
-        if (absFeature > 1.8) {
-          const featMask = Math.min(1.0, (absFeature - 1.8) / 8.0);
-          featureContrib = featureBand * sharpStrength * 1.85 * featMask;
-        }
-
-        // 3. 3D Local Studio Clarity
-        const clarityContrib = studioBand * clarityStrength * 0.75;
-
-        // Soft highlight/shadow protection so white walls & dark hair never clip
-        const normY = yOrig / 255.0;
-        const headroomGuard = 0.30 + 0.70 * (4.0 * normY * (1.0 - normY));
-
-        // 4. Clean Studio Radiance & Shadow Anchor (matches EnhancePhoto's bright clean look)
-        const studioExposureLift = Math.sin(normY * Math.PI) * 14.0 * clarityStrength;
-        const shadowAnchor       = Math.sin((normY - 0.5) * Math.PI) * 8.0 * clarityStrength;
-
-        let yNew = yOrig + (fineContrib + featureContrib + clarityContrib) * headroomGuard + studioExposureLift + shadowAnchor;
-        yNew = Math.max(0, Math.min(255, yNew));
-
-        // 5. Hue-Locked RGB Reconstruction (75% Luminance Ratio + 25% Additive)
-        // Guarantees 0% orange skin shift while delivering dramatic studio pop!
-        const lumRatio = yNew / Math.max(1.0, yOrig);
-        const lumDelta = yNew - yOrig;
-
-        let newR = (r * lumRatio) * 0.75 + (r + lumDelta) * 0.25;
-        let newG = (g * lumRatio) * 0.75 + (g + lumDelta) * 0.25;
-        let newB = (b * lumRatio) * 0.75 + (b + lumDelta) * 0.25;
-
-        // Subtle Studio Daylight White-Balance Clean-up (removes muddy indoor yellow cast)
-        newR = newR * 0.99;
-        newG = newG * 1.005;
-        newB = newB * 1.025;
-
-        // Smart Vibrance (protects skin saturation while enriching eyes/clothing)
-        const maxC = Math.max(newR, newG, newB);
-        const minC = Math.min(newR, newG, newB);
-        const sat  = (maxC - minC) / 255.0;
-        const vibBoost = 1.0 + (vibStrength * 0.35) * (1.0 - sat * 0.75);
-
-        const finalY = 0.299 * newR + 0.587 * newG + 0.114 * newB;
-        newR = finalY + (newR - finalY) * vibBoost;
-        newG = finalY + (newG - finalY) * vibBoost;
-        newB = finalY + (newB - finalY) * vibBoost;
-
-        data[i]     = newR < 0 ? 0 : (newR > 255 ? 255 : newR);
-        data[i + 1] = newG < 0 ? 0 : (newG > 255 ? 255 : newG);
-        data[i + 2] = newB < 0 ? 0 : (newB > 255 ? 255 : newB);
-      }
-
-      baseCtx.putImageData(imgData, 0, 0);
-    } catch (err) {
-      console.warn("Neural Studio v4 warning:", err);
+  window.switchResultTier = function(tier) {
+    epSelectedTier = tier;
+    calculateProportionalDimensions(tier);
+    updateResultTierTabs(tier);
+    if (epRawAiResultImg) {
+      exportAiImageToTargetTier(epRawAiResultImg, syncBeforeImageBounds);
     }
+  };
 
-    // Export at High-Resolution Proportional Target
-    const maxGpuDim = 4096;
-    const exportScale = Math.min(1, maxGpuDim / Math.max(epTargetWidth, epTargetHeight));
-    const exportW = Math.round(epTargetWidth * exportScale);
-    const exportH = Math.round(epTargetHeight * exportScale);
+  window.boostFixMaximum = function() {
+    const sSharp = document.getElementById('sliderSharpness');
+    if (sSharp) {
+      sSharp.value = "35"; // 0.35 CodeFormer weight = Maximum generative AI face & detail reconstruction
+      document.getElementById('valSharpness').innerText = "0.35 (Max AI Reconstruction)";
+    }
+    runEpUpscalingProcess(true);
+  };
 
-    const outCanvas = document.createElement('canvas');
-    outCanvas.width = exportW;
-    outCanvas.height = exportH;
-    const outCtx = outCanvas.getContext('2d');
-    outCtx.imageSmoothingEnabled = true;
-    outCtx.imageSmoothingQuality = 'high';
-    outCtx.drawImage(baseCanvas, 0, 0, exportW, exportH);
+  window.reprocessWithLiveSliders = function() {
+    if (epRawAiResultImg) exportAiImageToTargetTier(epRawAiResultImg, syncBeforeImageBounds);
+  };
 
-    const mimeType = epChosenFormat === 'PNG' ? 'image/png' : (epChosenFormat === 'WEBP' ? 'image/webp' : 'image/jpeg');
-    const extension = epChosenFormat.toLowerCase();
-
-    outCanvas.toBlob((blob) => {
-      if (!blob) return;
-      if (epDownloadBlobUrl) URL.revokeObjectURL(epDownloadBlobUrl);
-      epDownloadBlobUrl = URL.createObjectURL(blob);
-
-      const baseName = epCurrentFile ? epCurrentFile.name.replace(/\.[^/.]+$/, "") : "zephyr_studio";
-      epDownloadFileName = `${baseName}_${epSelectedTier}_${epTargetWidth}x${epTargetHeight}.${extension}`;
-
-      document.getElementById('epBeforeImage').src = sourceImg.src;
-      document.getElementById('epAfterImage').src = epDownloadBlobUrl;
-      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} Neural Studio)`;
-      document.getElementById('epStatOriginal').innerText = `${origW} × ${origH} px`;
-      document.getElementById('epStatProcessed').innerText = `${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
-      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • Neural Studio v4`;
-      document.getElementById('epDownloadBtnText').innerText = `Download ${epSelectedTier} Image (${epChosenFormat})`;
-
-      if (callback) callback();
-    }, mimeType, 0.96);
-  }
-
-  function handleEpRating(type) {
+  window.handleEpRating = function(type) {
     const likeBtn = document.getElementById('epLikeBtn');
     const dislikeBtn = document.getElementById('epDislikeBtn');
     const likeCount = document.getElementById('epLikeCount');
@@ -5740,7 +5754,7 @@ window.addEventListener('appinstalled', () => {
       likeBtn.className = 'px-4 py-1.5 rounded-xl bg-[#86efac]/20 border border-[#86efac] text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-[#86efac]/10 scale-105';
       dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
       feedbackMsg.className = 'text-[11px] font-mono pt-1 text-[#86efac]';
-      feedbackMsg.innerHTML = '✓ Studio Master quality verified!';
+      feedbackMsg.innerHTML = '✓ Cloud GPU AI result rated positively!';
     } else {
       epCurrentRating = 'dislike';
       dislikeCount.innerText = '1';
@@ -5748,20 +5762,11 @@ window.addEventListener('appinstalled', () => {
       dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-rose-500/10 scale-105';
       likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
       feedbackMsg.className = 'text-[11px] font-mono pt-1 text-amber-300';
-      feedbackMsg.innerHTML = `Want stronger edge definition? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Click for Max Studio Crisp</button>`;
+      feedbackMsg.innerHTML = `Want stronger neural face recovery? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Re-run at 0.35 Max AI Fidelity</button>`;
     }
-  }
+  };
 
-  function resetRatingWidget() {
-    epCurrentRating = null;
-    document.getElementById('epLikeCount').innerText = '0';
-    document.getElementById('epDislikeCount').innerText = '0';
-    document.getElementById('epLikeBtn').className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
-    document.getElementById('epDislikeBtn').className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
-    document.getElementById('epRatingFeedbackMsg').classList.add('hidden');
-  }
-
-  function triggerEpFileDownload() {
+  window.triggerEpFileDownload = function() {
     if (!epDownloadBlobUrl) return;
     const a = document.createElement('a');
     a.href = epDownloadBlobUrl;
@@ -5769,12 +5774,12 @@ window.addEventListener('appinstalled', () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  }
+  };
 
-  function backToEpUpload() {
+  window.backToEpUpload = function() {
     document.getElementById('epResultView').classList.add('hidden');
     document.getElementById('epUploadView').classList.remove('hidden');
-  }
+  };
 </script>
 </body>
 </html>
