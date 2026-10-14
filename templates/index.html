@@ -6329,309 +6329,76 @@ window.addEventListener('appinstalled', () => {
 </script>
 <script>
       // =========================================================================
-      // ZEPHYR PULSE: SELF-MOUNTING OWNER-ONLY ANALYTICS & GA4 (G-6W5JGQK51K)
+      // ZEPHYR PULSE: 100% REAL TELEMETRY & GA4 (G-6W5JGQK51K) — ZERO FAKE DATA
       // =========================================================================
       (function() {
         const ZP_ADMIN_EMAIL = 'priyamrana069@gmail.com';
         const ZP_ADMIN_PREFIX = 'priyamrana069';
         const ZP_DEFAULT_GA4 = 'G-6W5JGQK51K';
-        const ZP_STORAGE_KEY = 'zephyr_pulse_telemetry_v2';
-        let zpCurrentTimeframe = '7d';
+        const ZP_CLEAN_STORAGE_KEY = 'zephyr_real_telemetry_v3';
+        const ZP_VISITOR_ID_KEY = 'zephyr_unique_visitor_id';
+        let zpCurrentTimeframe = 'today';
 
-        // 1. Reliable Owner Verification (works even when navbar truncates to "priyamrana069@...")
+        // Purge any old cached demo numbers from the browser immediately
+        localStorage.removeItem('zephyr_pulse_telemetry_v1');
+        localStorage.removeItem('zephyr_pulse_telemetry_v2');
+
+        function getOrCreateVisitorId() {
+          let vid = localStorage.getItem(ZP_VISITOR_ID_KEY);
+          if (!vid) {
+            vid = 'usr_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+            localStorage.setItem(ZP_VISITOR_ID_KEY, vid);
+          }
+          return vid;
+        }
+
         function isAuthorizedZephyrAdmin() {
           const navText = (document.body ? document.body.innerText : '').toLowerCase();
-          if (navText.includes(ZP_ADMIN_PREFIX)) {
-            return true;
-          }
-          return false;
+          return navText.includes(ZP_ADMIN_PREFIX);
         }
 
-        // 2. Self-Mounting Modal HTML (Guarantees the modal ALWAYS exists on document.body)
-        function ensureZpModalMounted() {
-          let existing = document.getElementById('zephyrAnalyticsModal');
-          if (existing && document.getElementById('zpKpiTraffic')) {
-            if (existing.parentElement !== document.body) {
-              document.body.appendChild(existing);
-            }
-            return existing;
+        function getLast7DaysDates() {
+          const days = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const iso = d.toISOString().split('T')[0];
+            const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' });
+            days.push({ iso, label });
           }
-          if (existing) existing.remove();
-
-          const modal = document.createElement('div');
-          modal.id = 'zephyrAnalyticsModal';
-          modal.style.cssText = 'display: none; position: fixed; inset: 0; z-index: 999999; background: rgba(0,0,0,0.86); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 16px; overflow-y: auto;';
-          modal.addEventListener('click', function(e) {
-            if (e.target === modal) window.closeZephyrAnalytics();
-          });
-
-          modal.innerHTML = `
-            <div class="relative w-full max-w-6xl rounded-3xl bg-[#090d16] border border-white/15 shadow-2xl p-6 sm:p-8 my-auto text-slate-200 space-y-6 max-h-[92vh] overflow-y-auto" onclick="event.stopPropagation()">
-              
-              <!-- Top Header -->
-              <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
-                <div class="flex items-center gap-3">
-                  <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 text-[#86efac] flex items-center justify-center text-xl shadow-lg shadow-emerald-500/10">
-                    📊
-                  </div>
-                  <div>
-                    <div class="flex flex-wrap items-center gap-2.5">
-                      <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Zephyr Pulse • Traffic & Revenue Intelligence</h2>
-                      <span id="zpLiveProviderBadge" class="px-2.5 py-0.5 rounded-full bg-[#86efac]/15 border border-[#86efac]/40 text-[#86efac] text-[10px] font-mono font-bold flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#86efac] animate-ping"></span>
-                        🔒 OWNER ONLY (${ZP_ADMIN_EMAIL}) • GA4 (${ZP_DEFAULT_GA4})
-                      </span>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-0.5">Real-time daily traffic, new vs. repeated customer cohorts, escrow revenue & Google Analytics 4 sync</p>
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2">
-                  <div class="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 text-xs font-mono">
-                    <button type="button" onclick="setZpTimeframe('today', this)" class="zp-tf-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white cursor-pointer transition-all">Today</button>
-                    <button type="button" onclick="setZpTimeframe('7d', this)" class="zp-tf-btn px-3 py-1 rounded-lg bg-[#86efac] text-slate-950 font-extrabold cursor-pointer transition-all">7 Days</button>
-                    <button type="button" onclick="setZpTimeframe('30d', this)" class="zp-tf-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white cursor-pointer transition-all">30 Days</button>
-                  </div>
-
-                  <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-xs font-bold text-sky-300 cursor-pointer transition-all">
-                    ↗ Open Google Analytics
-                  </a>
-
-                  <button type="button" onclick="exportZpAnalyticsCsv()" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-200 cursor-pointer transition-all">
-                    ⬇ Export CSV
-                  </button>
-
-                  <button type="button" onclick="closeZephyrAnalytics()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white flex items-center justify-center text-lg cursor-pointer transition-all">
-                    ✕
-                  </button>
-                </div>
-              </div>
-
-              <!-- 4 Core KPI Cards -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
-                  <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
-                    <span>Daily Traffic (Sessions)</span>
-                    <span class="text-sky-400 text-sm">🌐</span>
-                  </div>
-                  <div class="flex items-baseline gap-2">
-                    <span id="zpKpiTraffic" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">1,428</span>
-                    <span class="text-[11px] font-mono font-bold text-[#86efac]">+18.4% ↑</span>
-                  </div>
-                  <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
-                    <span>GA4 Stream:</span>
-                    <span class="text-[#86efac] font-bold">G-6W5JGQK51K Live</span>
-                  </div>
-                </div>
-
-                <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
-                  <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
-                    <span>New Customers (1st Visit)</span>
-                    <span class="text-indigo-400 text-sm">✨</span>
-                  </div>
-                  <div class="flex items-baseline gap-2">
-                    <span id="zpKpiNewCust" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">892</span>
-                    <span id="zpKpiNewPct" class="text-[11px] font-mono font-bold text-indigo-300">62.5% of total</span>
-                  </div>
-                  <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
-                    <span>New Signups / Transfers:</span>
-                    <span class="text-white font-bold">164 today</span>
-                  </div>
-                </div>
-
-                <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
-                  <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
-                    <span>Repeated Customers</span>
-                    <span class="text-purple-400 text-sm">🔁</span>
-                  </div>
-                  <div class="flex items-baseline gap-2">
-                    <span id="zpKpiRepeatCust" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">536</span>
-                    <span id="zpKpiRepeatPct" class="text-[11px] font-mono font-bold text-purple-300">37.5% retention</span>
-                  </div>
-                  <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
-                    <span>Your Session Count:</span>
-                    <span id="zpYourVisitCount" class="text-[#86efac] font-bold">#1 (Owner)</span>
-                  </div>
-                </div>
-
-                <div class="rounded-2xl bg-gradient-to-br from-emerald-500/10 via-white/[0.03] to-sky-500/10 border border-[#86efac]/30 p-5 space-y-2">
-                  <div class="flex items-center justify-between text-xs text-slate-300 font-semibold">
-                    <span>Gross Revenue (Escrow + PRO)</span>
-                    <span class="text-[#86efac] text-sm">💰</span>
-                  </div>
-                  <div class="flex items-baseline gap-2">
-                    <span id="zpKpiRevenue" class="text-2xl sm:text-3xl font-extrabold text-[#86efac] font-mono">$4,890.00</span>
-                    <span class="text-[11px] font-mono font-bold text-emerald-300">+24.2% ↑</span>
-                  </div>
-                  <div class="flex items-center justify-between text-[11px] text-slate-300 font-mono pt-1 border-t border-white/10">
-                    <span>Escrow: <b id="zpEscrowRevSub">$3,140</b></span>
-                    <span>PRO MRR: <b id="zpProRevSub">$1,750</b></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Middle Grid: 7-Day Chart + Funnel -->
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-7 rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-4 flex flex-col justify-between">
-                  <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <h3 class="text-sm font-bold text-white">Daily Traffic: New vs. Repeated Customers</h3>
-                      <p class="text-[11px] text-slate-400">Hover over any day to inspect visitor split and daily revenue</p>
-                    </div>
-                    <div class="flex items-center gap-4 text-[11px] font-mono">
-                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-[#86efac]"></span> Repeated Customer</span>
-                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-indigo-500"></span> New Customer</span>
-                    </div>
-                  </div>
-
-                  <div id="zpChartBarsContainer" class="h-48 pt-6 pb-2 px-2 grid grid-cols-7 gap-3 items-end border-b border-white/10"></div>
-
-                  <div class="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs">
-                    <span class="text-slate-400 font-mono text-[11px]">Test real-time GA4 & Revenue event dispatch:</span>
-                    <div class="flex flex-wrap items-center gap-2">
-                      <button type="button" onclick="recordZephyrEvent('escrow_payment', 49.00, 'Pay-to-Unlock Escrow ($49.00)')" class="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[#86efac] font-mono font-bold text-[11px] cursor-pointer transition-all">
-                        + Simulate $49 Escrow Sale
-                      </button>
-                      <button type="button" onclick="recordZephyrEvent('pro_upgrade', 19.00, 'PRO 50 GB Plan Upgrade ($19.00)')" class="px-3 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 font-mono font-bold text-[11px] cursor-pointer transition-all">
-                        + Simulate $19 PRO Upgrade
-                      </button>
-                      <button type="button" onclick="recordZephyrEvent('repeat_visit', 0, 'Repeated Customer Session')" class="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 font-mono font-bold text-[11px] cursor-pointer transition-all">
-                        + Ping Repeat Visit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="lg:col-span-5 rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-4 flex flex-col justify-between">
-                  <div>
-                    <h3 class="text-sm font-bold text-white">Customer Retention & Revenue Funnel</h3>
-                    <p class="text-[11px] text-slate-400">Conversion breakdown across Zephyr Drive features</p>
-                  </div>
-
-                  <div class="space-y-3 text-xs font-mono">
-                    <div class="space-y-1">
-                      <div class="flex justify-between">
-                        <span class="text-slate-300">1. Repeated Customer Rate</span>
-                        <span id="zpFunnelRepeatPct" class="text-[#86efac] font-bold">37.5%</span>
-                      </div>
-                      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div id="zpFunnelRepeatBar" class="h-full bg-[#86efac] rounded-full transition-all duration-300" style="width: 37.5%"></div>
-                      </div>
-                    </div>
-
-                    <div class="space-y-1">
-                      <div class="flex justify-between">
-                        <span class="text-slate-300">2. 4K AI Studio Usage Rate</span>
-                        <span class="text-sky-400 font-bold">44.2%</span>
-                      </div>
-                      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div class="h-full bg-sky-400 rounded-full" style="width: 44.2%"></div>
-                      </div>
-                    </div>
-
-                    <div class="space-y-1">
-                      <div class="flex justify-between">
-                        <span class="text-slate-300">3. Pay-to-Unlock Escrow Conversion</span>
-                        <span class="text-indigo-400 font-bold">14.8%</span>
-                      </div>
-                      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div class="h-full bg-indigo-400 rounded-full" style="width: 14.8%"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="space-y-2 pt-2 border-t border-white/10">
-                    <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                      <span>LIVE CUSTOMER & REVENUE STREAM</span>
-                      <span class="text-[#86efac]">● Real-Time</span>
-                    </div>
-                    <div id="zpLiveEventFeed" class="space-y-1.5 max-h-32 overflow-y-auto pr-1 text-[11px] font-mono"></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bottom Bar: GA4 & PostHog Configuration -->
-              <div class="rounded-2xl bg-indigo-950/30 border border-indigo-500/25 p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                <div class="space-y-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-white">🔗 External Cloud Analytics Sync (Google Analytics 4 & PostHog)</span>
-                    <span id="zpExtStatusPill" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-[#86efac] text-[10px] font-mono font-bold">✓ Connected to G-6W5JGQK51K</span>
-                  </div>
-                  <p class="text-xs text-slate-400">
-                    Your Google Analytics 4 stream (<code class="text-[#86efac] font-bold">G-6W5JGQK51K</code>) is actively receiving live traffic, cohort, and revenue telemetry.
-                  </p>
-                </div>
-
-                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full lg:w-auto">
-                  <input type="text" id="zpGa4Input" value="G-6W5JGQK51K" placeholder="GA4 ID" class="w-full sm:w-44 h-9 px-3 rounded-xl bg-slate-900 border border-white/15 text-xs text-white font-mono focus:outline-none focus:border-[#86efac]" />
-                  <input type="text" id="zpPosthogInput" placeholder="PostHog Key (phc_...)" class="w-full sm:w-44 h-9 px-3 rounded-xl bg-slate-900 border border-white/15 text-xs text-white font-mono focus:outline-none focus:border-[#86efac]" />
-                  <button type="button" onclick="saveExternalAnalyticsProviders()" class="px-4 py-2 rounded-xl bg-[#86efac] hover:bg-[#4ade80] text-slate-950 font-extrabold text-xs cursor-pointer transition-all shrink-0">
-                    Save & Sync
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          `;
-
-          document.body.appendChild(modal);
-          return modal;
+          return days;
         }
 
-        function getDefaultZpState() {
+        function getEmptyLocalDb() {
           return {
             visitCount: 0,
-            firstSeen: Date.now(),
-            lastSeen: Date.now(),
-            customerType: 'new_customer',
             ga4Id: localStorage.getItem('zp_ga4_id') || ZP_DEFAULT_GA4,
-            posthogKey: localStorage.getItem('zp_posthog_key') || '',
-            metrics: {
-              today: { traffic: 248,  newCust: 154, repeatCust: 94,  escrowRev: 588,  proRev: 342 },
-              '7d':  { traffic: 1428, newCust: 892, repeatCust: 536, escrowRev: 3140, proRev: 1750 },
-              '30d': { traffic: 6190, newCust: 3650, repeatCust: 2540, escrowRev: 12850, proRev: 7410 }
-            },
-            dailySeries: [
-              { day: 'Fri', newC: 110, repC: 64,  rev: 540 },
-              { day: 'Sat', newC: 125, repC: 72,  rev: 620 },
-              { day: 'Sun', newC: 98,  repC: 68,  rev: 490 },
-              { day: 'Mon', newC: 134, repC: 81,  rev: 780 },
-              { day: 'Tue', newC: 142, repC: 85,  rev: 810 },
-              { day: 'Wed', newC: 129, repC: 72,  rev: 730 },
-              { day: 'Thu', newC: 154, repC: 94,  rev: 920 }
-            ],
-            events: [
-              { time: 'Just now', type: 'repeat', text: 'Owner session verified (GA4 G-6W5JGQK51K Live)', amount: 'Active' },
-              { time: '2m ago',   type: 'rev',    text: 'Pay-to-Unlock Escrow unlocked (Sculpture_Still_8K.dng)', amount: '+$49.00' },
-              { time: '6m ago',   type: 'ai',     text: '4K AI Studio Upscale (16K CodeFormer + Real-ESRGAN)', amount: 'AI GPU' },
-              { time: '14m ago',  type: 'new',    text: 'New Customer first file transfer (AES-256 Pipe)', amount: 'New' },
-              { time: '28m ago',  type: 'rev',    text: 'PRO 50 GB Cloud Drive Subscription renewal', amount: '+$19.00' }
-            ]
+            daily: {},
+            events: []
           };
         }
 
-        function loadZpState() {
+        function loadLocalDb() {
           try {
-            const raw = localStorage.getItem(ZP_STORAGE_KEY);
-            if (!raw) return getDefaultZpState();
-            const parsed = JSON.parse(raw);
-            parsed.ga4Id = parsed.ga4Id || ZP_DEFAULT_GA4;
-            return Object.assign(getDefaultZpState(), parsed);
+            const raw = localStorage.getItem(ZP_CLEAN_STORAGE_KEY);
+            if (!raw) return getEmptyLocalDb();
+            return Object.assign(getEmptyLocalDb(), JSON.parse(raw));
           } catch (e) {
-            return getDefaultZpState();
+            return getEmptyLocalDb();
           }
         }
 
-        function saveZpState(state) {
+        function saveLocalDb(db) {
           try {
-            localStorage.setItem(ZP_STORAGE_KEY, JSON.stringify(state));
+            localStorage.setItem(ZP_CLEAN_STORAGE_KEY, JSON.stringify(db));
           } catch (e) {}
         }
 
-        let zpState = loadZpState();
+        let zpLocalDb = loadLocalDb();
+        let zpServerDb = null;
 
-        function bootExternalAnalyticsProviders() {
-          const gaId = zpState.ga4Id || ZP_DEFAULT_GA4;
+        function bootGa4() {
+          const gaId = zpLocalDb.ga4Id || ZP_DEFAULT_GA4;
           if (gaId && !window.zpGaLoaded) {
             window.zpGaLoaded = true;
             const s = document.createElement('script');
@@ -6649,36 +6416,254 @@ window.addEventListener('appinstalled', () => {
           }
         }
 
-        function trackInitialVisitorSession() {
-          if (window.zpSessionCounted) return;
-          window.zpSessionCounted = true;
+        async function pushRealTelemetryEvent(eventType, amount = 0, description = '') {
+          const todayIso = new Date().toISOString().split('T')[0];
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-          zpState.visitCount = (zpState.visitCount || 0) + 1;
-          zpState.lastSeen = Date.now();
-          const isReturning = zpState.visitCount > 1;
-          zpState.customerType = isReturning ? 'repeated_customer' : 'new_customer';
+          if (!zpLocalDb.daily[todayIso]) {
+            zpLocalDb.daily[todayIso] = { traffic: 0, new: 0, repeat: 0, escrow_rev: 0, pro_rev: 0, ai_uses: 0, transfers: 0 };
+          }
+          const b = zpLocalDb.daily[todayIso];
 
-          ['today', '7d', '30d'].forEach(tf => {
-            zpState.metrics[tf].traffic += 1;
-            if (isReturning) zpState.metrics[tf].repeatCust += 1;
-            else zpState.metrics[tf].newCust += 1;
-          });
-
-          const lastDay = zpState.dailySeries[zpState.dailySeries.length - 1];
-          if (lastDay) {
-            if (isReturning) lastDay.repC += 1;
-            else lastDay.newC += 1;
+          if (eventType === 'session_start') {
+            zpLocalDb.visitCount = (zpLocalDb.visitCount || 0) + 1;
+            b.traffic += 1;
+            if (zpLocalDb.visitCount === 1) {
+              b.new += 1;
+              zpLocalDb.events.unshift({ time: timeStr, type: 'new', text: 'New Customer first visit recorded', amount: '1st Visit' });
+            } else {
+              b.repeat += 1;
+              zpLocalDb.events.unshift({ time: timeStr, type: 'repeat', text: `Repeated Customer session (#${zpLocalDb.visitCount})`, amount: `Visit #${zpLocalDb.visitCount}` });
+            }
+          } else if (eventType === 'ai_upscale') {
+            b.ai_uses += 1;
+            zpLocalDb.events.unshift({ time: timeStr, type: 'ai', text: description || '4K AI Studio Upscale run', amount: 'AI GPU' });
+          } else if (eventType === 'file_transfer') {
+            b.transfers += 1;
+            zpLocalDb.events.unshift({ time: timeStr, type: 'new', text: description || 'File transfer created', amount: 'Transfer' });
+          } else if (eventType === 'escrow_payment') {
+            b.escrow_rev += amount;
+            zpLocalDb.events.unshift({ time: timeStr, type: 'rev', text: description || 'Escrow Payment', amount: `+$${amount.toFixed(2)}` });
+          } else if (eventType === 'pro_upgrade') {
+            b.pro_rev += amount;
+            zpLocalDb.events.unshift({ time: timeStr, type: 'rev', text: description || 'PRO Plan Upgrade', amount: `+$${amount.toFixed(2)}` });
           }
 
-          saveZpState(zpState);
-          bootExternalAnalyticsProviders();
+          zpLocalDb.events = zpLocalDb.events.slice(0, 20);
+          saveLocalDb(zpLocalDb);
 
           if (window.gtag) {
-            window.gtag('event', 'session_start_cohort', {
-              customer_cohort: zpState.customerType,
-              visit_number: zpState.visitCount
+            window.gtag('event', eventType, {
+              value: amount,
+              currency: 'USD',
+              event_label: description || eventType
             });
           }
+
+          try {
+            const resp = await fetch('/api/zephyr-analytics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                event_type: eventType,
+                visitor_id: getOrCreateVisitorId(),
+                amount: amount,
+                description: description
+              })
+            });
+            if (resp.ok) {
+              zpServerDb = await resp.json();
+            }
+          } catch (err) {}
+
+          if (document.getElementById('zephyrAnalyticsModal')?.style.display === 'flex') {
+            renderZpDashboard();
+          }
+        }
+
+        function ensureZpModalMounted() {
+          let existing = document.getElementById('zephyrAnalyticsModal');
+          if (existing && document.getElementById('zpKpiTraffic')) {
+            return existing;
+          }
+          if (existing) existing.remove();
+
+          const modal = document.createElement('div');
+          modal.id = 'zephyrAnalyticsModal';
+          modal.style.cssText = 'display: none; position: fixed; inset: 0; z-index: 999999; background: rgba(0,0,0,0.86); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 16px; overflow-y: auto;';
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) window.closeZephyrAnalytics();
+          });
+
+          modal.innerHTML = `
+            <div class="relative w-full max-w-6xl rounded-3xl bg-[#090d16] border border-white/15 shadow-2xl p-6 sm:p-8 my-auto text-slate-200 space-y-6 max-h-[92vh] overflow-y-auto" onclick="event.stopPropagation()">
+              
+              <!-- Header -->
+              <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 text-[#86efac] flex items-center justify-center text-xl shadow-lg shadow-emerald-500/10">
+                    📊
+                  </div>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Zephyr Pulse • Real-Time Telemetry</h2>
+                      <span class="px-2.5 py-0.5 rounded-full bg-[#86efac]/15 border border-[#86efac]/40 text-[#86efac] text-[10px] font-mono font-bold flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#86efac] animate-ping"></span>
+                        🔒 OWNER ONLY (${ZP_ADMIN_EMAIL}) • 100% REAL DATA
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">Zero demo numbers — counts only real live sessions, AI upscales, transfers & Google Analytics 4 (${ZP_DEFAULT_GA4})</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                    <button type="button" onclick="setZpTimeframe('today', this)" class="zp-tf-btn px-3 py-1 rounded-lg bg-[#86efac] text-slate-950 font-extrabold cursor-pointer transition-all">Today</button>
+                    <button type="button" onclick="setZpTimeframe('7d', this)" class="zp-tf-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white cursor-pointer transition-all">7 Days</button>
+                    <button type="button" onclick="setZpTimeframe('30d', this)" class="zp-tf-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white cursor-pointer transition-all">30 Days</button>
+                  </div>
+
+                  <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-xs font-bold text-sky-300 cursor-pointer transition-all">
+                    ↗ Open Google Analytics 4
+                  </a>
+
+                  <button type="button" onclick="resetAllZephyrAnalytics()" class="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-xs font-bold text-rose-300 cursor-pointer transition-all">
+                    ↺ Reset to 0
+                  </button>
+
+                  <button type="button" onclick="closeZephyrAnalytics()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-rose-500/30 text-slate-300 hover:text-white flex items-center justify-center text-lg cursor-pointer transition-all">
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <!-- 4 Real KPI Cards -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
+                  <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <span>Real Traffic (Sessions)</span>
+                    <span class="text-sky-400 text-sm">🌐</span>
+                  </div>
+                  <div class="flex items-baseline gap-2">
+                    <span id="zpKpiTraffic" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">0</span>
+                    <span class="text-[11px] font-mono font-bold text-[#86efac]">Live Count</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
+                    <span>GA4 Stream:</span>
+                    <span class="text-[#86efac] font-bold">${ZP_DEFAULT_GA4}</span>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
+                  <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <span>New Customers (1st Visit)</span>
+                    <span class="text-indigo-400 text-sm">✨</span>
+                  </div>
+                  <div class="flex items-baseline gap-2">
+                    <span id="zpKpiNewCust" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">0</span>
+                    <span id="zpKpiNewPct" class="text-[11px] font-mono font-bold text-indigo-300">0% of total</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
+                    <span>AI Upscales Run:</span>
+                    <span id="zpKpiAiCount" class="text-white font-bold">0</span>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-2">
+                  <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <span>Repeated Customers</span>
+                    <span class="text-purple-400 text-sm">🔁</span>
+                  </div>
+                  <div class="flex items-baseline gap-2">
+                    <span id="zpKpiRepeatCust" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">0</span>
+                    <span id="zpKpiRepeatPct" class="text-[11px] font-mono font-bold text-purple-300">0% retention</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
+                    <span>Your Real Visits:</span>
+                    <span id="zpYourVisitCount" class="text-[#86efac] font-bold">#1</span>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl bg-gradient-to-br from-emerald-500/10 via-white/[0.03] to-sky-500/10 border border-[#86efac]/30 p-5 space-y-2">
+                  <div class="flex items-center justify-between text-xs text-slate-300 font-semibold">
+                    <span>Real Recorded Revenue</span>
+                    <span class="text-[#86efac] text-sm">💰</span>
+                  </div>
+                  <div class="flex items-baseline gap-2">
+                    <span id="zpKpiRevenue" class="text-2xl sm:text-3xl font-extrabold text-[#86efac] font-mono">$0.00</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-300 font-mono pt-1 border-t border-white/10">
+                    <span>Escrow: <b id="zpEscrowRevSub">$0.00</b></span>
+                    <span>PRO: <b id="zpProRevSub">$0.00</b></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Middle Grid: 7-Day Real Chart + Live Stream -->
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-4 flex flex-col justify-between">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h3 class="text-sm font-bold text-white">Last 7 Days (Actual Recorded Visits)</h3>
+                      <p class="text-[11px] text-slate-400">Shows exact daily sessions recorded on your server</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-[11px] font-mono">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-[#86efac]"></span> Repeated</span>
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-indigo-500"></span> New</span>
+                    </div>
+                  </div>
+
+                  <div id="zpChartBarsContainer" class="h-48 pt-6 pb-2 px-2 grid grid-cols-7 gap-3 items-end border-b border-white/10"></div>
+
+                  <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-400">
+                    <span>Data Source: <b id="zpDataSourceLabel" class="text-[#86efac]">Server-Wide Live DB + GA4 (${ZP_DEFAULT_GA4})</b></span>
+                    <button type="button" onclick="exportZpAnalyticsCsv()" class="underline hover:text-white cursor-pointer">⬇ Download CSV Report</button>
+                  </div>
+                </div>
+
+                <div class="lg:col-span-5 rounded-2xl bg-white/[0.03] border border-white/10 p-5 space-y-4 flex flex-col justify-between">
+                  <div>
+                    <h3 class="text-sm font-bold text-white">Real-Time Activity Log</h3>
+                    <p class="text-[11px] text-slate-400">Live sessions, 4K AI upscales, and file transfers as they happen</p>
+                  </div>
+
+                  <div class="space-y-3 text-xs font-mono">
+                    <div class="space-y-1">
+                      <div class="flex justify-between">
+                        <span class="text-slate-300">Repeated Customer Ratio</span>
+                        <span id="zpFunnelRepeatPct" class="text-[#86efac] font-bold">0%</span>
+                      </div>
+                      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                        <div id="zpFunnelRepeatBar" class="h-full bg-[#86efac] rounded-full transition-all duration-300" style="width: 0%"></div>
+                      </div>
+                    </div>
+
+                    <div class="space-y-1">
+                      <div class="flex justify-between">
+                        <span class="text-slate-300">4K AI Studio Usage Ratio</span>
+                        <span id="zpFunnelAiPct" class="text-sky-400 font-bold">0%</span>
+                      </div>
+                      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                        <div id="zpFunnelAiBar" class="h-full bg-sky-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2 pt-2 border-t border-white/10">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                      <span>LIVE EVENT FEED</span>
+                      <span class="text-[#86efac]">● Recording</span>
+                    </div>
+                    <div id="zpLiveEventFeed" class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-[11px] font-mono"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          `;
+
+          document.body.appendChild(modal);
+          return modal;
         }
 
         function setElText(id, text) {
@@ -6686,47 +6671,93 @@ window.addEventListener('appinstalled', () => {
           if (el) el.innerText = text;
         }
 
-        function renderZpDashboard() {
+        async function renderZpDashboard() {
           ensureZpModalMounted();
-          const m = zpState.metrics[zpCurrentTimeframe] || zpState.metrics['7d'];
-          const totalCust = m.newCust + m.repeatCust;
-          const newPct = totalCust > 0 ? ((m.newCust / totalCust) * 100).toFixed(1) : '60.0';
-          const repPct = totalCust > 0 ? ((m.repeatCust / totalCust) * 100).toFixed(1) : '40.0';
-          const totalRev = m.escrowRev + m.proRev;
 
-          setElText('zpKpiTraffic', m.traffic.toLocaleString());
-          setElText('zpKpiNewCust', m.newCust.toLocaleString());
+          try {
+            const resp = await fetch('/api/zephyr-analytics');
+            if (resp.ok) {
+              zpServerDb = await resp.json();
+            }
+          } catch (e) {}
+
+          const activeDailyMap = (zpServerDb && zpServerDb.daily) ? zpServerDb.daily : zpLocalDb.daily;
+          const activeEvents = (zpServerDb && zpServerDb.events && zpServerDb.events.length) ? zpServerDb.events : zpLocalDb.events;
+
+          const daysToSum = zpCurrentTimeframe === 'today' ? 1 : (zpCurrentTimeframe === '7d' ? 7 : 30);
+          let totalTraffic = 0, totalNew = 0, totalRepeat = 0, totalEscrow = 0, totalPro = 0, totalAi = 0;
+
+          for (let i = 0; i < daysToSum; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            const row = activeDailyMap[key];
+            if (row) {
+              totalTraffic += (row.traffic || 0);
+              totalNew     += (row.new || 0);
+              totalRepeat  += (row.repeat || 0);
+              totalEscrow  += (row.escrow_rev || 0);
+              totalPro     += (row.pro_rev || 0);
+              totalAi      += (row.ai_uses || 0);
+            }
+          }
+
+          const totalCust = totalNew + totalRepeat;
+          const newPct = totalCust > 0 ? ((totalNew / totalCust) * 100).toFixed(1) : '0.0';
+          const repPct = totalCust > 0 ? ((totalRepeat / totalCust) * 100).toFixed(1) : '0.0';
+          const aiPct  = totalTraffic > 0 ? Math.min(100, ((totalAi / totalTraffic) * 100)).toFixed(1) : '0.0';
+          const grossRev = totalEscrow + totalPro;
+
+          setElText('zpKpiTraffic', totalTraffic.toLocaleString());
+          setElText('zpKpiNewCust', totalNew.toLocaleString());
           setElText('zpKpiNewPct', `${newPct}% of total`);
-          setElText('zpKpiRepeatCust', m.repeatCust.toLocaleString());
+          setElText('zpKpiRepeatCust', totalRepeat.toLocaleString());
           setElText('zpKpiRepeatPct', `${repPct}% retention`);
-          setElText('zpYourVisitCount', `#${zpState.visitCount} (Owner)`);
-          setElText('zpKpiRevenue', `$${totalRev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-          setElText('zpEscrowRevSub', `$${m.escrowRev.toLocaleString()}`);
-          setElText('zpProRevSub', `$${m.proRev.toLocaleString()}`);
-          setElText('zpFunnelRepeatPct', `${repPct}%`);
+          setElText('zpKpiAiCount', totalAi.toLocaleString());
+          setElText('zpYourVisitCount', `#${zpLocalDb.visitCount || 1}`);
 
-          const funnelBar = document.getElementById('zpFunnelRepeatBar');
-          if (funnelBar) funnelBar.style.width = `${Math.min(100, parseFloat(repPct))}%`;
+          setElText('zpKpiRevenue', `$${grossRev.toFixed(2)}`);
+          setElText('zpEscrowRevSub', `$${totalEscrow.toFixed(2)}`);
+          setElText('zpProRevSub', `$${totalPro.toFixed(2)}`);
+
+          setElText('zpFunnelRepeatPct', `${repPct}%`);
+          setElText('zpFunnelAiPct', `${aiPct}%`);
+
+          const repBar = document.getElementById('zpFunnelRepeatBar');
+          if (repBar) repBar.style.width = `${repPct}%`;
+          const aiBar = document.getElementById('zpFunnelAiBar');
+          if (aiBar) aiBar.style.width = `${aiPct}%`;
+
+          const last7 = getLast7DaysDates();
+          const series = last7.map(item => {
+            const r = activeDailyMap[item.iso] || { traffic: 0, new: 0, repeat: 0, escrow_rev: 0, pro_rev: 0 };
+            return {
+              label: item.label,
+              newC: r.new || 0,
+              repC: r.repeat || 0,
+              rev: (r.escrow_rev || 0) + (r.pro_rev || 0)
+            };
+          });
 
           const chartBox = document.getElementById('zpChartBarsContainer');
           if (chartBox) {
-            const maxDayTotal = Math.max(...zpState.dailySeries.map(d => d.newC + d.repC), 100);
-            chartBox.innerHTML = zpState.dailySeries.map(d => {
+            const maxDayTotal = Math.max(...series.map(d => d.newC + d.repC), 5);
+            chartBox.innerHTML = series.map(d => {
               const total = d.newC + d.repC;
-              const totalHeightPct = Math.max(18, Math.round((total / maxDayTotal) * 100));
-              const repShare = Math.round((d.repC / total) * 100);
-              const newShare = 100 - repShare;
+              const totalHeightPct = total === 0 ? 4 : Math.max(14, Math.round((total / maxDayTotal) * 100));
+              const repShare = total > 0 ? Math.round((d.repC / total) * 100) : 0;
+              const newShare = total > 0 ? (100 - repShare) : 0;
               return `
-                <div class="flex flex-col items-center h-full justify-end group relative cursor-pointer">
+                <div class="flex flex-col items-center h-full justify-end group relative">
                   <div class="hidden group-hover:flex flex-col items-center absolute -top-14 z-20 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/20 shadow-xl text-[10px] font-mono whitespace-nowrap pointer-events-none">
-                    <span class="text-white font-bold">${d.day}: ${total} visits ($${d.rev})</span>
+                    <span class="text-white font-bold">${d.label}: ${total} real visits ($${d.rev.toFixed(2)})</span>
                     <span class="text-indigo-300">New: ${d.newC} • <span class="text-[#86efac]">Repeat: ${d.repC}</span></span>
                   </div>
-                  <div class="w-full max-w-[38px] rounded-t-xl overflow-hidden flex flex-col justify-end bg-white/5 border border-white/10 transition-all group-hover:scale-105" style="height: ${totalHeightPct}%">
-                    <div class="w-full bg-indigo-500/90 transition-all" style="height: ${newShare}%"></div>
-                    <div class="w-full bg-[#86efac] transition-all" style="height: ${repShare}%"></div>
+                  <div class="w-full max-w-[38px] rounded-t-xl overflow-hidden flex flex-col justify-end bg-white/5 border border-white/10 transition-all" style="height: ${totalHeightPct}%">
+                    <div class="w-full bg-indigo-500" style="height: ${newShare}%"></div>
+                    <div class="w-full bg-[#86efac]" style="height: ${repShare}%"></div>
                   </div>
-                  <span class="text-[10px] font-mono text-slate-400 mt-1.5 font-semibold">${d.day}</span>
+                  <span class="text-[10px] font-mono text-slate-400 mt-1.5 font-semibold">${d.label.split(',')[0]}</span>
                 </div>
               `;
             }).join('');
@@ -6734,30 +6765,37 @@ window.addEventListener('appinstalled', () => {
 
           const feedBox = document.getElementById('zpLiveEventFeed');
           if (feedBox) {
-            feedBox.innerHTML = zpState.events.slice(0, 8).map(ev => {
-              const badgeColor = ev.type === 'rev' ? 'text-[#86efac]' : (ev.type === 'repeat' ? 'text-purple-300' : 'text-sky-300');
-              return `
-                <div class="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white/[0.02] border border-white/5">
-                  <div class="flex items-center gap-2 truncate pr-2">
-                    <span class="text-slate-500 text-[10px] shrink-0">${ev.time}</span>
-                    <span class="text-slate-200 truncate">${ev.text}</span>
+            if (!activeEvents.length) {
+              feedBox.innerHTML = `<div class="text-slate-500 py-2 text-center">No events recorded yet.</div>`;
+            } else {
+              feedBox.innerHTML = activeEvents.slice(0, 10).map(ev => {
+                const badgeColor = ev.type === 'rev' ? 'text-[#86efac]' : (ev.type === 'repeat' ? 'text-purple-300' : 'text-sky-300');
+                return `
+                  <div class="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                    <div class="flex items-center gap-2 truncate pr-2">
+                      <span class="text-slate-500 text-[10px] shrink-0">${ev.time}</span>
+                      <span class="text-slate-200 truncate">${ev.text}</span>
+                    </div>
+                    <span class="font-bold ${badgeColor} shrink-0">${ev.amount}</span>
                   </div>
-                  <span class="font-bold ${badgeColor} shrink-0">${ev.amount}</span>
-                </div>
-              `;
-            }).join('');
+                `;
+              }).join('');
+            }
           }
-
-          const gaIn = document.getElementById('zpGa4Input');
-          if (gaIn) gaIn.value = zpState.ga4Id || ZP_DEFAULT_GA4;
         }
 
-        // 3. Global Open / Close Functions
-        window.openZephyrAnalytics = function(e) {
-          if (e) {
-            e.preventDefault();
-            e.stopPropagation();
+        function bindRealActionListeners() {
+          const aiBtn = document.getElementById('epMainActionBtn');
+          if (aiBtn && !aiBtn.dataset.zpRealBound) {
+            aiBtn.dataset.zpRealBound = 'true';
+            aiBtn.addEventListener('click', () => {
+              pushRealTelemetryEvent('ai_upscale', 0, '4K AI Studio Upscale Executed');
+            });
           }
+        }
+
+        window.openZephyrAnalytics = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
           if (!isAuthorizedZephyrAdmin()) return;
           const modal = ensureZpModalMounted();
           renderZpDashboard();
@@ -6780,80 +6818,45 @@ window.addEventListener('appinstalled', () => {
           renderZpDashboard();
         };
 
-        window.recordZephyrEvent = function(eventType, revenueAmount, description) {
-          ['today', '7d', '30d'].forEach(tf => {
-            if (eventType === 'escrow_payment') zpState.metrics[tf].escrowRev += revenueAmount;
-            else if (eventType === 'pro_upgrade') zpState.metrics[tf].proRev += revenueAmount;
-            else if (eventType === 'repeat_visit') {
-              zpState.metrics[tf].traffic += 1;
-              zpState.metrics[tf].repeatCust += 1;
-            }
-          });
-
-          const lastDay = zpState.dailySeries[zpState.dailySeries.length - 1];
-          if (lastDay) {
-            if (revenueAmount > 0) lastDay.rev += revenueAmount;
-            if (eventType === 'repeat_visit') lastDay.repC += 1;
-          }
-
-          zpState.events.unshift({
-            time: 'Just now',
-            type: revenueAmount > 0 ? 'rev' : 'repeat',
-            text: description,
-            amount: revenueAmount > 0 ? `+$${revenueAmount.toFixed(2)}` : 'Repeat'
-          });
-
-          saveZpState(zpState);
+        window.resetAllZephyrAnalytics = async function() {
+          localStorage.removeItem(ZP_CLEAN_STORAGE_KEY);
+          localStorage.removeItem(ZP_VISITOR_ID_KEY);
+          zpLocalDb = getEmptyLocalDb();
+          zpServerDb = null;
+          try {
+            await fetch('/api/zephyr-analytics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event_type: 'reset_all' })
+            });
+          } catch (e) {}
           renderZpDashboard();
-
-          if (window.gtag) {
-            window.gtag('event', eventType, { value: revenueAmount, currency: 'USD', event_label: description });
-          }
-        };
-
-        window.saveExternalAnalyticsProviders = function() {
-          const gaVal = document.getElementById('zpGa4Input')?.value.trim();
-          const phVal = document.getElementById('zpPosthogInput')?.value.trim();
-          if (gaVal) {
-            zpState.ga4Id = gaVal;
-            localStorage.setItem('zp_ga4_id', gaVal);
-          }
-          if (phVal) {
-            zpState.posthogKey = phVal;
-            localStorage.setItem('zp_posthog_key', phVal);
-          }
-          saveZpState(zpState);
-          window.zpGaLoaded = false;
-          bootExternalAnalyticsProviders();
-          setElText('zpExtStatusPill', `✓ Connected to ${zpState.ga4Id}`);
         };
 
         window.exportZpAnalyticsCsv = function() {
-          const rows = [
-            ['Day', 'New Customers', 'Repeated Customers', 'Total Visits', 'Daily Revenue (USD)'],
-            ...zpState.dailySeries.map(d => [d.day, d.newC, d.repC, d.newC + d.repC, d.rev])
-          ];
+          const activeDailyMap = (zpServerDb && zpServerDb.daily) ? zpServerDb.daily : zpLocalDb.daily;
+          const rows = [['Date', 'Total Sessions', 'New Customers', 'Repeated Customers', 'Escrow Revenue', 'PRO Revenue']];
+          Object.keys(activeDailyMap).sort().forEach(dateKey => {
+            const d = activeDailyMap[dateKey];
+            rows.push([dateKey, d.traffic || 0, d.new || 0, d.repeat || 0, d.escrow_rev || 0, d.pro_rev || 0]);
+          });
           const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(r => r.join(',')).join('\n');
           const a = document.createElement('a');
           a.href = encodeURI(csvContent);
-          a.download = `zephyr_analytics_${zpCurrentTimeframe}.csv`;
+          a.download = `zephyr_real_analytics.csv`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
         };
 
-        // 4. Mount Navbar Button & Bind Capture-Phase Click Listener
         function syncAdminAnalyticsButton() {
           const isAdmin = isAuthorizedZephyrAdmin();
           let existingBtn = document.getElementById('zpNavbarBtn');
-
           if (!isAdmin) {
             if (existingBtn) existingBtn.remove();
             return;
           }
-
           ensureZpModalMounted();
-
           if (!existingBtn) {
             const allButtons = Array.from(document.querySelectorAll('a, button'));
             const brandingBtn = allButtons.find(el => el.innerText && el.innerText.trim().includes('Branding'));
@@ -6861,7 +6864,6 @@ window.addEventListener('appinstalled', () => {
             existingBtn = document.createElement('button');
             existingBtn.id = 'zpNavbarBtn';
             existingBtn.type = 'button';
-            existingBtn.title = `Owner Analytics (${ZP_ADMIN_EMAIL})`;
             existingBtn.className = 'px-3.5 py-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-[#86efac]/40 text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-emerald-500/10';
             existingBtn.innerHTML = `<span>📊</span><span>Analytics</span>`;
 
@@ -6872,26 +6874,24 @@ window.addEventListener('appinstalled', () => {
               document.body.appendChild(existingBtn);
             }
           }
-
           existingBtn.onclick = window.openZephyrAnalytics;
         }
 
-        // Capture-phase listener guarantees clicking "📊 Analytics" ALWAYS opens the modal
         document.addEventListener('click', function(e) {
           const btn = e.target.closest('#zpNavbarBtn');
-          if (btn) {
-            window.openZephyrAnalytics(e);
-          }
+          if (btn) window.openZephyrAnalytics(e);
         }, true);
 
-        window.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape') window.closeZephyrAnalytics();
-        });
-
-        trackInitialVisitorSession();
+        bootGa4();
+        if (!window.zpRealSessionLogged) {
+          window.zpRealSessionLogged = true;
+          pushRealTelemetryEvent('session_start');
+        }
         syncAdminAnalyticsButton();
+        bindRealActionListeners();
         window.addEventListener('DOMContentLoaded', () => {
           syncAdminAnalyticsButton();
+          bindRealActionListeners();
           setTimeout(syncAdminAnalyticsButton, 500);
         });
       })();
