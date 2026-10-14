@@ -6896,32 +6896,53 @@ window.addEventListener('appinstalled', () => {
         });
       })();
     </script>
-    <!-- ============================================================ -->
-    <!-- FIX: CLIENT FILE REQUEST MODAL OVERFLOW & POSITIONING        -->
+  <!-- ============================================================ -->
+    <!-- PERMANENT FIX: CLIENT FILE REQUEST MODAL CLEAN ALIGNMENT     -->
     <!-- ============================================================ -->
     <style>
-      /* Keep the Request Modal above the navbar and vertically scrollable */
       .zephyr-request-modal-backdrop-fix {
         z-index: 99990 !important;
+        display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         overflow-y: auto !important;
-        padding: 1rem !important;
+        padding: 24px 16px !important;
       }
       .zephyr-request-modal-card-fix {
-        max-height: 88vh !important;
+        max-height: 86vh !important;
+        width: 100% !important;
+        max-width: 540px !important;
         overflow-y: auto !important;
-        margin-top: auto !important;
-        margin-bottom: auto !important;
+        margin: auto !important;
+        padding: 32px 28px !important;
+        border-radius: 24px !important;
+        display: flex !important;
+        flex-direction: column !important;
         scrollbar-width: thin;
         scrollbar-color: rgba(134, 239, 172, 0.3) transparent;
+      }
+      /* Clean spacing between header, subtitle, inputs and QR output */
+      .zephyr-request-modal-card-fix > * {
+        position: static !important;
+      }
+      .zephyr-request-modal-card-fix .modal-header-clean {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 8px !important;
+      }
+      .zephyr-request-modal-card-fix .modal-subtitle-clean {
+        margin-top: 0 !important;
+        margin-bottom: 20px !important;
+        line-height: 1.5 !important;
+        font-size: 0.825rem !important;
+        color: #94a3b8 !important;
       }
     </style>
 
     <script>
       (function() {
-        function fixClientRequestModalLayout() {
-          // Locate the "Create Client File Request Link" heading
+        function restyleRequestModal() {
           const headings = Array.from(document.querySelectorAll('h2, h3, div'));
           const titleEl = headings.find(el => 
             el.children.length === 0 && 
@@ -6931,46 +6952,39 @@ window.addEventListener('appinstalled', () => {
 
           if (!titleEl) return;
 
-          // Find the modal card container and its fixed backdrop
-          const modalCard = titleEl.closest('.rounded-2xl, .rounded-3xl, [class*="max-w-"]');
+          // Target card and backdrop
+          const modalCard = titleEl.closest('.rounded-2xl, .rounded-3xl, [class*="max-w-"]') || titleEl.parentElement.parentElement;
           const backdrop = modalCard ? modalCard.parentElement : null;
 
           if (backdrop && modalCard) {
             backdrop.classList.add('zephyr-request-modal-backdrop-fix');
             modalCard.classList.add('zephyr-request-modal-card-fix');
 
-            // Make the header row (Title + Close X button) sticky at the top of the card
-            const headerRow = titleEl.parentElement;
-            if (headerRow && !headerRow.dataset.stickyFixed) {
-              headerRow.dataset.stickyFixed = 'true';
-              headerRow.style.position = 'sticky';
-              headerRow.style.top = '-1px';
-              headerRow.style.zIndex = '20';
-              headerRow.style.backgroundColor = '#0b101b';
-              headerRow.style.paddingTop = '4px';
-              headerRow.style.paddingBottom = '10px';
-              headerRow.style.borderBottom = '1px solid rgba(255,255,255,0.08)';
+            // Reset any sticky attributes that caused text collision
+            const parentRow = titleEl.parentElement;
+            if (parentRow) {
+              parentRow.style.position = 'static';
+              parentRow.style.border = 'none';
+              parentRow.classList.add('modal-header-clean');
             }
-          }
 
-          // When clicking "Generate Client Drop Link & QR Code", smoothly scroll the QR section into view
-          const allButtons = Array.from(modalCard ? modalCard.querySelectorAll('button') : []);
-          const genBtn = allButtons.find(b => b.textContent && b.textContent.includes('Generate Client Drop Link'));
-          if (genBtn && !genBtn.dataset.scrollFixed) {
-            genBtn.dataset.scrollFixed = 'true';
-            genBtn.addEventListener('click', function() {
-              setTimeout(() => {
-                if (modalCard) {
-                  modalCard.scrollTo({ top: modalCard.scrollHeight, behavior: 'smooth' });
+            // Look for subtitle text node and structure it neatly below header
+            const paragraphs = modalCard.querySelectorAll('p, span, div');
+            paragraphs.forEach(p => {
+              if (p.textContent && p.textContent.includes('Generate a secure drop portal')) {
+                p.classList.add('modal-subtitle-clean');
+                // Ensure subtitle sits directly after the title row
+                if (parentRow && p.previousElementSibling !== parentRow) {
+                  parentRow.insertAdjacentElement('afterend', p);
                 }
-              }, 120);
+              }
             });
           }
         }
 
-        window.addEventListener('DOMContentLoaded', fixClientRequestModalLayout);
-        document.addEventListener('click', () => setTimeout(fixClientRequestModalLayout, 50));
-        fixClientRequestModalLayout();
+        window.addEventListener('DOMContentLoaded', restyleRequestModal);
+        document.addEventListener('click', () => setTimeout(restyleRequestModal, 50));
+        restyleRequestModal();
       })();
     </script>
 </body>
