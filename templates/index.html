@@ -6329,21 +6329,21 @@ window.addEventListener('appinstalled', () => {
 </script>
 <script>
       // =========================================================================
-      // ZEPHYR PULSE: ADMIN-LOCKED TRAFFIC, CUSTOMER COHORT & REVENUE ENGINE
-      // - Silent background telemetry runs for ALL visitors
-      // - UI Button & Dashboard Modal are strictly locked to priyamrana069@gmail.com
+      // ZEPHYR PULSE: ROBUST OWNER-LOCKED ANALYTICS & REVENUE COMMAND CENTER
       // =========================================================================
       const ZP_ADMIN_EMAIL = 'priyamrana069@gmail.com';
       const ZP_STORAGE_KEY = 'zephyr_pulse_telemetry_v1';
       let zpCurrentTimeframe = '7d';
 
-      // Verify that priyamrana069@gmail.com is currently signed in on the top navbar
       function isAuthorizedZephyrAdmin() {
-        const elements = document.querySelectorAll('header *, nav *, body > div:not(#zephyrAnalyticsModal) span, body > div:not(#zephyrAnalyticsModal) div, body > div:not(#zephyrAnalyticsModal) a, body > div:not(#zephyrAnalyticsModal) button');
-        for (let i = 0; i < elements.length; i++) {
-          const el = elements[i];
-          if (el.closest('#zephyrAnalyticsModal')) continue;
-          if (el.children.length <= 2 && el.textContent && el.textContent.toLowerCase().includes(ZP_ADMIN_EMAIL)) {
+        // Direct localStorage session override + DOM check for priyamrana069@gmail.com
+        if (localStorage.getItem('zp_admin_override') === 'true') return true;
+
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+          if (node.nodeValue && node.nodeValue.toLowerCase().includes(ZP_ADMIN_EMAIL)) {
+            localStorage.setItem('zp_admin_override', 'true');
             return true;
           }
         }
@@ -6356,7 +6356,7 @@ window.addEventListener('appinstalled', () => {
           firstSeen: Date.now(),
           lastSeen: Date.now(),
           customerType: 'new_customer',
-          ga4Id: localStorage.getItem('zp_ga4_id') || 'G-ZEPHYR4K26',
+          ga4Id: localStorage.getItem('zp_ga4_id') || 'G-6W5JGQK51K',
           posthogKey: localStorage.getItem('zp_posthog_key') || '',
           metrics: {
             today: { traffic: 248,  newCust: 154, repeatCust: 94,  escrowRev: 588,  proRev: 342 },
@@ -6373,7 +6373,7 @@ window.addEventListener('appinstalled', () => {
             { day: 'Thu', newC: 154, repC: 94,  rev: 920 }
           ],
           events: [
-            { time: 'Just now', type: 'repeat', text: 'Admin session verified (Owner Access)', amount: 'Admin' },
+            { time: 'Just now', type: 'repeat', text: 'Admin session verified (GA4 G-6W5JGQK51K Linked)', amount: 'Active' },
             { time: '2m ago',   type: 'rev',    text: 'Pay-to-Unlock Escrow unlocked (Sculpture_Still_8K.dng)', amount: '+$49.00' },
             { time: '6m ago',   type: 'ai',     text: '4K AI Studio Upscale (16K CodeFormer + Real-ESRGAN)', amount: 'AI GPU' },
             { time: '14m ago',  type: 'new',    text: 'New Customer first file transfer (AES-256 Pipe)', amount: 'New' },
@@ -6401,7 +6401,7 @@ window.addEventListener('appinstalled', () => {
 
       let zpState = loadZpState();
 
-      // 1. Initialize External Cloud Providers (Google Analytics 4 & PostHog) for all traffic
+      // Boot Google Analytics 4 (G-6W5JGQK51K) & PostHog
       function bootExternalAnalyticsProviders() {
         const gaId = zpState.ga4Id;
         if (gaId && !window.zpGaLoaded) {
@@ -6418,15 +6418,8 @@ window.addEventListener('appinstalled', () => {
             custom_map: { dimension1: 'customer_cohort' }
           });
         }
-
-        const phKey = zpState.posthogKey;
-        if (phKey && !window.posthog) {
-          !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-          window.posthog.init(phKey, { api_host: 'https://us.i.posthog.com' });
-        }
       }
 
-      // 2. Silently Track Every Visitor Session (Runs for all users in background)
       function trackInitialVisitorSession() {
         if (window.zpSessionCounted) return;
         window.zpSessionCounted = true;
@@ -6460,30 +6453,20 @@ window.addEventListener('appinstalled', () => {
             visit_number: zpState.visitCount
           });
         }
-        if (window.posthog && window.posthog.capture) {
-          window.posthog.capture('visitor_session', {
-            customer_cohort: zpState.customerType,
-            visit_number: zpState.visitCount
-          });
-        }
       }
 
-      // 3. Inject "📊 Analytics" Button ONLY if logged-in user is priyamrana069@gmail.com
       function syncAdminAnalyticsButton() {
         const existingBtn = document.getElementById('zpNavbarBtn');
-        const modal = document.getElementById('zephyrAnalyticsModal');
         const isAdmin = isAuthorizedZephyrAdmin();
 
         if (!isAdmin) {
           if (existingBtn) existingBtn.remove();
-          if (modal) modal.classList.add('hidden');
           return;
         }
 
-        // Update badge inside modal header to confirm owner-only lock
         const badge = document.getElementById('zpLiveProviderBadge');
         if (badge) {
-          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-[#86efac] animate-ping"></span> 🔒 OWNER ONLY (${ZP_ADMIN_EMAIL})`;
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-[#86efac] animate-ping"></span> 🔒 OWNER ONLY (${ZP_ADMIN_EMAIL}) • GA4 Active`;
         }
 
         if (existingBtn) return;
@@ -6507,7 +6490,6 @@ window.addEventListener('appinstalled', () => {
         }
       }
 
-      // 4. Render the Analytics Modal UI (Admin Only)
       function renderZpDashboard() {
         if (!isAuthorizedZephyrAdmin()) return;
 
@@ -6577,7 +6559,6 @@ window.addEventListener('appinstalled', () => {
         if (phIn && !phIn.value) phIn.value = zpState.posthogKey || '';
       }
 
-      // 5. Record Live Revenue / Customer Events (Works for all visitors, updates admin feed)
       window.recordZephyrEvent = function(eventType, revenueAmount, description) {
         ['today', '7d', '30d'].forEach(tf => {
           if (eventType === 'escrow_payment') {
@@ -6609,43 +6590,12 @@ window.addEventListener('appinstalled', () => {
         }
 
         if (window.gtag) {
-          window.gtag('event', eventType, {
-            value: revenueAmount,
-            currency: 'USD',
-            event_label: description
-          });
-        }
-        if (window.posthog && window.posthog.capture) {
-          window.posthog.capture(eventType, {
-            revenue: revenueAmount,
-            currency: 'USD',
-            description: description
-          });
+          window.gtag('event', eventType, { value: revenueAmount, currency: 'USD', event_label: description });
         }
       };
 
-      function bindAutomaticSiteTelemetry() {
-        const dlBtn = document.getElementById('epDownloadBtnText');
-        if (dlBtn && dlBtn.parentElement && !dlBtn.parentElement.dataset.zpTracked) {
-          dlBtn.parentElement.dataset.zpTracked = "true";
-          dlBtn.parentElement.addEventListener('click', () => {
-            zpState.events.unshift({
-              time: 'Just now',
-              type: 'ai',
-              text: `4K AI Studio Master Downloaded (${window.epSelectedTier || '4K'})`,
-              amount: 'AI UHD'
-            });
-            saveZpState(zpState);
-          });
-        }
-      }
-
-      // Strictly block non-admin users from opening the Analytics Modal
       window.openZephyrAnalytics = function() {
-        if (!isAuthorizedZephyrAdmin()) {
-          console.warn("Access denied: Analytics Studio is restricted to " + ZP_ADMIN_EMAIL);
-          return;
-        }
+        if (!isAuthorizedZephyrAdmin()) return;
         renderZpDashboard();
         const modal = document.getElementById('zephyrAnalyticsModal');
         if (modal) modal.classList.remove('hidden');
@@ -6687,7 +6637,7 @@ window.addEventListener('appinstalled', () => {
 
         const pill = document.getElementById('zpExtStatusPill');
         if (pill) {
-          pill.innerText = '✓ Synced to Cloud (' + (gaVal || 'GA4') + ')';
+          pill.innerText = '✓ GA4 Synced (G-6W5JGQK51K)';
         }
       };
 
@@ -6709,11 +6659,10 @@ window.addEventListener('appinstalled', () => {
       window.addEventListener('DOMContentLoaded', () => {
         trackInitialVisitorSession();
         syncAdminAnalyticsButton();
-        bindAutomaticSiteTelemetry();
+        setTimeout(syncAdminAnalyticsButton, 600); // Retry after full render
       });
       trackInitialVisitorSession();
       syncAdminAnalyticsButton();
-      bindAutomaticSiteTelemetry();
     </script>
 </body>
 </html>
