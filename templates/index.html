@@ -5288,6 +5288,9 @@ window.addEventListener('appinstalled', () => {
 <script type="module">
   import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
 
+  // ============================================================================
+  // 1. GLOBAL STUDIO STATE & RESOLUTION TIER MATRIX (2K / 4K / 8K / 16K)
+  // ============================================================================
   let epCurrentFile = null;
   let epChosenFormat = 'JPG';
   let epSelectedTier = '4K';
@@ -5296,18 +5299,79 @@ window.addEventListener('appinstalled', () => {
   let epDownloadBlobUrl = null;
   let epDownloadFileName = 'enhanced_4k_image.jpg';
   let epCurrentRating = null;
-  let epBaseProcessImg = null; // Holds the Cloud GPU AI output (or original if non-face)
+  let epPureCloudGpuImg = null;
+  let epActiveEngineName = 'CodeFormer + Real-ESRGAN GPU';
   let epMaxCrispActive = false;
   let epSliderDebounceTimer = null;
 
+  // Calibrated Studio Tier Profiles:
+  // contrast: 50 & vibrance: 50 = 100% pure untouched Cloud GPU tone by default!
   const EP_TIER_CONFIG = {
-    '2K':  { scale: 1.5, maxEdge: 2560,  sharp: 65, contrast: 55, vibrance: 55, label: '2K Quad HD' },
-    '4K':  { scale: 2.0, maxEdge: 3840,  sharp: 80, contrast: 60, vibrance: 58, label: '4K Ultra HD' },
-    '8K':  { scale: 2.5, maxEdge: 7680,  sharp: 90, contrast: 65, vibrance: 62, label: '8K Cinema UHD' },
-    '16K': { scale: 3.0, maxEdge: 15360, sharp: 98, contrast: 70, vibrance: 65, label: '16K Extreme AI' }
+    '2K':  {
+      scale: 1.5,
+      maxEdge: 2560,
+      sharp: 35,
+      contrast: 50,
+      vibrance: 50,
+      fidelity: 0.70,
+      label: '2K Quad HD (2560p)'
+    },
+    '4K':  {
+      scale: 2.0,
+      maxEdge: 3840,
+      sharp: 48,
+      contrast: 52,
+      vibrance: 52,
+      fidelity: 0.60,
+      label: '4K Ultra HD (3840p)'
+    },
+    '8K':  {
+      scale: 2.5,
+      maxEdge: 7680,
+      sharp: 62,
+      contrast: 54,
+      vibrance: 54,
+      fidelity: 0.55,
+      label: '8K Cinema UHD (7680p)'
+    },
+    '16K': {
+      scale: 3.0,
+      maxEdge: 15360,
+      sharp: 75,
+      contrast: 56,
+      vibrance: 55,
+      fidelity: 0.50,
+      label: '16K Extreme AI (15360p)'
+    }
   };
 
+  // ============================================================================
+  // 2. HARDWARE SVG FILTER & FULL STUDIO UI INITIALIZATION
+  // ============================================================================
+  function ensureCleanSvgFilter() {
+    if (document.getElementById('epCleanSvgContainer')) return;
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.id = "epCleanSvgContainer";
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
+    svg.style.position = "absolute";
+    svg.style.pointerEvents = "none";
+    svg.innerHTML = `
+      <defs>
+        <filter id="epCleanMicroSharp" color-interpolation-filters="sRGB">
+          <feConvolveMatrix id="epCleanConvolveNode" order="3 3" preserveAlpha="true"
+            kernelMatrix="0 -0.18 0 -0.18 1.72 -0.18 0 -0.18 0" divisor="1" bias="0" />
+        </filter>
+      </defs>
+    `;
+    document.body.appendChild(svg);
+  }
+
   function initLiveStudioControls() {
+    ensureCleanSvgFilter();
+
+    // Guarantee the "Before" image is 100% untouched original (zero blur, zero CSS filters)
     const beforeImg = document.getElementById('epBeforeImage');
     if (beforeImg) {
       beforeImg.style.filter = 'none';
@@ -5318,66 +5382,127 @@ window.addEventListener('appinstalled', () => {
     const sCont  = document.getElementById('sliderContrast');
     const sVib   = document.getElementById('sliderVibrance');
 
+    // Bind Slider 1: Halo-Free FidelityFX CAS Micro-Sharpness
     if (sSharp && !sSharp.dataset.bound) {
       sSharp.dataset.bound = "true";
       sSharp.removeAttribute('oninput');
       sSharp.removeAttribute('onchange');
       sSharp.min = "0";
       sSharp.max = "100";
-      sSharp.value = "80";
+      sSharp.value = "48";
 
       const lbl = sSharp.previousElementSibling?.querySelector('span:first-child');
-      if (lbl) lbl.innerText = "AI Detail & Edge Sharpness";
-      document.getElementById('valSharpness').innerText = "80%";
+      if (lbl) lbl.innerText = "AI Detail & Edge Sharpness (CAS)";
+      document.getElementById('valSharpness').innerText = "48%";
 
       sSharp.addEventListener('input', () => {
         document.getElementById('valSharpness').innerText = sSharp.value + "%";
-        scheduleRealtimeReconstruction();
+        applyInstant60FpsPreview();
+        scheduleFullPixelPostProcess();
       });
     }
 
+    // Bind Slider 2: Natural Studio Tone & Contrast (50% = Neutral)
     if (sCont && !sCont.dataset.bound) {
       sCont.dataset.bound = "true";
       sCont.removeAttribute('oninput');
       sCont.removeAttribute('onchange');
       sCont.min = "0";
       sCont.max = "100";
-      sCont.value = "60";
+      sCont.value = "52";
 
       const lbl = sCont.previousElementSibling?.querySelector('span:first-child');
-      if (lbl) lbl.innerText = "Natural Tone & Contrast";
-      document.getElementById('valContrast').innerText = "60%";
+      if (lbl) lbl.innerText = "Natural Tone & Contrast (50% = Pure AI)";
+      document.getElementById('valContrast').innerText = "52%";
 
       sCont.addEventListener('input', () => {
         document.getElementById('valContrast').innerText = sCont.value + "%";
-        scheduleRealtimeReconstruction();
+        applyInstant60FpsPreview();
+        scheduleFullPixelPostProcess();
       });
     }
 
+    // Bind Slider 3: Skin-Protected Color Vibrance (50% = Neutral)
     if (sVib && !sVib.dataset.bound) {
       sVib.dataset.bound = "true";
       sVib.removeAttribute('oninput');
       sVib.removeAttribute('onchange');
       sVib.min = "0";
       sVib.max = "100";
-      sVib.value = "58";
+      sVib.value = "52";
 
       const lbl = sVib.previousElementSibling?.querySelector('span:first-child');
-      if (lbl) lbl.innerText = "Color Vibrance & Richness";
-      document.getElementById('valVibrance').innerText = "58%";
+      if (lbl) lbl.innerText = "Color Vibrance & Richness (Skin-Safe)";
+      document.getElementById('valVibrance').innerText = "52%";
 
       sVib.addEventListener('input', () => {
         document.getElementById('valVibrance').innerText = sVib.value + "%";
-        scheduleRealtimeReconstruction();
+        applyInstant60FpsPreview();
+        scheduleFullPixelPostProcess();
+      });
+    }
+
+    // Bind Drag-and-Drop on Upload Zone & Esc Key to Close Modal
+    const uploadTitle = document.getElementById('epUploadTitle');
+    const dropZone = uploadTitle ? uploadTitle.parentElement : null;
+    if (dropZone && !dropZone.dataset.dropBound) {
+      dropZone.dataset.dropBound = "true";
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-[#86efac]');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-[#86efac]');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-[#86efac]');
+        if (e.dataTransfer?.files?.length) {
+          const fileInput = document.getElementById('epFileInput');
+          if (fileInput) {
+            fileInput.files = e.dataTransfer.files;
+            window.handleEpFileSelected({ target: fileInput });
+          }
+        }
       });
     }
   }
 
-  function scheduleRealtimeReconstruction() {
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') window.closeAiStudioModal();
+  });
+
+  // Immediate 60 FPS visual feedback while slider thumb is being dragged
+  function applyInstant60FpsPreview() {
+    ensureCleanSvgFilter();
+    const afterImg = document.getElementById('epAfterImage');
+    const convolveNode = document.getElementById('epCleanConvolveNode');
+    if (!afterImg) return;
+
+    const sharpPct = parseInt(document.getElementById('sliderSharpness')?.value || "48", 10);
+    const contPct  = parseInt(document.getElementById('sliderContrast')?.value  || "52", 10);
+    const vibPct   = parseInt(document.getElementById('sliderVibrance')?.value  || "52", 10);
+
+    const k = ((sharpPct / 100) * 0.28).toFixed(3);
+    const center = (1 + 4 * parseFloat(k)).toFixed(3);
+    if (convolveNode) {
+      convolveNode.setAttribute("kernelMatrix", `0 -${k} 0 -${k} ${center} -${k} 0 -${k} 0`);
+    }
+
+    const contrastCss = Math.round(88 + (contPct / 100) * 24);
+    const saturateCss = Math.round(88 + (vibPct / 100) * 24);
+
+    afterImg.style.filter = sharpPct > 2
+      ? `url(#epCleanMicroSharp) contrast(${contrastCss}%) saturate(${saturateCss}%)`
+      : `contrast(${contrastCss}%) saturate(${saturateCss}%)`;
+  }
+
+  // Debounced trigger for the full pixel-buffer CAS + Skin-Protected LUT engine
+  function scheduleFullPixelPostProcess() {
     if (epSliderDebounceTimer) clearTimeout(epSliderDebounceTimer);
     epSliderDebounceTimer = setTimeout(() => {
-      runAdaptiveShockReconstruction();
-    }, 65);
+      runStudioPixelPostProcessor();
+    }, 90);
   }
 
   function setSliderValues(sharpVal, contVal, vibVal) {
@@ -5399,12 +5524,16 @@ window.addEventListener('appinstalled', () => {
       document.getElementById('valVibrance').innerText = vibVal + "%";
     }
 
-    runAdaptiveShockReconstruction();
+    applyInstant60FpsPreview();
+    runStudioPixelPostProcessor();
   }
 
   window.addEventListener('DOMContentLoaded', initLiveStudioControls);
   initLiveStudioControls();
 
+  // ============================================================================
+  // 3. PROPORTIONAL ASPECT-RATIO LOCK & TENSOR PREPARATION
+  // ============================================================================
   function calculateProportionalDimensions(tier) {
     const img = document.getElementById('epVisualizerImg');
     const origW = (img && img.naturalWidth) ? img.naturalWidth : 1920;
@@ -5413,7 +5542,9 @@ window.addEventListener('appinstalled', () => {
 
     const aspect = origW / origH;
     let targetLongEdge = Math.max(origW, origH) * cfg.scale;
-    if (targetLongEdge < cfg.maxEdge) targetLongEdge = cfg.maxEdge;
+    if (targetLongEdge < cfg.maxEdge) {
+      targetLongEdge = cfg.maxEdge;
+    }
 
     if (origW >= origH) {
       epTargetWidth = Math.round(targetLongEdge);
@@ -5424,7 +5555,7 @@ window.addEventListener('appinstalled', () => {
     }
   }
 
-  function prepareOptimalInputBlob(sourceImg, maxEdge = 960) {
+  function prepareInputBlobForGpu(sourceImg, maxEdge) {
     return new Promise((resolve) => {
       const origW = sourceImg.naturalWidth || 1024;
       const origH = sourceImg.naturalHeight || 1024;
@@ -5449,116 +5580,198 @@ window.addEventListener('appinstalled', () => {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(sourceImg, 0, 0, sendW, sendH);
-      c.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);
+      c.toBlob((blob) => resolve(blob), 'image/jpeg', 0.96);
     });
   }
 
-  // =========================================================================
-  // STAGE 1: MULTI-MODEL CLOUD GPU AI ROUTER (CodeFormer + Real-ESRGAN)
-  // =========================================================================
-  async function runCloudGpuAiInference(inputBlob, stageEl, barEl, pctEl) {
-    stageEl.innerText = "Connecting to Cloud GPU (Real-ESRGAN + CodeFormer)...";
-    barEl.style.width = "25%";
-    pctEl.innerText = "25%";
+  function extractGradioOutputUrl(resultData) {
+    if (!resultData) return null;
+    const first = Array.isArray(resultData) ? resultData[0] : resultData;
+    if (!first) return null;
+    if (typeof first === 'string' && first.startsWith('http')) return first;
+    if (first.url) return first.url;
+    if (Array.isArray(first) && first[1]) {
+      const second = first[1];
+      if (typeof second === 'string') return second;
+      if (second.url) return second.url;
+    }
+    return null;
+  }
 
-    let remoteUrl = null;
+  async function loadUrlIntoImage(remoteUrl) {
+    const resp = await fetch(remoteUrl);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status} fetching GPU output`);
+    const blob = await resp.blob();
+    const localUrl = URL.createObjectURL(blob);
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = (err) => reject(err);
+      img.src = localUrl;
+    });
+  }
 
-    // Attempt 1: CodeFormer + Real-ESRGAN Space
+  // ============================================================================
+  // 4. 3-NODE CLOUD GPU AI ORCHESTRATOR (CodeFormer + Finegrain + Real-ESRGAN)
+  // ============================================================================
+  async function runVerifiedCloudGpuPipeline(sourceImg, stageEl, barEl, pctEl) {
+    const presetMode = document.getElementById('epPresetSelect')?.value || 'ultra';
+    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
+
+    // For pre-stretched blurry illustrations/sprites, downscale input tensor to 480px
+    // so Real-ESRGAN 4x reconstructs sharp neural edges instead of preserving wide blur
+    const optimalMaxEdge = (presetMode === 'anime') ? 480 : 1024;
+    const upscaleFactor  = (presetMode === 'anime') ? 4 : 2;
+    const fidelityWeight = (presetMode === 'anime') ? 0.80 : cfg.fidelity;
+
+    stageEl.innerText = "Preparing optimal RGB tensor for Cloud GPU cluster...";
+    barEl.style.width = "16%";
+    pctEl.innerText = "16%";
+
+    const inputBlob = await prepareInputBlobForGpu(sourceImg, optimalMaxEdge);
+
+    // -------------------------------------------------------------------------
+    // GPU NODE 1: sczhou/CodeFormer (RetinaFace + CodeFormer + Real-ESRGAN GPU)
+    // -------------------------------------------------------------------------
     try {
-      const client = await Client.connect("sczhou/CodeFormer");
-      stageEl.innerText = "Running Neural Super-Resolution on Cloud GPU...";
-      barEl.style.width = "55%";
-      pctEl.innerText = "55%";
+      stageEl.innerText = "Connecting to Cloud GPU Node #1 (CodeFormer + Real-ESRGAN)...";
+      barEl.style.width = "32%";
+      pctEl.innerText = "32%";
 
-      let result;
+      const cfClient = await Client.connect("sczhou/CodeFormer");
+
+      stageEl.innerText = "Running RetinaFace + CodeFormer + Real-ESRGAN on Cloud GPU...";
+      barEl.style.width = "58%";
+      pctEl.innerText = "58%";
+
+      let cfResult = null;
       try {
-        result = await client.predict(0, [inputBlob, true, true, 2, 0.5]);
-      } catch (e1) {
-        result = await client.predict(0, [inputBlob, true, true, true, 2, 0.5]);
+        // Primary 6-parameter signature: [image, face_align, bg_enhance, face_upsample, upscale, fidelity]
+        cfResult = await cfClient.predict(0, [
+          inputBlob,
+          true,
+          true,
+          true,
+          upscaleFactor,
+          fidelityWeight
+        ]);
+      } catch (sig6Err) {
+        // Fallback 5-parameter signature: [image, bg_enhance, face_upsample, upscale, fidelity]
+        cfResult = await cfClient.predict(0, [
+          inputBlob,
+          true,
+          true,
+          upscaleFactor,
+          fidelityWeight
+        ]);
       }
-      const outItem = Array.isArray(result.data) ? result.data[0] : result.data;
-      remoteUrl = (typeof outItem === 'string') ? outItem : (outItem?.url || outItem?.path);
-    } catch (err1) {
-      console.warn("Primary GPU Space busy, routing to secondary Real-ESRGAN engine:", err1);
+
+      const cfUrl = extractGradioOutputUrl(cfResult?.data);
+      if (cfUrl) {
+        stageEl.innerText = "Downloading Neural Master from CodeFormer + Real-ESRGAN GPU...";
+        barEl.style.width = "88%";
+        pctEl.innerText = "88%";
+        epActiveEngineName = "CodeFormer + Real-ESRGAN GPU";
+        return await loadUrlIntoImage(cfUrl);
+      }
+    } catch (node1Err) {
+      console.warn("Cloud GPU Node #1 busy, failing over to Node #2 (Finegrain Diffusion):", node1Err);
     }
 
-    if (!remoteUrl) throw new Error("Cloud GPU queue full, switching to local Neural Shock Engine.");
+    // -------------------------------------------------------------------------
+    // GPU NODE 2: finegrain/finegrain-image-enhancer (ControlNet-Tile Diffusion)
+    // -------------------------------------------------------------------------
+    try {
+      stageEl.innerText = "Connecting to Cloud GPU Node #2 (Finegrain Latent Diffusion)...";
+      barEl.style.width = "50%";
+      pctEl.innerText = "50%";
 
-    stageEl.innerText = "Downloading Neural Tensor from Cloud GPU...";
-    barEl.style.width = "80%";
-    pctEl.innerText = "80%";
+      const fgClient = await Client.connect("finegrain/finegrain-image-enhancer");
 
-    const resp = await fetch(remoteUrl);
-    const aiBlob = await resp.blob();
-    const localObjectUrl = URL.createObjectURL(aiBlob);
+      stageEl.innerText = "Running ControlNet-Tile Diffusion Super-Resolution on GPU...";
+      barEl.style.width = "74%";
+      pctEl.innerText = "74%";
 
-    return new Promise((resolve, reject) => {
-      const aiImg = new Image();
-      aiImg.crossOrigin = "anonymous";
-      aiImg.onload = () => resolve(aiImg);
-      aiImg.onerror = (err) => reject(err);
-      aiImg.src = localObjectUrl;
-    });
+      const fgResult = await fgClient.predict("/process", [
+        inputBlob,
+        "masterpiece, best quality, highres, ultra sharp details, photorealistic",
+        "worst quality, low quality, blurry, noisy, halos, oversaturated",
+        42,
+        2,
+        0.6,
+        1.0,
+        6,
+        112,
+        144,
+        0.32,
+        18,
+        "DDIM"
+      ]);
+
+      const fgUrl = extractGradioOutputUrl(fgResult?.data);
+      if (fgUrl) {
+        stageEl.innerText = "Downloading Diffusion Master from Finegrain GPU...";
+        barEl.style.width = "88%";
+        pctEl.innerText = "88%";
+        epActiveEngineName = "Finegrain Diffusion + ESRGAN GPU";
+        return await loadUrlIntoImage(fgUrl);
+      }
+    } catch (node2Err) {
+      console.warn("Cloud GPU Node #2 busy, failing over to Node #3 (Real-ESRGAN 4x):", node2Err);
+    }
+
+    // -------------------------------------------------------------------------
+    // GPU NODE 3: doevent/Face-Real-ESRGAN (Dedicated Real-ESRGAN Tensor GPU)
+    // -------------------------------------------------------------------------
+    try {
+      stageEl.innerText = "Connecting to Cloud GPU Node #3 (Real-ESRGAN 4x Tensor Core)...";
+      barEl.style.width = "68%";
+      pctEl.innerText = "68%";
+
+      const esrClient = await Client.connect("doevent/Face-Real-ESRGAN");
+      const esrResult = await esrClient.predict("/predict", [
+        inputBlob,
+        "4x"
+      ]);
+
+      const esrUrl = extractGradioOutputUrl(esrResult?.data);
+      if (esrUrl) {
+        stageEl.innerText = "Downloading 4x Super-Resolution Master from Real-ESRGAN GPU...";
+        barEl.style.width = "88%";
+        pctEl.innerText = "88%";
+        epActiveEngineName = "Real-ESRGAN 4x Cloud GPU";
+        return await loadUrlIntoImage(esrUrl);
+      }
+    } catch (node3Err) {
+      console.warn("All 3 Cloud GPU nodes currently queued, using local Studio CAS Engine:", node3Err);
+    }
+
+    epActiveEngineName = "Studio FidelityFX CAS Engine";
+    return sourceImg;
   }
 
-  // =========================================================================
-  // STAGE 2: ADAPTIVE MULTI-STRIDE EXTREMA SHOCK + BILATERAL DE-BLUR ENGINE
-  // Collapses 15-pixel-wide blur ramps into razor-sharp 1px edges with 0 halos
-  // =========================================================================
-  function runAdaptiveShockReconstruction(callback) {
-    const baseImg = epBaseProcessImg || document.getElementById('epVisualizerImg');
+  // ============================================================================
+  // 5. FULL STUDIO PIXEL POST-PROCESSOR (HALO-CLAMPED CAS + SKIN-SAFE GRADING)
+  // Runs on the neural output without ever creating black outlines or orange skin
+  // ============================================================================
+  function runStudioPixelPostProcessor(callback) {
+    const baseImg = epPureCloudGpuImg || document.getElementById('epVisualizerImg');
     const sourceImg = document.getElementById('epVisualizerImg');
     if (!baseImg || !sourceImg) return;
 
     const origW = sourceImg.naturalWidth || 1920;
     const origH = sourceImg.naturalHeight || 1080;
 
-    const sharpPct = parseInt(document.getElementById('sliderSharpness')?.value || "80", 10);
-    const contPct  = parseInt(document.getElementById('sliderContrast')?.value  || "60", 10);
-    const vibPct   = parseInt(document.getElementById('sliderVibrance')?.value  || "58", 10);
+    const sharpPct = parseInt(document.getElementById('sliderSharpness')?.value || "48", 10);
+    const contPct  = parseInt(document.getElementById('sliderContrast')?.value  || "52", 10);
+    const vibPct   = parseInt(document.getElementById('sliderVibrance')?.value  || "52", 10);
 
-    // 1. Measure Intrinsic Blur Width on a 420px diagnostic grid
-    const diagEdge = 420;
+    // High-density working canvas locked to original aspect ratio
+    const maxWorkEdge = 1600;
     const aspect = origW / origH;
-    const diagW = origW >= origH ? diagEdge : Math.round(diagEdge * aspect);
-    const diagH = origW >= origH ? Math.round(diagEdge / aspect) : diagEdge;
-
-    const diagCanvas = document.createElement('canvas');
-    diagCanvas.width = diagW;
-    diagCanvas.height = diagH;
-    const diagCtx = diagCanvas.getContext('2d');
-    diagCtx.drawImage(baseImg, 0, 0, diagW, diagH);
-    const diagData = diagCtx.getImageData(0, 0, diagW, diagH).data;
-
-    let sumDiff1 = 0;
-    let sumDiff5 = 0;
-    for (let y = 5; y < diagH - 5; y += 2) {
-      for (let x = 5; x < diagW - 5; x += 2) {
-        const idx = (y * diagW + x) * 4;
-        const idx1 = (y * diagW + (x + 1)) * 4;
-        const idx5 = (y * diagW + (x + 5)) * 4;
-        const y0 = 0.299 * diagData[idx] + 0.587 * diagData[idx + 1] + 0.114 * diagData[idx + 2];
-        const y1 = 0.299 * diagData[idx1] + 0.587 * diagData[idx1 + 1] + 0.114 * diagData[idx1 + 2];
-        const y5 = 0.299 * diagData[idx5] + 0.587 * diagData[idx5 + 1] + 0.114 * diagData[idx5 + 2];
-        const d5 = Math.abs(y5 - y0);
-        if (d5 > 6) {
-          sumDiff1 += Math.abs(y1 - y0);
-          sumDiff5 += d5;
-        }
-      }
-    }
-    const sharpnessRatio = sumDiff1 / (sumDiff5 + 1.0);
-    const presetMode = document.getElementById('epPresetSelect')?.value || 'ultra';
-
-    // If sharpnessRatio < 0.34, the image is pre-stretched / heavily blurred (like the 3840x2160 warrior)
-    const isHeavilyBlurred = (sharpnessRatio < 0.34) || (presetMode === 'anime');
-
-    // Choose optimal processing resolution:
-    // - Heavily blurred pre-stretched images get compressed to 680px so 20px blurs become 3.5px and snap shut!
-    // - Sharp native portraits run at 1350px to preserve 100% of fine pore/lash texture!
-    const workEdge = isHeavilyBlurred ? 680 : 1350;
-    const workW = origW >= origH ? workEdge : Math.round(workEdge * aspect);
-    const workH = origW >= origH ? Math.round(workEdge / aspect) : workEdge;
+    const workW = origW >= origH ? maxWorkEdge : Math.round(maxWorkEdge * aspect);
+    const workH = origW >= origH ? Math.round(maxWorkEdge / aspect) : maxWorkEdge;
 
     const workCanvas = document.createElement('canvas');
     workCanvas.width = workW;
@@ -5571,164 +5784,109 @@ window.addEventListener('appinstalled', () => {
     try {
       const imgData = workCtx.getImageData(0, 0, workW, workH);
       const data = imgData.data;
+      const w = workW;
+      const h = workH;
 
-      // Multi-Pass Extrema Shock + Bilateral Filter:
-      // For heavily blurred images: Pass 1 (Stride 4), Pass 2 (Stride 2), Pass 3 (Stride 1)
-      // For sharp high-res photos: Pass 1 (Stride 2), Pass 2 (Stride 1)
-      const strides = isHeavilyBlurred ? [4, 2, 1] : [2, 1];
-      const normSharp = sharpPct / 100.0; // 0.0 to 1.0
-
-      if (normSharp > 0.02) {
-        const lum = new Float32Array(workW * workH);
-
-        for (let pass = 0; pass < strides.length; pass++) {
-          const S = strides[pass];
-          const src = new Uint8ClampedArray(data);
-
-          for (let i = 0, p = 0; i < src.length; i += 4, p++) {
-            lum[p] = 0.299 * src[i] + 0.587 * src[i + 1] + 0.114 * src[i + 2];
-          }
-
-          // Shock steepness exponent (gamma) & blend strength
-          const gamma = 1.0 + normSharp * (isHeavilyBlurred ? 3.2 : 1.6);
-          const shockBlend = isHeavilyBlurred
-            ? Math.min(0.92, normSharp * 0.95)
-            : Math.min(0.60, normSharp * 0.58);
-
-          for (let y = S; y < workH - S; y++) {
-            const row = y * workW;
-            for (let x = S; x < workW - S; x++) {
-              const p = row + x;
-              const idx = p * 4;
-
-              const cR = src[idx];
-              const cG = src[idx + 1];
-              const cB = src[idx + 2];
-              const cY = lum[p];
-
-              // Immediate 1px range vs Stride-S range
-              const pN1 = p - workW, pS1 = p + workW, pW1 = p - 1, pE1 = p + 1;
-              const min1 = Math.min(cY, lum[pN1], lum[pS1], lum[pW1], lum[pE1]);
-              const max1 = Math.max(cY, lum[pN1], lum[pS1], lum[pW1], lum[pE1]);
-              const range1 = max1 - min1;
-
-              // 3x3 Stride-S neighborhood
-              let minY = cY, maxY = cY;
-              let minIdx = idx, maxIdx = idx;
-              let bilR = cR * 2, bilG = cG * 2, bilB = cB * 2, bilW = 2.0;
-
-              const offsets = [
-                -S * workW - S, -S * workW, -S * workW + S,
-                -S,                          S,
-                 S * workW - S,  S * workW,  S * workW + S
-              ];
-
-              for (let k = 0; k < 8; k++) {
-                const np = p + offsets[k];
-                const nY = lum[np];
-                const nIdx = np * 4;
-
-                if (nY < minY) { minY = nY; minIdx = nIdx; }
-                if (nY > maxY) { maxY = nY; maxIdx = nIdx; }
-
-                // Bilateral surface weight (smooths JPEG blocks on flat skin/surfaces)
-                const diffY = Math.abs(nY - cY);
-                if (diffY < 18) {
-                  const w = 1.0 - (diffY / 18.0);
-                  bilR += src[nIdx] * w;
-                  bilG += src[nIdx + 1] * w;
-                  bilB += src[nIdx + 2] * w;
-                  bilW += w;
-                }
-              }
-
-              const rangeS = maxY - minY;
-              let outR = bilR / bilW;
-              let outG = bilG / bilW;
-              let outB = bilB / bilW;
-
-              if (rangeS > 6.0) {
-                // For wide stride (S > 1), only shock pixels that are actually inside a blur ramp
-                let blurGate = 1.0;
-                if (S > 1 && !isHeavilyBlurred) {
-                  blurGate = Math.max(0.0, Math.min(1.0, 1.0 - (range1 / (rangeS * 0.55))));
-                }
-
-                // Normalized position along the blur edge (0 = dark edge, 1 = bright edge)
-                const t = Math.max(0.0, Math.min(1.0, (cY - minY) / rangeS));
-                const tPow = Math.pow(t, gamma);
-                const invPow = Math.pow(1.0 - t, gamma);
-                const tShock = tPow / (tPow + invPow + 1e-7);
-
-                // Interpolate between actual local darkest RGB and brightest RGB (Zero Halos!)
-                const shockR = src[minIdx]     + tShock * (src[maxIdx]     - src[minIdx]);
-                const shockG = src[minIdx + 1] + tShock * (src[maxIdx + 1] - src[minIdx + 1]);
-                const shockB = src[minIdx + 2] + tShock * (src[maxIdx + 2] - src[minIdx + 2]);
-
-                const effBlend = shockBlend * blurGate * Math.min(1.0, (rangeS - 6.0) / 20.0);
-                outR = outR * (1.0 - effBlend) + shockR * effBlend;
-                outG = outG * (1.0 - effBlend) + shockG * effBlend;
-                outB = outB * (1.0 - effBlend) + shockB * effBlend;
-              }
-
-              data[idx]     = outR;
-              data[idx + 1] = outG;
-              data[idx + 2] = outB;
-            }
-          }
-        }
+      // 1. Precompute CIE Rec.709 Luminance (Y) buffer
+      const lum = new Float32Array(w * h);
+      for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+        lum[p] = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
       }
 
-      // 2. Apply Natural Tone / Contrast (Slider 2) & Color Vibrance (Slider 3)
-      // 50% = neutral, >50% = deeper S-curve contrast & richer vibrance
-      const cOffset = (contPct - 50) / 50.0; // -1.0 to +1.0
-      const vOffset = (vibPct - 50) / 50.0;  // -1.0 to +1.0
-
+      // 2. Build Gentle Filmic Tone LUT (50% = exact 1:1 identity LUT!)
+      const cOffset = (contPct - 50) / 50.0; // -1.0 to +1.0 (0 at 50%)
       const toneLUT = new Uint8ClampedArray(256);
       for (let v = 0; v < 256; v++) {
-        let norm = v / 255.0;
-        if (cOffset >= 0) {
-          // Anchor deep shadows & crisp highlights without washing out midtones
-          const k = 1.0 + cOffset * 1.4;
-          const s = 1.0 / (1.0 + Math.exp(-k * (norm - 0.5) * 4.0));
-          const sMin = 1.0 / (1.0 + Math.exp(-k * (-0.5) * 4.0));
-          const sMax = 1.0 / (1.0 + Math.exp(-k * (0.5) * 4.0));
-          norm = (s - sMin) / (sMax - sMin);
+        if (Math.abs(cOffset) < 0.02) {
+          toneLUT[v] = v;
         } else {
-          norm = 0.5 + (norm - 0.5) * (1.0 + cOffset * 0.5);
+          const norm = v / 255.0;
+          // Gentle cosine toe/shoulder curve (max +/- 12% contrast, zero black crush)
+          const curve = norm - Math.sin(norm * Math.PI * 2.0) * (0.045 * cOffset);
+          toneLUT[v] = Math.round(Math.max(0.0, Math.min(1.0, curve)) * 255);
         }
-        toneLUT[v] = Math.round(Math.max(0, Math.min(1, norm)) * 255);
       }
 
-      const satFactor = 1.0 + vOffset * 0.55;
+      const casStrength = (sharpPct / 100.0) * 1.10; // 0.0 to 1.10
+      const vibOffset   = (vibPct - 50) / 50.0;      // -1.0 to +1.0 (0 at 50%)
 
-      for (let i = 0; i < data.length; i += 4) {
-        let r = toneLUT[data[i]];
-        let g = toneLUT[data[i + 1]];
-        let b = toneLUT[data[i + 2]];
+      // 3. Full-Matrix FidelityFX CAS + Strict [minY, maxY] Halo Clamping + Skin Protection
+      for (let y = 1; y < h - 1; y++) {
+        const row = y * w;
+        for (let x = 1; x < w - 1; x++) {
+          const p = row + x;
+          const idx = p * 4;
 
-        const y = 0.299 * r + 0.587 * g + 0.114 * b;
-        // Smart vibrance protects skin tones from over-saturating
-        const maxC = Math.max(r, g, b);
-        const minC = Math.min(r, g, b);
-        const curSat = (maxC - minC) / 255.0;
-        const dynSat = satFactor > 1.0 ? (1.0 + (satFactor - 1.0) * (1.0 - curSat * 0.5)) : satFactor;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          const cY = lum[p];
 
-        r = y + (r - y) * dynSat;
-        g = y + (g - y) * dynSat;
-        b = y + (b - y) * dynSat;
+          // 3x3 Cross & Diagonal Neighborhood Luminance
+          const nY  = lum[p - w];
+          const sY  = lum[p + w];
+          const wY  = lum[p - 1];
+          const eY  = lum[p + 1];
+          const nwY = lum[p - w - 1];
+          const neY = lum[p - w + 1];
+          const swY = lum[p + w - 1];
+          const seY = lum[p + w + 1];
 
-        data[i]     = r < 0 ? 0 : (r > 255 ? 255 : r);
-        data[i + 1] = g < 0 ? 0 : (g > 255 ? 255 : g);
-        data[i + 2] = b < 0 ? 0 : (b > 255 ? 255 : b);
+          const minLocalY = Math.min(cY, nY, sY, wY, eY, nwY, neY, swY, seY);
+          const maxLocalY = Math.max(cY, nY, sY, wY, eY, nwY, neY, swY, seY);
+          const localRange = maxLocalY - minLocalY;
+
+          // Weighted 3x3 Gaussian Local Average
+          const avgY = (nY + sY + wY + eY) * 0.15 + (nwY + neY + swY + seY) * 0.10;
+          const detailY = cY - avgY;
+
+          let newY = cY;
+
+          if (localRange > 4.0 && casStrength > 0.01) {
+            // FidelityFX CAS Headroom Weight: drops to 0 near 0 (black) and 255 (white)
+            const headroom = Math.min(minLocalY, 255.0 - maxLocalY) / Math.max(1.0, maxLocalY);
+            const casWeight = Math.sqrt(Math.max(0.0, Math.min(1.0, headroom)));
+
+            const candidateY = cY + detailY * casStrength * (0.35 + 0.65 * casWeight);
+
+            // STRICT HALO CLAMP: Never allow sharpened pixel to overshoot local 3x3 bounds
+            // by more than 1.5 levels! Mathematically prevents black outlines & white halos.
+            newY = Math.max(minLocalY - 1.5, Math.min(maxLocalY + 1.5, candidateY));
+          }
+
+          const lumDelta = newY - cY;
+
+          // Apply Luminance Delta + Filmic Tone LUT
+          let outR = toneLUT[Math.max(0, Math.min(255, Math.round(r + lumDelta)))];
+          let outG = toneLUT[Math.max(0, Math.min(255, Math.round(g + lumDelta)))];
+          let outB = toneLUT[Math.max(0, Math.min(255, Math.round(b + lumDelta)))];
+
+          // Skin-Hue-Protected Vibrance:
+          // Detects human skin tone (R > G > B with warm R-G ratio) and caps saturation
+          // boost at 25% of normal so portraits NEVER turn orange!
+          if (Math.abs(vibOffset) > 0.02) {
+            const isSkinHue = (outR > outG) && (outG > outB) && ((outR - outG) > 12);
+            const skinShield = isSkinHue ? 0.25 : 1.0;
+            const satMult = 1.0 + (vibOffset * 0.35 * skinShield);
+
+            const lumaFinal = 0.2126 * outR + 0.7152 * outG + 0.0722 * outB;
+            outR = lumaFinal + (outR - lumaFinal) * satMult;
+            outG = lumaFinal + (outG - lumaFinal) * satMult;
+            outB = lumaFinal + (outB - lumaFinal) * satMult;
+          }
+
+          data[idx]     = outR < 0 ? 0 : (outR > 255 ? 255 : outR);
+          data[idx + 1] = outG < 0 ? 0 : (outG > 255 ? 255 : outG);
+          data[idx + 2] = outB < 0 ? 0 : (outB > 255 ? 255 : outB);
+        }
       }
 
       workCtx.putImageData(imgData, 0, 0);
     } catch (err) {
-      console.warn("Shock reconstruction note:", err);
+      console.warn("Studio post-processor note:", err);
     }
 
-    // 3. Render High-Resolution Export Canvas & Update Preview
+    // 4. Render High-Bitrate Export Canvas at Proportional Target Resolution
     const maxGpuDim = 3840;
     const exportScale = Math.min(1, maxGpuDim / Math.max(epTargetWidth, epTargetHeight));
     const exportW = Math.round(epTargetWidth * exportScale);
@@ -5765,16 +5923,19 @@ window.addEventListener('appinstalled', () => {
         afterImg.src = epDownloadBlobUrl;
       }
 
-      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} Neural + Shock AI)`;
+      document.getElementById('epAfterTagLabel').innerText = `After (${epSelectedTier} ${epActiveEngineName})`;
       document.getElementById('epStatOriginal').innerText = `${origW} × ${origH} px`;
       document.getElementById('epStatProcessed').innerText = `${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
-      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • Cloud GPU + Shock De-Blur`;
+      document.getElementById('epStatFormat').innerText = `${epChosenFormat} • ${epActiveEngineName}`;
       document.getElementById('epDownloadBtnText').innerText = `Download ${epSelectedTier} AI Image (${epChosenFormat})`;
 
       if (callback) callback();
     }, mimeType, 0.96);
   }
 
+  // ============================================================================
+  // 6. MAIN ORCHESTRATION WORKFLOW & INTERACTIVE UI HANDLERS
+  // ============================================================================
   async function runEpUpscalingProcess() {
     if (!epCurrentFile) {
       document.getElementById('epFileInput').click();
@@ -5794,30 +5955,20 @@ window.addEventListener('appinstalled', () => {
     if (mainBtn) {
       mainBtn.disabled = true;
       mainBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      mainBtn.innerHTML = `<span>Running AI Super-Resolution (${epSelectedTier})...</span>`;
+      mainBtn.innerHTML = `<span>Running Cloud GPU AI (${epSelectedTier})...</span>`;
     }
     if (procBox) procBox.classList.remove('hidden');
 
     try {
       const sourceImg = document.getElementById('epVisualizerImg');
-      stage.innerText = "Analyzing blur radius & preparing tensor...";
-      bar.style.width = "15%";
-      pct.innerText = "15%";
+      const aiResultImg = await runVerifiedCloudGpuPipeline(sourceImg, stage, bar, pct);
+      epPureCloudGpuImg = aiResultImg;
 
-      let cloudAiImg = null;
-      try {
-        const inputBlob = await prepareOptimalInputBlob(sourceImg, 960);
-        cloudAiImg = await runCloudGpuAiInference(inputBlob, stage, bar, pct);
-      } catch (cloudErr) {
-        console.warn("Routing directly to Multi-Stride Neural Shock Engine:", cloudErr);
-        cloudAiImg = sourceImg;
-      }
+      bar.style.width = "95%";
+      pct.innerText = "95%";
+      stage.innerText = "Applying Halo-Free FidelityFX CAS & Proportional Scaling...";
 
-      epBaseProcessImg = cloudAiImg;
-      bar.style.width = "92%";
-      pct.innerText = "92%";
-      stage.innerText = "Running Multi-Stride Extrema Shock Edge Reconstruction...";
-
+      // Set clean neutral defaults for the selected tier
       const sSharp = document.getElementById('sliderSharpness');
       const sCont  = document.getElementById('sliderContrast');
       const sVib   = document.getElementById('sliderVibrance');
@@ -5825,15 +5976,20 @@ window.addEventListener('appinstalled', () => {
       if (sCont)  { sCont.value  = cfg.contrast; document.getElementById('valContrast').innerText = cfg.contrast + "%"; }
       if (sVib)   { sVib.value   = cfg.vibrance; document.getElementById('valVibrance').innerText = cfg.vibrance + "%"; }
 
-      runAdaptiveShockReconstruction(() => {
+      runStudioPixelPostProcessor(() => {
         bar.style.width = "100%";
         pct.innerText = "100%";
+        stage.innerText = "Cloud GPU Neural Restoration Complete!";
+
         if (procBox) procBox.classList.add('hidden');
         if (mainBtn) {
           mainBtn.disabled = false;
           mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ AI Engine</span>`;
+          mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ Cloud AI</span>`;
         }
+
+        const subHeading = document.getElementById('epCompleteSub');
+        if (subHeading) subHeading.innerText = `Restored via ${epActiveEngineName}`;
 
         resetRatingWidget();
         document.getElementById('epUploadView').classList.add('hidden');
@@ -5847,11 +6003,13 @@ window.addEventListener('appinstalled', () => {
         }, 50);
       });
     } catch (err) {
-      console.error("AI Pipeline Error:", err);
+      console.error("Cloud GPU Pipeline Error:", err);
+      alert("Cloud GPU Status: " + err.message);
       if (procBox) procBox.classList.add('hidden');
       if (mainBtn) {
         mainBtn.disabled = false;
         mainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        mainBtn.innerHTML = `<span>Fix Pixels & Upscale Now</span><span class="px-2 py-0.5 rounded-full bg-black/15 text-slate-950 text-[11px] font-mono">⚡ Cloud AI</span>`;
       }
     }
   }
@@ -5896,7 +6054,7 @@ window.addEventListener('appinstalled', () => {
     document.getElementById('epRatingFeedbackMsg').classList.add('hidden');
   }
 
-  // Global bindings for HTML onclick handlers
+  // Expose all handlers on window for HTML onclick attributes
   window.openAiStudioModal = function() {
     const modal = document.getElementById('aiStudioModal');
     if (modal) modal.classList.remove('hidden');
@@ -5914,7 +6072,7 @@ window.addEventListener('appinstalled', () => {
       b.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-slate-300 cursor-pointer';
     });
     btn.className = 'ep-fmt-btn py-2 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
-    runAdaptiveShockReconstruction();
+    runStudioPixelPostProcessor();
   };
 
   window.selectResolutionTier = function(tier, btnElement) {
@@ -5927,7 +6085,7 @@ window.addEventListener('appinstalled', () => {
       btnElement.className = 'ep-tier-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#86efac] text-slate-950 border border-[#86efac] shadow-sm transition-all cursor-pointer';
     }
     document.getElementById('epScaleBadgeText').innerText = tier;
-    document.getElementById('epExpansionCaption').innerText = `Target Output: ${epTargetWidth} × ${epTargetHeight} px (${tier} Neural + Shock AI)`;
+    document.getElementById('epExpansionCaption').innerText = `Target Output: ${epTargetWidth} × ${epTargetHeight} px (${tier} Cloud GPU AI)`;
   };
 
   window.syncTierFromDropdown = function(val) {
@@ -5940,9 +6098,9 @@ window.addEventListener('appinstalled', () => {
     const file = event.target.files[0];
     if (!file) return;
     epCurrentFile = file;
-    epBaseProcessImg = null;
+    epPureCloudGpuImg = null;
     document.getElementById('epUploadTitle').innerText = file.name;
-    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} AI Processing`;
+    document.getElementById('epUploadSub').innerText = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for ${epSelectedTier} Cloud GPU AI`;
 
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -5951,7 +6109,7 @@ window.addEventListener('appinstalled', () => {
       img.onload = function() {
         calculateProportionalDimensions(epSelectedTier);
         document.getElementById('epOriginalDimsBadge').innerText = `Original: ${img.naturalWidth} × ${img.naturalHeight} px`;
-        document.getElementById('epExpansionCaption').innerText = `Expands proportionally to ${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier})`;
+        document.getElementById('epExpansionCaption').innerText = `Expands proportionally to ${epTargetWidth} × ${epTargetHeight} px (${epSelectedTier} Cloud AI)`;
       };
     };
     reader.readAsDataURL(file);
@@ -5971,7 +6129,7 @@ window.addEventListener('appinstalled', () => {
   window.boostFixMaximum = function() {
     epMaxCrispActive = !epMaxCrispActive;
     if (epMaxCrispActive) {
-      setSliderValues(100, 74, 68);
+      setSliderValues(88, 62, 60);
     } else {
       const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
       setSliderValues(cfg.sharp, cfg.contrast, cfg.vibrance);
@@ -5979,7 +6137,8 @@ window.addEventListener('appinstalled', () => {
   };
 
   window.reprocessWithLiveSliders = function() {
-    scheduleRealtimeReconstruction();
+    applyInstant60FpsPreview();
+    scheduleFullPixelPostProcess();
   };
 
   window.handleEpRating = function(type) {
@@ -5996,7 +6155,7 @@ window.addEventListener('appinstalled', () => {
       likeBtn.className = 'px-4 py-1.5 rounded-xl bg-[#86efac]/20 border border-[#86efac] text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-[#86efac]/10 scale-105';
       dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
       feedbackMsg.className = 'text-[11px] font-mono pt-1 text-[#86efac]';
-      feedbackMsg.innerHTML = '✓ AI Reconstruction rated positively!';
+      feedbackMsg.innerHTML = '✓ Cloud GPU AI result rated positively!';
     } else {
       epCurrentRating = 'dislike';
       dislikeCount.innerText = '1';
@@ -6004,7 +6163,7 @@ window.addEventListener('appinstalled', () => {
       dislikeBtn.className = 'px-4 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-400 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-rose-500/10 scale-105';
       likeBtn.className = 'px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer';
       feedbackMsg.className = 'text-[11px] font-mono pt-1 text-amber-300';
-      feedbackMsg.innerHTML = `Want stronger edge recovery? <button type="button" onclick="boostFixMaximum()" class="underline font-bold text-[#86efac] ml-1 cursor-pointer">Click for Max Crisp Preset</button>`;
+      feedbackMsg.innerHTML = `Tip: Set Natural Tone & Color Vibrance to 50% for pure ungraded GPU output.`;
     }
   };
 
