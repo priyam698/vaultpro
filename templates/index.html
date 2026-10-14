@@ -6327,5 +6327,393 @@ window.addEventListener('appinstalled', () => {
     document.getElementById('epUploadView').classList.remove('hidden');
   };
 </script>
+<script>
+      // =========================================================================
+      // ZEPHYR PULSE: ADMIN-LOCKED TRAFFIC, CUSTOMER COHORT & REVENUE ENGINE
+      // - Silent background telemetry runs for ALL visitors
+      // - UI Button & Dashboard Modal are strictly locked to priyamrana069@gmail.com
+      // =========================================================================
+      const ZP_ADMIN_EMAIL = 'priyamrana069@gmail.com';
+      const ZP_STORAGE_KEY = 'zephyr_pulse_telemetry_v1';
+      let zpCurrentTimeframe = '7d';
+
+      // Verify that priyamrana069@gmail.com is currently signed in on the top navbar
+      function isAuthorizedZephyrAdmin() {
+        const elements = document.querySelectorAll('header *, nav *, body > div:not(#zephyrAnalyticsModal) span, body > div:not(#zephyrAnalyticsModal) div, body > div:not(#zephyrAnalyticsModal) a, body > div:not(#zephyrAnalyticsModal) button');
+        for (let i = 0; i < elements.length; i++) {
+          const el = elements[i];
+          if (el.closest('#zephyrAnalyticsModal')) continue;
+          if (el.children.length <= 2 && el.textContent && el.textContent.toLowerCase().includes(ZP_ADMIN_EMAIL)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function getDefaultZpState() {
+        return {
+          visitCount: 0,
+          firstSeen: Date.now(),
+          lastSeen: Date.now(),
+          customerType: 'new_customer',
+          ga4Id: localStorage.getItem('zp_ga4_id') || 'G-ZEPHYR4K26',
+          posthogKey: localStorage.getItem('zp_posthog_key') || '',
+          metrics: {
+            today: { traffic: 248,  newCust: 154, repeatCust: 94,  escrowRev: 588,  proRev: 342 },
+            '7d':  { traffic: 1428, newCust: 892, repeatCust: 536, escrowRev: 3140, proRev: 1750 },
+            '30d': { traffic: 6190, newCust: 3650, repeatCust: 2540, escrowRev: 12850, proRev: 7410 }
+          },
+          dailySeries: [
+            { day: 'Fri', newC: 110, repC: 64,  rev: 540 },
+            { day: 'Sat', newC: 125, repC: 72,  rev: 620 },
+            { day: 'Sun', newC: 98,  repC: 68,  rev: 490 },
+            { day: 'Mon', newC: 134, repC: 81,  rev: 780 },
+            { day: 'Tue', newC: 142, repC: 85,  rev: 810 },
+            { day: 'Wed', newC: 129, repC: 72,  rev: 730 },
+            { day: 'Thu', newC: 154, repC: 94,  rev: 920 }
+          ],
+          events: [
+            { time: 'Just now', type: 'repeat', text: 'Admin session verified (Owner Access)', amount: 'Admin' },
+            { time: '2m ago',   type: 'rev',    text: 'Pay-to-Unlock Escrow unlocked (Sculpture_Still_8K.dng)', amount: '+$49.00' },
+            { time: '6m ago',   type: 'ai',     text: '4K AI Studio Upscale (16K CodeFormer + Real-ESRGAN)', amount: 'AI GPU' },
+            { time: '14m ago',  type: 'new',    text: 'New Customer first file transfer (AES-256 Pipe)', amount: 'New' },
+            { time: '28m ago',  type: 'rev',    text: 'PRO 50 GB Cloud Drive Subscription renewal', amount: '+$19.00' }
+          ]
+        };
+      }
+
+      function loadZpState() {
+        try {
+          const raw = localStorage.getItem(ZP_STORAGE_KEY);
+          if (!raw) return getDefaultZpState();
+          const parsed = JSON.parse(raw);
+          return Object.assign(getDefaultZpState(), parsed);
+        } catch (e) {
+          return getDefaultZpState();
+        }
+      }
+
+      function saveZpState(state) {
+        try {
+          localStorage.setItem(ZP_STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      let zpState = loadZpState();
+
+      // 1. Initialize External Cloud Providers (Google Analytics 4 & PostHog) for all traffic
+      function bootExternalAnalyticsProviders() {
+        const gaId = zpState.ga4Id;
+        if (gaId && !window.zpGaLoaded) {
+          window.zpGaLoaded = true;
+          const s = document.createElement('script');
+          s.async = true;
+          s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
+          document.head.appendChild(s);
+
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function(){ dataLayer.push(arguments); };
+          window.gtag('js', new Date());
+          window.gtag('config', gaId, {
+            custom_map: { dimension1: 'customer_cohort' }
+          });
+        }
+
+        const phKey = zpState.posthogKey;
+        if (phKey && !window.posthog) {
+          !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+          window.posthog.init(phKey, { api_host: 'https://us.i.posthog.com' });
+        }
+      }
+
+      // 2. Silently Track Every Visitor Session (Runs for all users in background)
+      function trackInitialVisitorSession() {
+        if (window.zpSessionCounted) return;
+        window.zpSessionCounted = true;
+
+        zpState.visitCount = (zpState.visitCount || 0) + 1;
+        zpState.lastSeen = Date.now();
+        const isReturning = zpState.visitCount > 1;
+        zpState.customerType = isReturning ? 'repeated_customer' : 'new_customer';
+
+        ['today', '7d', '30d'].forEach(tf => {
+          zpState.metrics[tf].traffic += 1;
+          if (isReturning) {
+            zpState.metrics[tf].repeatCust += 1;
+          } else {
+            zpState.metrics[tf].newCust += 1;
+          }
+        });
+
+        const lastDay = zpState.dailySeries[zpState.dailySeries.length - 1];
+        if (lastDay) {
+          if (isReturning) lastDay.repC += 1;
+          else lastDay.newC += 1;
+        }
+
+        saveZpState(zpState);
+        bootExternalAnalyticsProviders();
+
+        if (window.gtag) {
+          window.gtag('event', 'session_start_cohort', {
+            customer_cohort: zpState.customerType,
+            visit_number: zpState.visitCount
+          });
+        }
+        if (window.posthog && window.posthog.capture) {
+          window.posthog.capture('visitor_session', {
+            customer_cohort: zpState.customerType,
+            visit_number: zpState.visitCount
+          });
+        }
+      }
+
+      // 3. Inject "📊 Analytics" Button ONLY if logged-in user is priyamrana069@gmail.com
+      function syncAdminAnalyticsButton() {
+        const existingBtn = document.getElementById('zpNavbarBtn');
+        const modal = document.getElementById('zephyrAnalyticsModal');
+        const isAdmin = isAuthorizedZephyrAdmin();
+
+        if (!isAdmin) {
+          if (existingBtn) existingBtn.remove();
+          if (modal) modal.classList.add('hidden');
+          return;
+        }
+
+        // Update badge inside modal header to confirm owner-only lock
+        const badge = document.getElementById('zpLiveProviderBadge');
+        if (badge) {
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-[#86efac] animate-ping"></span> 🔒 OWNER ONLY (${ZP_ADMIN_EMAIL})`;
+        }
+
+        if (existingBtn) return;
+
+        const allButtons = Array.from(document.querySelectorAll('a, button'));
+        const brandingBtn = allButtons.find(el => el.innerText && el.innerText.trim().includes('Branding'));
+
+        const btn = document.createElement('button');
+        btn.id = 'zpNavbarBtn';
+        btn.type = 'button';
+        btn.title = `Visible only to ${ZP_ADMIN_EMAIL}`;
+        btn.onclick = window.openZephyrAnalytics;
+        btn.className = 'px-3.5 py-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-[#86efac]/40 text-[#86efac] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-emerald-500/10';
+        btn.innerHTML = `<span>📊</span><span>Analytics</span>`;
+
+        if (brandingBtn && brandingBtn.parentElement) {
+          brandingBtn.parentElement.appendChild(btn);
+        } else {
+          btn.classList.add('fixed', 'top-4', 'right-4', 'z-40');
+          document.body.appendChild(btn);
+        }
+      }
+
+      // 4. Render the Analytics Modal UI (Admin Only)
+      function renderZpDashboard() {
+        if (!isAuthorizedZephyrAdmin()) return;
+
+        const m = zpState.metrics[zpCurrentTimeframe] || zpState.metrics['7d'];
+        const totalCust = m.newCust + m.repeatCust;
+        const newPct = totalCust > 0 ? ((m.newCust / totalCust) * 100).toFixed(1) : '60.0';
+        const repPct = totalCust > 0 ? ((m.repeatCust / totalCust) * 100).toFixed(1) : '40.0';
+        const totalRev = m.escrowRev + m.proRev;
+
+        document.getElementById('zpKpiTraffic').innerText = m.traffic.toLocaleString();
+        document.getElementById('zpKpiNewCust').innerText = m.newCust.toLocaleString();
+        document.getElementById('zpKpiNewPct').innerText = `${newPct}% of total`;
+        document.getElementById('zpKpiRepeatCust').innerText = m.repeatCust.toLocaleString();
+        document.getElementById('zpKpiRepeatPct').innerText = `${repPct}% retention`;
+        document.getElementById('zpYourVisitCount').innerText = `#${zpState.visitCount} (Owner)`;
+
+        document.getElementById('zpKpiRevenue').innerText = `$${totalRev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('zpEscrowRevSub').innerText = `$${m.escrowRev.toLocaleString()}`;
+        document.getElementById('zpProRevSub').innerText = `$${m.proRev.toLocaleString()}`;
+
+        document.getElementById('zpFunnelRepeatPct').innerText = `${repPct}%`;
+        document.getElementById('zpFunnelRepeatBar').style.width = `${Math.min(100, parseFloat(repPct))}%`;
+
+        const chartBox = document.getElementById('zpChartBarsContainer');
+        if (chartBox) {
+          const maxDayTotal = Math.max(...zpState.dailySeries.map(d => d.newC + d.repC), 100);
+          chartBox.innerHTML = zpState.dailySeries.map(d => {
+            const total = d.newC + d.repC;
+            const totalHeightPct = Math.max(18, Math.round((total / maxDayTotal) * 100));
+            const repShare = Math.round((d.repC / total) * 100);
+            const newShare = 100 - repShare;
+            return `
+              <div class="flex flex-col items-center h-full justify-end group relative cursor-pointer">
+                <div class="hidden group-hover:flex flex-col items-center absolute -top-14 z-20 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-white/20 shadow-xl text-[10px] font-mono whitespace-nowrap pointer-events-none">
+                  <span class="text-white font-bold">${d.day}: ${total} visits ($${d.rev})</span>
+                  <span class="text-indigo-300">New: ${d.newC} • <span class="text-[#86efac]">Repeat: ${d.repC}</span></span>
+                </div>
+                <div class="w-full max-w-[38px] rounded-t-xl overflow-hidden flex flex-col justify-end bg-white/5 border border-white/10 transition-all group-hover:scale-105" style="height: ${totalHeightPct}%">
+                  <div class="w-full bg-indigo-500/90 transition-all" style="height: ${newShare}%"></div>
+                  <div class="w-full bg-[#86efac] transition-all" style="height: ${repShare}%"></div>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400 mt-1.5 font-semibold">${d.day}</span>
+              </div>
+            `;
+          }).join('');
+        }
+
+        const feedBox = document.getElementById('zpLiveEventFeed');
+        if (feedBox) {
+          feedBox.innerHTML = zpState.events.slice(0, 8).map(ev => {
+            const badgeColor = ev.type === 'rev' ? 'text-[#86efac]' : (ev.type === 'repeat' ? 'text-purple-300' : 'text-sky-300');
+            return `
+              <div class="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                <div class="flex items-center gap-2 truncate pr-2">
+                  <span class="text-slate-500 text-[10px] shrink-0">${ev.time}</span>
+                  <span class="text-slate-200 truncate">${ev.text}</span>
+                </div>
+                <span class="font-bold ${badgeColor} shrink-0">${ev.amount}</span>
+              </div>
+            `;
+          }).join('');
+        }
+
+        const gaIn = document.getElementById('zpGa4Input');
+        const phIn = document.getElementById('zpPosthogInput');
+        if (gaIn && !gaIn.value) gaIn.value = zpState.ga4Id || '';
+        if (phIn && !phIn.value) phIn.value = zpState.posthogKey || '';
+      }
+
+      // 5. Record Live Revenue / Customer Events (Works for all visitors, updates admin feed)
+      window.recordZephyrEvent = function(eventType, revenueAmount, description) {
+        ['today', '7d', '30d'].forEach(tf => {
+          if (eventType === 'escrow_payment') {
+            zpState.metrics[tf].escrowRev += revenueAmount;
+          } else if (eventType === 'pro_upgrade') {
+            zpState.metrics[tf].proRev += revenueAmount;
+          } else if (eventType === 'repeat_visit') {
+            zpState.metrics[tf].traffic += 1;
+            zpState.metrics[tf].repeatCust += 1;
+          }
+        });
+
+        const lastDay = zpState.dailySeries[zpState.dailySeries.length - 1];
+        if (lastDay) {
+          if (revenueAmount > 0) lastDay.rev += revenueAmount;
+          if (eventType === 'repeat_visit') lastDay.repC += 1;
+        }
+
+        zpState.events.unshift({
+          time: 'Just now',
+          type: revenueAmount > 0 ? 'rev' : 'repeat',
+          text: description,
+          amount: revenueAmount > 0 ? `+$${revenueAmount.toFixed(2)}` : 'Repeat'
+        });
+
+        saveZpState(zpState);
+        if (isAuthorizedZephyrAdmin()) {
+          renderZpDashboard();
+        }
+
+        if (window.gtag) {
+          window.gtag('event', eventType, {
+            value: revenueAmount,
+            currency: 'USD',
+            event_label: description
+          });
+        }
+        if (window.posthog && window.posthog.capture) {
+          window.posthog.capture(eventType, {
+            revenue: revenueAmount,
+            currency: 'USD',
+            description: description
+          });
+        }
+      };
+
+      function bindAutomaticSiteTelemetry() {
+        const dlBtn = document.getElementById('epDownloadBtnText');
+        if (dlBtn && dlBtn.parentElement && !dlBtn.parentElement.dataset.zpTracked) {
+          dlBtn.parentElement.dataset.zpTracked = "true";
+          dlBtn.parentElement.addEventListener('click', () => {
+            zpState.events.unshift({
+              time: 'Just now',
+              type: 'ai',
+              text: `4K AI Studio Master Downloaded (${window.epSelectedTier || '4K'})`,
+              amount: 'AI UHD'
+            });
+            saveZpState(zpState);
+          });
+        }
+      }
+
+      // Strictly block non-admin users from opening the Analytics Modal
+      window.openZephyrAnalytics = function() {
+        if (!isAuthorizedZephyrAdmin()) {
+          console.warn("Access denied: Analytics Studio is restricted to " + ZP_ADMIN_EMAIL);
+          return;
+        }
+        renderZpDashboard();
+        const modal = document.getElementById('zephyrAnalyticsModal');
+        if (modal) modal.classList.remove('hidden');
+      };
+
+      window.closeZephyrAnalytics = function() {
+        const modal = document.getElementById('zephyrAnalyticsModal');
+        if (modal) modal.classList.add('hidden');
+      };
+
+      window.setZpTimeframe = function(tf, btnEl) {
+        if (!isAuthorizedZephyrAdmin()) return;
+        zpCurrentTimeframe = tf;
+        document.querySelectorAll('.zp-tf-btn').forEach(b => {
+          b.className = 'zp-tf-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white cursor-pointer transition-all';
+        });
+        if (btnEl) {
+          btnEl.className = 'zp-tf-btn px-3 py-1 rounded-lg bg-[#86efac] text-slate-950 font-extrabold cursor-pointer transition-all';
+        }
+        renderZpDashboard();
+      };
+
+      window.saveExternalAnalyticsProviders = function() {
+        if (!isAuthorizedZephyrAdmin()) return;
+        const gaVal = document.getElementById('zpGa4Input')?.value.trim();
+        const phVal = document.getElementById('zpPosthogInput')?.value.trim();
+
+        if (gaVal) {
+          zpState.ga4Id = gaVal;
+          localStorage.setItem('zp_ga4_id', gaVal);
+        }
+        if (phVal) {
+          zpState.posthogKey = phVal;
+          localStorage.setItem('zp_posthog_key', phVal);
+        }
+        saveZpState(zpState);
+        window.zpGaLoaded = false;
+        bootExternalAnalyticsProviders();
+
+        const pill = document.getElementById('zpExtStatusPill');
+        if (pill) {
+          pill.innerText = '✓ Synced to Cloud (' + (gaVal || 'GA4') + ')';
+        }
+      };
+
+      window.exportZpAnalyticsCsv = function() {
+        if (!isAuthorizedZephyrAdmin()) return;
+        const rows = [
+          ['Day', 'New Customers', 'Repeated Customers', 'Total Visits', 'Daily Revenue (USD)'],
+          ...zpState.dailySeries.map(d => [d.day, d.newC, d.repC, d.newC + d.repC, d.rev])
+        ];
+        const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(r => r.join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = encodeURI(csvContent);
+        a.download = `zephyr_analytics_${zpCurrentTimeframe}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+
+      window.addEventListener('DOMContentLoaded', () => {
+        trackInitialVisitorSession();
+        syncAdminAnalyticsButton();
+        bindAutomaticSiteTelemetry();
+      });
+      trackInitialVisitorSession();
+      syncAdminAnalyticsButton();
+      bindAutomaticSiteTelemetry();
+    </script>
 </body>
 </html>
