@@ -4243,9 +4243,130 @@ async def create_dodo_checkout(payload: dict):
             raise HTTPException(status_code=response.status_code, detail=res_data.get("message", "Dodo error"))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    # ============================================================================
+# REAL-TIME SERVER TELEMETRY ENGINE (ZERO FAKE DATA - FASTAPI)
+# ============================================================================
+import os, json
+from datetime import datetime
+from fastapi import Request
+
+ANALYTICS_DB_FILE = "zephyr_real_analytics.json"
+
+def load_analytics_db():
+    if os.path.exists(ANALYTICS_DB_FILE):
+        try:
+            with open(ANALYTICS_DB_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"known_visitors": {}, "daily": {}, "events": []}
+
+def save_analytics_db(data):
+    try:
+        with open(ANALYTICS_DB_FILE, "w") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
+
+@app.get("/api/zephyr-analytics")
+async def get_zephyr_analytics():
+    return load_analytics_db()
+
+@app.post("/api/zephyr-analytics")
+async def post_zephyr_analytics(request: Request):
+    db = load_analytics_db()
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+
+    if today_str not in db["daily"]:
+        db["daily"][today_str] = {
+            "traffic": 0,
+            "new": 0,
+            "repeat": 0,
+            "escrow_rev": 0.0,
+            "pro_rev": 0.0,
+            "ai_uses": 0,
+            "transfers": 0
+        }
+
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+
+    ev_type = payload.get("event_type", "session_start")
+    visitor_id = (
+        payload.get("visitor_id")
+        or request.headers.get("x-forwarded-for")
+        or (request.client.host if request.client else "anon")
+    )
+    amount = float(payload.get("amount", 0.0))
+    desc = payload.get("description", "")
+    time_label = datetime.now().strftime("%H:%M:%S")
+    day_bucket = db["daily"][today_str]
+
+    if ev_type == "session_start":
+        prev_visits = db["known_visitors"].get(visitor_id, 0)
+        db["known_visitors"][visitor_id] = prev_visits + 1
+        day_bucket["traffic"] += 1
+        if prev_visits == 0:
+            day_bucket["new"] += 1
+            db["events"].insert(0, {
+                "time": time_label,
+                "type": "new",
+                "text": f"New Customer visit ({visitor_id[:10]})",
+                "amount": "1st Visit"
+            })
+        else:
+            day_bucket["repeat"] += 1
+            db["events"].insert(0, {
+                "time": time_label,
+                "type": "repeat",
+                "text": f"Repeated Customer session (#{prev_visits + 1})",
+                "amount": f"Visit #{prev_visits + 1}"
+            })
+    elif ev_type == "ai_upscale":
+        day_bucket["ai_uses"] += 1
+        db["events"].insert(0, {
+            "time": time_label,
+            "type": "ai",
+            "text": desc or "4K AI Studio Upscale completed",
+            "amount": "AI GPU"
+        })
+    elif ev_type == "file_transfer":
+        day_bucket["transfers"] += 1
+        db["events"].insert(0, {
+            "time": time_label,
+            "type": "new",
+            "text": desc or "Encrypted file transfer created",
+            "amount": "Transfer"
+        })
+    elif ev_type == "escrow_payment":
+        day_bucket["escrow_rev"] += amount
+        db["events"].insert(0, {
+            "time": time_label,
+            "type": "rev",
+            "text": desc or "Pay-to-Unlock Escrow payment",
+            "amount": f"+${amount:.2f}"
+        })
+    elif ev_type == "pro_upgrade":
+        day_bucket["pro_rev"] += amount
+        db["events"].insert(0, {
+            "time": time_label,
+            "type": "rev",
+            "text": desc or "PRO 50 GB Plan subscription",
+            "amount": f"+${amount:.2f}"
+        })
+    elif ev_type == "reset_all":
+        db = {"known_visitors": {}, "daily": {}, "events": []}
+
+    db["events"] = db["events"][:25]
+    save_analytics_db(db)
+    return db
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    
+    
 
 
   
