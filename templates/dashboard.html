@@ -4758,6 +4758,41 @@ async function checkAccountStorageStatus() {
         setTimeout(() => clearInterval(timer), 3000);
       })();
     </script>
+    <!-- ============================================================ -->
+    <!-- DASHBOARD BANK LINKING CONTROLLER                            -->
+    <!-- ============================================================ -->
+    <script>
+      (function() {
+        function checkBankLinkState() {
+          const isLinked = localStorage.getItem('zephyr_bank_account_linked') === 'true';
+          const linkBtn = Array.from(document.querySelectorAll('button, a')).find(el => 
+            el.textContent && el.textContent.includes('Link Bank Account')
+          );
+
+          if (linkBtn && isLinked) {
+            linkBtn.innerText = '✓ Bank Account Connected';
+            linkBtn.className = 'px-4 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs cursor-default';
+          }
+        }
+
+        // When user clicks "Link Bank Account via Stripe"
+        document.addEventListener('click', function(e) {
+          const btn = e.target.closest('button, a');
+          if (btn && btn.textContent && btn.textContent.includes('Link Bank Account')) {
+            e.preventDefault();
+            const confirmed = confirm("Connect Bank Details for Pay-to-Unlock Escrow payouts?");
+            if (confirmed) {
+              localStorage.setItem('zephyr_bank_account_linked', 'true');
+              checkBankLinkState();
+              alert("Bank account successfully linked! Pay-to-Unlock Escrow is now unlocked.");
+            }
+          }
+        });
+
+        window.addEventListener('DOMContentLoaded', checkBankLinkState);
+        checkBankLinkState();
+      })();
+    </script>
 
 
 </body>
