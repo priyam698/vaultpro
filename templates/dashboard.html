@@ -4689,6 +4689,19 @@ async function checkAccountStorageStatus() {
 <!-- ============================================================ -->
     <!-- AUTO-HIDE INSTALL CARD ONLY IN ZEPHYR APP DASHBOARD          -->
     <!-- ============================================================ -->
+    <style>
+      @media all and (display-mode: standalone), 
+             all and (display-mode: window-controls-overlay), 
+             all and (display-mode: minimal-ui) {
+        .zephyr-pwa-install-container,
+        #pwaInstallSection,
+        #pwaInstallBanner,
+        .pwa-install-card {
+          display: none !important;
+        }
+      }
+    </style>
+
     <script>
       (function() {
         function hideDashInstallInApp() {
@@ -4701,29 +4714,48 @@ async function checkAccountStorageStatus() {
 
           if (!isApp) return;
 
-          const allNodes = Array.from(document.querySelectorAll('h1, h2, h3, h4, p, span, div'));
-          const title = allNodes.find(el => 
-            el.children.length === 0 && 
-            el.textContent && 
-            el.textContent.trim().includes('Our App Is Also Available')
-          );
-
-          if (title) {
-            let card = title;
-            while (card && card.parentElement && card.tagName !== 'BODY' && card.tagName !== 'MAIN') {
-              const btn = card.querySelector('button, a');
-              if (btn && btn.textContent && btn.textContent.includes('Install App')) {
-                card.style.setProperty('display', 'none', 'important');
-                break;
+          // 1. Locate by the Install App button inside the dashboard
+          const buttons = Array.from(document.querySelectorAll('button, a'));
+          buttons.forEach(btn => {
+            if (btn.textContent && btn.textContent.trim().toLowerCase().includes('install app')) {
+              let parent = btn.parentElement;
+              // Walk up the DOM to hide the entire install card
+              while (parent && parent.tagName !== 'BODY' && parent.tagName !== 'MAIN') {
+                if (
+                  parent.textContent.includes('Our App Is Also Available') ||
+                  parent.textContent.includes('desktop dock or mobile home screen')
+                ) {
+                  parent.style.setProperty('display', 'none', 'important');
+                  break;
+                }
+                parent = parent.parentElement;
               }
-              card = card.parentElement;
+              btn.style.setProperty('display', 'none', 'important');
             }
-          }
+          });
+
+          // 2. Direct fallback search for the banner container
+          const allDivs = Array.from(document.querySelectorAll('div, section'));
+          allDivs.forEach(el => {
+            if (
+              el.textContent &&
+              el.textContent.includes('Our App Is Also Available') &&
+              el.textContent.includes('desktop dock or mobile home screen')
+            ) {
+              // Hide the outermost wrapper of this specific card
+              const card = el.closest('.rounded-2xl, .rounded-3xl, [class*="border"]') || el;
+              card.style.setProperty('display', 'none', 'important');
+            }
+          });
         }
 
         window.addEventListener('DOMContentLoaded', hideDashInstallInApp);
         window.addEventListener('appinstalled', hideDashInstallInApp);
         hideDashInstallInApp();
+
+        // Run brief interval check in case the dashboard takes a moment to mount
+        const timer = setInterval(hideDashInstallInApp, 150);
+        setTimeout(() => clearInterval(timer), 3000);
       })();
     </script>
 
