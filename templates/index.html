@@ -7019,53 +7019,44 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- AUTO-HIDE INSTALL BANNER WHEN RUNNING IN INSTALLED APP       -->
+    <!-- AUTO-HIDE INSTALL BANNER ONLY IN ZEPHYR APP (PRESERVE FOOTER) -->
     <!-- ============================================================ -->
-    <style>
-      @media all and (display-mode: standalone), 
-             all and (display-mode: window-controls-overlay), 
-             all and (display-mode: minimal-ui) {
-        .zephyr-pwa-install-container,
-        #pwaInstallSection,
-        #pwaInstallBanner {
-          display: none !important;
-        }
-      }
-    </style>
-
     <script>
       (function() {
-        function hideInstallInApp() {
-          // Detect if running inside the installed standalone Zephyr App
-          const isStandaloneApp = 
+        function hideInstallBannerInApp() {
+          const isApp = 
             window.matchMedia('(display-mode: standalone)').matches ||
+            window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+            window.matchMedia('(display-mode: minimal-ui)').matches ||
             window.navigator.standalone === true ||
             document.referrer.includes('android-app://');
 
-          if (isStandaloneApp) {
-            // Target any container with "Install Zephyr on your device"
-            const allElements = Array.from(document.querySelectorAll('div, section'));
-            allElements.forEach(el => {
-              if (
-                el.children.length > 0 &&
-                el.textContent &&
-                el.textContent.includes('Install Zephyr on your device')
-              ) {
-                // Find the outer banner card and hide it
-                const bannerCard = el.closest('.rounded-2xl, .rounded-3xl, [class*="bg-"]') || el;
-                bannerCard.style.setProperty('display', 'none', 'important');
-              }
-            });
+          if (!isApp) return;
 
-            document.querySelectorAll('.zephyr-pwa-install-container').forEach(el => {
-              el.style.setProperty('display', 'none', 'important');
-            });
+          const allNodes = Array.from(document.querySelectorAll('h1, h2, h3, h4, p, span, div'));
+          const title = allNodes.find(el => 
+            el.children.length === 0 && 
+            el.textContent && 
+            el.textContent.trim().includes('Install Zephyr on your device')
+          );
+
+          if (title) {
+            // Traverse upward strictly until reaching the immediate install card
+            let card = title;
+            while (card && card.parentElement && card.tagName !== 'FOOTER' && card.tagName !== 'BODY') {
+              const btn = card.querySelector('button, a');
+              if (btn && btn.textContent && btn.textContent.includes('Install App')) {
+                card.style.setProperty('display', 'none', 'important');
+                break;
+              }
+              card = card.parentElement;
+            }
           }
         }
 
-        window.addEventListener('DOMContentLoaded', hideInstallInApp);
-        window.addEventListener('appinstalled', hideInstallInApp);
-        hideInstallInApp();
+        window.addEventListener('DOMContentLoaded', hideInstallBannerInApp);
+        window.addEventListener('appinstalled', hideInstallBannerInApp);
+        hideInstallBannerInApp();
       })();
     </script>
 </body>
