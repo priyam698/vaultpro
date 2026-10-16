@@ -4686,6 +4686,56 @@ async function checkAccountStorageStatus() {
     }
 }
 </script>
+<!-- ============================================================ -->
+    <!-- AUTO-HIDE INSTALL BANNER WHEN RUNNING IN INSTALLED APP       -->
+    <!-- ============================================================ -->
+    <style>
+      @media all and (display-mode: standalone), 
+             all and (display-mode: window-controls-overlay), 
+             all and (display-mode: minimal-ui) {
+        .zephyr-pwa-install-container,
+        #pwaInstallSection,
+        #pwaInstallBanner {
+          display: none !important;
+        }
+      }
+    </style>
+
+    <script>
+      (function() {
+        function hideInstallInApp() {
+          // Detect if running inside the installed standalone Zephyr App
+          const isStandaloneApp = 
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true ||
+            document.referrer.includes('android-app://');
+
+          if (isStandaloneApp) {
+            // Target any container with "Install Zephyr on your device"
+            const allElements = Array.from(document.querySelectorAll('div, section'));
+            allElements.forEach(el => {
+              if (
+                el.children.length > 0 &&
+                el.textContent &&
+                el.textContent.includes('Install Zephyr on your device')
+              ) {
+                // Find the outer banner card and hide it
+                const bannerCard = el.closest('.rounded-2xl, .rounded-3xl, [class*="bg-"]') || el;
+                bannerCard.style.setProperty('display', 'none', 'important');
+              }
+            });
+
+            document.querySelectorAll('.zephyr-pwa-install-container').forEach(el => {
+              el.style.setProperty('display', 'none', 'important');
+            });
+          }
+        }
+
+        window.addEventListener('DOMContentLoaded', hideInstallInApp);
+        window.addEventListener('appinstalled', hideInstallInApp);
+        hideInstallInApp();
+      })();
+    </script>
 
 
 </body>
