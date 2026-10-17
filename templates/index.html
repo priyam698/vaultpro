@@ -7174,46 +7174,69 @@ window.addEventListener('appinstalled', () => {
           const toast = document.getElementById('zephyrBankAlertToast');
           if (!toast) return;
           toast.style.display = 'block';
-          toast.classList.remove('opacity-0', '-translate-y-4');
-          toast.classList.add('opacity-100', 'translate-y-0');
 
           if (toastTimeout) clearTimeout(toastTimeout);
           toastTimeout = setTimeout(() => {
             toast.style.display = 'none';
-          }, 6000);
+          }, 5000);
         }
 
         function isBankDetailsEntered() {
           return localStorage.getItem('zephyr_bank_account_linked') === 'true';
         }
 
-        // Intercept clicks on the Pay-to-Unlock Escrow toggle switch
-        document.addEventListener('click', function(e) {
-          // Look for any toggle switch, label, or card area for "Pay-to-Unlock Escrow"
-          const escrowSection = e.target.closest('[class*="escrow"], label, div');
-          const isEscrowToggle = 
-            e.target.matches('input[type="checkbox"]') && 
-            e.target.closest('div, label')?.textContent?.includes('Pay-to-Unlock Escrow');
+        function attachEscrowToggleOnly() {
+          // Find the exact "Pay-to-Unlock Escrow" title
+          const allEls = Array.from(document.querySelectorAll('span, p, h3, h4, div'));
+          const title = allEls.find(el => 
+            el.children.length === 0 && 
+            el.textContent && 
+            el.textContent.trim() === 'Pay-to-Unlock Escrow'
+          );
+          if (!title) return;
 
-          const clickedEscrowContainer = 
-            e.target.textContent?.includes('Pay-to-Unlock Escrow') ||
-            (escrowSection && escrowSection.textContent?.includes('Pay-to-Unlock Escrow'));
+          // Find only the immediate row containing this title
+          const escrowRow = title.closest('.flex') || title.parentElement;
+          if (!escrowRow) return;
 
-          if (isEscrowToggle || (clickedEscrowContainer && (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL' || e.target.tagName === 'SPAN'))) {
-            if (!isBankDetailsEntered()) {
-              e.preventDefault();
-              e.stopPropagation();
+          // Target only the toggle switch (checkbox, label, or switch button)
+          const switchEl = 
+            escrowRow.querySelector('input[type="checkbox"]') ||
+            escrowRow.querySelector('[role="switch"]') ||
+            escrowRow.querySelector('label') ||
+            escrowRow.querySelector('.rounded-full');
 
-              // Reset checkbox state to unchecked
-              const toggleInput = document.querySelector('input[type="checkbox"][name*="escrow"], input[type="checkbox"]');
-              if (toggleInput && toggleInput.closest('div, label')?.textContent?.includes('Pay-to-Unlock Escrow')) {
-                toggleInput.checked = false;
-              }
+          if (!switchEl || switchEl.dataset.guarded) return;
+          switchEl.dataset.guarded = 'true';
 
-              showBankRequiredFlash();
-            }
+          const checkbox = escrowRow.querySelector('input[type="checkbox"]');
+
+          // If bank is not connected, guarantee toggle starts unchecked
+          if (!isBankDetailsEntered() && checkbox) {
+            checkbox.checked = false;
           }
-        }, true);
+
+          // Attach listener strictly to this switch control
+          switchEl.addEventListener('click', function(e) {
+            if (isBankDetailsEntered()) {
+              return; // Bank linked: allow normal toggle ON/OFF
+            }
+
+            // Bank missing: block toggle and flash warning
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (checkbox) {
+              checkbox.checked = false;
+            }
+            showBankRequiredFlash();
+          }, true);
+        }
+
+        window.addEventListener('DOMContentLoaded', attachEscrowToggleOnly);
+        attachEscrowToggleOnly();
+        setTimeout(attachEscrowToggleOnly, 300);
+        setTimeout(attachEscrowToggleOnly, 1000);
       })();
     </script>
     <!-- ============================================================ -->
