@@ -7138,20 +7138,20 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- HARD FIX: RESTORE ANALYTICS BUTTON & UN-HIJACK NAVBAR CLICKS -->
+    <!-- SHIFT RIGHT NAVBAR CLUSTER LEFT & FIX SPACING                -->
     <!-- ============================================================ -->
     <style>
-      /* Keep top navigation bar within screen bounds with clean edge margins */
+      /* Ensure the header container never causes viewport overflow */
       header {
         width: 100% !important;
         max-width: 100vw !important;
         box-sizing: border-box !important;
         padding-left: 1rem !important;
-        padding-right: 1.25rem !important;
+        padding-right: 2.5rem !important;
         overflow: visible !important;
       }
 
-      /* Flex header with clean space between left items and right controls */
+      /* Flex row across left and right navigation */
       header > div:first-child,
       header nav {
         display: flex !important;
@@ -7161,21 +7161,22 @@ window.addEventListener('appinstalled', () => {
         overflow: visible !important;
       }
 
-      /* Compact right-side controls so Sign Out is never clipped */
+      /* Shift the entire right-side button group leftward */
       header > div:first-child > div:last-child,
       header nav > div:last-child {
         display: flex !important;
         align-items: center !important;
         gap: 0.35rem !important;
         flex-shrink: 0 !important;
+        transform: translateX(-35px) !important; /* Pulls all right buttons left */
       }
 
-      /* Sleek, visible Analytics Button */
+      /* Keep Analytics button visible next to Branding */
       #zpNavbarBtn {
         display: inline-flex !important;
         align-items: center !important;
         gap: 0.35rem !important;
-        padding: 4px 10px !important;
+        padding: 4px 9px !important;
         font-size: 11px !important;
         font-weight: 700 !important;
         border-radius: 9999px !important;
@@ -7192,10 +7193,10 @@ window.addEventListener('appinstalled', () => {
         border-color: #86efac !important;
       }
 
-      /* Compact email badge so it doesn't push Sign Out off-screen */
+      /* Email pill clean sizing */
       header span[title*="@"],
       header span:has(span) {
-        max-width: 160px !important;
+        max-width: 175px !important;
         display: inline-block !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -7203,7 +7204,7 @@ window.addEventListener('appinstalled', () => {
         vertical-align: middle !important;
       }
 
-      /* Keep Sign Out permanently visible with breathing room */
+      /* Ensure Sign Out button is fully shown with clean margin */
       header a[href*="logout"],
       header a[href*="signout"],
       header button:has-text("Sign Out"),
@@ -7217,10 +7218,10 @@ window.addEventListener('appinstalled', () => {
 
     <script>
       (function() {
-        function hardFixNavbarAndAnalytics() {
+        function adjustHeaderCluster() {
           const header = document.querySelector('header');
 
-          // 1. Strip rogue click handlers from entire header and parent containers
+          // Prevent click hijacking on header buttons
           if (header) {
             header.onclick = null;
             header.querySelectorAll('*').forEach(el => {
@@ -7230,11 +7231,10 @@ window.addEventListener('appinstalled', () => {
             });
           }
 
-          // 2. Locate the "Branding" button to position Analytics right next to it
+          // Ensure Analytics button exists next to Branding
           const allLinks = Array.from(document.querySelectorAll('header a, header button, nav a, nav button'));
           const brandingBtn = allLinks.find(el => el.textContent && el.textContent.trim().toLowerCase().includes('branding'));
 
-          // 3. Ensure the Analytics button exists and is visible
           let analyticsBtn = document.getElementById('zpNavbarBtn');
           if (!analyticsBtn) {
             analyticsBtn = document.createElement('button');
@@ -7248,7 +7248,6 @@ window.addEventListener('appinstalled', () => {
 
           if (analyticsBtn) {
             analyticsBtn.style.setProperty('display', 'inline-flex', 'important');
-            // ONLY the Analytics button opens the analytics modal
             analyticsBtn.onclick = function(e) {
               e.preventDefault();
               e.stopPropagation();
@@ -7259,10 +7258,9 @@ window.addEventListener('appinstalled', () => {
           }
         }
 
-        window.addEventListener('DOMContentLoaded', hardFixNavbarAndAnalytics);
-        hardFixNavbarAndAnalytics();
-        setTimeout(hardFixNavbarAndAnalytics, 200);
-        setTimeout(hardFixNavbarAndAnalytics, 800);
+        window.addEventListener('DOMContentLoaded', adjustHeaderCluster);
+        adjustHeaderCluster();
+        setTimeout(adjustHeaderCluster, 200);
       })();
     </script>
 </body>
