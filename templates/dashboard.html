@@ -4575,17 +4575,22 @@ function renderAvailablePlans(currentStackedGb) {
 
         try {
             // 3. Request Dodo Payments Checkout Session
-            const res = await fetch("/api/dodo/create-checkout-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    user_id: currentUserId,
-                    plan_id: planId,
-                    plan_name: planName,
-                    storage_gb: planGb,
-                    is_stackable: true
-                })
-            });
+           // 3. Request Dodo Payments Checkout Session
+      const userEmail = localStorage.getItem("user_email") || localStorage.getItem("zephyr_user_email") || "priyamrana069@gmail.com";
+      const res = await fetch("/api/dodo/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: currentUserId || userEmail,
+          email: userEmail,
+          user_email: userEmail,
+          plan_id: planId,
+          plan_name: planName,
+          storage_gb: planGb,
+          is_stackable: true,
+          return_url: window.location.origin + "/dashboard"
+        })
+      });
 
             const data = await res.json();
 

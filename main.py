@@ -4203,17 +4203,18 @@ def health_check():
 
 @app.post("/api/dodo/create-checkout-session")
 async def create_dodo_checkout(payload: dict):
-    user_id = payload.get("user_id")
-    plan_id = payload.get("plan_id")
-    storage_gb = payload.get("storage_gb")
+    user_id = payload.get("user_id") or "zephyr_user"
+    user_email = payload.get("email") or payload.get("user_email") or "priyamrana069@gmail.com"
+    plan_id = str(payload.get("plan_id", "")).lower().strip()
+    storage_gb = payload.get("storage_gb") or 15
 
     product_id = DODO_PRODUCT_IDS.get(plan_id)
     if not product_id:
         raise HTTPException(status_code=400, detail="Invalid plan selected")
 
     dodo_api_key = os.getenv("DODO_API_KEY") or os.getenv("DODO_PAYMENTS_API_KEY")
-    dodo_base = os.getenv("DODO_API_URL", "https://test.dodopayments.com")
-    base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com")
+    dodo_base = os.getenv("DODO_API_URL", "https://test.dodopayments.com").rstrip("/")
+    base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
     headers = {
         "Authorization": f"Bearer {dodo_api_key}",
@@ -4221,8 +4222,16 @@ async def create_dodo_checkout(payload: dict):
     }
 
     body = {
-        "product_id": product_id,
-        "quantity": 1,
+        "product_cart": [
+            {
+                "product_id": product_id,
+                "quantity": 1
+            }
+        ],
+        "customer": {
+            "email": user_email if "@" in str(user_email) else "priyamrana069@gmail.com",
+            "name": str(user_email).split("@")[0] if "@" in str(user_email) else "Zephyr User"
+        },
         "metadata": {
             "user_id": str(user_id),
             "plan_id": str(plan_id),
@@ -4234,13 +4243,23 @@ async def create_dodo_checkout(payload: dict):
 
     try:
         import requests
-        response = requests.post(f"{dodo_base}/checkouts", json=body, headers=headers)
+        response = requests.post(f"{dodo_base}/checkouts", json=body, headers=headers, timeout=15)
         res_data = response.json()
 
         if response.status_code in [200, 201]:
-            return {"checkout_url": res_data.get("payment_link") or res_data.get("url")}
+            checkout_link = (
+                res_data.get("checkout_url")
+                or res_data.get("payment_link")
+                or res_data.get("url")
+            )
+            return {"checkout_url": checkout_link}
         else:
-            raise HTTPException(status_code=response.status_code, detail=res_data.get("message", "Dodo error"))
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=res_data.get("message") or res_data.get("detail") or "Dodo checkout error"
+            )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     # ============================================================================
