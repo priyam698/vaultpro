@@ -4759,6 +4759,7 @@ async function checkAccountStorageStatus() {
       })();
     </script>
     <!-- ============================================================ -->
+    <!-- ============================================================ -->
     <!-- DASHBOARD BANK LINKING CONTROLLER                            -->
     <!-- ============================================================ -->
     <script>
@@ -4775,7 +4776,6 @@ async function checkAccountStorageStatus() {
           }
         }
 
-        // When user clicks "Link Bank Account via Stripe"
         document.addEventListener('click', function(e) {
           const btn = e.target.closest('button, a');
           if (btn && btn.textContent && btn.textContent.includes('Link Bank Account')) {

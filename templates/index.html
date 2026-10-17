@@ -7060,7 +7060,8 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- PAY-TO-UNLOCK ESCROW BANK VERIFICATION GUARD                 -->
+    <!-- ============================================================ -->
+    <!-- PRECISE FIX: ESCROW TOGGLE ONLY (NORMAL TRANSFERS UNTOUCHED) -->
     <!-- ============================================================ -->
     <div id="zephyrBankAlertToast" style="display: none;" class="fixed top-6 left-1/2 -translate-x-1/2 z-[999999] w-[92%] max-w-lg p-4 rounded-2xl bg-[#0f172a]/95 border border-amber-400/40 shadow-2xl backdrop-blur-xl text-slate-200 transition-all duration-300">
       <div class="flex items-start gap-3">
@@ -7087,6 +7088,84 @@ window.addEventListener('appinstalled', () => {
       </div>
     </div>
 
+    <script>
+      (function() {
+        let toastTimeout = null;
+
+        function showBankRequiredFlash() {
+          const toast = document.getElementById('zephyrBankAlertToast');
+          if (!toast) return;
+          toast.style.display = 'block';
+
+          if (toastTimeout) clearTimeout(toastTimeout);
+          toastTimeout = setTimeout(() => {
+            toast.style.display = 'none';
+          }, 6000);
+        }
+
+        function isBankDetailsEntered() {
+          return localStorage.getItem('zephyr_bank_account_linked') === 'true';
+        }
+
+        // Locate ONLY the specific row containing "Pay-to-Unlock Escrow"
+        function getEscrowRow() {
+          const allEls = Array.from(document.querySelectorAll('span, p, div, label, h3, h4'));
+          const title = allEls.find(el => el.textContent && el.textContent.trim() === 'Pay-to-Unlock Escrow');
+          if (!title) return null;
+
+          let parent = title.parentElement;
+          while (parent && parent !== document.body) {
+            // Must contain the toggle switch but NOT the whole card / transfer buttons
+            if (
+              (parent.querySelector('input[type="checkbox"], [role="switch"], .rounded-full')) &&
+              !parent.textContent.includes('Transfer Files') &&
+              !parent.textContent.includes('Send files') &&
+              !parent.textContent.includes('Expire in')
+            ) {
+              return parent;
+            }
+            parent = parent.parentElement;
+          }
+          return null;
+        }
+
+        // Intercept ONLY clicks on the Escrow toggle
+        document.addEventListener('click', function(e) {
+          const escrowRow = getEscrowRow();
+          if (!escrowRow) return;
+
+          // If the click happened anywhere OUTSIDE the escrow row, ignore completely
+          if (!escrowRow.contains(e.target)) return;
+
+          // If bank details are already connected, allow toggling with NO alerts
+          if (isBankDetailsEntered()) return;
+
+          // Check if user clicked the toggle switch itself
+          const toggleInput = escrowRow.querySelector('input[type="checkbox"]');
+          const toggleBtn = escrowRow.querySelector('button, [role="switch"]');
+          
+          const isInteractingWithSwitch = 
+            e.target.matches('input[type="checkbox"]') ||
+            e.target.closest('button, [role="switch"], label') ||
+            e.target.classList.contains('rounded-full');
+
+          if (isInteractingWithSwitch) {
+            // Block turning it ON
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (toggleInput) {
+              toggleInput.checked = false;
+            }
+            if (toggleBtn) {
+              toggleBtn.setAttribute('aria-checked', 'false');
+            }
+
+            showBankRequiredFlash();
+          }
+        }, true);
+      })();
+    </script>
     <script>
       (function() {
         let toastTimeout = null;
