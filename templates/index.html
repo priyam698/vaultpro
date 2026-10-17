@@ -7138,18 +7138,20 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- RESTORE ORIGINAL NAVBAR SPACING & VISIBILITY                -->
+    <!-- SLIGHT SHIFT NAVBAR LEFT & FULL VISIBILITY FIX               -->
     <!-- ============================================================ -->
     <style>
-      /* Keep the top navigation bar at full width without page overflow */
+      /* Ensure the top header stays strictly within the screen bounds */
       header {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
+        padding-left: 1rem !important;
+        padding-right: 1.5rem !important; /* Pulls right edge inward */
         overflow: visible !important;
       }
 
-      /* Maintain spacious separation between the left and right clusters */
+      /* Flex layout with balanced spacing */
       header > div,
       header nav {
         display: flex !important;
@@ -7159,20 +7161,32 @@ window.addEventListener('appinstalled', () => {
         overflow: visible !important;
       }
 
-      /* Ensure neither group is clipped */
+      /* Tighten spacing between buttons on the right side */
       header .flex {
         overflow: visible !important;
+        gap: 0.4rem !important;
       }
 
-      /* Compact Analytics button so it never pushes the right side */
+      /* Compact Analytics button */
       #zpNavbarBtn {
-        padding: 4px 10px !important;
+        padding: 4px 8px !important;
         font-size: 11px !important;
         white-space: nowrap !important;
         flex-shrink: 0 !important;
       }
 
-      /* Guarantee Sign Out stays visible on the far right */
+      /* Slightly shrink email pill width to shift Sign Out leftward */
+      header span[title*="@"],
+      header span:has(span) {
+        max-width: 115px !important;
+        display: inline-block !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+      }
+
+      /* Guarantee Sign Out stays cleanly inset from the right window edge */
       header a[href*="logout"],
       header a[href*="signout"],
       header button:has-text("Sign Out"),
@@ -7180,22 +7194,14 @@ window.addEventListener('appinstalled', () => {
         flex-shrink: 0 !important;
         display: inline-flex !important;
         visibility: visible !important;
+        margin-right: 0.5rem !important;
       }
     </style>
 
     <script>
       (function() {
-        function restoreNavbarLayout() {
-          // Reset any previously injected inline styles that clamped container widths
-          const allDivs = document.querySelectorAll('header div, header nav, header span');
-          allDivs.forEach(el => {
-            if (el.style.maxWidth === '180px' || el.style.overflow === 'hidden') {
-              el.style.maxWidth = '';
-              el.style.overflow = '';
-            }
-          });
-
-          // Ensure the user email text truncates smoothly if screen width is narrow
+        function shiftNavbarLeft() {
+          // Truncate email element cleanly to pull all right buttons left
           const allSpans = Array.from(document.querySelectorAll('header span, header a, header div'));
           const emailEl = allSpans.find(el => 
             el.children.length === 0 && 
@@ -7205,7 +7211,7 @@ window.addEventListener('appinstalled', () => {
           );
 
           if (emailEl) {
-            emailEl.style.maxWidth = '175px';
+            emailEl.style.maxWidth = '115px';
             emailEl.style.overflow = 'hidden';
             emailEl.style.textOverflow = 'ellipsis';
             emailEl.style.whiteSpace = 'nowrap';
@@ -7214,9 +7220,9 @@ window.addEventListener('appinstalled', () => {
           }
         }
 
-        window.addEventListener('DOMContentLoaded', restoreNavbarLayout);
-        restoreNavbarLayout();
-        setTimeout(restoreNavbarLayout, 300);
+        window.addEventListener('DOMContentLoaded', shiftNavbarLeft);
+        shiftNavbarLeft();
+        setTimeout(shiftNavbarLeft, 250);
       })();
     </script>
 </body>
