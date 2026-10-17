@@ -7138,44 +7138,86 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- CLEAN NAVBAR BALANCE & RECOVERY FIX                          -->
+    <!-- RESTORE ORIGINAL NAVBAR SPACING & VISIBILITY                -->
     <!-- ============================================================ -->
     <style>
-      /* Ensure the top header stays strictly within the screen bounds */
+      /* Keep the top navigation bar at full width without page overflow */
       header {
-        max-width: 100vw !important;
+        width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
+        overflow: visible !important;
       }
 
-      /* Compact button and item spacing so all items fit cleanly on one line */
-      header nav, 
-      header .flex.items-center {
-        gap: 0.35rem !important;
+      /* Maintain spacious separation between the left and right clusters */
+      header > div,
+      header nav {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        overflow: visible !important;
       }
 
-      header a, 
-      header button {
-        padding-left: 0.55rem !important;
-        padding-right: 0.55rem !important;
-        font-size: 0.8rem !important;
+      /* Ensure neither group is clipped */
+      header .flex {
+        overflow: visible !important;
       }
 
-      /* Keep the Analytics button compact */
+      /* Compact Analytics button so it never pushes the right side */
       #zpNavbarBtn {
-        padding: 4px 9px !important;
+        padding: 4px 10px !important;
         font-size: 11px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
       }
 
-      /* Truncate user email text directly so it never pushes Sign In / Sign Out off-screen */
-      header span[title*="@"],
-      header span:has(span) {
-        max-width: 130px;
-        display: inline-block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        vertical-align: middle;
+      /* Guarantee Sign Out stays visible on the far right */
+      header a[href*="logout"],
+      header a[href*="signout"],
+      header button:has-text("Sign Out"),
+      .zephyr-signout-btn {
+        flex-shrink: 0 !important;
+        display: inline-flex !important;
+        visibility: visible !important;
       }
     </style>
+
+    <script>
+      (function() {
+        function restoreNavbarLayout() {
+          // Reset any previously injected inline styles that clamped container widths
+          const allDivs = document.querySelectorAll('header div, header nav, header span');
+          allDivs.forEach(el => {
+            if (el.style.maxWidth === '180px' || el.style.overflow === 'hidden') {
+              el.style.maxWidth = '';
+              el.style.overflow = '';
+            }
+          });
+
+          // Ensure the user email text truncates smoothly if screen width is narrow
+          const allSpans = Array.from(document.querySelectorAll('header span, header a, header div'));
+          const emailEl = allSpans.find(el => 
+            el.children.length === 0 && 
+            el.textContent && 
+            el.textContent.includes('@') &&
+            el.textContent.includes('.')
+          );
+
+          if (emailEl) {
+            emailEl.style.maxWidth = '175px';
+            emailEl.style.overflow = 'hidden';
+            emailEl.style.textOverflow = 'ellipsis';
+            emailEl.style.whiteSpace = 'nowrap';
+            emailEl.style.display = 'inline-block';
+            emailEl.style.verticalAlign = 'middle';
+          }
+        }
+
+        window.addEventListener('DOMContentLoaded', restoreNavbarLayout);
+        restoreNavbarLayout();
+        setTimeout(restoreNavbarLayout, 300);
+      })();
+    </script>
 </body>
 </html>
