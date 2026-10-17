@@ -7138,71 +7138,75 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- SLIGHT SHIFT NAVBAR LEFT & FULL VISIBILITY FIX               -->
+    <!-- 1:1 RESTORE: ORIGINAL HEADER SPACING & FULL EMAIL VISIBILITY -->
     <!-- ============================================================ -->
     <style>
-      /* Ensure the top header stays strictly within the screen bounds */
+      /* Ensure the navbar matches original layout with full breathing room */
       header {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
-        padding-left: 1rem !important;
-        padding-right: 1.5rem !important; /* Pulls right edge inward */
-        overflow: visible !important;
       }
 
-      /* Flex layout with balanced spacing */
+      /* Clean separation between left menu and right user controls */
       header > div,
       header nav {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
         width: 100% !important;
-        overflow: visible !important;
+        gap: 1.5rem !important;
       }
 
-      /* Tighten spacing between buttons on the right side */
-      header .flex {
-        overflow: visible !important;
-        gap: 0.4rem !important;
-      }
-
-      /* Compact Analytics button */
-      #zpNavbarBtn {
-        padding: 4px 8px !important;
-        font-size: 11px !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-      }
-
-      /* Slightly shrink email pill width to shift Sign Out leftward */
+      /* Remove forced text truncation so the full email displays naturally */
       header span[title*="@"],
-      header span:has(span) {
-        max-width: 115px !important;
-        display: inline-block !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+      header span:has(span),
+      .zephyr-user-pill-fix {
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
         white-space: nowrap !important;
-        vertical-align: middle !important;
       }
 
-      /* Guarantee Sign Out stays cleanly inset from the right window edge */
+      /* Keep Sign Out button fully visible with proper right margin */
       header a[href*="logout"],
       header a[href*="signout"],
-      header button:has-text("Sign Out"),
-      .zephyr-signout-btn {
+      header button:has-text("Sign Out") {
         flex-shrink: 0 !important;
         display: inline-flex !important;
-        visibility: visible !important;
-        margin-right: 0.5rem !important;
+        margin-left: 0.25rem !important;
+      }
+
+      /* Style for Analytics button inside bottom Quick Actions bar */
+      #zpQuickActionsBtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(134, 239, 172, 0.35);
+        color: #86efac;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      #zpQuickActionsBtn:hover {
+        background: rgba(16, 185, 129, 0.28);
+        border-color: #86efac;
       }
     </style>
 
     <script>
       (function() {
-        function shiftNavbarLeft() {
-          // Truncate email element cleanly to pull all right buttons left
-          const allSpans = Array.from(document.querySelectorAll('header span, header a, header div'));
+        function restoreOriginalHeader() {
+          // 1. Remove the Analytics button from the top navbar if present
+          const topBtn = document.getElementById('zpNavbarBtn');
+          if (topBtn) topBtn.remove();
+
+          // 2. Remove any inline truncation styles on the email pill
+          const allSpans = Array.from(document.querySelectorAll('header span, header div, header a'));
           const emailEl = allSpans.find(el => 
             el.children.length === 0 && 
             el.textContent && 
@@ -7211,18 +7215,42 @@ window.addEventListener('appinstalled', () => {
           );
 
           if (emailEl) {
-            emailEl.style.maxWidth = '115px';
-            emailEl.style.overflow = 'hidden';
-            emailEl.style.textOverflow = 'ellipsis';
-            emailEl.style.whiteSpace = 'nowrap';
-            emailEl.style.display = 'inline-block';
-            emailEl.style.verticalAlign = 'middle';
+            emailEl.style.maxWidth = '';
+            emailEl.style.overflow = 'visible';
+            emailEl.style.textOverflow = 'clip';
+            if (emailEl.parentElement) {
+              emailEl.parentElement.style.maxWidth = '';
+              emailEl.parentElement.style.overflow = 'visible';
+              emailEl.parentElement.style.cursor = 'pointer';
+              emailEl.parentElement.title = 'Click to open Owner Analytics';
+              emailEl.parentElement.onclick = window.openZephyrAnalytics;
+            }
+          }
+
+          // 3. Mount Analytics in the bottom Quick Actions bar so top header stays uncluttered
+          if (typeof isAuthorizedZephyrAdmin === 'function' && isAuthorizedZephyrAdmin()) {
+            if (!document.getElementById('zpQuickActionsBtn')) {
+              const quickActionContainers = Array.from(document.querySelectorAll('div, section')).filter(el => 
+                el.textContent && el.textContent.includes('Quick Actions:')
+              );
+
+              if (quickActionContainers.length > 0) {
+                const qaContainer = quickActionContainers[quickActionContainers.length - 1];
+                const btnWrapper = qaContainer.querySelector('.flex') || qaContainer;
+                const qaBtn = document.createElement('button');
+                qaBtn.id = 'zpQuickActionsBtn';
+                qaBtn.type = 'button';
+                qaBtn.innerHTML = `<span>📊</span><span>Analytics</span>`;
+                qaBtn.onclick = window.openZephyrAnalytics;
+                btnWrapper.appendChild(qaBtn);
+              }
+            }
           }
         }
 
-        window.addEventListener('DOMContentLoaded', shiftNavbarLeft);
-        shiftNavbarLeft();
-        setTimeout(shiftNavbarLeft, 250);
+        window.addEventListener('DOMContentLoaded', restoreOriginalHeader);
+        restoreOriginalHeader();
+        setTimeout(restoreOriginalHeader, 300);
       })();
     </script>
 </body>
