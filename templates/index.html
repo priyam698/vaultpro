@@ -7138,16 +7138,16 @@ window.addEventListener('appinstalled', () => {
       })();
     </script>
     <!-- ============================================================ -->
-    <!-- FINAL NAVBAR FIX: COMPACT PILL + FULL RIGHT CLUSTER VISIBLE  -->
+    <!-- FINAL NAVBAR FIX: FULL ENGLISH (US) VISIBILITY & SPACING     -->
     <!-- ============================================================ -->
     <style>
-      /* 1. Outer header row spans full width with balanced edge padding */
+      /* 1. Header bounds and padding */
       header {
         width: 100% !important;
         max-width: 100vw !important;
         box-sizing: border-box !important;
         padding-left: 1rem !important;
-        padding-right: 1.25rem !important;
+        padding-right: 1rem !important;
       }
 
       header > div:first-child {
@@ -7159,7 +7159,7 @@ window.addEventListener('appinstalled', () => {
         gap: 0.5rem !important;
       }
 
-      /* 2. CRITICAL: Keep <nav> (the center pill) auto-sized, NEVER 100% width */
+      /* 2. Center navigation pill stays auto-sized */
       header nav {
         width: auto !important;
         max-width: max-content !important;
@@ -7178,7 +7178,7 @@ window.addEventListener('appinstalled', () => {
         white-space: nowrap !important;
       }
 
-      /* 3. Compact Analytics button inside the center pill */
+      /* 3. Analytics button inside center pill */
       #zpNavbarBtn {
         display: inline-flex !important;
         align-items: center !important;
@@ -7195,27 +7195,35 @@ window.addEventListener('appinstalled', () => {
         flex-shrink: 0 !important;
       }
 
-      /* 4. Right-hand controls group: tight, clean spacing with zero transforms */
+      /* 4. Right controls container */
       header > div:first-child > div:last-child {
         display: flex !important;
         align-items: center !important;
         justify-content: flex-end !important;
-        gap: 0.4rem !important;
+        gap: 0.35rem !important;
         width: auto !important;
         flex-shrink: 0 !important;
         transform: none !important;
       }
 
-      /* 5. Trim excess empty width inside the English (US) dropdown box */
+      /* 5. Sized to fit "English (US)" completely and shifted slightly left */
       header select {
-        width: 122px !important;
-        min-width: 0 !important;
-        padding-left: 1.6rem !important;
-        padding-right: 1.2rem !important;
-        font-size: 0.75rem !important;
+        width: 142px !important;
+        min-width: 142px !important;
+        padding-left: 1.85rem !important;
+        padding-right: 1.35rem !important;
+        font-size: 0.78rem !important;
+        line-height: normal !important;
+        white-space: nowrap !important;
       }
 
-      /* 6. Keep full email and Sign Out button cleanly visible */
+      header .relative:has(select) {
+        width: 142px !important;
+        min-width: 142px !important;
+        margin-right: 0.35rem !important; /* Shifts language pill slightly left */
+      }
+
+      /* 6. Sign Out button visibility */
       header a[href*="logout"],
       header a[href*="signout"] {
         display: inline-flex !important;
@@ -7233,7 +7241,7 @@ window.addEventListener('appinstalled', () => {
           const header = document.querySelector('header');
           if (!header) return;
 
-          // Remove any rogue click listeners from header containers
+          // Clear any rogue click listeners
           header.onclick = null;
           header.querySelectorAll('*').forEach(el => {
             if (el.id !== 'zpNavbarBtn' && el.onclick === window.openZephyrAnalytics) {
@@ -7241,16 +7249,27 @@ window.addEventListener('appinstalled', () => {
             }
           });
 
-          // Force <nav> pill to stay compact around its buttons
+          // Enforce auto width on the center pill
           const navPill = header.querySelector('nav');
           if (navPill) {
             navPill.style.setProperty('width', 'auto', 'important');
             navPill.style.setProperty('max-width', 'max-content', 'important');
-            navPill.style.setProperty('justify-content', 'center', 'important');
-            navPill.style.setProperty('margin-right', '0', 'important');
           }
 
-          // Place Analytics button cleanly at the end of the center pill
+          // Ensure full width and left shift for the language dropdown
+          const langSelect = header.querySelector('select');
+          if (langSelect) {
+            langSelect.style.setProperty('width', '142px', 'important');
+            langSelect.style.setProperty('min-width', '142px', 'important');
+            const langWrapper = langSelect.closest('.relative') || langSelect.parentElement;
+            if (langWrapper && langWrapper !== header) {
+              langWrapper.style.setProperty('width', '142px', 'important');
+              langWrapper.style.setProperty('min-width', '142px', 'important');
+              langWrapper.style.setProperty('margin-right', '0.35rem', 'important');
+            }
+          }
+
+          // Analytics button placement next to Branding
           const allLinks = Array.from(header.querySelectorAll('a, button'));
           const brandingBtn = allLinks.find(el => el.textContent && el.textContent.trim().toLowerCase().includes('branding'));
 
