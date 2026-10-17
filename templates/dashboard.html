@@ -4793,6 +4793,116 @@ async function checkAccountStorageStatus() {
         checkBankLinkState();
       })();
     </script>
+    <!-- ============================================================ -->
+    <!-- ZEPHYR ESCROW BANK DETAILS MODAL & CONTROLLER                -->
+    <!-- ============================================================ -->
+    <div id="zephyrBankModal" style="display: none;" class="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div class="w-full max-w-md p-6 rounded-3xl bg-[#0f172a] border border-slate-700/60 shadow-2xl text-slate-200">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🏦</span>
+            <h3 class="font-bold text-white text-base">Link Payout Bank Account</h3>
+          </div>
+          <button type="button" onclick="closeZephyrBankModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+
+        <form id="zephyrBankForm" onsubmit="handleSaveBankDetails(event)" class="mt-4 space-y-3.5 text-xs">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Account Holder Legal Name</label>
+            <input type="text" id="bankHolderName" required placeholder="e.g. Priyam Rana" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Bank Name</label>
+            <input type="text" id="bankName" required placeholder="e.g. HDFC Bank, Chase, ICICI" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Account Number / IBAN</label>
+            <input type="text" id="bankAccountNumber" required placeholder="•••• •••• •••• 5678" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">IFSC / Routing / SWIFT Code</label>
+            <input type="text" id="bankRoutingCode" required placeholder="e.g. HDFC0001234 or 021000021" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div class="pt-2 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeZephyrBankModal()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all">Cancel</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg transition-all">Save & Connect Bank</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function openZephyrBankModal() {
+        document.getElementById('zephyrBankModal').style.display = 'flex';
+      }
+
+      function closeZephyrBankModal() {
+        document.getElementById('zephyrBankModal').style.display = 'none';
+      }
+
+      function handleSaveBankDetails(e) {
+        e.preventDefault();
+        const holder = document.getElementById('bankHolderName').value.trim();
+        const bank = document.getElementById('bankName').value.trim();
+        const acc = document.getElementById('bankAccountNumber').value.trim();
+        const routing = document.getElementById('bankRoutingCode').value.trim();
+
+        const bankData = {
+          holder,
+          bank,
+          last4: acc.slice(-4) || '5678',
+          routing,
+          linkedAt: new Date().toISOString()
+        };
+
+        localStorage.setItem('zephyr_bank_account_linked', 'true');
+        localStorage.setItem('zephyr_bank_details', JSON.stringify(bankData));
+
+        closeZephyrBankModal();
+        updateDashboardBankUI();
+        alert('Bank account successfully connected! Pay-to-Unlock Escrow is now active.');
+      }
+
+      function updateDashboardBankUI() {
+        const isLinked = localStorage.getItem('zephyr_bank_account_linked') === 'true';
+        const savedData = JSON.parse(localStorage.getItem('zephyr_bank_details') || '{}');
+
+        const allButtons = Array.from(document.querySelectorAll('button, a'));
+        const linkBtn = allButtons.find(el => 
+          el.textContent && el.textContent.includes('Bank Account')
+        );
+
+        if (linkBtn) {
+          if (isLinked) {
+            const bankName = savedData.bank || 'Verified Bank';
+            const last4 = savedData.last4 || '••••';
+            linkBtn.innerHTML = `<span>✓ Connected: ${bankName} (••••${last4})</span>`;
+            linkBtn.className = 'px-4 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer';
+            linkBtn.onclick = function(e) {
+              e.preventDefault();
+              if (confirm('Do you want to edit or unlink your payout bank account?')) {
+                openZephyrBankModal();
+              }
+            };
+          } else {
+            linkBtn.innerHTML = `Link Bank Account via Stripe`;
+            linkBtn.onclick = function(e) {
+              e.preventDefault();
+              openZephyrBankModal();
+            };
+          }
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        updateDashboardBankUI();
+        if (window.location.hash === '#link-bank' || window.location.search.includes('action=link-bank')) {
+          openZephyrBankModal();
+        }
+      });
+      updateDashboardBankUI();
+    </script>
 
 
 </body>

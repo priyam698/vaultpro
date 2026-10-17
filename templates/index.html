@@ -7185,8 +7185,8 @@ window.addEventListener('appinstalled', () => {
           return localStorage.getItem('zephyr_bank_account_linked') === 'true';
         }
 
-        function attachEscrowToggleOnly() {
-          // Find the exact "Pay-to-Unlock Escrow" title
+        function setupEscrowSwitchHandler() {
+          // Locate the exact "Pay-to-Unlock Escrow" title element
           const allEls = Array.from(document.querySelectorAll('span, p, h3, h4, div'));
           const title = allEls.find(el => 
             el.children.length === 0 && 
@@ -7195,48 +7195,49 @@ window.addEventListener('appinstalled', () => {
           );
           if (!title) return;
 
-          // Find only the immediate row containing this title
+          // Target only the row containing this specific switch
           const escrowRow = title.closest('.flex') || title.parentElement;
           if (!escrowRow) return;
 
-          // Target only the toggle switch (checkbox, label, or switch button)
-          const switchEl = 
+          const switchControl = 
             escrowRow.querySelector('input[type="checkbox"]') ||
             escrowRow.querySelector('[role="switch"]') ||
             escrowRow.querySelector('label') ||
             escrowRow.querySelector('.rounded-full');
 
-          if (!switchEl || switchEl.dataset.guarded) return;
-          switchEl.dataset.guarded = 'true';
+          if (!switchControl || switchControl.dataset.escrowConfigured) return;
+          switchControl.dataset.escrowConfigured = 'true';
 
           const checkbox = escrowRow.querySelector('input[type="checkbox"]');
+          const knob = escrowRow.querySelector('.rounded-full span, .rounded-full div');
 
-          // If bank is not connected, guarantee toggle starts unchecked
-          if (!isBankDetailsEntered() && checkbox) {
-            checkbox.checked = false;
-          }
-
-          // Attach listener strictly to this switch control
-          switchEl.addEventListener('click', function(e) {
+          // Intercept the click on the toggle switch
+          switchControl.addEventListener('click', function(e) {
+            // If bank details ARE connected: allow normal toggle ON/OFF with no toast
             if (isBankDetailsEntered()) {
-              return; // Bank linked: allow normal toggle ON/OFF
+              const toast = document.getElementById('zephyrBankAlertToast');
+              if (toast) toast.style.display = 'none';
+              return;
             }
 
-            // Bank missing: block toggle and flash warning
+            // If bank details are NOT connected: hold OFF and show warning
             e.preventDefault();
             e.stopPropagation();
 
-            if (checkbox) {
-              checkbox.checked = false;
+            if (checkbox) checkbox.checked = false;
+            if (knob) {
+              knob.classList.remove('translate-x-5', 'translate-x-6');
+              knob.classList.add('translate-x-0');
             }
+
             showBankRequiredFlash();
           }, true);
         }
 
-        window.addEventListener('DOMContentLoaded', attachEscrowToggleOnly);
-        attachEscrowToggleOnly();
-        setTimeout(attachEscrowToggleOnly, 300);
-        setTimeout(attachEscrowToggleOnly, 1000);
+        window.addEventListener('DOMContentLoaded', setupEscrowSwitchHandler);
+        setupEscrowSwitchHandler();
+        setTimeout(setupEscrowSwitchHandler, 300);
+        setTimeout(setupEscrowSwitchHandler, 1000);
       })();
     </script>
     <!-- ============================================================ -->
