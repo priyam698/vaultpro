@@ -4837,119 +4837,154 @@ async function checkAccountStorageStatus() {
       </div>
     </div>
 
-    <script>
-      function openZephyrBankModal() {
-        document.getElementById('zephyrBankModal').style.display = 'flex';
-      }
+   <!-- STRIPE COUNTRY SELECTION MODAL -->
+<div id="stripeCountryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+  <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-base font-bold text-white">Select Bank Account Country</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Stripe will configure local bank rails for your country.</p>
+      </div>
+      <button type="button" onclick="closeCountryModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+    </div>
 
-      function closeZephyrBankModal() {
-        document.getElementById('zephyrBankModal').style.display = 'none';
-      }
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Payout Country</label>
+        <select id="stripeCountrySelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+          <option value="IN" selected>🇮🇳 India (INR Direct Bank / IFSC / Export Payout)</option>
+          <option value="US">🇺🇸 United States (ACH / Routing Number / Wise USD)</option>
+          <option value="GB">🇬🇧 United Kingdom (Sort Code & Account Number)</option>
+          <option value="CA">🇨🇦 Canada (Transit & Institution Number)</option>
+          <option value="AU">🇦🇺 Australia (BSB & Account Number)</option>
+          <option value="DE">🇩🇪 Germany (IBAN & SEPA)</option>
+          <option value="FR">🇫🇷 France (IBAN)</option>
+          <option value="NL">🇳🇱 Netherlands (IBAN)</option>
+          <option value="SG">🇸🇬 Singapore (GIRO / FAST)</option>
+          <option value="AE">🇦🇪 United Arab Emirates (IBAN)</option>
+          <option value="IE">🇮🇪 Ireland (IBAN)</option>
+          <option value="NZ">🇳🇿 New Zealand (Bank Code)</option>
+          <option value="ES">🇪🇸 Spain (IBAN)</option>
+          <option value="IT">🇮🇹 Italy (IBAN)</option>
+          <option value="JP">🇯🇵 Japan (Zengin Payout)</option>
+        </select>
+      </div>
 
-      function handleSaveBankDetails(e) {
-        e.preventDefault();
-        const holder = document.getElementById('bankHolderName').value.trim();
-        const bank = document.getElementById('bankName').value.trim();
-        const acc = document.getElementById('bankAccountNumber').value.trim();
-        const routing = document.getElementById('bankRoutingCode').value.trim();
+      <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 text-[11px] text-slate-400 leading-relaxed">
+        💡 <strong>Note:</strong> Selecting <strong>India</strong> prompts for Indian bank account details (IFSC, Account Number, PAN). If you use a global USD virtual account (such as <strong>Wise, Payoneer, or Skydo</strong>), select <strong>United States</strong>.
+      </div>
 
-        const bankData = {
-          holder,
-          bank,
-          last4: acc.slice(-4) || '5678',
-          routing,
-          linkedAt: new Date().toISOString()
-        };
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button type="button" onclick="closeCountryModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all">
+          Cancel
+        </button>
+        <button type="button" id="btnContinueStripe" onclick="proceedToStripeOnboard()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+          <span>Continue to Stripe</span> ↗
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        localStorage.setItem('zephyr_bank_account_linked', 'true');
-        localStorage.setItem('zephyr_bank_details', JSON.stringify(bankData));
+<script>
+  function openCountryModal() {
+    document.getElementById('stripeCountryModal')?.classList.remove('hidden');
+  }
 
-        closeZephyrBankModal();
-        updateDashboardBankUI();
-        alert('Bank account successfully connected! Pay-to-Unlock Escrow is now active.');
-      }
+  function closeCountryModal() {
+    document.getElementById('stripeCountryModal')?.classList.add('hidden');
+  }
 
-     async function updateDashboardBankUI() {
-      const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
-                      Array.from(document.querySelectorAll('button, a')).find(el => el.textContent && el.textContent.includes('Bank Account'));
-      if (!linkBtn) return;
+  function startStripeOnboarding() {
+    openCountryModal();
+  }
 
-      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+  async function proceedToStripeOnboard() {
+    const btn = document.getElementById('btnContinueStripe');
+    const countrySelect = document.getElementById('stripeCountrySelect');
+    const selectedCountry = countrySelect ? countrySelect.value : 'IN';
 
-      try {
-        const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
-        const data = await res.json();
-
-        if (data.connected && data.payouts_enabled) {
-          localStorage.setItem('zephyr_bank_account_linked', 'true');
-          linkBtn.innerHTML = `<span>✓ Bank Linked via Stripe (88% Payouts Active)</span>`;
-          linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 cursor-default';
-          linkBtn.onclick = function(e) {
-            e.preventDefault();
-            alert("Your bank account is fully connected via Stripe Express. 88% of all escrow unlock payments are directly routed to your bank.");
-          };
-        } else if (data.connected && !data.payouts_enabled) {
-          localStorage.setItem('zephyr_bank_account_linked', 'false');
-          linkBtn.innerHTML = `<span>Complete Stripe Verification</span> ↗`;
-          linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg cursor-pointer transition-all';
-          linkBtn.onclick = function(e) {
-            e.preventDefault();
-            startStripeOnboarding();
-          };
-        } else {
-          localStorage.setItem('zephyr_bank_account_linked', 'false');
-          linkBtn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
-          linkBtn.onclick = function(e) {
-            e.preventDefault();
-            startStripeOnboarding();
-          };
-        }
-      } catch (err) {
-        console.warn("Stripe status check skipped:", err);
-      }
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<span>Configuring Stripe (${selectedCountry})...</span>`;
     }
 
-    async function startStripeOnboarding() {
-      const btn = document.getElementById('triggerStripeOnboardLink') || 
-                  Array.from(document.querySelectorAll('button, a')).find(el => el.textContent && el.textContent.includes('Bank Account'));
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span>Redirecting to Stripe...</span>`;
-      }
+    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
 
-      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+    try {
+      const res = await fetch('/api/stripe/connect/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          user_id: userId, 
+          email: userId,
+          country: selectedCountry 
+        })
+      });
+      const data = await res.json();
 
-      try {
-        const res = await fetch('/api/stripe/connect/onboard', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, email: userId })
-        });
-        const data = await res.json();
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert("Error: " + (data.detail || "Could not generate Stripe onboarding link."));
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
-          }
-        }
-      } catch (err) {
-        alert("Connection error contacting Stripe backend.");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Error: " + (data.detail || "Could not generate Stripe onboarding link."));
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
+          btn.innerHTML = `<span>Continue to Stripe</span> ↗`;
         }
       }
+    } catch (err) {
+      alert("Connection error contacting Stripe backend.");
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Continue to Stripe</span> ↗`;
+      }
     }
+  }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      updateDashboardBankUI();
-    });
-      updateDashboardBankUI();
-    </script>
+  async function updateDashboardBankUI() {
+    const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
+                    Array.from(document.querySelectorAll('button, a')).find(el => el.textContent && el.textContent.includes('Bank Account'));
+    if (!linkBtn) return;
+
+    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+
+    try {
+      const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
+      const data = await res.json();
+
+      if (data.connected && data.payouts_enabled) {
+        localStorage.setItem('zephyr_bank_account_linked', 'true');
+        linkBtn.innerHTML = `<span>✓ Bank Linked via Stripe (88% Payouts Active)</span>`;
+        linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 cursor-default';
+        linkBtn.onclick = function(e) {
+          e.preventDefault();
+          alert("Your bank account is connected via Stripe Express. 88% of all escrow unlock payments are directly routed to your bank.");
+        };
+      } else if (data.connected && !data.payouts_enabled) {
+        localStorage.setItem('zephyr_bank_account_linked', 'false');
+        linkBtn.innerHTML = `<span>Complete Stripe Verification</span> ↗`;
+        linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg cursor-pointer transition-all';
+        linkBtn.onclick = function(e) {
+          e.preventDefault();
+          openCountryModal();
+        };
+      } else {
+        localStorage.setItem('zephyr_bank_account_linked', 'false');
+        linkBtn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
+        linkBtn.onclick = function(e) {
+          e.preventDefault();
+          openCountryModal();
+        };
+      }
+    } catch (err) {
+      console.warn("Stripe status check skipped:", err);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    updateDashboardBankUI();
+  });
+</script>
 
 
 </body>

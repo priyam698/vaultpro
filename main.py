@@ -4273,6 +4273,7 @@ async def get_stripe_connect_status(user_id: str):
 async def start_stripe_onboard(payload: dict):
     user_id = payload.get("user_id") or "priyamrana069@gmail.com"
     email = payload.get("email") or user_id
+    target_country = str(payload.get("country") or "US").upper().strip()
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
     conn = get_db()
@@ -4284,39 +4285,58 @@ async def start_stripe_onboard(payload: dict):
     if user:
         account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
 
-    # Create Express Account if creator doesn't have one yet
-    if not account_id:
+    # Verify if existing Stripe account matches the selected country
+    needs_new_account = True
+    if account_id:
+        try:
+            existing_acct = stripe.Account.retrieve(account_id)
+            if existing_acct.get("country", "").upper() == target_country:
+                needs_new_account = False
+        except Exception:
+            needs_new_account = True
+
+    # Create account configured for the selected country
+    if needs_new_account:
         try:
             account = stripe.Account.create(
                 type="express",
+                country=target_country,
                 email=email if "@" in str(email) else "creator@zephyrweb.in",
                 capabilities={"transfers": {"requested": True}},
                 business_type="individual",
-                metadata={"zephyr_user_id": str(user_id)}
+                metadata={
+                    "zephyr_user_id": str(user_id),
+                    "registered_country": target_country
+                }
             )
             account_id = account.id
             cursor.execute(
-                "UPDATE users SET stripe_account_id = %s WHERE user_id = %s",
+                "UPDATE users SET stripe_account_id = %s, stripe_payouts_enabled = 0 WHERE user_id = %s",
                 (account_id, user_id)
             )
             conn.commit()
         except Exception:
+            # Fallback for countries with different capability structures
             try:
                 account = stripe.Account.create(
                     type="express",
+                    country=target_country,
                     email=email if "@" in str(email) else "creator@zephyrweb.in",
                     business_type="individual",
-                    metadata={"zephyr_user_id": str(user_id)}
+                    metadata={
+                        "zephyr_user_id": str(user_id),
+                        "registered_country": target_country
+                    }
                 )
                 account_id = account.id
                 cursor.execute(
-                    "UPDATE users SET stripe_account_id = %s WHERE user_id = %s",
+                    "UPDATE users SET stripe_account_id = %s, stripe_payouts_enabled = 0 WHERE user_id = %s",
                     (account_id, user_id)
                 )
                 conn.commit()
             except Exception as e:
                 conn.close()
-                raise HTTPException(status_code=500, detail=f"Stripe account creation failed: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Stripe account creation failed for country {target_country}: {str(e)}")
 
     conn.close()
 
