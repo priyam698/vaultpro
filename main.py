@@ -187,7 +187,11 @@ def resolve_user_tier(user_dict: dict):
     current_tier = (user_dict.get("tier") or "free").lower()
     current_quota = user_dict.get("storage_quota_bytes")
 
-    if is_sub_active(sub_end) or price > 0.0:
+    # 1. Strictly verify whether the subscription date is currently active
+    active = is_sub_active(sub_end)
+
+    if active:
+        # Active paid subscription: allow full purchased/stacked vault capacity
         if current_tier in PLAN_CONFIG and current_tier != "free":
             resolved = current_tier
         elif price >= 7.0:
@@ -205,10 +209,9 @@ def resolve_user_tier(user_dict: dict):
         quota = min(MAX_VAULT_BYTES, max(current_quota or default_q, default_q))
         return resolved, quota, price
 
-    tier_key = current_tier if current_tier in PLAN_CONFIG else "free"
-    default_quota = PLAN_CONFIG[tier_key]["quota"]
-    quota = current_quota or default_quota
-    return tier_key, quota, price
+    # 2. Expired subscription OR Free user: strictly lock to Free Starter (5 GB)
+    free_quota = PLAN_CONFIG["free"]["quota"]  # 5,368,709,120 bytes (5 GB)
+    return "free", free_quota, 0.0
 
 # ----------------- Brevo Permanent Password Engine -----------------
 def generate_permanent_password() -> str:
