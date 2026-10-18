@@ -71,7 +71,6 @@ SUPERSONIC_FAVICON_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0
 app = FastAPI(
     title="Zephyr Drive & Transfer API",
     version="3.5.0",
-    swagger_favicon_url="/favicon.ico"
 )
 
 import os

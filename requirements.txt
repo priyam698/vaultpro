@@ -12,3 +12,4 @@ requests
 replicate
 itsdangerous>=2.1.2
 resend>=2.0.0
+stripe>=7.0.0
