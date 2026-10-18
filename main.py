@@ -4204,58 +4204,98 @@ def health_check():
     return {"status": "ok"}
 
 # ============================================================
-# STRIPE CONNECT & 88/12 ESCROW PAYOUT ENGINE
+# ============================================================
+# STRIPE CONNECT & 88/12 ESCROW PAYOUT ENGINE (POSTGRES SAFE)
 # ============================================================
 import stripe
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-# Auto-migration: ensure users table has stripe tracking columns
-try:
-    _conn = get_db()
-    _cursor = _conn.cursor()
-    for _col in [
-        "ALTER TABLE users ADD COLUMN stripe_account_id TEXT",
-        "ALTER TABLE users ADD COLUMN stripe_payouts_enabled INTEGER DEFAULT 0",
-        "ALTER TABLE users ADD COLUMN stripe_details_submitted INTEGER DEFAULT 0"
-    ]:
-        try:
-            _cursor.execute(_col)
-            _conn.commit()
-        except Exception:
-            pass
-    _conn.close()
-except Exception as _e:
-    print(f"[STRIPE DB MIGRATION NOTICE]: {_e}")
+
+def _init_stripe_db():
+    conn = None
+    try:
+        conn = get_db()
+        conn.rollback()
+        cursor = conn.cursor()
+        for col_stmt in [
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_payouts_enabled INTEGER DEFAULT 0;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_details_submitted INTEGER DEFAULT 0;"
+        ]:
+            try:
+                cursor.execute(col_stmt)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+    except Exception as e:
+        if conn:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        print(f"[STRIPE DB INIT NOTICE]: {e}")
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+_init_stripe_db()
+
+
+def _db_get_stripe_user(user_ident: str):
+    """Safely retrieves Stripe user details checking email and user_id without transaction aborts."""
+    conn = None
+    try:
+        conn = get_db()
+        conn.rollback()
+        cursor = conn.cursor()
+        for col in ["email", "user_id"]:
+            try:
+                cursor.execute(f"SELECT stripe_account_id, stripe_payouts_enabled FROM users WHERE {col} = %s", (user_ident,))
+                row = cursor.fetchone()
+                if row:
+                    return conn, cursor, row, col
+            except Exception:
+                conn.rollback()
+        return conn, cursor, None, "email"
+    except Exception:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
+        return None, None, None, "email"
 
 
 @app.get("/api/stripe/connect/status")
 async def get_stripe_connect_status(user_id: str):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT stripe_account_id, stripe_payouts_enabled FROM users WHERE user_id = %s",
-        (user_id,)
-    )
-    user = cursor.fetchone()
-    conn.close()
+    ident = str(user_id or "priyamrana069@gmail.com").strip()
+    conn, cursor, user_row, matched_col = _db_get_stripe_user(ident)
 
-    if not user:
-        return {"connected": False, "payouts_enabled": False}
-
-    stripe_account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
-    if not stripe_account_id:
+    if not conn or not user_row:
+        if conn:
+            conn.close()
         return {"connected": False, "payouts_enabled": False}
 
     try:
+        stripe_account_id = user_row.get("stripe_account_id") if isinstance(user_row, dict) else user_row[0]
+        if not stripe_account_id:
+            conn.close()
+            return {"connected": False, "payouts_enabled": False}
+
         acct = stripe.Account.retrieve(stripe_account_id)
         payouts_enabled = bool(acct.payouts_enabled and acct.details_submitted)
 
-        conn = get_db()
-        cursor = conn.cursor()
         cursor.execute(
-            "UPDATE users SET stripe_payouts_enabled = %s, stripe_details_submitted = %s WHERE user_id = %s",
-            (1 if payouts_enabled else 0, 1 if acct.details_submitted else 0, user_id)
+            f"""
+            UPDATE users 
+            SET stripe_payouts_enabled = %s, stripe_details_submitted = %s 
+            WHERE {matched_col} = %s
+            """,
+            (1 if payouts_enabled else 0, 1 if acct.details_submitted else 0, ident)
         )
         conn.commit()
         conn.close()
@@ -4265,27 +4305,33 @@ async def get_stripe_connect_status(user_id: str):
             "payouts_enabled": payouts_enabled,
             "account_id": stripe_account_id
         }
-    except Exception as e:
-        return {"connected": True, "payouts_enabled": False, "error": str(e)}
+    except Exception:
+        if conn:
+            try:
+                conn.rollback()
+                conn.close()
+            except Exception:
+                pass
+        return {"connected": True, "payouts_enabled": False}
 
 
 @app.post("/api/stripe/connect/onboard")
 async def start_stripe_onboard(payload: dict):
-    user_id = payload.get("user_id") or "priyamrana069@gmail.com"
-    email = payload.get("email") or user_id
+    user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
     target_country = str(payload.get("country") or "US").upper().strip()
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT stripe_account_id FROM users WHERE user_id = %s", (user_id,))
-    user = cursor.fetchone()
+    if target_country == "IN":
+        raise HTTPException(
+            status_code=400,
+            detail="Direct Indian Stripe accounts cannot be created by US platforms due to RBI cross-border rules. Please select 'United States' and enter your Wise, Payoneer, or Skydo USD receiving account details."
+        )
 
+    conn, cursor, user_row, matched_col = _db_get_stripe_user(user_ident)
     account_id = None
-    if user:
-        account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
+    if user_row:
+        account_id = user_row.get("stripe_account_id") if isinstance(user_row, dict) else user_row[0]
 
-    # Verify if existing Stripe account matches the selected country
     needs_new_account = True
     if account_id:
         try:
@@ -4295,50 +4341,44 @@ async def start_stripe_onboard(payload: dict):
         except Exception:
             needs_new_account = True
 
-    # Create account configured for the selected country
     if needs_new_account:
         try:
             account = stripe.Account.create(
                 type="express",
                 country=target_country,
-                email=email if "@" in str(email) else "creator@zephyrweb.in",
+                email=user_ident if "@" in user_ident else "creator@zephyrweb.in",
                 capabilities={"transfers": {"requested": True}},
                 business_type="individual",
-                metadata={
-                    "zephyr_user_id": str(user_id),
-                    "registered_country": target_country
-                }
+                metadata={"zephyr_user": user_ident, "country": target_country}
             )
-            account_id = account.id
-            cursor.execute(
-                "UPDATE users SET stripe_account_id = %s, stripe_payouts_enabled = 0 WHERE user_id = %s",
-                (account_id, user_id)
-            )
-            conn.commit()
         except Exception:
-            # Fallback for countries with different capability structures
+            account = stripe.Account.create(
+                type="express",
+                country=target_country,
+                email=user_ident if "@" in user_ident else "creator@zephyrweb.in",
+                business_type="individual",
+                metadata={"zephyr_user": user_ident, "country": target_country}
+            )
+
+        account_id = account.id
+
+        if conn and cursor:
             try:
-                account = stripe.Account.create(
-                    type="express",
-                    country=target_country,
-                    email=email if "@" in str(email) else "creator@zephyrweb.in",
-                    business_type="individual",
-                    metadata={
-                        "zephyr_user_id": str(user_id),
-                        "registered_country": target_country
-                    }
-                )
-                account_id = account.id
                 cursor.execute(
-                    "UPDATE users SET stripe_account_id = %s, stripe_payouts_enabled = 0 WHERE user_id = %s",
-                    (account_id, user_id)
+                    f"""
+                    UPDATE users 
+                    SET stripe_account_id = %s, stripe_payouts_enabled = 0, stripe_details_submitted = 0 
+                    WHERE {matched_col} = %s
+                    """,
+                    (account_id, user_ident)
                 )
                 conn.commit()
             except Exception as e:
-                conn.close()
-                raise HTTPException(status_code=500, detail=f"Stripe account creation failed for country {target_country}: {str(e)}")
+                conn.rollback()
+                raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
 
-    conn.close()
+    if conn:
+        conn.close()
 
     try:
         account_link = stripe.AccountLink.create(
@@ -4350,31 +4390,35 @@ async def start_stripe_onboard(payload: dict):
         return {"url": account_link.url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate onboarding URL: {str(e)}")
+
+
 @app.post("/api/stripe/connect/disconnect")
 async def disconnect_stripe_account(payload: dict):
-    user_id = payload.get("user_id") or "priyamrana069@gmail.com"
-
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT stripe_account_id FROM users WHERE user_id = %s", (user_id,))
-    user = cursor.fetchone()
+    user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
+    conn, cursor, user_row, matched_col = _db_get_stripe_user(user_ident)
 
     account_id = None
-    if user:
-        account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
+    if user_row:
+        account_id = user_row.get("stripe_account_id") if isinstance(user_row, dict) else user_row[0]
 
-    cursor.execute(
-        """
-        UPDATE users 
-        SET stripe_account_id = NULL, 
-            stripe_payouts_enabled = 0, 
-            stripe_details_submitted = 0 
-        WHERE user_id = %s
-        """,
-        (user_id,)
-    )
-    conn.commit()
-    conn.close()
+    if conn and cursor:
+        try:
+            cursor.execute(
+                f"""
+                UPDATE users 
+                SET stripe_account_id = NULL, 
+                    stripe_payouts_enabled = 0, 
+                    stripe_details_submitted = 0 
+                WHERE {matched_col} = %s
+                """,
+                (user_ident,)
+            )
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            raise HTTPException(status_code=500, detail=f"Failed to disconnect: {str(e)}")
+        finally:
+            conn.close()
 
     if account_id:
         try:
@@ -4387,26 +4431,21 @@ async def disconnect_stripe_account(payload: dict):
 
 @app.post("/api/escrow/create-checkout")
 async def create_escrow_checkout(payload: dict):
-    creator_user_id = payload.get("creator_user_id")
+    creator_ident = str(payload.get("creator_user_id") or payload.get("creator_email") or "").strip()
     file_id = payload.get("file_id")
     file_name = payload.get("file_name") or "Secure Escrow Deliverable"
     price_usd = float(payload.get("price_usd") or 10.0)
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT stripe_account_id, stripe_payouts_enabled FROM users WHERE user_id = %s",
-        (creator_user_id,)
-    )
-    creator = cursor.fetchone()
-    conn.close()
+    conn, cursor, creator_row, _ = _db_get_stripe_user(creator_ident)
+    if conn:
+        conn.close()
 
-    if not creator:
-        raise HTTPException(status_code=400, detail="Creator not found.")
+    if not creator_row:
+        raise HTTPException(status_code=400, detail="Creator account not found.")
 
-    creator_account_id = creator.get("stripe_account_id") if isinstance(creator, dict) else creator[0]
-    payouts_enabled = creator.get("stripe_payouts_enabled") if isinstance(creator, dict) else creator[1]
+    creator_account_id = creator_row.get("stripe_account_id") if isinstance(creator_row, dict) else creator_row[0]
+    payouts_enabled = creator_row.get("stripe_payouts_enabled") if isinstance(creator_row, dict) else creator_row[1]
 
     if not creator_account_id or not payouts_enabled:
         raise HTTPException(status_code=400, detail="Creator bank payout onboarding is not complete.")
@@ -4429,12 +4468,12 @@ async def create_escrow_checkout(payload: dict):
         }],
         mode="payment",
         payment_intent_data={
-            "application_fee_amount": platform_fee_cents,        # 12% stays in your Zephyr account
-            "transfer_data": {"destination": creator_account_id} # 88% sent directly to creator's bank
+            "application_fee_amount": platform_fee_cents,        # 12% kept by Zephyr
+            "transfer_data": {"destination": creator_account_id} # 88% direct to creator bank
         },
         metadata={
             "file_id": str(file_id),
-            "creator_user_id": str(creator_user_id)
+            "creator_user": str(creator_ident)
         },
         success_url=f"{base_url}/download/{file_id}?unlocked=true&session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{base_url}/download/{file_id}?canceled=true"
