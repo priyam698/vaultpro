@@ -4942,44 +4942,85 @@ async function checkAccountStorageStatus() {
   }
 
   async function updateDashboardBankUI() {
-    const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
-                    Array.from(document.querySelectorAll('button, a')).find(el => el.textContent && el.textContent.includes('Bank Account'));
-    if (!linkBtn) return;
+      // Find the button or badge in the bank card
+      const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
+                      Array.from(document.querySelectorAll('button, div')).find(el => 
+                        el.textContent && (el.textContent.includes('Bank Linked') || el.textContent.includes('Bank Account'))
+                      );
+      if (!linkBtn) return;
 
-    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+      const container = linkBtn.parentElement;
+      container.className = "pt-2 flex flex-wrap items-center gap-3";
 
-    try {
-      const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
-      const data = await res.json();
+      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
 
-      if (data.connected && data.payouts_enabled) {
-        localStorage.setItem('zephyr_bank_account_linked', 'true');
-        linkBtn.innerHTML = `<span>✓ Bank Linked via Stripe (88% Payouts Active)</span>`;
-        linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 cursor-default';
-        linkBtn.onclick = function(e) {
-          e.preventDefault();
-          alert("Your bank account is connected via Stripe Express. 88% of all escrow unlock payments are directly routed to your bank.");
-        };
-      } else if (data.connected && !data.payouts_enabled) {
-        localStorage.setItem('zephyr_bank_account_linked', 'false');
-        linkBtn.innerHTML = `<span>Complete Stripe Verification</span> ↗`;
-        linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg cursor-pointer transition-all';
-        linkBtn.onclick = function(e) {
-          e.preventDefault();
-          openCountryModal();
-        };
-      } else {
-        localStorage.setItem('zephyr_bank_account_linked', 'false');
-        linkBtn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
-        linkBtn.onclick = function(e) {
-          e.preventDefault();
-          openCountryModal();
-        };
+      try {
+        const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+
+        if (data.connected && data.payouts_enabled) {
+          localStorage.setItem('zephyr_bank_account_linked', 'true');
+          container.innerHTML = `
+            <div class="px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>✓ Bank Linked via Stripe (88% Payouts Active)</span>
+            </div>
+            <button type="button" onclick="disconnectStripeAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Remove Bank Account</span>
+            </button>
+          `;
+        } else if (data.connected && !data.payouts_enabled) {
+          localStorage.setItem('zephyr_bank_account_linked', 'false');
+          container.innerHTML = `
+            <button type="button" onclick="openCountryModal()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg transition-all cursor-pointer">
+              <span>Complete Stripe Verification</span> ↗
+            </button>
+            <button type="button" onclick="disconnectStripeAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer">
+              <span>Remove / Reset Bank</span>
+            </button>
+          `;
+        } else {
+          localStorage.setItem('zephyr_bank_account_linked', 'false');
+          container.innerHTML = `
+            <button id="triggerStripeOnboardLink" onclick="startStripeOnboarding()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+              <span>Link Bank Account via Stripe</span> ↗
+            </button>
+          `;
+        }
+      } catch (err) {
+        console.warn("Stripe status check skipped:", err);
       }
-    } catch (err) {
-      console.warn("Stripe status check skipped:", err);
     }
-  }
+
+    async function disconnectStripeAccount() {
+      if (!confirm("Are you sure you want to remove your connected bank account? Pay-to-Unlock Escrow will be disabled until you link a new account.")) {
+        return;
+      }
+
+      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+
+      try {
+        const res = await fetch('/api/stripe/connect/disconnect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, email: userId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('zephyr_bank_account_linked', 'false');
+          alert("Bank account unlinked successfully.");
+          window.location.href = '/dashboard';
+        } else {
+          alert("Error: " + (data.detail || "Failed to remove bank account."));
+        }
+      } catch (err) {
+        alert("Connection error unlinking bank account.");
+      }
+    }
 
   window.addEventListener('DOMContentLoaded', () => {
     updateDashboardBankUI();
