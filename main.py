@@ -4203,6 +4203,191 @@ DODO_PRODUCT_IDS = {
 def health_check():
     return {"status": "ok"}
 
+# ============================================================
+# STRIPE CONNECT & 88/12 ESCROW PAYOUT ENGINE
+# ============================================================
+import stripe
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+# Auto-migration: ensure users table has stripe tracking columns
+try:
+    _conn = get_db()
+    _cursor = _conn.cursor()
+    for _col in [
+        "ALTER TABLE users ADD COLUMN stripe_account_id TEXT",
+        "ALTER TABLE users ADD COLUMN stripe_payouts_enabled INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN stripe_details_submitted INTEGER DEFAULT 0"
+    ]:
+        try:
+            _cursor.execute(_col)
+            _conn.commit()
+        except Exception:
+            pass
+    _conn.close()
+except Exception as _e:
+    print(f"[STRIPE DB MIGRATION NOTICE]: {_e}")
+
+
+@app.get("/api/stripe/connect/status")
+async def get_stripe_connect_status(user_id: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT stripe_account_id, stripe_payouts_enabled FROM users WHERE user_id = %s",
+        (user_id,)
+    )
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user:
+        return {"connected": False, "payouts_enabled": False}
+
+    stripe_account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
+    if not stripe_account_id:
+        return {"connected": False, "payouts_enabled": False}
+
+    try:
+        acct = stripe.Account.retrieve(stripe_account_id)
+        payouts_enabled = bool(acct.payouts_enabled and acct.details_submitted)
+
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE users SET stripe_payouts_enabled = %s, stripe_details_submitted = %s WHERE user_id = %s",
+            (1 if payouts_enabled else 0, 1 if acct.details_submitted else 0, user_id)
+        )
+        conn.commit()
+        conn.close()
+
+        return {
+            "connected": True,
+            "payouts_enabled": payouts_enabled,
+            "account_id": stripe_account_id
+        }
+    except Exception as e:
+        return {"connected": True, "payouts_enabled": False, "error": str(e)}
+
+
+@app.post("/api/stripe/connect/onboard")
+async def start_stripe_onboard(payload: dict):
+    user_id = payload.get("user_id") or "priyamrana069@gmail.com"
+    email = payload.get("email") or user_id
+    base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT stripe_account_id FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    account_id = None
+    if user:
+        account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
+
+    # Create Express Account if creator doesn't have one yet
+    if not account_id:
+        try:
+            account = stripe.Account.create(
+                type="express",
+                email=email if "@" in str(email) else "creator@zephyrweb.in",
+                capabilities={"transfers": {"requested": True}},
+                business_type="individual",
+                metadata={"zephyr_user_id": str(user_id)}
+            )
+            account_id = account.id
+            cursor.execute(
+                "UPDATE users SET stripe_account_id = %s WHERE user_id = %s",
+                (account_id, user_id)
+            )
+            conn.commit()
+        except Exception:
+            try:
+                account = stripe.Account.create(
+                    type="express",
+                    email=email if "@" in str(email) else "creator@zephyrweb.in",
+                    business_type="individual",
+                    metadata={"zephyr_user_id": str(user_id)}
+                )
+                account_id = account.id
+                cursor.execute(
+                    "UPDATE users SET stripe_account_id = %s WHERE user_id = %s",
+                    (account_id, user_id)
+                )
+                conn.commit()
+            except Exception as e:
+                conn.close()
+                raise HTTPException(status_code=500, detail=f"Stripe account creation failed: {str(e)}")
+
+    conn.close()
+
+    try:
+        account_link = stripe.AccountLink.create(
+            account=account_id,
+            refresh_url=f"{base_url}/dashboard?stripe_onboard=retry",
+            return_url=f"{base_url}/dashboard?stripe_onboard=success",
+            type="account_onboarding"
+        )
+        return {"url": account_link.url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate onboarding URL: {str(e)}")
+
+
+@app.post("/api/escrow/create-checkout")
+async def create_escrow_checkout(payload: dict):
+    creator_user_id = payload.get("creator_user_id")
+    file_id = payload.get("file_id")
+    file_name = payload.get("file_name") or "Secure Escrow Deliverable"
+    price_usd = float(payload.get("price_usd") or 10.0)
+    base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT stripe_account_id, stripe_payouts_enabled FROM users WHERE user_id = %s",
+        (creator_user_id,)
+    )
+    creator = cursor.fetchone()
+    conn.close()
+
+    if not creator:
+        raise HTTPException(status_code=400, detail="Creator not found.")
+
+    creator_account_id = creator.get("stripe_account_id") if isinstance(creator, dict) else creator[0]
+    payouts_enabled = creator.get("stripe_payouts_enabled") if isinstance(creator, dict) else creator[1]
+
+    if not creator_account_id or not payouts_enabled:
+        raise HTTPException(status_code=400, detail="Creator bank payout onboarding is not complete.")
+
+    total_cents = int(round(price_usd * 100))
+    platform_fee_cents = int(round(total_cents * 0.12))  # Exactly 12% platform fee
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {
+                    "name": f"Unlock: {file_name}",
+                    "description": "Secure escrow transfer decryption."
+                },
+                "unit_amount": total_cents
+            },
+            "quantity": 1
+        }],
+        mode="payment",
+        payment_intent_data={
+            "application_fee_amount": platform_fee_cents,        # 12% stays in your Zephyr account
+            "transfer_data": {"destination": creator_account_id} # 88% sent directly to creator's bank
+        },
+        metadata={
+            "file_id": str(file_id),
+            "creator_user_id": str(creator_user_id)
+        },
+        success_url=f"{base_url}/download/{file_id}?unlocked=true&session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{base_url}/download/{file_id}?canceled=true"
+    )
+
+    return {"checkout_url": session.url}
 @app.post("/api/dodo/create-checkout-session")
 async def create_dodo_checkout(payload: dict):
     user_id = payload.get("user_id") or "zephyr_user"

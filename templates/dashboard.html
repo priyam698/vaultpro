@@ -986,10 +986,10 @@ body {
         </div>
 
         <div class="pt-2">
-          <button id="triggerStripeOnboardLink" onclick="triggerStripeOnboard()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition cursor-pointer">
-            Link Bank Account via Stripe
-          </button>
-        </div>
+  <button id="triggerStripeOnboardLink" onclick="startStripeOnboarding()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+    <span>Link Bank Account via Stripe</span> ↗
+  </button>
+</div>
       </div>
     </div>
 
@@ -4869,43 +4869,85 @@ async function checkAccountStorageStatus() {
         alert('Bank account successfully connected! Pay-to-Unlock Escrow is now active.');
       }
 
-      function updateDashboardBankUI() {
-        const isLinked = localStorage.getItem('zephyr_bank_account_linked') === 'true';
-        const savedData = JSON.parse(localStorage.getItem('zephyr_bank_details') || '{}');
+     async function updateDashboardBankUI() {
+      const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
+                      Array.from(document.querySelectorAll('button, a')).find(el => el.textContent && el.textContent.includes('Bank Account'));
+      if (!linkBtn) return;
 
-        const allButtons = Array.from(document.querySelectorAll('button, a'));
-        const linkBtn = allButtons.find(el => 
-          el.textContent && el.textContent.includes('Bank Account')
-        );
+      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
 
-        if (linkBtn) {
-          if (isLinked) {
-            const bankName = savedData.bank || 'Verified Bank';
-            const last4 = savedData.last4 || '••••';
-            linkBtn.innerHTML = `<span>✓ Connected: ${bankName} (••••${last4})</span>`;
-            linkBtn.className = 'px-4 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer';
-            linkBtn.onclick = function(e) {
-              e.preventDefault();
-              if (confirm('Do you want to edit or unlink your payout bank account?')) {
-                openZephyrBankModal();
-              }
-            };
-          } else {
-            linkBtn.innerHTML = `Link Bank Account via Stripe`;
-            linkBtn.onclick = function(e) {
-              e.preventDefault();
-              openZephyrBankModal();
-            };
-          }
+      try {
+        const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+
+        if (data.connected && data.payouts_enabled) {
+          localStorage.setItem('zephyr_bank_account_linked', 'true');
+          linkBtn.innerHTML = `<span>✓ Bank Linked via Stripe (88% Payouts Active)</span>`;
+          linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 cursor-default';
+          linkBtn.onclick = function(e) {
+            e.preventDefault();
+            alert("Your bank account is fully connected via Stripe Express. 88% of all escrow unlock payments are directly routed to your bank.");
+          };
+        } else if (data.connected && !data.payouts_enabled) {
+          localStorage.setItem('zephyr_bank_account_linked', 'false');
+          linkBtn.innerHTML = `<span>Complete Stripe Verification</span> ↗`;
+          linkBtn.className = 'w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg cursor-pointer transition-all';
+          linkBtn.onclick = function(e) {
+            e.preventDefault();
+            startStripeOnboarding();
+          };
+        } else {
+          localStorage.setItem('zephyr_bank_account_linked', 'false');
+          linkBtn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
+          linkBtn.onclick = function(e) {
+            e.preventDefault();
+            startStripeOnboarding();
+          };
         }
+      } catch (err) {
+        console.warn("Stripe status check skipped:", err);
+      }
+    }
+
+    async function startStripeOnboarding() {
+      const btn = document.getElementById('triggerStripeOnboardLink') || 
+                  Array.from(document.querySelectorAll('button, a')).find(el => el.textContent && el.textContent.includes('Bank Account'));
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>Redirecting to Stripe...</span>`;
       }
 
-      window.addEventListener('DOMContentLoaded', () => {
-        updateDashboardBankUI();
-        if (window.location.hash === '#link-bank' || window.location.search.includes('action=link-bank')) {
-          openZephyrBankModal();
+      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+
+      try {
+        const res = await fetch('/api/stripe/connect/onboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, email: userId })
+        });
+        const data = await res.json();
+
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert("Error: " + (data.detail || "Could not generate Stripe onboarding link."));
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
+          }
         }
-      });
+      } catch (err) {
+        alert("Connection error contacting Stripe backend.");
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>Link Bank Account via Stripe</span> ↗`;
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateDashboardBankUI();
+    });
       updateDashboardBankUI();
     </script>
 
