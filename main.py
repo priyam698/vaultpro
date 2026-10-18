@@ -4350,6 +4350,39 @@ async def start_stripe_onboard(payload: dict):
         return {"url": account_link.url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate onboarding URL: {str(e)}")
+@app.post("/api/stripe/connect/disconnect")
+async def disconnect_stripe_account(payload: dict):
+    user_id = payload.get("user_id") or "priyamrana069@gmail.com"
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT stripe_account_id FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    account_id = None
+    if user:
+        account_id = user.get("stripe_account_id") if isinstance(user, dict) else user[0]
+
+    cursor.execute(
+        """
+        UPDATE users 
+        SET stripe_account_id = NULL, 
+            stripe_payouts_enabled = 0, 
+            stripe_details_submitted = 0 
+        WHERE user_id = %s
+        """,
+        (user_id,)
+    )
+    conn.commit()
+    conn.close()
+
+    if account_id:
+        try:
+            stripe.Account.delete(account_id)
+        except Exception:
+            pass
+
+    return {"success": True, "message": "Bank account unlinked successfully."}
 
 
 @app.post("/api/escrow/create-checkout")
