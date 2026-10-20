@@ -4206,11 +4206,11 @@ def health_check():
 # ============================================================
 # ============================================================
 # ============================================================
-# UNIFIED WISE + PAYPAL + STRIPE 88/12 ESCROW PAYOUT ENGINE
+# ============================================================
+# 100% DIRECT PAYOUT ENGINE (WISE & PAYPAL — PAID PLANS ONLY)
 # ============================================================
 import stripe
 import json
-import requests
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
@@ -4250,8 +4250,8 @@ def _init_payout_db():
 _init_payout_db()
 
 
-def _db_get_payout_user(user_ident: str):
-    """Safely retrieves payout columns checking both email and user_id without transaction aborts."""
+def _db_get_user_and_plan(user_ident: str):
+    """Fetches user payout status and checks whether the user is on a Paid Plan."""
     conn = None
     try:
         conn = get_db()
@@ -4259,16 +4259,16 @@ def _db_get_payout_user(user_ident: str):
         cursor = conn.cursor()
         for col in ["email", "user_id"]:
             try:
-                cursor.execute(
-                    f"""
-                    SELECT stripe_account_id, stripe_payouts_enabled, payout_method, payout_details 
-                    FROM users WHERE {col} = %s
-                    """,
-                    (user_ident,)
-                )
+                cursor.execute(f"SELECT * FROM users WHERE {col} = %s", (user_ident,))
                 row = cursor.fetchone()
                 if row:
-                    return conn, cursor, row, col
+                    # Convert row to dict if cursor doesn't return dict
+                    if isinstance(row, dict):
+                        user_dict = row
+                    else:
+                        col_names = [desc[0] for desc in cursor.description]
+                        user_dict = dict(zip(col_names, row))
+                    return conn, cursor, user_dict, col
             except Exception:
                 conn.rollback()
         return conn, cursor, None, "email"
@@ -4281,80 +4281,116 @@ def _db_get_payout_user(user_ident: str):
         return None, None, None, "email"
 
 
+def _is_user_on_paid_plan(user_dict: dict) -> bool:
+    """Returns True if user has an active paid plan or storage > 5 GB (Free Tier default)."""
+    if not user_dict:
+        return False
+
+    # Check common plan/tier columns
+    plan_val = str(
+        user_dict.get("plan") or 
+        user_dict.get("plan_id") or 
+        user_dict.get("tier") or 
+        user_dict.get("subscription_tier") or 
+        "free"
+    ).lower().strip()
+
+    if plan_val not in ("free", "none", "", "0", "basic_free"):
+        return True
+
+    if user_dict.get("is_pro") or user_dict.get("is_paid"):
+        return True
+
+    # Check storage quota (Free plan is 5 GB; Paid plans have > 5 GB)
+    for quota_col in ["storage_limit_gb", "storage_gb", "max_storage_gb", "quota_gb"]:
+        val = user_dict.get(quota_col)
+        if val is not None:
+            try:
+                if float(val) > 5.0:
+                    return True
+            except Exception:
+                pass
+
+    # Check byte-based storage limit (> 6 GB in bytes)
+    for byte_col in ["storage_limit", "max_storage", "quota_bytes"]:
+        val = user_dict.get(byte_col)
+        if val is not None:
+            try:
+                if float(val) > 6 * (1024 ** 3):
+                    return True
+            except Exception:
+                pass
+
+    return False
+
+
 @app.get("/api/stripe/connect/status")
 async def get_stripe_connect_status(user_id: str):
     ident = str(user_id or "priyamrana069@gmail.com").strip()
-    conn, cursor, user_row, matched_col = _db_get_payout_user(ident)
+    conn, cursor, user_dict, _ = _db_get_user_and_plan(ident)
 
-    if not conn or not user_row:
-        if conn:
-            conn.close()
-        return {"connected": False, "payouts_enabled": False}
-
-    try:
-        if isinstance(user_row, dict):
-            payout_method = user_row.get("payout_method")
-            payout_details_raw = user_row.get("payout_details")
-            stripe_account_id = user_row.get("stripe_account_id")
-            payouts_enabled = bool(user_row.get("stripe_payouts_enabled"))
-        else:
-            stripe_account_id = user_row[0]
-            payouts_enabled = bool(user_row[1])
-            payout_method = user_row[2] if len(user_row) > 2 else None
-            payout_details_raw = user_row[3] if len(user_row) > 3 else None
-
+    if conn:
         conn.close()
 
-        # 1. Check if Wise or PayPal is linked
-        if payout_method in ("wise", "paypal") and payout_details_raw:
-            try:
-                details = json.loads(payout_details_raw)
-            except Exception:
-                details = {}
+    if not user_dict:
+        return {"connected": False, "payouts_enabled": False, "is_paid_plan": False}
 
-            if payout_method == "paypal":
-                email_val = details.get("paypal_email", "PayPal")
-                label = f"PayPal ({email_val})"
-            else:
-                country = details.get("country", "Global")
-                acct_num = str(details.get("account_number", ""))
-                last4 = acct_num[-4:] if len(acct_num) >= 4 else "Bank"
-                label = f"Wise Bank ({country} ••••{last4})"
+    is_paid = _is_user_on_paid_plan(user_dict)
+    payout_method = user_dict.get("payout_method")
+    payout_details_raw = user_dict.get("payout_details")
 
-            return {
-                "connected": True,
-                "payouts_enabled": True,
-                "method": payout_method,
-                "label": label
-            }
+    if payout_method in ("wise", "paypal") and payout_details_raw:
+        try:
+            details = json.loads(payout_details_raw)
+        except Exception:
+            details = {}
 
-        # 2. Fallback check for existing Stripe Connect accounts
-        if stripe_account_id:
-            return {
-                "connected": True,
-                "payouts_enabled": payouts_enabled,
-                "method": "stripe",
-                "label": "Stripe Express"
-            }
+        if payout_method == "paypal":
+            email_val = details.get("paypal_email", "PayPal")
+            label = f"PayPal ({email_val})"
+        else:
+            country = details.get("country", "Bank")
+            acct_num = str(details.get("account_number", ""))
+            last4 = acct_num[-4:] if len(acct_num) >= 4 else "Acct"
+            label = f"Wise ({country} ••••{last4})"
 
-        return {"connected": False, "payouts_enabled": False}
-    except Exception as e:
-        if conn:
-            try:
-                conn.close()
-            except Exception:
-                pass
-        return {"connected": False, "payouts_enabled": False, "error": str(e)}
+        return {
+            "connected": True,
+            "payouts_enabled": True,
+            "is_paid_plan": is_paid,
+            "method": payout_method,
+            "label": label
+        }
+
+    return {
+        "connected": False,
+        "payouts_enabled": False,
+        "is_paid_plan": is_paid
+    }
 
 
 @app.post("/api/payouts/save")
 async def save_payout_method(payload: dict):
     user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
     method = str(payload.get("method") or "wise").lower().strip()
+    client_is_paid = payload.get("is_paid_plan", None)
+
+    conn, cursor, user_dict, matched_col = _db_get_user_and_plan(user_ident)
+    if not conn or not cursor:
+        raise HTTPException(status_code=500, detail="Database connection unavailable.")
+
+    is_paid = _is_user_on_paid_plan(user_dict) or bool(client_is_paid)
+    if not is_paid:
+        conn.close()
+        raise HTTPException(
+            status_code=403,
+            detail="Upgrade Required: Pay-to-Unlock Escrow is exclusively available on Paid Plans. Please upgrade your plan to link a payout account."
+        )
 
     if method == "paypal":
         paypal_email = str(payload.get("paypal_email") or "").strip()
         if not paypal_email or "@" not in paypal_email:
+            conn.close()
             raise HTTPException(status_code=400, detail="Please enter a valid PayPal email address.")
         details_dict = {"paypal_email": paypal_email}
         label = f"PayPal ({paypal_email})"
@@ -4365,7 +4401,8 @@ async def save_payout_method(payload: dict):
         bank_code = str(payload.get("bank_code") or "").strip()
 
         if not holder_name or not account_number:
-            raise HTTPException(status_code=400, detail="Please enter account holder name and account number / IBAN.")
+            conn.close()
+            raise HTTPException(status_code=400, detail="Please enter your Account Holder Name and Account Number.")
 
         details_dict = {
             "country": country,
@@ -4373,14 +4410,11 @@ async def save_payout_method(payload: dict):
             "account_number": account_number,
             "bank_code": bank_code
         }
-        last4 = account_number[-4:] if len(account_number) >= 4 else "Bank"
-        label = f"Wise Bank ({country} ••••{last4})"
+        last4 = account_number[-4:] if len(account_number) >= 4 else "Acct"
+        label = f"Wise ({country} ••••{last4})"
     else:
+        conn.close()
         raise HTTPException(status_code=400, detail="Unsupported payout method.")
-
-    conn, cursor, user_row, matched_col = _db_get_payout_user(user_ident)
-    if not conn or not cursor:
-        raise HTTPException(status_code=500, detail="Database connection unavailable.")
 
     try:
         cursor.execute(
@@ -4397,7 +4431,7 @@ async def save_payout_method(payload: dict):
         conn.commit()
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to save payout method: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save payout account: {str(e)}")
     finally:
         conn.close()
 
@@ -4405,14 +4439,14 @@ async def save_payout_method(payload: dict):
         "success": True,
         "method": method,
         "label": label,
-        "message": "Payout account linked! 88% Direct Escrow Payouts are now active."
+        "message": "Payout account linked! 100% Direct Payouts are now active."
     }
 
 
 @app.post("/api/stripe/connect/disconnect")
 async def disconnect_stripe_account(payload: dict):
     user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
-    conn, cursor, user_row, matched_col = _db_get_payout_user(user_ident)
+    conn, cursor, _, matched_col = _db_get_user_and_plan(user_ident)
 
     if conn and cursor:
         try:
@@ -4435,7 +4469,7 @@ async def disconnect_stripe_account(payload: dict):
         finally:
             conn.close()
 
-    return {"success": True, "message": "Payout account removed successfully."}
+    return {"success": True, "message": "Payout account unlinked successfully."}
 
 
 @app.post("/api/escrow/create-checkout")
@@ -4446,26 +4480,23 @@ async def create_escrow_checkout(payload: dict):
     price_usd = float(payload.get("price_usd") or 10.0)
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
-    conn, cursor, creator_row, _ = _db_get_payout_user(creator_ident)
+    conn, cursor, creator_dict, _ = _db_get_user_and_plan(creator_ident)
     if conn:
         conn.close()
 
-    if not creator_row:
+    if not creator_dict:
         raise HTTPException(status_code=400, detail="Creator account not found.")
 
-    if isinstance(creator_row, dict):
-        payouts_enabled = creator_row.get("stripe_payouts_enabled")
-        payout_method = creator_row.get("payout_method") or "stripe"
-    else:
-        payouts_enabled = creator_row[1]
-        payout_method = creator_row[2] if len(creator_row) > 2 else "stripe"
+    if not _is_user_on_paid_plan(creator_dict):
+        raise HTTPException(status_code=403, detail="Creator must be on an active Paid Plan to use Pay-to-Unlock Escrow.")
+
+    payouts_enabled = creator_dict.get("stripe_payouts_enabled")
+    payout_method = creator_dict.get("payout_method") or "wise"
 
     if not payouts_enabled:
-        raise HTTPException(status_code=400, detail="Creator payout account is not linked yet.")
+        raise HTTPException(status_code=400, detail="Creator has not linked a Wise or PayPal payout account yet.")
 
     total_cents = int(round(price_usd * 100))
-    creator_share_cents = int(round(total_cents * 0.88))  # 88% to Creator via Wise/PayPal
-    platform_fee_cents = total_cents - creator_share_cents  # 12% retained by Zephyr
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -4474,7 +4505,7 @@ async def create_escrow_checkout(payload: dict):
                 "currency": "usd",
                 "product_data": {
                     "name": f"Unlock: {file_name}",
-                    "description": "Secure escrow transfer decryption (88% Creator Payout via Wise/PayPal)."
+                    "description": "Secure escrow file unlock (100% Direct Payout to Creator)."
                 },
                 "unit_amount": total_cents
             },
@@ -4485,8 +4516,8 @@ async def create_escrow_checkout(payload: dict):
             "file_id": str(file_id),
             "creator_user": str(creator_ident),
             "payout_method": str(payout_method),
-            "creator_payout_cents": str(creator_share_cents),
-            "platform_fee_cents": str(platform_fee_cents)
+            "creator_payout_cents": str(total_cents),
+            "platform_fee_cents": "0"
         },
         success_url=f"{base_url}/download/{file_id}?unlocked=true&session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{base_url}/download/{file_id}?canceled=true"
