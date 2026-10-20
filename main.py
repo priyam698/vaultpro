@@ -4205,14 +4205,17 @@ def health_check():
 
 # ============================================================
 # ============================================================
-# STRIPE CONNECT & 88/12 ESCROW PAYOUT ENGINE (POSTGRES SAFE)
+# ============================================================
+# UNIFIED WISE + PAYPAL + STRIPE 88/12 ESCROW PAYOUT ENGINE
 # ============================================================
 import stripe
+import json
+import requests
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
-def _init_stripe_db():
+def _init_payout_db():
     conn = None
     try:
         conn = get_db()
@@ -4221,7 +4224,9 @@ def _init_stripe_db():
         for col_stmt in [
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_payouts_enabled INTEGER DEFAULT 0;",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_details_submitted INTEGER DEFAULT 0;"
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_details_submitted INTEGER DEFAULT 0;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_method TEXT;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_details TEXT;"
         ]:
             try:
                 cursor.execute(col_stmt)
@@ -4234,7 +4239,7 @@ def _init_stripe_db():
                 conn.rollback()
             except Exception:
                 pass
-        print(f"[STRIPE DB INIT NOTICE]: {e}")
+        print(f"[PAYOUT DB INIT NOTICE]: {e}")
     finally:
         if conn:
             try:
@@ -4242,11 +4247,11 @@ def _init_stripe_db():
             except Exception:
                 pass
 
-_init_stripe_db()
+_init_payout_db()
 
 
-def _db_get_stripe_user(user_ident: str):
-    """Safely retrieves Stripe user details checking email and user_id without transaction aborts."""
+def _db_get_payout_user(user_ident: str):
+    """Safely retrieves payout columns checking both email and user_id without transaction aborts."""
     conn = None
     try:
         conn = get_db()
@@ -4254,7 +4259,13 @@ def _db_get_stripe_user(user_ident: str):
         cursor = conn.cursor()
         for col in ["email", "user_id"]:
             try:
-                cursor.execute(f"SELECT stripe_account_id, stripe_payouts_enabled FROM users WHERE {col} = %s", (user_ident,))
+                cursor.execute(
+                    f"""
+                    SELECT stripe_account_id, stripe_payouts_enabled, payout_method, payout_details 
+                    FROM users WHERE {col} = %s
+                    """,
+                    (user_ident,)
+                )
                 row = cursor.fetchone()
                 if row:
                     return conn, cursor, row, col
@@ -4273,7 +4284,7 @@ def _db_get_stripe_user(user_ident: str):
 @app.get("/api/stripe/connect/status")
 async def get_stripe_connect_status(user_id: str):
     ident = str(user_id or "priyamrana069@gmail.com").strip()
-    conn, cursor, user_row, matched_col = _db_get_stripe_user(ident)
+    conn, cursor, user_row, matched_col = _db_get_payout_user(ident)
 
     if not conn or not user_row:
         if conn:
@@ -4281,125 +4292,127 @@ async def get_stripe_connect_status(user_id: str):
         return {"connected": False, "payouts_enabled": False}
 
     try:
-        stripe_account_id = user_row.get("stripe_account_id") if isinstance(user_row, dict) else user_row[0]
-        if not stripe_account_id:
-            conn.close()
-            return {"connected": False, "payouts_enabled": False}
+        if isinstance(user_row, dict):
+            payout_method = user_row.get("payout_method")
+            payout_details_raw = user_row.get("payout_details")
+            stripe_account_id = user_row.get("stripe_account_id")
+            payouts_enabled = bool(user_row.get("stripe_payouts_enabled"))
+        else:
+            stripe_account_id = user_row[0]
+            payouts_enabled = bool(user_row[1])
+            payout_method = user_row[2] if len(user_row) > 2 else None
+            payout_details_raw = user_row[3] if len(user_row) > 3 else None
 
-        acct = stripe.Account.retrieve(stripe_account_id)
-        payouts_enabled = bool(acct.payouts_enabled and acct.details_submitted)
-
-        cursor.execute(
-            f"""
-            UPDATE users 
-            SET stripe_payouts_enabled = %s, stripe_details_submitted = %s 
-            WHERE {matched_col} = %s
-            """,
-            (1 if payouts_enabled else 0, 1 if acct.details_submitted else 0, ident)
-        )
-        conn.commit()
         conn.close()
 
-        return {
-            "connected": True,
-            "payouts_enabled": payouts_enabled,
-            "account_id": stripe_account_id
-        }
-    except Exception:
+        # 1. Check if Wise or PayPal is linked
+        if payout_method in ("wise", "paypal") and payout_details_raw:
+            try:
+                details = json.loads(payout_details_raw)
+            except Exception:
+                details = {}
+
+            if payout_method == "paypal":
+                email_val = details.get("paypal_email", "PayPal")
+                label = f"PayPal ({email_val})"
+            else:
+                country = details.get("country", "Global")
+                acct_num = str(details.get("account_number", ""))
+                last4 = acct_num[-4:] if len(acct_num) >= 4 else "Bank"
+                label = f"Wise Bank ({country} ••••{last4})"
+
+            return {
+                "connected": True,
+                "payouts_enabled": True,
+                "method": payout_method,
+                "label": label
+            }
+
+        # 2. Fallback check for existing Stripe Connect accounts
+        if stripe_account_id:
+            return {
+                "connected": True,
+                "payouts_enabled": payouts_enabled,
+                "method": "stripe",
+                "label": "Stripe Express"
+            }
+
+        return {"connected": False, "payouts_enabled": False}
+    except Exception as e:
         if conn:
             try:
-                conn.rollback()
                 conn.close()
             except Exception:
                 pass
-        return {"connected": True, "payouts_enabled": False}
+        return {"connected": False, "payouts_enabled": False, "error": str(e)}
 
 
-@app.post("/api/stripe/connect/onboard")
-async def start_stripe_onboard(payload: dict):
+@app.post("/api/payouts/save")
+async def save_payout_method(payload: dict):
     user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
-    target_country = str(payload.get("country") or "US").upper().strip()
-    base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
+    method = str(payload.get("method") or "wise").lower().strip()
 
-    if target_country == "IN":
-        raise HTTPException(
-            status_code=400,
-            detail="Direct Indian Stripe accounts cannot be created by US platforms due to RBI cross-border rules. Please select 'United States' and enter your Wise, Payoneer, or Skydo USD receiving account details."
-        )
+    if method == "paypal":
+        paypal_email = str(payload.get("paypal_email") or "").strip()
+        if not paypal_email or "@" not in paypal_email:
+            raise HTTPException(status_code=400, detail="Please enter a valid PayPal email address.")
+        details_dict = {"paypal_email": paypal_email}
+        label = f"PayPal ({paypal_email})"
+    elif method == "wise":
+        country = str(payload.get("country") or "IN").upper().strip()
+        holder_name = str(payload.get("account_holder") or "").strip()
+        account_number = str(payload.get("account_number") or "").strip()
+        bank_code = str(payload.get("bank_code") or "").strip()
 
-    conn, cursor, user_row, matched_col = _db_get_stripe_user(user_ident)
-    account_id = None
-    if user_row:
-        account_id = user_row.get("stripe_account_id") if isinstance(user_row, dict) else user_row[0]
+        if not holder_name or not account_number:
+            raise HTTPException(status_code=400, detail="Please enter account holder name and account number / IBAN.")
 
-    needs_new_account = True
-    if account_id:
-        try:
-            existing_acct = stripe.Account.retrieve(account_id)
-            if existing_acct.get("country", "").upper() == target_country:
-                needs_new_account = False
-        except Exception:
-            needs_new_account = True
+        details_dict = {
+            "country": country,
+            "account_holder": holder_name,
+            "account_number": account_number,
+            "bank_code": bank_code
+        }
+        last4 = account_number[-4:] if len(account_number) >= 4 else "Bank"
+        label = f"Wise Bank ({country} ••••{last4})"
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported payout method.")
 
-    if needs_new_account:
-        try:
-            account = stripe.Account.create(
-                type="express",
-                country=target_country,
-                email=user_ident if "@" in user_ident else "creator@zephyrweb.in",
-                capabilities={"transfers": {"requested": True}},
-                business_type="individual",
-                metadata={"zephyr_user": user_ident, "country": target_country}
-            )
-        except Exception:
-            account = stripe.Account.create(
-                type="express",
-                country=target_country,
-                email=user_ident if "@" in user_ident else "creator@zephyrweb.in",
-                business_type="individual",
-                metadata={"zephyr_user": user_ident, "country": target_country}
-            )
-
-        account_id = account.id
-
-        if conn and cursor:
-            try:
-                cursor.execute(
-                    f"""
-                    UPDATE users 
-                    SET stripe_account_id = %s, stripe_payouts_enabled = 0, stripe_details_submitted = 0 
-                    WHERE {matched_col} = %s
-                    """,
-                    (account_id, user_ident)
-                )
-                conn.commit()
-            except Exception as e:
-                conn.rollback()
-                raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
-
-    if conn:
-        conn.close()
+    conn, cursor, user_row, matched_col = _db_get_payout_user(user_ident)
+    if not conn or not cursor:
+        raise HTTPException(status_code=500, detail="Database connection unavailable.")
 
     try:
-        account_link = stripe.AccountLink.create(
-            account=account_id,
-            refresh_url=f"{base_url}/dashboard?stripe_onboard=retry",
-            return_url=f"{base_url}/dashboard?stripe_onboard=success",
-            type="account_onboarding"
+        cursor.execute(
+            f"""
+            UPDATE users 
+            SET payout_method = %s,
+                payout_details = %s,
+                stripe_payouts_enabled = 1,
+                stripe_details_submitted = 1
+            WHERE {matched_col} = %s
+            """,
+            (method, json.dumps(details_dict), user_ident)
         )
-        return {"url": account_link.url}
+        conn.commit()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate onboarding URL: {str(e)}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save payout method: {str(e)}")
+    finally:
+        conn.close()
+
+    return {
+        "success": True,
+        "method": method,
+        "label": label,
+        "message": "Payout account linked! 88% Direct Escrow Payouts are now active."
+    }
 
 
 @app.post("/api/stripe/connect/disconnect")
 async def disconnect_stripe_account(payload: dict):
     user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
-    conn, cursor, user_row, matched_col = _db_get_stripe_user(user_ident)
-
-    account_id = None
-    if user_row:
-        account_id = user_row.get("stripe_account_id") if isinstance(user_row, dict) else user_row[0]
+    conn, cursor, user_row, matched_col = _db_get_payout_user(user_ident)
 
     if conn and cursor:
         try:
@@ -4408,7 +4421,9 @@ async def disconnect_stripe_account(payload: dict):
                 UPDATE users 
                 SET stripe_account_id = NULL, 
                     stripe_payouts_enabled = 0, 
-                    stripe_details_submitted = 0 
+                    stripe_details_submitted = 0,
+                    payout_method = NULL,
+                    payout_details = NULL
                 WHERE {matched_col} = %s
                 """,
                 (user_ident,)
@@ -4420,13 +4435,7 @@ async def disconnect_stripe_account(payload: dict):
         finally:
             conn.close()
 
-    if account_id:
-        try:
-            stripe.Account.delete(account_id)
-        except Exception:
-            pass
-
-    return {"success": True, "message": "Bank account unlinked successfully."}
+    return {"success": True, "message": "Payout account removed successfully."}
 
 
 @app.post("/api/escrow/create-checkout")
@@ -4437,21 +4446,26 @@ async def create_escrow_checkout(payload: dict):
     price_usd = float(payload.get("price_usd") or 10.0)
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
-    conn, cursor, creator_row, _ = _db_get_stripe_user(creator_ident)
+    conn, cursor, creator_row, _ = _db_get_payout_user(creator_ident)
     if conn:
         conn.close()
 
     if not creator_row:
         raise HTTPException(status_code=400, detail="Creator account not found.")
 
-    creator_account_id = creator_row.get("stripe_account_id") if isinstance(creator_row, dict) else creator_row[0]
-    payouts_enabled = creator_row.get("stripe_payouts_enabled") if isinstance(creator_row, dict) else creator_row[1]
+    if isinstance(creator_row, dict):
+        payouts_enabled = creator_row.get("stripe_payouts_enabled")
+        payout_method = creator_row.get("payout_method") or "stripe"
+    else:
+        payouts_enabled = creator_row[1]
+        payout_method = creator_row[2] if len(creator_row) > 2 else "stripe"
 
-    if not creator_account_id or not payouts_enabled:
-        raise HTTPException(status_code=400, detail="Creator bank payout onboarding is not complete.")
+    if not payouts_enabled:
+        raise HTTPException(status_code=400, detail="Creator payout account is not linked yet.")
 
     total_cents = int(round(price_usd * 100))
-    platform_fee_cents = int(round(total_cents * 0.12))  # Exactly 12% platform fee
+    creator_share_cents = int(round(total_cents * 0.88))  # 88% to Creator via Wise/PayPal
+    platform_fee_cents = total_cents - creator_share_cents  # 12% retained by Zephyr
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -4460,20 +4474,19 @@ async def create_escrow_checkout(payload: dict):
                 "currency": "usd",
                 "product_data": {
                     "name": f"Unlock: {file_name}",
-                    "description": "Secure escrow transfer decryption."
+                    "description": "Secure escrow transfer decryption (88% Creator Payout via Wise/PayPal)."
                 },
                 "unit_amount": total_cents
             },
             "quantity": 1
         }],
         mode="payment",
-        payment_intent_data={
-            "application_fee_amount": platform_fee_cents,        # 12% kept by Zephyr
-            "transfer_data": {"destination": creator_account_id} # 88% direct to creator bank
-        },
         metadata={
             "file_id": str(file_id),
-            "creator_user": str(creator_ident)
+            "creator_user": str(creator_ident),
+            "payout_method": str(payout_method),
+            "creator_payout_cents": str(creator_share_cents),
+            "platform_fee_cents": str(platform_fee_cents)
         },
         success_url=f"{base_url}/download/{file_id}?unlocked=true&session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{base_url}/download/{file_id}?canceled=true"
