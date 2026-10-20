@@ -4810,49 +4810,13 @@ async function checkAccountStorageStatus() {
     <!-- ============================================================ -->
     <!-- ZEPHYR ESCROW BANK DETAILS MODAL & CONTROLLER                -->
     <!-- ============================================================ -->
-    <div id="zephyrBankModal" style="display: none;" class="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div class="w-full max-w-md p-6 rounded-3xl bg-[#0f172a] border border-slate-700/60 shadow-2xl text-slate-200">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div class="flex items-center gap-2.5">
-            <span class="text-xl">🏦</span>
-            <h3 class="font-bold text-white text-base">Link Payout Bank Account</h3>
-          </div>
-          <button type="button" onclick="closeZephyrBankModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
-        </div>
-
-        <form id="zephyrBankForm" onsubmit="handleSaveBankDetails(event)" class="mt-4 space-y-3.5 text-xs">
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">Account Holder Legal Name</label>
-            <input type="text" id="bankHolderName" required placeholder="e.g. Priyam Rana" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">Bank Name</label>
-            <input type="text" id="bankName" required placeholder="e.g. HDFC Bank, Chase, ICICI" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">Account Number / IBAN</label>
-            <input type="text" id="bankAccountNumber" required placeholder="•••• •••• •••• 5678" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">IFSC / Routing / SWIFT Code</label>
-            <input type="text" id="bankRoutingCode" required placeholder="e.g. HDFC0001234 or 021000021" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
-          </div>
-
-          <div class="pt-2 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeZephyrBankModal()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-all">Cancel</button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg transition-all">Save & Connect Bank</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-   <!-- UNIFIED WISE + PAYPAL PAYOUT MODAL -->
+    <!-- UNIFIED WISE + PAYPAL 100% PAYOUT MODAL -->
 <div id="stripeCountryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
   <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-base font-bold text-white">Connect 88% Escrow Payout Account</h3>
-        <p class="text-xs text-slate-400 mt-0.5">Choose Wise (Direct Local Bank) or PayPal Instant Payouts.</p>
+        <h3 class="text-base font-bold text-white">Connect 100% Direct Payout Account</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Receive 100% of your file unlock revenue via Wise or PayPal.</p>
       </div>
       <button type="button" onclick="closeCountryModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
     </div>
@@ -4860,7 +4824,7 @@ async function checkAccountStorageStatus() {
     <!-- Method Tabs -->
     <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-800/80 border border-slate-700/60 mb-4">
       <button type="button" id="tabBtnWise" onclick="switchPayoutTab('wise')" class="py-2 px-3 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer">
-        🏦 Wise / Local Bank
+        🏦 Wise (Local Bank)
       </button>
       <button type="button" id="tabBtnPaypal" onclick="switchPayoutTab('paypal')" class="py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer">
         💳 PayPal Global
@@ -4899,7 +4863,7 @@ async function checkAccountStorageStatus() {
       </div>
 
       <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-slate-300 leading-relaxed">
-        ⚡ <strong>Direct Local Payouts via Wise:</strong> 88% of every file unlock is deposited straight into your local bank account with zero platform-rejection errors.
+        ⚡ <strong>100% Direct Payout via Wise:</strong> 100% of every file unlock is transferred straight to your local bank account with zero platform fee.
       </div>
     </div>
 
@@ -4911,7 +4875,7 @@ async function checkAccountStorageStatus() {
       </div>
 
       <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-slate-300 leading-relaxed">
-        🌍 <strong>Instant Global PayPal Payouts:</strong> Supported in 200+ countries. Receive 88% of every unlock directly to your PayPal account with zero bank routing forms.
+        🌍 <strong>100% Instant PayPal Payouts:</strong> Receive 100% of every file unlock directly to your PayPal email with zero platform deductions.
       </div>
     </div>
 
@@ -4921,25 +4885,82 @@ async function checkAccountStorageStatus() {
         Cancel
       </button>
       <button type="button" id="btnContinueStripe" onclick="savePayoutAccount()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-        <span>Connect Payout Account</span> ✓
+        <span>Save Payout Account</span> ✓
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE REQUIRED FLASH MODAL FOR FREE USERS -->
+<div id="escrowUpgradeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+  <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-amber-500/40 shadow-2xl text-center space-y-4">
+    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold">
+      ⚡
+    </div>
+    <div class="space-y-1.5">
+      <h3 class="text-base font-extrabold text-white">Upgrade Your Plan to Use Pay-to-Unlock Escrow</h3>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Pay-to-Unlock Escrow with <strong>100% Direct Wise & PayPal Payouts</strong> is a premium feature available exclusively on Paid Plans. Free Tier accounts cannot enable escrow locks.
+      </p>
+    </div>
+    <div class="flex items-center justify-center gap-3 pt-2">
+      <button type="button" onclick="closeUpgradeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-all cursor-pointer">
+        Maybe Later
+      </button>
+      <a href="/pricing" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs inline-flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all">
+        <span>Upgrade Plan Now</span> ↗
+      </a>
     </div>
   </div>
 </div>
 
 <script>
   let activePayoutTab = 'wise';
+  let userIsOnPaidPlan = false;
+
+  function detectPaidPlanFromDOM() {
+    // Checks if the dashboard UI shows PRO Plan or > 5 GB vault capacity
+    const pageText = document.body.innerText || '';
+    if (pageText.includes('Free Tier') || pageText.includes('/ 5.00 GB') || pageText.includes('/5.00 GB')) {
+      return false;
+    }
+    if (pageText.includes('PRO Plan') || pageText.includes('275 GB') || localStorage.getItem('zephyr_is_paid_plan') === 'true') {
+      return true;
+    }
+    return userIsOnPaidPlan;
+  }
+
+  function showUpgradeRequiredFlash() {
+    const modal = document.getElementById('escrowUpgradeModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+    } else {
+      alert("⚡ Upgrade Required: Pay-to-Unlock Escrow with 100% Direct Payouts is available only on Paid Plans. Please upgrade your plan to use this service.");
+    }
+  }
+
+  function closeUpgradeModal() {
+    document.getElementById('escrowUpgradeModal')?.classList.add('hidden');
+  }
+
+  function handleConnectPayoutClick() {
+    if (!detectPaidPlanFromDOM()) {
+      showUpgradeRequiredFlash();
+      return;
+    }
+    openCountryModal();
+  }
 
   function openCountryModal() {
+    if (!detectPaidPlanFromDOM()) {
+      showUpgradeRequiredFlash();
+      return;
+    }
     document.getElementById('stripeCountryModal')?.classList.remove('hidden');
   }
 
   function closeCountryModal() {
     document.getElementById('stripeCountryModal')?.classList.add('hidden');
-  }
-
-  function startStripeOnboarding() {
-    openCountryModal();
   }
 
   function switchPayoutTab(tab) {
@@ -4998,13 +5019,20 @@ async function checkAccountStorageStatus() {
   }
 
   async function savePayoutAccount() {
+    if (!detectPaidPlanFromDOM()) {
+      closeCountryModal();
+      showUpgradeRequiredFlash();
+      return;
+    }
+
     const btn = document.getElementById('btnContinueStripe');
     const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
 
     let payload = {
       user_id: userId,
       email: userId,
-      method: activePayoutTab
+      method: activePayoutTab,
+      is_paid_plan: true
     };
 
     if (activePayoutTab === 'paypal') {
@@ -5045,30 +5073,25 @@ async function checkAccountStorageStatus() {
 
       if (res.ok && data.success) {
         localStorage.setItem('zephyr_bank_account_linked', 'true');
+        localStorage.setItem('zephyr_payout_label', data.label || 'Wise / PayPal');
         closeCountryModal();
         await updateDashboardBankUI();
       } else {
-        alert('Error: ' + (data.detail || 'Could not save payout account.'));
+        alert(data.detail || 'Could not save payout account.');
       }
     } catch (err) {
       alert('Network error saving payout account.');
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = `<span>Connect Payout Account</span> ✓`;
+        btn.innerHTML = `<span>Save Payout Account</span> ✓`;
       }
     }
   }
 
   async function updateDashboardBankUI() {
-    const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
-                    Array.from(document.querySelectorAll('button, div')).find(el => 
-                      el.textContent && (el.textContent.includes('Bank Linked') || el.textContent.includes('Bank Account') || el.textContent.includes('Payouts Active'))
-                    );
-    if (!linkBtn) return;
-
-    const container = linkBtn.parentElement;
-    container.className = "pt-2 flex flex-wrap items-center gap-3";
+    const container = document.getElementById('stripeBankActionsContainer');
+    if (!container) return;
 
     const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
 
@@ -5076,13 +5099,31 @@ async function checkAccountStorageStatus() {
       const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
       const data = await res.json();
 
+      if (typeof data.is_paid_plan === 'boolean') {
+        userIsOnPaidPlan = data.is_paid_plan;
+      }
+      const isPaid = detectPaidPlanFromDOM() || userIsOnPaidPlan;
+      localStorage.setItem('zephyr_is_paid_plan', isPaid ? 'true' : 'false');
+
+      // If Free User: lock the feature and show Upgrade prompt on click
+      if (!isPaid) {
+        localStorage.setItem('zephyr_bank_account_linked', 'false');
+        container.innerHTML = `
+          <button type="button" onclick="showUpgradeRequiredFlash()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-xs inline-flex items-center gap-2 transition-all cursor-pointer">
+            <span>🔒 Upgrade Plan to Enable Wise / PayPal Escrow</span> ↗
+          </button>
+        `;
+        return;
+      }
+
+      // Paid User with Linked Wise or PayPal Account
       if (data.connected && data.payouts_enabled) {
         localStorage.setItem('zephyr_bank_account_linked', 'true');
-        const methodLabel = data.label || 'Wise / PayPal';
+        const methodLabel = data.label || localStorage.getItem('zephyr_payout_label') || 'Wise / PayPal';
         container.innerHTML = `
           <div class="px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>✓ Linked: ${methodLabel} (88% Payouts Active)</span>
+            <span>✓ Connected: ${methodLabel} (100% Direct Payout Active)</span>
           </div>
           <button type="button" onclick="openCountryModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer">
             <span>Change Method</span>
@@ -5091,14 +5132,15 @@ async function checkAccountStorageStatus() {
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            <span>Remove Bank Account</span>
+            <span>Remove Account</span>
           </button>
         `;
       } else {
+        // Paid User without Linked Account yet
         localStorage.setItem('zephyr_bank_account_linked', 'false');
         container.innerHTML = `
-          <button id="triggerStripeOnboardLink" onclick="openCountryModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-            <span>Link Bank Account (Wise / PayPal)</span> ↗
+          <button type="button" id="triggerStripeOnboardLink" onclick="openCountryModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+            <span>Link Wise or PayPal Account (100% Payout)</span> ↗
           </button>
         `;
       }
@@ -5108,7 +5150,7 @@ async function checkAccountStorageStatus() {
   }
 
   async function disconnectStripeAccount() {
-    if (!confirm("Are you sure you want to remove your connected payout account? Pay-to-Unlock Escrow will be disabled until you link a new Wise or PayPal account.")) {
+    if (!confirm("Are you sure you want to remove your connected Wise / PayPal account? Pay-to-Unlock Escrow will be disabled until you link an account again.")) {
       return;
     }
 
@@ -5124,6 +5166,7 @@ async function checkAccountStorageStatus() {
 
       if (data.success) {
         localStorage.setItem('zephyr_bank_account_linked', 'false');
+        localStorage.removeItem('zephyr_payout_label');
         await updateDashboardBankUI();
       } else {
         alert("Error: " + (data.detail || "Failed to remove payout account."));
@@ -5134,10 +5177,9 @@ async function checkAccountStorageStatus() {
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    updateDashboardBankUI();
+    setTimeout(updateDashboardBankUI, 150);
   });
 </script>
-
 
 </body>
 </html>

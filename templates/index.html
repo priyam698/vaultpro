@@ -7404,5 +7404,48 @@ window.addEventListener('appinstalled', () => {
         setTimeout(lockCleanNavbar, 200);
       })();
     </script>
+    <script>
+  // Enforce Paid Plan & Linked Wise/PayPal Account on Pay-to-Unlock Escrow Toggle
+  document.addEventListener('DOMContentLoaded', () => {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      const parentText = (cb.closest('div, label')?.innerText || '').toLowerCase();
+      if (parentText.includes('escrow') || parentText.includes('unlock') || cb.id.toLowerCase().includes('escrow')) {
+        cb.addEventListener('change', async function(e) {
+          if (!this.checked) return;
+
+          const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+          let isPaid = localStorage.getItem('zephyr_is_paid_plan') === 'true';
+          let isLinked = localStorage.getItem('zephyr_bank_account_linked') === 'true';
+
+          try {
+            const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
+            const data = await res.json();
+            if (typeof data.is_paid_plan === 'boolean') isPaid = data.is_paid_plan;
+            if (typeof data.payouts_enabled === 'boolean') isLinked = data.payouts_enabled;
+          } catch (err) {}
+
+          if (!isPaid) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this.checked = false;
+            alert("⚡ Upgrade Required: Pay-to-Unlock Escrow (100% Direct Payouts) is only available on Paid Plans. Please upgrade your plan to use this feature!");
+            window.location.href = '/pricing';
+            return false;
+          }
+
+          if (!isLinked) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this.checked = false;
+            alert("🏦 Payout Account Required: Please link your Wise or PayPal account on your Dashboard to receive 100% of your buyer payments.");
+            window.location.href = '/dashboard';
+            return false;
+          }
+        }, true);
+      }
+    });
+  });
+</script>
 </body>
 </html>
