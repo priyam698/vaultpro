@@ -4851,9 +4851,9 @@ async function checkAccountStorageStatus() {
     <div class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-300 mb-1.5">Payout Country</label>
-        <select id="stripeCountrySelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
-          <option value="IN" selected>🇮🇳 India (INR Direct Bank / IFSC / Export Payout)</option>
-          <option value="US">🇺🇸 United States (ACH / Routing Number / Wise USD)</option>
+       <select id="stripeCountrySelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+          <option value="US" selected>🇮🇳 India (via Wise / Payoneer / Skydo USD Account)</option>
+          <option value="US">🇺🇸 United States (ACH / Checking / Savings)</option>
           <option value="GB">🇬🇧 United Kingdom (Sort Code & Account Number)</option>
           <option value="CA">🇨🇦 Canada (Transit & Institution Number)</option>
           <option value="AU">🇦🇺 Australia (BSB & Account Number)</option>
@@ -4870,8 +4870,8 @@ async function checkAccountStorageStatus() {
         </select>
       </div>
 
-      <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 text-[11px] text-slate-400 leading-relaxed">
-        💡 <strong>Note:</strong> Selecting <strong>India</strong> prompts for Indian bank account details (IFSC, Account Number, PAN). If you use a global USD virtual account (such as <strong>Wise, Payoneer, or Skydo</strong>), select <strong>United States</strong>.
+      <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-slate-300 leading-relaxed">
+        💡 <strong>Receiving Payouts in India:</strong> Keep <strong>India (via Wise / Payoneer / Skydo)</strong> selected. Enter your free USD receiving routing & account number during Stripe setup. Payouts are auto-converted and deposited directly to your Indian bank account (HDFC, ICICI, SBI, etc.) in INR.
       </div>
 
       <div class="flex items-center justify-end gap-2.5 pt-2">
