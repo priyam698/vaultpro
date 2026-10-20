@@ -985,9 +985,15 @@ body {
           </p>
         </div>
 
-        <div class="pt-2">
-  <button id="triggerStripeOnboardLink" onclick="startStripeOnboarding()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-    <span>Link Bank Account via Stripe</span> ↗
+       <div class="pt-2 flex flex-wrap items-center gap-3" id="stripeBankActionsContainer">
+  <button type="button" id="triggerStripeOnboardLink" onclick="openCountryModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+    <span>Link Bank Account (Wise / PayPal)</span> ↗
+  </button>
+  <button type="button" id="btnRemoveStripeBank" onclick="disconnectStripeAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+    <span>Remove Bank Account</span>
   </button>
 </div>
       </div>
@@ -4837,56 +4843,90 @@ async function checkAccountStorageStatus() {
       </div>
     </div>
 
-   <!-- STRIPE COUNTRY SELECTION MODAL -->
+   <!-- UNIFIED WISE + PAYPAL PAYOUT MODAL -->
 <div id="stripeCountryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
   <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-base font-bold text-white">Select Bank Account Country</h3>
-        <p class="text-xs text-slate-400 mt-0.5">Stripe will configure local bank rails for your country.</p>
+        <h3 class="text-base font-bold text-white">Connect 88% Escrow Payout Account</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Choose Wise (Direct Local Bank) or PayPal Instant Payouts.</p>
       </div>
-      <button type="button" onclick="closeCountryModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      <button type="button" onclick="closeCountryModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
     </div>
 
-    <div class="space-y-4">
+    <!-- Method Tabs -->
+    <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-800/80 border border-slate-700/60 mb-4">
+      <button type="button" id="tabBtnWise" onclick="switchPayoutTab('wise')" class="py-2 px-3 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer">
+        🏦 Wise / Local Bank
+      </button>
+      <button type="button" id="tabBtnPaypal" onclick="switchPayoutTab('paypal')" class="py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer">
+        💳 PayPal Global
+      </button>
+    </div>
+
+    <!-- TAB 1: WISE / DIRECT LOCAL BANK -->
+    <div id="wisePayoutForm" class="space-y-3.5">
       <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Payout Country</label>
-       <select id="stripeCountrySelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
-          <option value="US" selected>🇮🇳 India (via Wise / Payoneer / Skydo USD Account)</option>
-          <option value="US">🇺🇸 United States (ACH / Checking / Savings)</option>
-          <option value="GB">🇬🇧 United Kingdom (Sort Code & Account Number)</option>
-          <option value="CA">🇨🇦 Canada (Transit & Institution Number)</option>
-          <option value="AU">🇦🇺 Australia (BSB & Account Number)</option>
-          <option value="DE">🇩🇪 Germany (IBAN & SEPA)</option>
-          <option value="FR">🇫🇷 France (IBAN)</option>
-          <option value="NL">🇳🇱 Netherlands (IBAN)</option>
-          <option value="SG">🇸🇬 Singapore (GIRO / FAST)</option>
-          <option value="AE">🇦🇪 United Arab Emirates (IBAN)</option>
-          <option value="IE">🇮🇪 Ireland (IBAN)</option>
-          <option value="NZ">🇳🇿 New Zealand (Bank Code)</option>
-          <option value="ES">🇪🇸 Spain (IBAN)</option>
-          <option value="IT">🇮🇹 Italy (IBAN)</option>
-          <option value="JP">🇯🇵 Japan (Zengin Payout)</option>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Bank Country & Currency</label>
+        <select id="wiseCountrySelect" onchange="updateWisePlaceholders()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+          <option value="IN" selected>🇮🇳 India (INR — Local Bank + IFSC / UPI)</option>
+          <option value="US">🇺🇸 United States (USD — ACH Routing + Account)</option>
+          <option value="GB">🇬🇧 United Kingdom (GBP — Sort Code + Account)</option>
+          <option value="EU">🇪🇺 Europe SEPA (EUR — IBAN + BIC)</option>
+          <option value="CA">🇨🇦 Canada (CAD — Transit/Institution + Account)</option>
+          <option value="AU">🇦🇺 Australia (AUD — BSB + Account)</option>
+          <option value="SG">🇸🇬 Singapore (SGD — Bank Code + Account)</option>
+          <option value="AE">🇦🇪 UAE (AED — IBAN)</option>
         </select>
       </div>
 
-      <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-slate-300 leading-relaxed">
-        💡 <strong>Receiving Payouts in India:</strong> Keep <strong>India (via Wise / Payoneer / Skydo)</strong> selected. Enter your free USD receiving routing & account number during Stripe setup. Payouts are auto-converted and deposited directly to your Indian bank account (HDFC, ICICI, SBI, etc.) in INR.
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Account Holder Full Name</label>
+        <input type="text" id="wiseAccountHolder" placeholder="e.g. Priyam Rana" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
       </div>
 
-      <div class="flex items-center justify-end gap-2.5 pt-2">
-        <button type="button" onclick="closeCountryModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all">
-          Cancel
-        </button>
-        <button type="button" id="btnContinueStripe" onclick="proceedToStripeOnboard()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-          <span>Continue to Stripe</span> ↗
-        </button>
+      <div>
+        <label id="wiseCodeLabel" class="block text-xs font-semibold text-slate-300 mb-1">IFSC Code (11 characters)</label>
+        <input type="text" id="wiseBankCode" placeholder="e.g. HDFC0001234 or SBIN0005678" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
       </div>
+
+      <div>
+        <label id="wiseAcctLabel" class="block text-xs font-semibold text-slate-300 mb-1">Bank Account Number (or UPI ID)</label>
+        <input type="text" id="wiseAccountNumber" placeholder="Enter your bank account number" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-slate-300 leading-relaxed">
+        ⚡ <strong>Direct Local Payouts via Wise:</strong> 88% of every file unlock is deposited straight into your local bank account with zero platform-rejection errors.
+      </div>
+    </div>
+
+    <!-- TAB 2: PAYPAL GLOBAL -->
+    <div id="paypalPayoutForm" class="hidden space-y-3.5">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Your PayPal Email Address</label>
+        <input type="email" id="paypalEmailInput" placeholder="yourname@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
+      </div>
+
+      <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-slate-300 leading-relaxed">
+        🌍 <strong>Instant Global PayPal Payouts:</strong> Supported in 200+ countries. Receive 88% of every unlock directly to your PayPal account with zero bank routing forms.
+      </div>
+    </div>
+
+    <!-- Modal Footer Buttons -->
+    <div class="flex items-center justify-end gap-2.5 pt-4 mt-2 border-t border-slate-800">
+      <button type="button" onclick="closeCountryModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all cursor-pointer">
+        Cancel
+      </button>
+      <button type="button" id="btnContinueStripe" onclick="savePayoutAccount()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+        <span>Connect Payout Account</span> ✓
+      </button>
     </div>
   </div>
 </div>
 
 <script>
+  let activePayoutTab = 'wise';
+
   function openCountryModal() {
     document.getElementById('stripeCountryModal')?.classList.remove('hidden');
   }
@@ -4899,128 +4939,196 @@ async function checkAccountStorageStatus() {
     openCountryModal();
   }
 
-  async function proceedToStripeOnboard() {
+  function switchPayoutTab(tab) {
+    activePayoutTab = tab;
+    const wiseForm = document.getElementById('wisePayoutForm');
+    const paypalForm = document.getElementById('paypalPayoutForm');
+    const btnWise = document.getElementById('tabBtnWise');
+    const btnPaypal = document.getElementById('tabBtnPaypal');
+
+    if (tab === 'wise') {
+      wiseForm.classList.remove('hidden');
+      paypalForm.classList.add('hidden');
+      btnWise.className = "py-2 px-3 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer";
+      btnPaypal.className = "py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer";
+    } else {
+      wiseForm.classList.add('hidden');
+      paypalForm.classList.remove('hidden');
+      btnPaypal.className = "py-2 px-3 rounded-xl font-bold text-xs bg-indigo-500 text-white shadow transition-all cursor-pointer";
+      btnWise.className = "py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer";
+    }
+  }
+
+  function updateWisePlaceholders() {
+    const country = document.getElementById('wiseCountrySelect')?.value || 'IN';
+    const codeLabel = document.getElementById('wiseCodeLabel');
+    const codeInput = document.getElementById('wiseBankCode');
+    const acctLabel = document.getElementById('wiseAcctLabel');
+    const acctInput = document.getElementById('wiseAccountNumber');
+
+    if (country === 'IN') {
+      codeLabel.textContent = 'IFSC Code (11 characters)';
+      codeInput.placeholder = 'e.g. HDFC0001234 or SBIN0005678';
+      acctLabel.textContent = 'Indian Bank Account Number (or UPI ID)';
+      acctInput.placeholder = 'Enter account number or UPI ID';
+    } else if (country === 'US') {
+      codeLabel.textContent = 'ACH Routing Number (9 digits)';
+      codeInput.placeholder = 'e.g. 026073150';
+      acctLabel.textContent = 'US Checking / Savings Account Number';
+      acctInput.placeholder = 'Enter account number';
+    } else if (country === 'GB') {
+      codeLabel.textContent = 'UK Sort Code (6 digits)';
+      codeInput.placeholder = 'e.g. 20-00-00';
+      acctLabel.textContent = 'UK Account Number (8 digits)';
+      acctInput.placeholder = 'Enter 8-digit account number';
+    } else if (country === 'EU' || country === 'AE') {
+      codeLabel.textContent = 'BIC / SWIFT Code';
+      codeInput.placeholder = 'e.g. DEUTDEFFXXX';
+      acctLabel.textContent = 'IBAN Number';
+      acctInput.placeholder = 'e.g. DE89 3704 0044 0532 0130 00';
+    } else {
+      codeLabel.textContent = 'Bank / Transit / BSB Code';
+      codeInput.placeholder = 'Enter local bank routing code';
+      acctLabel.textContent = 'Account Number';
+      acctInput.placeholder = 'Enter local bank account number';
+    }
+  }
+
+  async function savePayoutAccount() {
     const btn = document.getElementById('btnContinueStripe');
-    const countrySelect = document.getElementById('stripeCountrySelect');
-    const selectedCountry = countrySelect ? countrySelect.value : 'IN';
+    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+
+    let payload = {
+      user_id: userId,
+      email: userId,
+      method: activePayoutTab
+    };
+
+    if (activePayoutTab === 'paypal') {
+      const paypalEmail = document.getElementById('paypalEmailInput')?.value.trim();
+      if (!paypalEmail || !paypalEmail.includes('@')) {
+        alert('Please enter a valid PayPal email address.');
+        return;
+      }
+      payload.paypal_email = paypalEmail;
+    } else {
+      const country = document.getElementById('wiseCountrySelect')?.value || 'IN';
+      const holder = document.getElementById('wiseAccountHolder')?.value.trim();
+      const bankCode = document.getElementById('wiseBankCode')?.value.trim();
+      const acctNum = document.getElementById('wiseAccountNumber')?.value.trim();
+
+      if (!holder || !acctNum) {
+        alert('Please fill in your Account Holder Name and Account Number.');
+        return;
+      }
+      payload.country = country;
+      payload.account_holder = holder;
+      payload.bank_code = bankCode;
+      payload.account_number = acctNum;
+    }
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<span>Configuring Stripe (${selectedCountry})...</span>`;
+      btn.innerHTML = `<span>Saving Payout Details...</span>`;
     }
 
-    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
-
     try {
-      const res = await fetch('/api/stripe/connect/onboard', {
+      const res = await fetch('/api/payouts/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          user_id: userId, 
-          email: userId,
-          country: selectedCountry 
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
 
-      if (data.url) {
-        window.location.href = data.url;
+      if (res.ok && data.success) {
+        localStorage.setItem('zephyr_bank_account_linked', 'true');
+        closeCountryModal();
+        await updateDashboardBankUI();
       } else {
-        alert("Error: " + (data.detail || "Could not generate Stripe onboarding link."));
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<span>Continue to Stripe</span> ↗`;
-        }
+        alert('Error: ' + (data.detail || 'Could not save payout account.'));
       }
     } catch (err) {
-      alert("Connection error contacting Stripe backend.");
+      alert('Network error saving payout account.');
+    } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = `<span>Continue to Stripe</span> ↗`;
+        btn.innerHTML = `<span>Connect Payout Account</span> ✓`;
       }
     }
   }
 
   async function updateDashboardBankUI() {
-      // Find the button or badge in the bank card
-      const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
-                      Array.from(document.querySelectorAll('button, div')).find(el => 
-                        el.textContent && (el.textContent.includes('Bank Linked') || el.textContent.includes('Bank Account'))
-                      );
-      if (!linkBtn) return;
+    const linkBtn = document.getElementById('triggerStripeOnboardLink') || 
+                    Array.from(document.querySelectorAll('button, div')).find(el => 
+                      el.textContent && (el.textContent.includes('Bank Linked') || el.textContent.includes('Bank Account') || el.textContent.includes('Payouts Active'))
+                    );
+    if (!linkBtn) return;
 
-      const container = linkBtn.parentElement;
-      container.className = "pt-2 flex flex-wrap items-center gap-3";
+    const container = linkBtn.parentElement;
+    container.className = "pt-2 flex flex-wrap items-center gap-3";
 
-      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
 
-      try {
-        const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
-        const data = await res.json();
+    try {
+      const res = await fetch(`/api/stripe/connect/status?user_id=${encodeURIComponent(userId)}`);
+      const data = await res.json();
 
-        if (data.connected && data.payouts_enabled) {
-          localStorage.setItem('zephyr_bank_account_linked', 'true');
-          container.innerHTML = `
-            <div class="px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 shadow-sm">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>✓ Bank Linked via Stripe (88% Payouts Active)</span>
-            </div>
-            <button type="button" onclick="disconnectStripeAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              <span>Remove Bank Account</span>
-            </button>
-          `;
-        } else if (data.connected && !data.payouts_enabled) {
-          localStorage.setItem('zephyr_bank_account_linked', 'false');
-          container.innerHTML = `
-            <button type="button" onclick="openCountryModal()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg transition-all cursor-pointer">
-              <span>Complete Stripe Verification</span> ↗
-            </button>
-            <button type="button" onclick="disconnectStripeAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer">
-              <span>Remove / Reset Bank</span>
-            </button>
-          `;
-        } else {
-          localStorage.setItem('zephyr_bank_account_linked', 'false');
-          container.innerHTML = `
-            <button id="triggerStripeOnboardLink" onclick="startStripeOnboarding()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-              <span>Link Bank Account via Stripe</span> ↗
-            </button>
-          `;
-        }
-      } catch (err) {
-        console.warn("Stripe status check skipped:", err);
+      if (data.connected && data.payouts_enabled) {
+        localStorage.setItem('zephyr_bank_account_linked', 'true');
+        const methodLabel = data.label || 'Wise / PayPal';
+        container.innerHTML = `
+          <div class="px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>✓ Linked: ${methodLabel} (88% Payouts Active)</span>
+          </div>
+          <button type="button" onclick="openCountryModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer">
+            <span>Change Method</span>
+          </button>
+          <button type="button" onclick="disconnectStripeAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Remove Bank Account</span>
+          </button>
+        `;
+      } else {
+        localStorage.setItem('zephyr_bank_account_linked', 'false');
+        container.innerHTML = `
+          <button id="triggerStripeOnboardLink" onclick="openCountryModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+            <span>Link Bank Account (Wise / PayPal)</span> ↗
+          </button>
+        `;
       }
+    } catch (err) {
+      console.warn("Payout status check skipped:", err);
+    }
+  }
+
+  async function disconnectStripeAccount() {
+    if (!confirm("Are you sure you want to remove your connected payout account? Pay-to-Unlock Escrow will be disabled until you link a new Wise or PayPal account.")) {
+      return;
     }
 
-    async function disconnectStripeAccount() {
-      if (!confirm("Are you sure you want to remove your connected bank account? Pay-to-Unlock Escrow will be disabled until you link a new account.")) {
-        return;
+    const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
+
+    try {
+      const res = await fetch('/api/stripe/connect/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, email: userId })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('zephyr_bank_account_linked', 'false');
+        await updateDashboardBankUI();
+      } else {
+        alert("Error: " + (data.detail || "Failed to remove payout account."));
       }
-
-      const userId = localStorage.getItem('user_email') || 'priyamrana069@gmail.com';
-
-      try {
-        const res = await fetch('/api/stripe/connect/disconnect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, email: userId })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          localStorage.setItem('zephyr_bank_account_linked', 'false');
-          alert("Bank account unlinked successfully.");
-          window.location.href = '/dashboard';
-        } else {
-          alert("Error: " + (data.detail || "Failed to remove bank account."));
-        }
-      } catch (err) {
-        alert("Connection error unlinking bank account.");
-      }
+    } catch (err) {
+      alert("Connection error removing payout account.");
     }
+  }
 
   window.addEventListener('DOMContentLoaded', () => {
     updateDashboardBankUI();
