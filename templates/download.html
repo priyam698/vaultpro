@@ -1511,5 +1511,118 @@ async function downloadActiveFile() {
       }
     });
   </script>
+  <!-- 2ND USER (BUYER) LIVE QR / UPI PAYMENT & AUTO-UNLOCK MODAL -->
+<div id="buyerUpiQrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+  <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-emerald-500/30 shadow-2xl text-center space-y-4">
+    <div class="flex items-center justify-between">
+      <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        Listening for Bank Payment Notification...
+      </span>
+      <button type="button" onclick="closeBuyerUpiModal()" class="text-slate-400 hover:text-white text-sm cursor-pointer">✕</button>
+    </div>
+
+    <div class="space-y-1">
+      <h3 class="text-base font-extrabold text-white">Scan QR or Pay via UPI to Unlock File</h3>
+      <p class="text-xs text-slate-400">Paying <strong id="buyerPayeeName" class="text-white">Creator</strong> • Reference: <code id="buyerTxRef" class="text-emerald-400 font-mono"></code></p>
+    </div>
+
+    <div class="p-4 rounded-2xl bg-white w-56 h-56 mx-auto flex items-center justify-center shadow-lg">
+      <img id="buyerQrImg" src="" alt="Scan to Pay" class="w-full h-full object-contain">
+    </div>
+
+    <div id="buyerUpiIdBox" class="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-slate-200 font-mono">
+      UPI ID: <strong id="buyerUpiIdText" class="text-emerald-400 select-all"></strong>
+    </div>
+
+    <a id="buyerUpiIntentBtn" href="#" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs inline-flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all">
+      <span>Open GPay / PhonePe / Paytm App</span> ↗
+    </a>
+
+    <!-- Instant Bank Notification / UTR Confirmation -->
+    <div class="pt-3 border-t border-slate-800 text-left space-y-2">
+      <label class="block text-[11px] text-slate-400">
+        Paid? The file unlocks automatically upon bank notification, or enter your 12-digit UPI Ref/UTR No. for instant unlock:
+      </label>
+      <div class="flex gap-2">
+        <input type="text" id="buyerUtrInput" maxlength="12" placeholder="12-digit UPI UTR / Ref No." class="flex-1 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-emerald-500">
+        <button type="button" onclick="submitBuyerUtr()" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs cursor-pointer transition-all">
+          Verify & Unlock
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeBuyerTxRef = null;
+  let activeBuyerFileId = null;
+  let paymentPollTimer = null;
+
+  async function openDirectUpiQrCheckout(sessionData) {
+    activeBuyerTxRef = sessionData.tx_ref;
+    activeBuyerFileId = sessionData.file_id;
+
+    document.getElementById('buyerPayeeName').textContent = sessionData.holder_name || 'Creator';
+    document.getElementById('buyerTxRef').textContent = sessionData.tx_ref;
+    document.getElementById('buyerQrImg').src = sessionData.qr_image || '';
+    document.getElementById('buyerUpiIdText').textContent = sessionData.upi_id || 'Scan QR Above';
+
+    const intentBtn = document.getElementById('buyerUpiIntentBtn');
+    if (sessionData.upi_uri) {
+      intentBtn.href = sessionData.upi_uri;
+      intentBtn.classList.remove('hidden');
+    } else {
+      intentBtn.classList.add('hidden');
+    }
+
+    document.getElementById('buyerUpiQrModal').classList.remove('hidden');
+
+    // Start polling every 2 seconds to auto-detect bank payment confirmation
+    if (paymentPollTimer) clearInterval(paymentPollTimer);
+    paymentPollTimer = setInterval(checkBuyerPaymentDetected, 2000);
+  }
+
+  function closeBuyerUpiModal() {
+    document.getElementById('buyerUpiQrModal')?.classList.add('hidden');
+    if (paymentPollTimer) clearInterval(paymentPollTimer);
+  }
+
+  async function checkBuyerPaymentDetected() {
+    if (!activeBuyerTxRef) return;
+    try {
+      const res = await fetch(`/api/escrow/check-payment-status?tx_ref=${encodeURIComponent(activeBuyerTxRef)}`);
+      const data = await res.json();
+      if (data.paid) {
+        clearInterval(paymentPollTimer);
+        window.location.href = `/download/${activeBuyerFileId}?unlocked=true&tx_ref=${activeBuyerTxRef}&token=${data.unlock_token || ''}`;
+      }
+    } catch (e) {}
+  }
+
+  async function submitBuyerUtr() {
+    const utr = document.getElementById('buyerUtrInput')?.value.trim();
+    if (!utr || utr.length !== 12) {
+      alert("Please enter the 12-digit UPI UTR / Reference number from your payment app.");
+      return;
+    }
+    try {
+      const res = await fetch('/api/escrow/verify-utr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tx_ref: activeBuyerTxRef, utr_number: utr })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        clearInterval(paymentPollTimer);
+        window.location.href = `/download/${activeBuyerFileId}?unlocked=true&tx_ref=${activeBuyerTxRef}&token=${data.unlock_token || ''}`;
+      } else {
+        alert(data.detail || "Could not verify UTR.");
+      }
+    } catch (e) {
+      alert("Network error verifying payment.");
+    }
+  }
+</script>
 </body>
 </html>

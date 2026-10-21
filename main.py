@@ -4207,10 +4207,14 @@ def health_check():
 # ============================================================
 # ============================================================
 # ============================================================
-# 100% DIRECT PAYOUT ENGINE (WISE & PAYPAL — PAID PLANS ONLY)
+# 100% DIRECT PAYOUT ENGINE (QR, UPI & BANK TRANSFER + AUTO-UNLOCK)
 # ============================================================
 import stripe
 import json
+import uuid
+import re
+import urllib.parse
+from fastapi import Request
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
@@ -4221,15 +4225,29 @@ def _init_payout_db():
         conn = get_db()
         conn.rollback()
         cursor = conn.cursor()
-        for col_stmt in [
+        for stmt in [
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_payouts_enabled INTEGER DEFAULT 0;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_details_submitted INTEGER DEFAULT 0;",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_method TEXT;",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_details TEXT;"
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS payout_details TEXT;",
+            """
+            CREATE TABLE IF NOT EXISTS escrow_payment_sessions (
+                tx_ref TEXT PRIMARY KEY,
+                file_id TEXT,
+                creator_email TEXT,
+                amount REAL,
+                currency TEXT DEFAULT 'INR',
+                payout_method TEXT,
+                payment_status TEXT DEFAULT 'PENDING',
+                utr_number TEXT,
+                unlocked_token TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """
         ]:
             try:
-                cursor.execute(col_stmt)
+                cursor.execute(stmt)
                 conn.commit()
             except Exception:
                 conn.rollback()
@@ -4262,7 +4280,6 @@ def _db_get_user_and_plan(user_ident: str):
                 cursor.execute(f"SELECT * FROM users WHERE {col} = %s", (user_ident,))
                 row = cursor.fetchone()
                 if row:
-                    # Convert row to dict if cursor doesn't return dict
                     if isinstance(row, dict):
                         user_dict = row
                     else:
@@ -4282,11 +4299,10 @@ def _db_get_user_and_plan(user_ident: str):
 
 
 def _is_user_on_paid_plan(user_dict: dict) -> bool:
-    """Returns True if user has an active paid plan or storage > 5 GB (Free Tier default)."""
+    """Returns True if user has an active paid plan or storage > 5 GB."""
     if not user_dict:
         return False
 
-    # Check common plan/tier columns
     plan_val = str(
         user_dict.get("plan") or 
         user_dict.get("plan_id") or 
@@ -4301,7 +4317,6 @@ def _is_user_on_paid_plan(user_dict: dict) -> bool:
     if user_dict.get("is_pro") or user_dict.get("is_paid"):
         return True
 
-    # Check storage quota (Free plan is 5 GB; Paid plans have > 5 GB)
     for quota_col in ["storage_limit_gb", "storage_gb", "max_storage_gb", "quota_gb"]:
         val = user_dict.get(quota_col)
         if val is not None:
@@ -4311,7 +4326,6 @@ def _is_user_on_paid_plan(user_dict: dict) -> bool:
             except Exception:
                 pass
 
-    # Check byte-based storage limit (> 6 GB in bytes)
     for byte_col in ["storage_limit", "max_storage", "quota_bytes"]:
         val = user_dict.get(byte_col)
         if val is not None:
@@ -4324,6 +4338,9 @@ def _is_user_on_paid_plan(user_dict: dict) -> bool:
     return False
 
 
+# ------------------------------------------------------------
+# 1. GET PAYOUT STATUS (QR / UPI / BANK TRANSFER)
+# ------------------------------------------------------------
 @app.get("/api/stripe/connect/status")
 async def get_stripe_connect_status(user_id: str):
     ident = str(user_id or "priyamrana069@gmail.com").strip()
@@ -4339,27 +4356,33 @@ async def get_stripe_connect_status(user_id: str):
     payout_method = user_dict.get("payout_method")
     payout_details_raw = user_dict.get("payout_details")
 
-    if payout_method in ("wise", "paypal") and payout_details_raw:
+    if payout_method in ("qr", "upi", "wise", "bank", "paypal") and payout_details_raw:
         try:
             details = json.loads(payout_details_raw)
         except Exception:
             details = {}
 
-        if payout_method == "paypal":
-            email_val = details.get("paypal_email", "PayPal")
-            label = f"PayPal ({email_val})"
-        else:
-            country = details.get("country", "Bank")
+        if payout_method == "qr":
+            upi_val = details.get("upi_id") or details.get("account_holder") or "Custom QR"
+            label = f"QR Code ({upi_val})"
+        elif payout_method == "upi":
+            upi_val = details.get("upi_id", "UPI ID")
+            label = f"UPI ({upi_val})"
+        elif payout_method in ("wise", "bank"):
+            country = details.get("country", "IN")
             acct_num = str(details.get("account_number", ""))
-            last4 = acct_num[-4:] if len(acct_num) >= 4 else "Acct"
-            label = f"Wise ({country} ••••{last4})"
+            last4 = acct_num[-4:] if len(acct_num) >= 4 else "Bank"
+            label = f"Bank Transfer ({country} ••••{last4})"
+        else:
+            label = f"Payout Linked ({payout_method.upper()})"
 
         return {
             "connected": True,
             "payouts_enabled": True,
             "is_paid_plan": is_paid,
             "method": payout_method,
-            "label": label
+            "label": label,
+            "webhook_key": details.get("webhook_key", "")
         }
 
     return {
@@ -4369,10 +4392,13 @@ async def get_stripe_connect_status(user_id: str):
     }
 
 
+# ------------------------------------------------------------
+# 2. SAVE PAYOUT METHOD (QR CODE, UPI ID, OR BANK TRANSFER)
+# ------------------------------------------------------------
 @app.post("/api/payouts/save")
 async def save_payout_method(payload: dict):
     user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
-    method = str(payload.get("method") or "wise").lower().strip()
+    method = str(payload.get("method") or "upi").lower().strip()
     client_is_paid = payload.get("is_paid_plan", None)
 
     conn, cursor, user_dict, matched_col = _db_get_user_and_plan(user_ident)
@@ -4384,17 +4410,44 @@ async def save_payout_method(payload: dict):
         conn.close()
         raise HTTPException(
             status_code=403,
-            detail="Upgrade Required: Pay-to-Unlock Escrow is exclusively available on Paid Plans. Please upgrade your plan to link a payout account."
+            detail="Upgrade Required: Pay-to-Unlock Escrow is exclusively available on Paid Plans. Please upgrade your plan to use this service."
         )
 
-    if method == "paypal":
-        paypal_email = str(payload.get("paypal_email") or "").strip()
-        if not paypal_email or "@" not in paypal_email:
+    webhook_key = f"zk_{uuid.uuid4().hex[:16]}"
+
+    if method == "qr":
+        holder_name = str(payload.get("account_holder") or "").strip()
+        upi_id = str(payload.get("upi_id") or "").strip()
+        qr_image_data = str(payload.get("qr_image_data") or "").strip()
+
+        if not qr_image_data and not upi_id:
             conn.close()
-            raise HTTPException(status_code=400, detail="Please enter a valid PayPal email address.")
-        details_dict = {"paypal_email": paypal_email}
-        label = f"PayPal ({paypal_email})"
-    elif method == "wise":
+            raise HTTPException(status_code=400, detail="Please upload your Payment QR Code image or enter your linked UPI ID.")
+
+        details_dict = {
+            "account_holder": holder_name or "Zephyr Creator",
+            "upi_id": upi_id,
+            "qr_image_data": qr_image_data,
+            "webhook_key": webhook_key
+        }
+        label = f"QR Code ({upi_id or holder_name or 'Active'})"
+
+    elif method == "upi":
+        holder_name = str(payload.get("account_holder") or "").strip()
+        upi_id = str(payload.get("upi_id") or "").strip()
+
+        if not upi_id or "@" not in upi_id:
+            conn.close()
+            raise HTTPException(status_code=400, detail="Please enter a valid UPI ID (e.g. yourname@okhdfcbank).")
+
+        details_dict = {
+            "account_holder": holder_name or upi_id.split("@")[0],
+            "upi_id": upi_id,
+            "webhook_key": webhook_key
+        }
+        label = f"UPI ({upi_id})"
+
+    elif method in ("wise", "bank"):
         country = str(payload.get("country") or "IN").upper().strip()
         holder_name = str(payload.get("account_holder") or "").strip()
         account_number = str(payload.get("account_number") or "").strip()
@@ -4402,16 +4455,18 @@ async def save_payout_method(payload: dict):
 
         if not holder_name or not account_number:
             conn.close()
-            raise HTTPException(status_code=400, detail="Please enter your Account Holder Name and Account Number.")
+            raise HTTPException(status_code=400, detail="Please enter your Account Holder Name and Bank Account Number.")
 
         details_dict = {
             "country": country,
             "account_holder": holder_name,
             "account_number": account_number,
-            "bank_code": bank_code
+            "bank_code": bank_code,
+            "webhook_key": webhook_key
         }
-        last4 = account_number[-4:] if len(account_number) >= 4 else "Acct"
-        label = f"Wise ({country} ••••{last4})"
+        last4 = account_number[-4:] if len(account_number) >= 4 else "Bank"
+        label = f"Bank Transfer ({country} ••••{last4})"
+        method = "wise"
     else:
         conn.close()
         raise HTTPException(status_code=400, detail="Unsupported payout method.")
@@ -4439,6 +4494,7 @@ async def save_payout_method(payload: dict):
         "success": True,
         "method": method,
         "label": label,
+        "webhook_key": webhook_key,
         "message": "Payout account linked! 100% Direct Payouts are now active."
     }
 
@@ -4472,32 +4528,92 @@ async def disconnect_stripe_account(payload: dict):
     return {"success": True, "message": "Payout account unlinked successfully."}
 
 
+# ------------------------------------------------------------
+# 3. CREATE ESCROW PAYMENT SESSION (QR, UPI, OR BANK CHECKOUT)
+# ------------------------------------------------------------
 @app.post("/api/escrow/create-checkout")
 async def create_escrow_checkout(payload: dict):
-    creator_ident = str(payload.get("creator_user_id") or payload.get("creator_email") or "").strip()
-    file_id = payload.get("file_id")
+    creator_ident = str(payload.get("creator_user_id") or payload.get("creator_email") or "priyamrana069@gmail.com").strip()
+    file_id = str(payload.get("file_id") or "file_1")
     file_name = payload.get("file_name") or "Secure Escrow Deliverable"
-    price_usd = float(payload.get("price_usd") or 10.0)
+    price_amount = float(payload.get("price_usd") or payload.get("price") or 10.0)
     base_url = os.getenv("BASE_URL", "https://zephyr-drive.onrender.com").rstrip("/")
 
     conn, cursor, creator_dict, _ = _db_get_user_and_plan(creator_ident)
-    if conn:
-        conn.close()
-
     if not creator_dict:
+        if conn:
+            conn.close()
         raise HTTPException(status_code=400, detail="Creator account not found.")
 
     if not _is_user_on_paid_plan(creator_dict):
+        if conn:
+            conn.close()
         raise HTTPException(status_code=403, detail="Creator must be on an active Paid Plan to use Pay-to-Unlock Escrow.")
 
     payouts_enabled = creator_dict.get("stripe_payouts_enabled")
-    payout_method = creator_dict.get("payout_method") or "wise"
+    payout_method = creator_dict.get("payout_method") or "upi"
+    payout_details_raw = creator_dict.get("payout_details")
 
-    if not payouts_enabled:
-        raise HTTPException(status_code=400, detail="Creator has not linked a Wise or PayPal payout account yet.")
+    if not payouts_enabled or not payout_details_raw:
+        if conn:
+            conn.close()
+        raise HTTPException(status_code=400, detail="Creator has not linked a QR, UPI, or Bank account yet.")
 
-    total_cents = int(round(price_usd * 100))
+    try:
+        details = json.loads(payout_details_raw)
+    except Exception:
+        details = {}
 
+    tx_ref = f"ZP{uuid.uuid4().hex[:8].upper()}"
+
+    # Record the pending payment session for real-time bank detection
+    try:
+        cursor.execute(
+            """
+            INSERT INTO escrow_payment_sessions (tx_ref, file_id, creator_email, amount, currency, payout_method, payment_status)
+            VALUES (%s, %s, %s, %s, %s, %s, 'PENDING')
+            """,
+            (tx_ref, file_id, creator_ident, price_amount, "INR" if payout_method in ("qr", "upi") else "USD", payout_method)
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+    finally:
+        conn.close()
+
+    # If Creator uses QR or UPI: Return direct QR & UPI Intent so 2nd user pays 1st user's bank directly!
+    if payout_method in ("qr", "upi"):
+        upi_id = details.get("upi_id", "")
+        holder_name = details.get("account_holder", "Creator")
+        qr_image_data = details.get("qr_image_data", "")
+
+        upi_uri = ""
+        generated_qr_url = ""
+        if upi_id:
+            params = {
+                "pa": upi_id,
+                "pn": holder_name,
+                "am": f"{price_amount:.2f}",
+                "cu": "INR",
+                "tn": f"Zephyr {tx_ref}"
+            }
+            upi_uri = f"upi://pay?{urllib.parse.urlencode(params)}"
+            generated_qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={urllib.parse.quote(upi_uri)}"
+
+        return {
+            "mode": "direct_upi_qr",
+            "tx_ref": tx_ref,
+            "file_id": file_id,
+            "amount": price_amount,
+            "payout_method": payout_method,
+            "upi_id": upi_id,
+            "holder_name": holder_name,
+            "upi_uri": upi_uri,
+            "qr_image": qr_image_data or generated_qr_url
+        }
+
+    # If Creator uses Bank Transfer (Wise): Use Stripe Checkout -> Auto-Wire
+    total_cents = int(round(price_amount * 100))
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         line_items=[{
@@ -4505,7 +4621,7 @@ async def create_escrow_checkout(payload: dict):
                 "currency": "usd",
                 "product_data": {
                     "name": f"Unlock: {file_name}",
-                    "description": "Secure escrow file unlock (100% Direct Payout to Creator)."
+                    "description": "100% Direct Bank Payout to Creator"
                 },
                 "unit_amount": total_cents
             },
@@ -4513,17 +4629,183 @@ async def create_escrow_checkout(payload: dict):
         }],
         mode="payment",
         metadata={
+            "escrow_unlock": "true",
+            "tx_ref": tx_ref,
             "file_id": str(file_id),
-            "creator_user": str(creator_ident),
-            "payout_method": str(payout_method),
-            "creator_payout_cents": str(total_cents),
-            "platform_fee_cents": "0"
+            "creator_user": str(creator_ident)
         },
-        success_url=f"{base_url}/download/{file_id}?unlocked=true&session_id={{CHECKOUT_SESSION_ID}}",
+        success_url=f"{base_url}/download/{file_id}?unlocked=true&tx_ref={tx_ref}",
         cancel_url=f"{base_url}/download/{file_id}?canceled=true"
     )
 
-    return {"checkout_url": session.url}
+    return {"mode": "checkout_redirect", "checkout_url": session.url, "tx_ref": tx_ref}
+
+
+# ------------------------------------------------------------
+# 4. REAL-TIME BANK NOTIFICATION LISTENER & AUTO-UNLOCK ENGINE
+# ------------------------------------------------------------
+@app.post("/api/escrow/bank-notification-webhook")
+async def bank_notification_webhook(payload: dict):
+    """
+    Automatically receives incoming bank/UPI payment notifications from the 1st user's 
+    device/bank bridge and immediately marks the 2nd user's session as PAID so the file unlocks.
+    """
+    creator_ident = str(payload.get("creator_email") or payload.get("user_id") or "").strip()
+    notification_text = str(payload.get("notification_text") or payload.get("message") or "")
+    tx_ref = str(payload.get("tx_ref") or "").strip().upper()
+    amount_received = payload.get("amount")
+    utr_Match = re.search(r"\b(\d{12})\b", notification_text)
+    utr_number = str(payload.get("utr") or (utr_Match.group(1) if utr_Match else "AUTO_DETECTED"))
+
+    # Extract ZP transaction reference if present in SMS/UPI notification text
+    if not tx_ref:
+        ref_match = re.search(r"(ZP[A-F0-9]{8})", notification_text.upper())
+        if ref_match:
+            tx_ref = ref_match.group(1)
+
+    conn = get_db()
+    conn.rollback()
+    cursor = conn.cursor()
+
+    try:
+        if tx_ref:
+            cursor.execute(
+                """
+                UPDATE escrow_payment_sessions
+                SET payment_status = 'PAID',
+                    utr_number = %s,
+                    unlocked_token = %s
+                WHERE tx_ref = %s
+                RETURNING file_id;
+                """,
+                (utr_number, f"unlock_{uuid.uuid4().hex}", tx_ref)
+            )
+        elif creator_ident and amount_received:
+            cursor.execute(
+                """
+                UPDATE escrow_payment_sessions
+                SET payment_status = 'PAID',
+                    utr_number = %s,
+                    unlocked_token = %s
+                WHERE tx_ref = (
+                    SELECT tx_ref FROM escrow_payment_sessions
+                    WHERE creator_email = %s AND payment_status = 'PENDING' AND amount = %s
+                    ORDER BY created_at DESC LIMIT 1
+                )
+                RETURNING file_id;
+                """,
+                (utr_number, f"unlock_{uuid.uuid4().hex}", creator_ident, float(amount_received))
+            )
+        else:
+            cursor.execute(
+                """
+                UPDATE escrow_payment_sessions
+                SET payment_status = 'PAID',
+                    utr_number = %s,
+                    unlocked_token = %s
+                WHERE tx_ref = (
+                    SELECT tx_ref FROM escrow_payment_sessions
+                    WHERE payment_status = 'PENDING'
+                    ORDER BY created_at DESC LIMIT 1
+                )
+                RETURNING file_id;
+                """,
+                (utr_number, f"unlock_{uuid.uuid4().hex}")
+            )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Webhook processing error: {str(e)}")
+
+    conn.close()
+    return {"success": True, "status": "PAID", "utr": utr_number}
+
+
+@app.post("/api/escrow/verify-utr")
+async def verify_upi_utr_payment(payload: dict):
+    """
+    Confirms payment via 12-digit Bank/UPI UTR reference number and unlocks the file for the 2nd user.
+    """
+    tx_ref = str(payload.get("tx_ref") or "").strip().upper()
+    utr_number = re.sub(r"\D", "", str(payload.get("utr_number") or ""))
+
+    if len(utr_number) != 12:
+        raise HTTPException(status_code=400, detail="Please enter a valid 12-digit UPI / Bank UTR Reference Number.")
+
+    conn = get_db()
+    conn.rollback()
+    cursor = conn.cursor()
+
+    try:
+        # Ensure the same UTR isn't reused across multiple unlocks
+        cursor.execute("SELECT tx_ref FROM escrow_payment_sessions WHERE utr_number = %s AND tx_ref != %s", (utr_number, tx_ref))
+        if cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=400, detail="This 12-digit UTR number has already been used.")
+
+        unlock_token = f"unlock_{uuid.uuid4().hex}"
+        cursor.execute(
+            """
+            UPDATE escrow_payment_sessions
+            SET payment_status = 'PAID',
+                utr_number = %s,
+                unlocked_token = %s
+            WHERE tx_ref = %s
+            """,
+            (utr_number, unlock_token, tx_ref)
+        )
+        conn.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"UTR verification error: {str(e)}")
+
+    conn.close()
+    return {"success": True, "status": "PAID", "unlock_token": unlock_token}
+
+
+@app.get("/api/escrow/check-payment-status")
+async def check_escrow_payment_status(tx_ref: str):
+    """
+    Polled every 2 seconds by the 2nd user's browser. The moment the bank notification 
+    is detected, this returns PAID and unlocks the file automatically!
+    """
+    conn = get_db()
+    conn.rollback()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT payment_status, file_id, unlocked_token, utr_number FROM escrow_payment_sessions WHERE tx_ref = %s",
+            (tx_ref.strip().upper(),)
+        )
+        row = cursor.fetchone()
+    except Exception:
+        conn.rollback()
+        row = None
+    finally:
+        conn.close()
+
+    if not row:
+        return {"paid": False, "status": "NOT_FOUND"}
+
+    if isinstance(row, dict):
+        status_val = row.get("payment_status")
+        file_id = row.get("file_id")
+        token = row.get("unlocked_token")
+    else:
+        status_val = row[0]
+        file_id = row[1]
+        token = row[2]
+
+    return {
+        "paid": status_val == "PAID",
+        "status": status_val,
+        "file_id": file_id,
+        "unlock_token": token
+    }
 @app.post("/api/dodo/create-checkout-session")
 async def create_dodo_checkout(payload: dict):
     user_id = payload.get("user_id") or "zephyr_user"

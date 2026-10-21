@@ -4805,33 +4805,79 @@ async function checkAccountStorageStatus() {
     <!-- ============================================================ -->
     <!-- ZEPHYR ESCROW BANK DETAILS MODAL & CONTROLLER                -->
     <!-- ============================================================ -->
-    <!-- UNIFIED WISE + PAYPAL 100% PAYOUT MODAL -->
+<!-- 3-OPTION DIRECT PAYOUT MODAL: QR CODE | UPI ID | BANK TRANSFER -->
 <div id="stripeCountryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-  <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl">
+  <div class="relative w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl max-h-[92vh] overflow-y-auto">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-base font-bold text-white">Connect 100% Direct Payout Account</h3>
-        <p class="text-xs text-slate-400 mt-0.5">Receive 100% of your file unlock revenue via Wise or PayPal.</p>
+        <h3 class="text-base font-bold text-white">Link 100% Direct Payout Account</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Choose QR Code, UPI ID, or Direct Bank Transfer.</p>
       </div>
       <button type="button" onclick="closeCountryModal()" class="text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
     </div>
 
-    <!-- Method Tabs -->
-    <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-800/80 border border-slate-700/60 mb-4">
-      <button type="button" id="tabBtnWise" onclick="switchPayoutTab('wise')" class="py-2 px-3 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer">
-        🏦 Wise (Local Bank)
+    <!-- 3 Method Tabs: QR | UPI | Bank Transfer -->
+    <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-slate-800/90 border border-slate-700/60 mb-4">
+      <button type="button" id="tabBtnQr" onclick="switchPayoutTab('qr')" class="py-2 px-2 rounded-xl font-bold text-[11px] bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer">
+        🔳 QR Code
       </button>
-      <button type="button" id="tabBtnPaypal" onclick="switchPayoutTab('paypal')" class="py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer">
-        💳 PayPal Global
+      <button type="button" id="tabBtnUpi" onclick="switchPayoutTab('upi')" class="py-2 px-2 rounded-xl font-bold text-[11px] text-slate-300 hover:text-white transition-all cursor-pointer">
+        📱 UPI ID
+      </button>
+      <button type="button" id="tabBtnWise" onclick="switchPayoutTab('wise')" class="py-2 px-2 rounded-xl font-bold text-[11px] text-slate-300 hover:text-white transition-all cursor-pointer">
+        🏦 Bank Transfer
       </button>
     </div>
 
-    <!-- TAB 1: WISE / DIRECT LOCAL BANK -->
-    <div id="wisePayoutForm" class="space-y-3.5">
+    <!-- OPTION 1: QR CODE -->
+    <div id="qrPayoutForm" class="space-y-3.5">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Account Holder Name</label>
+        <input type="text" id="qrAccountHolder" placeholder="e.g. Priyam Rana" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Upload Your Bank / UPI QR Code Image</label>
+        <input type="file" id="qrImageInput" accept="image/*" onchange="handleQrFileSelect(event)" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500/20 file:text-emerald-300 hover:file:bg-emerald-500/30 cursor-pointer">
+        <div id="qrPreviewContainer" class="hidden mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+          <img id="qrPreviewImg" src="" alt="QR Preview" class="w-14 h-14 rounded-lg object-contain bg-white p-1">
+          <span class="text-[11px] text-emerald-400 font-semibold">✓ QR Code Ready for Auto-Detection</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Linked UPI ID (for Dynamic Amount Auto-Detection)</label>
+        <input type="text" id="qrLinkedUpiId" placeholder="e.g. yourname@okhdfcbank" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-slate-300 leading-relaxed">
+        📡 <strong>Auto Bank Notification Sync:</strong> When the 2nd user scans your QR and pays, Zephyr detects the bank payment confirmation and unlocks the file automatically.
+      </div>
+    </div>
+
+    <!-- OPTION 2: DIRECT UPI ID -->
+    <div id="upiPayoutForm" class="hidden space-y-3.5">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Registered Bank Name / Holder Name</label>
+        <input type="text" id="upiAccountHolder" placeholder="e.g. Priyam Rana" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Your Direct Bank UPI ID (VPA)</label>
+        <input type="text" id="upiIdInput" placeholder="e.g. priyam@okicici or 9876543210@ybl" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-slate-300 leading-relaxed">
+        ⚡ <strong>100% Instant UPI-to-Bank:</strong> Buyers pay directly to your UPI ID via GPay, PhonePe, or Paytm. Our system verifies the bank payment notification and unlocks the file in real time.
+      </div>
+    </div>
+
+    <!-- OPTION 3: BANK TRANSFER (WISE / LOCAL BANK) -->
+    <div id="wisePayoutForm" class="hidden space-y-3.5">
       <div>
         <label class="block text-xs font-semibold text-slate-300 mb-1">Bank Country & Currency</label>
         <select id="wiseCountrySelect" onchange="updateWisePlaceholders()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
-          <option value="IN" selected>🇮🇳 India (INR — Local Bank + IFSC / UPI)</option>
+          <option value="IN" selected>🇮🇳 India (INR — Local Bank + IFSC)</option>
           <option value="US">🇺🇸 United States (USD — ACH Routing + Account)</option>
           <option value="GB">🇬🇧 United Kingdom (GBP — Sort Code + Account)</option>
           <option value="EU">🇪🇺 Europe SEPA (EUR — IBAN + BIC)</option>
@@ -4853,24 +4899,12 @@ async function checkAccountStorageStatus() {
       </div>
 
       <div>
-        <label id="wiseAcctLabel" class="block text-xs font-semibold text-slate-300 mb-1">Bank Account Number (or UPI ID)</label>
+        <label id="wiseAcctLabel" class="block text-xs font-semibold text-slate-300 mb-1">Bank Account Number</label>
         <input type="text" id="wiseAccountNumber" placeholder="Enter your bank account number" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
       </div>
 
       <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-slate-300 leading-relaxed">
-        ⚡ <strong>100% Direct Payout via Wise:</strong> 100% of every file unlock is transferred straight to your local bank account with zero platform fee.
-      </div>
-    </div>
-
-    <!-- TAB 2: PAYPAL GLOBAL -->
-    <div id="paypalPayoutForm" class="hidden space-y-3.5">
-      <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1">Your PayPal Email Address</label>
-        <input type="email" id="paypalEmailInput" placeholder="yourname@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
-      </div>
-
-      <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-slate-300 leading-relaxed">
-        🌍 <strong>100% Instant PayPal Payouts:</strong> Receive 100% of every file unlock directly to your PayPal email with zero platform deductions.
+        🏦 <strong>100% Direct Bank Transfer:</strong> 100% of every file unlock is transferred straight to your bank account with zero platform fee.
       </div>
     </div>
 
@@ -4895,7 +4929,7 @@ async function checkAccountStorageStatus() {
     <div class="space-y-1.5">
       <h3 class="text-base font-extrabold text-white">Upgrade Your Plan to Use Pay-to-Unlock Escrow</h3>
       <p class="text-xs text-slate-300 leading-relaxed">
-        Pay-to-Unlock Escrow with <strong>100% Direct Wise & PayPal Payouts</strong> is a premium feature available exclusively on Paid Plans. Free Tier accounts cannot enable escrow locks.
+        Pay-to-Unlock Escrow with <strong>100% Direct QR, UPI & Bank Payouts</strong> is available exclusively on Paid Plans. Free Tier accounts cannot enable escrow locks.
       </p>
     </div>
     <div class="flex items-center justify-center gap-3 pt-2">
@@ -4910,11 +4944,11 @@ async function checkAccountStorageStatus() {
 </div>
 
 <script>
-  let activePayoutTab = 'wise';
+  let activePayoutTab = 'qr';
+  let uploadedQrBase64 = '';
   let userIsOnPaidPlan = false;
 
   function detectPaidPlanFromDOM() {
-    // Checks if the dashboard UI shows PRO Plan or > 5 GB vault capacity
     const pageText = document.body.innerText || '';
     if (pageText.includes('Free Tier') || pageText.includes('/ 5.00 GB') || pageText.includes('/5.00 GB')) {
       return false;
@@ -4930,20 +4964,12 @@ async function checkAccountStorageStatus() {
     if (modal) {
       modal.classList.remove('hidden');
     } else {
-      alert("⚡ Upgrade Required: Pay-to-Unlock Escrow with 100% Direct Payouts is available only on Paid Plans. Please upgrade your plan to use this service.");
+      alert("⚡ Upgrade Required: Pay-to-Unlock Escrow is available only on Paid Plans. Please upgrade your plan to use this service.");
     }
   }
 
   function closeUpgradeModal() {
     document.getElementById('escrowUpgradeModal')?.classList.add('hidden');
-  }
-
-  function handleConnectPayoutClick() {
-    if (!detectPaidPlanFromDOM()) {
-      showUpgradeRequiredFlash();
-      return;
-    }
-    openCountryModal();
   }
 
   function openCountryModal() {
@@ -4958,23 +4984,52 @@ async function checkAccountStorageStatus() {
     document.getElementById('stripeCountryModal')?.classList.add('hidden');
   }
 
+  function handleQrFileSelect(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedQrBase64 = e.target.result;
+      const previewImg = document.getElementById('qrPreviewImg');
+      const previewBox = document.getElementById('qrPreviewContainer');
+      if (previewImg && previewBox) {
+        previewImg.src = uploadedQrBase64;
+        previewBox.classList.remove('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   function switchPayoutTab(tab) {
     activePayoutTab = tab;
+    const qrForm = document.getElementById('qrPayoutForm');
+    const upiForm = document.getElementById('upiPayoutForm');
     const wiseForm = document.getElementById('wisePayoutForm');
-    const paypalForm = document.getElementById('paypalPayoutForm');
-    const btnWise = document.getElementById('tabBtnWise');
-    const btnPaypal = document.getElementById('tabBtnPaypal');
 
-    if (tab === 'wise') {
-      wiseForm.classList.remove('hidden');
-      paypalForm.classList.add('hidden');
-      btnWise.className = "py-2 px-3 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer";
-      btnPaypal.className = "py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer";
+    const btnQr = document.getElementById('tabBtnQr');
+    const btnUpi = document.getElementById('tabBtnUpi');
+    const btnWise = document.getElementById('tabBtnWise');
+
+    const activeClass = "py-2 px-2 rounded-xl font-bold text-[11px] bg-emerald-500 text-slate-950 shadow transition-all cursor-pointer";
+    const inactiveClass = "py-2 px-2 rounded-xl font-bold text-[11px] text-slate-300 hover:text-white transition-all cursor-pointer";
+
+    qrForm.classList.add('hidden');
+    upiForm.classList.add('hidden');
+    wiseForm.classList.add('hidden');
+
+    btnQr.className = inactiveClass;
+    btnUpi.className = inactiveClass;
+    btnWise.className = inactiveClass;
+
+    if (tab === 'qr') {
+      qrForm.classList.remove('hidden');
+      btnQr.className = activeClass;
+    } else if (tab === 'upi') {
+      upiForm.classList.remove('hidden');
+      btnUpi.className = activeClass;
     } else {
-      wiseForm.classList.add('hidden');
-      paypalForm.classList.remove('hidden');
-      btnPaypal.className = "py-2 px-3 rounded-xl font-bold text-xs bg-indigo-500 text-white shadow transition-all cursor-pointer";
-      btnWise.className = "py-2 px-3 rounded-xl font-bold text-xs text-slate-300 hover:text-white transition-all cursor-pointer";
+      wiseForm.classList.remove('hidden');
+      btnWise.className = activeClass;
     }
   }
 
@@ -4988,8 +5043,8 @@ async function checkAccountStorageStatus() {
     if (country === 'IN') {
       codeLabel.textContent = 'IFSC Code (11 characters)';
       codeInput.placeholder = 'e.g. HDFC0001234 or SBIN0005678';
-      acctLabel.textContent = 'Indian Bank Account Number (or UPI ID)';
-      acctInput.placeholder = 'Enter account number or UPI ID';
+      acctLabel.textContent = 'Indian Bank Account Number';
+      acctInput.placeholder = 'Enter account number';
     } else if (country === 'US') {
       codeLabel.textContent = 'ACH Routing Number (9 digits)';
       codeInput.placeholder = 'e.g. 026073150';
@@ -5030,13 +5085,25 @@ async function checkAccountStorageStatus() {
       is_paid_plan: true
     };
 
-    if (activePayoutTab === 'paypal') {
-      const paypalEmail = document.getElementById('paypalEmailInput')?.value.trim();
-      if (!paypalEmail || !paypalEmail.includes('@')) {
-        alert('Please enter a valid PayPal email address.');
+    if (activePayoutTab === 'qr') {
+      const holder = document.getElementById('qrAccountHolder')?.value.trim();
+      const upiId = document.getElementById('qrLinkedUpiId')?.value.trim();
+      if (!uploadedQrBase64 && !upiId) {
+        alert('Please upload your QR Code image or enter your linked UPI ID.');
         return;
       }
-      payload.paypal_email = paypalEmail;
+      payload.account_holder = holder || 'Creator';
+      payload.upi_id = upiId;
+      payload.qr_image_data = uploadedQrBase64;
+    } else if (activePayoutTab === 'upi') {
+      const holder = document.getElementById('upiAccountHolder')?.value.trim();
+      const upiId = document.getElementById('upiIdInput')?.value.trim();
+      if (!upiId || !upiId.includes('@')) {
+        alert('Please enter a valid UPI ID (e.g. yourname@okhdfcbank).');
+        return;
+      }
+      payload.account_holder = holder || upiId.split('@')[0];
+      payload.upi_id = upiId;
     } else {
       const country = document.getElementById('wiseCountrySelect')?.value || 'IN';
       const holder = document.getElementById('wiseAccountHolder')?.value.trim();
@@ -5055,7 +5122,7 @@ async function checkAccountStorageStatus() {
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<span>Saving Payout Details...</span>`;
+      btn.innerHTML = `<span>Linking Account...</span>`;
     }
 
     try {
@@ -5068,7 +5135,7 @@ async function checkAccountStorageStatus() {
 
       if (res.ok && data.success) {
         localStorage.setItem('zephyr_bank_account_linked', 'true');
-        localStorage.setItem('zephyr_payout_label', data.label || 'Wise / PayPal');
+        localStorage.setItem('zephyr_payout_label', data.label || 'Payout Linked');
         closeCountryModal();
         await updateDashboardBankUI();
       } else {
@@ -5100,25 +5167,23 @@ async function checkAccountStorageStatus() {
       const isPaid = detectPaidPlanFromDOM() || userIsOnPaidPlan;
       localStorage.setItem('zephyr_is_paid_plan', isPaid ? 'true' : 'false');
 
-      // If Free User: lock the feature and show Upgrade prompt on click
       if (!isPaid) {
         localStorage.setItem('zephyr_bank_account_linked', 'false');
         container.innerHTML = `
           <button type="button" onclick="showUpgradeRequiredFlash()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-xs inline-flex items-center gap-2 transition-all cursor-pointer">
-            <span>🔒 Upgrade Plan to Enable Wise / PayPal Escrow</span> ↗
+            <span>🔒 Upgrade Plan to Enable QR / UPI / Bank Escrow</span> ↗
           </button>
         `;
         return;
       }
 
-      // Paid User with Linked Wise or PayPal Account
       if (data.connected && data.payouts_enabled) {
         localStorage.setItem('zephyr_bank_account_linked', 'true');
-        const methodLabel = data.label || localStorage.getItem('zephyr_payout_label') || 'Wise / PayPal';
+        const methodLabel = data.label || localStorage.getItem('zephyr_payout_label') || 'QR / UPI / Bank';
         container.innerHTML = `
           <div class="px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs inline-flex items-center gap-2 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>✓ Connected: ${methodLabel} (100% Direct Payout Active)</span>
+            <span>✓ Connected: ${methodLabel} (Auto-Unlock Active)</span>
           </div>
           <button type="button" onclick="openCountryModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer">
             <span>Change Method</span>
@@ -5131,11 +5196,10 @@ async function checkAccountStorageStatus() {
           </button>
         `;
       } else {
-        // Paid User without Linked Account yet
         localStorage.setItem('zephyr_bank_account_linked', 'false');
         container.innerHTML = `
           <button type="button" id="triggerStripeOnboardLink" onclick="openCountryModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-            <span>Link Wise or PayPal Account (100% Payout)</span> ↗
+            <span>Link Bank Account (QR / UPI / Bank Transfer)</span> ↗
           </button>
         `;
       }
@@ -5145,7 +5209,7 @@ async function checkAccountStorageStatus() {
   }
 
   async function disconnectStripeAccount() {
-    if (!confirm("Are you sure you want to remove your connected Wise / PayPal account? Pay-to-Unlock Escrow will be disabled until you link an account again.")) {
+    if (!confirm("Are you sure you want to remove your connected payout account? Pay-to-Unlock Escrow will be disabled until you link an account again.")) {
       return;
     }
 
