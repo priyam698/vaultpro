@@ -949,10 +949,16 @@
         if (!res.ok) throw new Error(data.detail || "Checkout failed");
 
         if (data.status === "already_paid") {
-          switchPaymentMode(true);
-        } else if (data.checkout_url) {
-          window.location.href = data.checkout_url;
-        }
+    switchPaymentMode(true);
+} else if (data.mode === "flash_qr" || data.mode === "flash_upi") {
+    // Opens the QR/UPI modal you pasted at the bottom of the file
+    openDirectUpiQrCheckout(data);
+    btn.innerText = "Pay & Unlock Personal Access";
+    btn.disabled = false;
+} else if (data.checkout_url || data.url) {
+    // Bank Transfer / Stripe fallback
+    window.location.href = data.checkout_url || data.url;
+}
       } catch(err) {
         if (errBox) {
           errBox.innerText = err.message;
