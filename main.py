@@ -4901,52 +4901,52 @@ async def bank_notification_webhook(payload: dict):
 @app.post("/api/escrow/verify-utr")
 async def verify_upi_utr_payment(payload: dict):
     """
-    Fast 12-digit UPI / Bank UTR verifier that unlocks both escrow_payment_sessions and paywall_purchases.
+    Fast, Ultra-Strict 12-digit UPI / Bank UTR verifier that prevents dummy/duplicate usage.
     """
     tx_ref = str(payload.get("tx_ref") or "").strip().upper()
     file_id = str(payload.get("file_id") or "").strip()
     utr_number = re.sub(r"\D", "", str(payload.get("utr_number") or ""))
 
+    # STRICT FRAUD RULES: Reject invalid lengths, repetitive digits, or common dummy sequences
     if len(utr_number) != 12:
-        raise HTTPException(status_code=400, detail="Please enter a valid 12-digit UPI / Bank UTR Reference Number.")
+        raise HTTPException(status_code=400, detail="Please enter a valid 12-digit numeric UPI/Bank UTR.")
+    
+    if len(set(utr_number)) <= 1 or utr_number.startswith("0000") or utr_number in ["123456789012", "098765432109"]:
+        raise HTTPException(status_code=400, detail="Invalid UTR pattern detected. Please enter your authentic bank transaction reference.")
 
     conn = get_db()
     conn.rollback()
     cursor = conn.cursor()
 
     try:
+        # 1. Check if this exact session is already paid (allows safe retry if unlocked previously)
+        cursor.execute("SELECT payment_status, unlocked_token FROM escrow_payment_sessions WHERE tx_ref = %s", (tx_ref,))
+        row = cursor.fetchone()
+        if row and (row.get("payment_status") if isinstance(row, dict) else row[0]) == "PAID":
+            token = row.get("unlocked_token") if isinstance(row, dict) else row[1]
+            conn.close()
+            return {"success": True, "status": "PAID", "unlock_token": token, "tx_ref": tx_ref}
+
+        # 2. Strict Cross-Transaction Reuse Check (Blocks claiming a UTR used by another buyer)
         cursor.execute(
-            "SELECT tx_ref FROM escrow_payment_sessions WHERE utr_number = %s AND tx_ref != %s",
-            (utr_number, tx_ref)
+            "SELECT tx_ref FROM escrow_payment_sessions WHERE utr_number = %s AND payment_status = 'PAID'",
+            (utr_number,)
         )
         if cursor.fetchone():
             conn.close()
-            raise HTTPException(status_code=400, detail="This 12-digit UTR number has already been used for another transaction.")
+            raise HTTPException(status_code=400, detail="This UTR number has already been claimed by another successful transaction.")
 
         unlock_token = f"unlock_{uuid.uuid4().hex}"
 
-        # 1. Mark escrow session as PAID
+        # 3. Mark as paid
         cursor.execute(
-            """
-            UPDATE escrow_payment_sessions
-            SET payment_status = 'PAID',
-                utr_number = %s,
-                unlocked_token = %s
-            WHERE tx_ref = %s
-            """,
+            "UPDATE escrow_payment_sessions SET payment_status = 'PAID', utr_number = %s, unlocked_token = %s WHERE tx_ref = %s",
             (utr_number, unlock_token, tx_ref)
         )
-
-        # 2. Mark share paywall purchase as 'paid' so /share/{id} unlocks immediately
         cursor.execute(
-            """
-            UPDATE paywall_purchases
-            SET payment_status = 'paid'
-            WHERE stripe_session_id = %s OR (share_id = %s AND payment_status = 'pending')
-            """,
+            "UPDATE paywall_purchases SET payment_status = 'paid' WHERE stripe_session_id = %s OR (share_id = %s AND payment_status = 'pending')",
             (tx_ref, file_id)
         )
-
         conn.commit()
     except HTTPException:
         raise
@@ -4956,12 +4956,7 @@ async def verify_upi_utr_payment(payload: dict):
         raise HTTPException(status_code=500, detail=f"UTR verification error: {str(e)}")
 
     conn.close()
-    return {
-        "success": True,
-        "status": "PAID",
-        "unlock_token": unlock_token,
-        "tx_ref": tx_ref
-    }
+    return {"success": True, "status": "PAID", "unlock_token": unlock_token, "tx_ref": tx_ref}
 
 @app.get("/api/escrow/check-payment-status")
 async def check_escrow_payment_status(tx_ref: str):

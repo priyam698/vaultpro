@@ -1672,15 +1672,29 @@ async function downloadActiveFile() {
     tempImg.src = rawQrDataUrl;
   }
 
-  function openDirectUpiQrCheckout(sessionData) {
+  async function openDirectUpiQrCheckout(sessionData) {
     activeBuyerTxRef = sessionData.tx_ref;
     activeBuyerFileId = sessionData.file_id;
     activeBuyerAmount = sessionData.amount || 0;
     activeSuccessUrl = sessionData.success_url || null;
     activeAccessToken = sessionData.access_token || null;
 
+    // 1. LIVE CURRENCY CONVERSION (USD to Local INR)
+    let convertedAmtInr = (activeBuyerAmount * 84.00).toFixed(2); // Fallback rate
+    try {
+      const rateRes = await fetch("https://open.er-api.com/v6/latest/USD");
+      const rateData = await rateRes.json();
+      if (rateData && rateData.rates && rateData.rates.INR) {
+        convertedAmtInr = (activeBuyerAmount * rateData.rates.INR).toFixed(2);
+      }
+    } catch(e) { console.warn("Live rate fetch failed, using fallback"); }
+
+    // 2. DISPLAY BOTH USD & INR ON THE BUYER MODAL
     const formattedAmt = `$${Number(activeBuyerAmount).toFixed(2)}`;
-    document.getElementById('buyerAmountDisplay').textContent = `Pay ${formattedAmt}`;
+    document.getElementById('buyerAmountDisplay').innerHTML = `
+      ${formattedAmt}
+      <span class="text-sm font-bold text-emerald-400 mt-1 block">≈ ₹${convertedAmtInr} INR</span>
+    `;
     document.getElementById('buyerPayeeName').textContent = sessionData.holder_name || 'Creator';
     document.getElementById('buyerTxRef').textContent = sessionData.tx_ref;
 
@@ -1691,10 +1705,10 @@ async function downloadActiveFile() {
     if (sessionData.mode === 'flash_qr') {
       qrSection.classList.remove('hidden');
       upiSection.classList.add('hidden');
-      // Convert uploaded static QR into amount-locked QR so banking apps auto-fill the amount!
+      // Pass the CONVERTED INR AMOUNT to the QR code so the banking app asks for the correct rupees!
       lockAmountIntoUploadedQr(
         sessionData.qr_image,
-        activeBuyerAmount,
+        convertedAmtInr,
         sessionData.holder_name,
         sessionData.tx_ref,
         qrImg
@@ -1702,8 +1716,11 @@ async function downloadActiveFile() {
     } else if (sessionData.mode === 'flash_upi') {
       document.getElementById('buyerUpiIdText').textContent = sessionData.upi_id || '';
       const intentBtn = document.getElementById('buyerUpiIntentBtn');
-      if (sessionData.upi_uri) {
-        intentBtn.href = sessionData.upi_uri;
+      
+      // Update intent button with converted INR amount
+      const upiUri = `upi://pay?pa=${encodeURIComponent(sessionData.upi_id)}&pn=${encodeURIComponent(sessionData.holder_name || 'Creator')}&am=${convertedAmtInr}&cu=INR&tn=${encodeURIComponent('Zephyr ' + sessionData.tx_ref)}`;
+      if (sessionData.upi_id) {
+        intentBtn.href = upiUri;
         intentBtn.classList.remove('hidden');
       } else {
         intentBtn.classList.add('hidden');
