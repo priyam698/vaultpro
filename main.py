@@ -1961,6 +1961,26 @@ async def verify_stripe_checkout_session(
     try:
         body = await request.json()
         if isinstance(body, dict):
+            if req_share_id and req_token:
+                conn_chk = get_db()
+                try:
+                    cur_chk = conn_chk.cursor()
+                    cur_chk.execute(
+                        "SELECT payment_status, permanent_password, buyer_email FROM paywall_purchases WHERE share_id = %s AND access_token = %s",
+                        (req_share_id, req_token)
+                    )
+                    pw_row = cur_chk.fetchone()
+                    if pw_row and (pw_row.get("payment_status") if isinstance(pw_row, dict) else pw_row[0]) == "paid":
+                        perm_pass = (pw_row.get("permanent_password") if isinstance(pw_row, dict) else pw_row[1]) or f"ZP-{secrets.token_hex(4).upper()}"
+                        cur_chk.execute(
+                            "UPDATE paywall_purchases SET permanent_password = %s WHERE share_id = %s AND access_token = %s",
+                            (perm_pass, req_share_id, req_token)
+                        )
+                        conn_chk.commit()
+                        return {"status": "paid", "verified": True, "access_token": req_token, "permanent_password": perm_pass}
+                finally:
+                    conn_chk.close()
+
             req_session_id = body.get("session_id") or req_session_id
             req_share_id = body.get("share_id") or req_share_id
             req_token = body.get("token") or req_token
@@ -4814,12 +4834,77 @@ async def bank_notification_webhook(payload: dict):
     return {"success": True, "status": "PAID", "utr": utr_number}
 
 
+@app.post("/api/escrow/bank-notification-webhook")
+async def bank_notification_webhook(payload: dict):
+    creator_ident = str(payload.get("creator_email") or payload.get("user_id") or "").strip()
+    notification_text = str(payload.get("notification_text") or payload.get("message") or "")
+    tx_ref = str(payload.get("tx_ref") or "").strip().upper()
+    amount_received = payload.get("amount")
+    utr_match = re.search(r"\b(\d{12})\b", notification_text)
+    utr_number = str(payload.get("utr") or (utr_match.group(1) if utr_match else "AUTO_DETECTED"))
+
+    if not tx_ref:
+        ref_match = re.search(r"(ZP[A-F0-9]{8})", notification_text.upper())
+        if ref_match:
+            tx_ref = ref_match.group(1)
+
+    conn = get_db()
+    conn.rollback()
+    cursor = conn.cursor()
+
+    try:
+        unlock_token = f"unlock_{uuid.uuid4().hex}"
+        if tx_ref:
+            cursor.execute(
+                """
+                UPDATE escrow_payment_sessions
+                SET payment_status = 'PAID', utr_number = %s, unlocked_token = %s
+                WHERE tx_ref = %s
+                """,
+                (utr_number, unlock_token, tx_ref)
+            )
+            cursor.execute(
+                "UPDATE paywall_purchases SET payment_status = 'paid' WHERE stripe_session_id = %s",
+                (tx_ref,)
+            )
+        elif creator_ident and amount_received:
+            cursor.execute(
+                """
+                UPDATE escrow_payment_sessions
+                SET payment_status = 'PAID', utr_number = %s, unlocked_token = %s
+                WHERE tx_ref = (
+                    SELECT tx_ref FROM escrow_payment_sessions
+                    WHERE creator_email = %s AND payment_status = 'PENDING' AND amount = %s
+                    ORDER BY created_at DESC LIMIT 1
+                )
+                RETURNING tx_ref;
+                """,
+                (utr_number, unlock_token, creator_ident, float(amount_received))
+            )
+            row = cursor.fetchone()
+            matched_ref = (row.get("tx_ref") if isinstance(row, dict) else row[0]) if row else None
+            if matched_ref:
+                cursor.execute(
+                    "UPDATE paywall_purchases SET payment_status = 'paid' WHERE stripe_session_id = %s",
+                    (matched_ref,)
+                )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Webhook error: {str(e)}")
+
+    conn.close()
+    return {"success": True, "status": "PAID", "utr": utr_number}
+
+
 @app.post("/api/escrow/verify-utr")
 async def verify_upi_utr_payment(payload: dict):
     """
-    Confirms payment via 12-digit Bank/UPI UTR reference number and unlocks the file for the 2nd user.
+    Fast 12-digit UPI / Bank UTR verifier that unlocks both escrow_payment_sessions and paywall_purchases.
     """
     tx_ref = str(payload.get("tx_ref") or "").strip().upper()
+    file_id = str(payload.get("file_id") or "").strip()
     utr_number = re.sub(r"\D", "", str(payload.get("utr_number") or ""))
 
     if len(utr_number) != 12:
@@ -4830,13 +4915,17 @@ async def verify_upi_utr_payment(payload: dict):
     cursor = conn.cursor()
 
     try:
-        # Ensure the same UTR isn't reused across multiple unlocks
-        cursor.execute("SELECT tx_ref FROM escrow_payment_sessions WHERE utr_number = %s AND tx_ref != %s", (utr_number, tx_ref))
+        cursor.execute(
+            "SELECT tx_ref FROM escrow_payment_sessions WHERE utr_number = %s AND tx_ref != %s",
+            (utr_number, tx_ref)
+        )
         if cursor.fetchone():
             conn.close()
-            raise HTTPException(status_code=400, detail="This 12-digit UTR number has already been used.")
+            raise HTTPException(status_code=400, detail="This 12-digit UTR number has already been used for another transaction.")
 
         unlock_token = f"unlock_{uuid.uuid4().hex}"
+
+        # 1. Mark escrow session as PAID
         cursor.execute(
             """
             UPDATE escrow_payment_sessions
@@ -4847,6 +4936,17 @@ async def verify_upi_utr_payment(payload: dict):
             """,
             (utr_number, unlock_token, tx_ref)
         )
+
+        # 2. Mark share paywall purchase as 'paid' so /share/{id} unlocks immediately
+        cursor.execute(
+            """
+            UPDATE paywall_purchases
+            SET payment_status = 'paid'
+            WHERE stripe_session_id = %s OR (share_id = %s AND payment_status = 'pending')
+            """,
+            (tx_ref, file_id)
+        )
+
         conn.commit()
     except HTTPException:
         raise
@@ -4856,8 +4956,12 @@ async def verify_upi_utr_payment(payload: dict):
         raise HTTPException(status_code=500, detail=f"UTR verification error: {str(e)}")
 
     conn.close()
-    return {"success": True, "status": "PAID", "unlock_token": unlock_token}
-
+    return {
+        "success": True,
+        "status": "PAID",
+        "unlock_token": unlock_token,
+        "tx_ref": tx_ref
+    }
 
 @app.get("/api/escrow/check-payment-status")
 async def check_escrow_payment_status(tx_ref: str):

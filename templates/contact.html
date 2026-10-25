@@ -368,5 +368,65 @@
       }
     }
   </script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const prefillMessage = params.get('message') || localStorage.getItem('zephyr_prefill_query');
+    const prefillEmail = params.get('email') || localStorage.getItem('zephyr_prefill_email');
+    const prefillSubject = params.get('subject') || localStorage.getItem('zephyr_prefill_subject');
+
+    if (!prefillMessage) return;
+
+    // 1. Auto-select "General Query" if a category dropdown or radio/tab exists
+    const selects = document.querySelectorAll('select');
+    selects.forEach(sel => {
+      for (const opt of sel.options) {
+        if (opt.text.toLowerCase().includes('general') || opt.value.toLowerCase().includes('general')) {
+          sel.value = opt.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+          break;
+        }
+      }
+    });
+
+    // Also click any button/tab labeled "General Query"
+    document.querySelectorAll('button, label, a, div[role="button"]').forEach(el => {
+      if ((el.textContent || '').trim().toLowerCase() === 'general query') {
+        el.click();
+      }
+    });
+
+    // 2. Auto-fill Email field if present
+    if (prefillEmail) {
+      const emailInput = document.querySelector('input[type="email"], input[name*="email" i], input[id*="email" i]');
+      if (emailInput) {
+        emailInput.value = prefillEmail;
+        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+
+    // 3. Auto-fill Subject field if present
+    if (prefillSubject) {
+      const subjectInput = document.querySelector('input[name*="subject" i], input[id*="subject" i], input[placeholder*="subject" i]');
+      if (subjectInput) {
+        subjectInput.value = prefillSubject;
+        subjectInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+
+    // 4. Auto-fill the Query / Message textarea so user can edit and click Send
+    const messageBox = document.querySelector('textarea');
+    if (messageBox) {
+      messageBox.value = prefillMessage;
+      messageBox.dispatchEvent(new Event('input', { bubbles: true }));
+      messageBox.focus();
+      messageBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Clear one-time prefill storage
+    localStorage.removeItem('zephyr_prefill_query');
+    localStorage.removeItem('zephyr_prefill_subject');
+  });
+</script>
 </body>
 </html>
