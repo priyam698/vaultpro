@@ -1781,18 +1781,38 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
         conn.close()
         raise HTTPException(status_code=404, detail="Paywalled transfer session not found.")
 
+    cursor.execute(
+        """
+        SELECT email, payout_method, payout_details, stripe_payouts_enabled
+        FROM users
+        WHERE payout_method IS NOT NULL AND stripe_payouts_enabled = 1
+        LIMIT 1
+        """
+    )
+    payout_user = cursor.fetchone()
+
     has_stripe = bool(share.get("stripe_account_id"))
-    has_indian = bool(share.get("bank_account_number") or share.get("upi_id"))
+    has_indian = bool(
+        share.get("bank_account_number")
+        or share.get("upi_id")
+        or (payout_user and payout_user.get("payout_method"))
+    )
 
     if not has_stripe and not has_indian:
         conn.close()
-        raise HTTPException(status_code=400, detail="Creator has not linked a payout account yet.")
+        raise HTTPException(
+            status_code=400,
+            detail="Creator has not linked a payout account yet."
+        )
 
-    cursor.execute("""
-        SELECT access_token, buyer_password, permanent_password 
-        FROM paywall_purchases 
+    cursor.execute(
+        """
+        SELECT access_token, buyer_password, permanent_password
+        FROM paywall_purchases
         WHERE share_id = %s AND LOWER(buyer_email) = %s AND payment_status = 'paid'
-    """, (payload.share_id, buyer))
+        """,
+        (payload.share_id, buyer)
+    )
     existing = cursor.fetchone()
 
     if existing:
@@ -1805,56 +1825,124 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
     access_token = f"pwtk_{secrets.token_hex(20)}"
     price_usd = float(share.get("unlock_price") or 0.00)
     price_cents = int(price_usd * 100)
-    platform_fee_cents = int(price_cents * 0.12)
+    gateway_fee_cents = int(price_cents * 0.035) + 30
 
     base_url = str(request.base_url).rstrip("/")
-    success_url = f"{base_url}/share/{payload.share_id}?paid=true&email={urllib.parse.quote(buyer)}&token={access_token}&session_id={{CHECKOUT_SESSION_ID}}"
+    success_url = f"{base_url}/share/{payload.share_id}?paid=true&email={urllib.parse.quote(buyer)}&token={access_token}"
     cancel_url = f"{base_url}/share/{payload.share_id}"
 
-    payment_intent_data = {}
-    if has_stripe and share.get("payout_method") != "indian_bank":
-        payment_intent_data = {
-            'application_fee_amount': platform_fee_cents,
-            'transfer_data': {'destination': share['stripe_account_id']},
-        }
+    tx_ref = f"ZP{uuid.uuid4().hex[:8].upper()}"
 
+    payout_method = payout_user.get("payout_method") if payout_user else None
+    payout_details_raw = payout_user.get("payout_details") if payout_user else "{}"
+    try:
+        details = json.loads(payout_details_raw) if payout_details_raw else {}
+    except Exception:
+        details = {}
+
+    holder_name = details.get("account_holder", "Creator")
+    creator_email = payout_user.get("email", "") if payout_user else ""
+
+    # CASE 1 & 2: 1ST USER UPLOADED QR OR ENTERED UPI ID
+    if payout_method in ("qr", "upi"):
+        cursor.execute(
+            "INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status, stripe_session_id) VALUES (%s, %s, %s, %s, 'pending', %s)",
+            (payload.share_id, buyer, access_token, price_usd, tx_ref)
+        )
+        cursor.execute(
+            "INSERT INTO escrow_payment_sessions (tx_ref, file_id, creator_email, amount, currency, payout_method, payment_status) VALUES (%s, %s, %s, %s, 'INR', %s, 'PENDING')",
+            (tx_ref, payload.share_id, creator_email, price_usd, payout_method)
+        )
+        conn.commit()
+        conn.close()
+
+        if payout_method == "qr":
+            return {
+                "status": "checkout_ready",
+                "mode": "flash_qr",
+                "tx_ref": tx_ref,
+                "file_id": payload.share_id,
+                "amount": price_usd,
+                "holder_name": holder_name,
+                "qr_image": details.get("qr_image_data", ""),
+                "success_url": success_url,
+                "access_token": access_token
+            }
+        else:
+            params = {
+                "pa": details.get("upi_id", ""),
+                "pn": holder_name,
+                "am": f"{price_usd:.2f}",
+                "cu": "INR",
+                "tn": f"Zephyr {tx_ref}"
+            }
+            return {
+                "status": "checkout_ready",
+                "mode": "flash_upi",
+                "tx_ref": tx_ref,
+                "file_id": payload.share_id,
+                "amount": price_usd,
+                "holder_name": holder_name,
+                "upi_id": details.get("upi_id", ""),
+                "upi_uri": f"upi://pay?{urllib.parse.urlencode(params)}",
+                "success_url": success_url,
+                "access_token": access_token
+            }
+
+    # CASE 3: BANK TRANSFER (Default to Secure Stripe Redirect)
     try:
         session_args = {
-            "payment_method_types": ['card'],
+            "payment_method_types": ["card"],
             "customer_email": buyer,
-            "line_items": [{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {'name': f"Unlock Transfer: {share['filename']}"},
-                    'unit_amount': price_cents,
+            "line_items": [
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": f"Unlock: {share.get('filename', 'File')}"},
+                        "unit_amount": price_cents
+                    },
+                    "quantity": 1
                 },
-                'quantity': 1,
-            }],
-            "mode": 'payment',
-            "success_url": success_url,
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": "Payment Gateway Processing Fee"},
+                        "unit_amount": gateway_fee_cents
+                    },
+                    "quantity": 1
+                }
+            ],
+            "mode": "payment",
+            "success_url": success_url + "&session_id={CHECKOUT_SESSION_ID}",
             "cancel_url": cancel_url,
-            "metadata": {"access_token": access_token, "buyer_email": buyer, "share_id": payload.share_id}
+            "metadata": {
+                "access_token": access_token,
+                "buyer_email": buyer,
+                "share_id": payload.share_id,
+                "escrow_unlock": "true",
+                "tx_ref": tx_ref
+            }
         }
-        if payment_intent_data:
-            session_args["payment_intent_data"] = payment_intent_data
-
         session = stripe.checkout.Session.create(**session_args)
 
-        cursor.execute("""
-            INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status, stripe_session_id)
-            VALUES (%s, %s, %s, %s, 'pending', %s)
-        """, (payload.share_id, buyer, access_token, price_usd, session.id))
+        cursor.execute(
+            "INSERT INTO paywall_purchases (share_id, buyer_email, access_token, amount_paid, payment_status, stripe_session_id) VALUES (%s, %s, %s, %s, 'pending', %s)",
+            (payload.share_id, buyer, access_token, price_usd, session.id)
+        )
         conn.commit()
         conn.close()
 
         return {
             "status": "checkout_ready",
             "checkout_url": session.url,
-            "access_token": access_token
+            "url": session.url,
+            "access_token": access_token,
+            "mode": "checkout_redirect"
         }
     except Exception as e:
+        conn.rollback()
         conn.close()
-        raise HTTPException(status_code=500, detail=f"Checkout error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ----------------- Stripe Checkout Session Verification -----------------
 @app.post("/api/paywall/verify-session")
