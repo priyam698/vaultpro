@@ -4829,7 +4829,7 @@ async function checkAccountStorageStatus() {
       </button>
     </div>
 
-    <!-- OPTION 1: QR CODE -->
+    <!-- OPTION 1: QR CODE (STRICT QR UPLOAD ONLY) -->
     <div id="qrPayoutForm" class="space-y-3.5">
       <div>
         <label class="block text-xs font-semibold text-slate-300 mb-1">Account Holder Name</label>
@@ -4837,21 +4837,19 @@ async function checkAccountStorageStatus() {
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1">Upload Your Bank / UPI QR Code Image</label>
-        <input type="file" id="qrImageInput" accept="image/*" onchange="handleQrFileSelect(event)" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500/20 file:text-emerald-300 hover:file:bg-emerald-500/30 cursor-pointer">
-        <div id="qrPreviewContainer" class="hidden mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-          <img id="qrPreviewImg" src="" alt="QR Preview" class="w-14 h-14 rounded-lg object-contain bg-white p-1">
-          <span class="text-[11px] text-emerald-400 font-semibold">✓ QR Code Ready for Auto-Detection</span>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Upload Your Payment QR Code Image <span class="text-rose-400">*</span></label>
+        <input type="file" id="qrImageInput" accept="image/*" onchange="handleQrFileSelect(event)" class="w-full px-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-slate-950 hover:file:bg-emerald-400 cursor-pointer">
+        <div id="qrPreviewContainer" class="hidden mt-3 p-3 rounded-2xl bg-slate-950 border border-emerald-500/30 flex items-center gap-3">
+          <img id="qrPreviewImg" src="" alt="QR Preview" class="w-16 h-16 rounded-lg object-contain bg-white p-1">
+          <div class="text-left">
+            <span class="block text-xs text-emerald-400 font-bold">✓ QR Code Uploaded</span>
+            <span class="block text-[11px] text-slate-400">This exact QR will flash on the buyer's screen for payment.</span>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1">Linked UPI ID (for Dynamic Amount Auto-Detection)</label>
-        <input type="text" id="qrLinkedUpiId" placeholder="e.g. yourname@okhdfcbank" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500">
-      </div>
-
       <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-slate-300 leading-relaxed">
-        📡 <strong>Auto Bank Notification Sync:</strong> When the 2nd user scans your QR and pays, Zephyr detects the bank payment confirmation and unlocks the file automatically.
+        🔳 <strong>Direct QR Flash:</strong> Your uploaded QR code will flash directly on the 2nd user's screen. Once payment hits your bank account, the file unlocks automatically.
       </div>
     </div>
 
@@ -5087,13 +5085,11 @@ async function checkAccountStorageStatus() {
 
     if (activePayoutTab === 'qr') {
       const holder = document.getElementById('qrAccountHolder')?.value.trim();
-      const upiId = document.getElementById('qrLinkedUpiId')?.value.trim();
-      if (!uploadedQrBase64 && !upiId) {
-        alert('Please upload your QR Code image or enter your linked UPI ID.');
+      if (!uploadedQrBase64) {
+        alert('Please upload your QR Code image.');
         return;
       }
       payload.account_holder = holder || 'Creator';
-      payload.upi_id = upiId;
       payload.qr_image_data = uploadedQrBase64;
     } else if (activePayoutTab === 'upi') {
       const holder = document.getElementById('upiAccountHolder')?.value.trim();

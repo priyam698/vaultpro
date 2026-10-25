@@ -4398,7 +4398,7 @@ async def get_stripe_connect_status(user_id: str):
 @app.post("/api/payouts/save")
 async def save_payout_method(payload: dict):
     user_ident = str(payload.get("user_id") or payload.get("email") or "priyamrana069@gmail.com").strip()
-    method = str(payload.get("method") or "upi").lower().strip()
+    method = str(payload.get("method") or "qr").lower().strip()
     client_is_paid = payload.get("is_paid_plan", None)
 
     conn, cursor, user_dict, matched_col = _db_get_user_and_plan(user_ident)
@@ -4417,20 +4417,18 @@ async def save_payout_method(payload: dict):
 
     if method == "qr":
         holder_name = str(payload.get("account_holder") or "").strip()
-        upi_id = str(payload.get("upi_id") or "").strip()
         qr_image_data = str(payload.get("qr_image_data") or "").strip()
 
-        if not qr_image_data and not upi_id:
+        if not qr_image_data:
             conn.close()
-            raise HTTPException(status_code=400, detail="Please upload your Payment QR Code image or enter your linked UPI ID.")
+            raise HTTPException(status_code=400, detail="Please upload your QR Code image to receive QR payments.")
 
         details_dict = {
             "account_holder": holder_name or "Zephyr Creator",
-            "upi_id": upi_id,
             "qr_image_data": qr_image_data,
             "webhook_key": webhook_key
         }
-        label = f"QR Code ({upi_id or holder_name or 'Active'})"
+        label = f"QR Code ({holder_name or 'Uploaded'})"
 
     elif method == "upi":
         holder_name = str(payload.get("account_holder") or "").strip()
@@ -4445,7 +4443,7 @@ async def save_payout_method(payload: dict):
             "upi_id": upi_id,
             "webhook_key": webhook_key
         }
-        label = f"UPI ({upi_id})"
+        label = f"UPI ID ({upi_id})"
 
     elif method in ("wise", "bank"):
         country = str(payload.get("country") or "IN").upper().strip()
@@ -4551,7 +4549,7 @@ async def create_escrow_checkout(payload: dict):
         raise HTTPException(status_code=403, detail="Creator must be on an active Paid Plan to use Pay-to-Unlock Escrow.")
 
     payouts_enabled = creator_dict.get("stripe_payouts_enabled")
-    payout_method = creator_dict.get("payout_method") or "upi"
+    payout_method = creator_dict.get("payout_method") or "qr"
     payout_details_raw = creator_dict.get("payout_details")
 
     if not payouts_enabled or not payout_details_raw:
@@ -4566,7 +4564,6 @@ async def create_escrow_checkout(payload: dict):
 
     tx_ref = f"ZP{uuid.uuid4().hex[:8].upper()}"
 
-    # Record the pending payment session for real-time bank detection
     try:
         cursor.execute(
             """
@@ -4581,38 +4578,46 @@ async def create_escrow_checkout(payload: dict):
     finally:
         conn.close()
 
-    # If Creator uses QR or UPI: Return direct QR & UPI Intent so 2nd user pays 1st user's bank directly!
-    if payout_method in ("qr", "upi"):
-        upi_id = details.get("upi_id", "")
-        holder_name = details.get("account_holder", "Creator")
+    holder_name = details.get("account_holder", "Creator")
+
+    # CASE 1: 1st User selected QR CODE -> Flash ONLY their uploaded QR image to 2nd user
+    if payout_method == "qr":
         qr_image_data = details.get("qr_image_data", "")
-
-        upi_uri = ""
-        generated_qr_url = ""
-        if upi_id:
-            params = {
-                "pa": upi_id,
-                "pn": holder_name,
-                "am": f"{price_amount:.2f}",
-                "cu": "INR",
-                "tn": f"Zephyr {tx_ref}"
-            }
-            upi_uri = f"upi://pay?{urllib.parse.urlencode(params)}"
-            generated_qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={urllib.parse.quote(upi_uri)}"
-
         return {
-            "mode": "direct_upi_qr",
+            "mode": "flash_qr",
             "tx_ref": tx_ref,
             "file_id": file_id,
+            "file_name": file_name,
             "amount": price_amount,
-            "payout_method": payout_method,
-            "upi_id": upi_id,
+            "payout_method": "qr",
             "holder_name": holder_name,
-            "upi_uri": upi_uri,
-            "qr_image": qr_image_data or generated_qr_url
+            "qr_image": qr_image_data
         }
 
-    # If Creator uses Bank Transfer (Wise): Use Stripe Checkout -> Auto-Wire
+    # CASE 2: 1st User selected UPI ID -> Flash ONLY their UPI ID to 2nd user
+    if payout_method == "upi":
+        upi_id = details.get("upi_id", "")
+        params = {
+            "pa": upi_id,
+            "pn": holder_name,
+            "am": f"{price_amount:.2f}",
+            "cu": "INR",
+            "tn": f"Zephyr {tx_ref}"
+        }
+        upi_uri = f"upi://pay?{urllib.parse.urlencode(params)}"
+        return {
+            "mode": "flash_upi",
+            "tx_ref": tx_ref,
+            "file_id": file_id,
+            "file_name": file_name,
+            "amount": price_amount,
+            "payout_method": "upi",
+            "holder_name": holder_name,
+            "upi_id": upi_id,
+            "upi_uri": upi_uri
+        }
+
+    # CASE 3: 1st User selected BANK TRANSFER -> Do NOT flash bank details; use secure checkout redirect
     total_cents = int(round(price_amount * 100))
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -4639,7 +4644,6 @@ async def create_escrow_checkout(payload: dict):
     )
 
     return {"mode": "checkout_redirect", "checkout_url": session.url, "tx_ref": tx_ref}
-
 
 # ------------------------------------------------------------
 # 4. REAL-TIME BANK NOTIFICATION LISTENER & AUTO-UNLOCK ENGINE
