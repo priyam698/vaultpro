@@ -1892,7 +1892,6 @@ async def initiate_paywall_checkout(payload: InitiatePaywallRequest, request: Re
     # CASE 3: BANK TRANSFER (Default to Secure Stripe Redirect)
     try:
         session_args = {
-            "payment_method_types": ["card"],
             "customer_email": buyer,
             "line_items": [
                 {
