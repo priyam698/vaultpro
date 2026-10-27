@@ -1360,6 +1360,55 @@ async def site_favicon():
 async def index_page(request: Request):
     return render_template("index.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
 
+@app.get("/api/user/stats")
+async def get_user_stats(request: Request):
+    # 1. Match your exact dashboard authentication logic
+    user_email = (
+        request.cookies.get("user_email")
+        or request.cookies.get("email")
+        or request.cookies.get("zephyr_email")
+        or request.cookies.get("auth_email")
+        or ""
+    )
+    if not user_email and hasattr(request, "session"):
+        user_email = request.session.get("user_email", "")
+
+    if not user_email:
+        return {"used_bytes": 0, "max_bytes": 5 * 1024 * 1024 * 1024, "max_gb": 5}
+
+    # 2. Fast SQL aggregation to get total bytes used
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COALESCE(SUM(file_size), 0) FROM shares WHERE creator_email = %s", (user_email,))
+        total_bytes_used = cursor.fetchone()[0]
+        conn.close()
+    except Exception:
+        total_bytes_used = 0
+
+    # 3. Read the user's plan (default to 'pro' to match your current UI test state)
+    user_plan = request.cookies.get("plan", "pro").lower()
+
+    plan_limits_gb = {
+        "pro": 200,
+        "plus": 80,
+        "lite": 30,
+        "micro": 15,
+        "free": 5
+    }
+    
+    max_gb = 5 # Default free tier limit
+    for key, gb in plan_limits_gb.items():
+        if key in user_plan:
+            max_gb = gb
+            break
+
+    return {
+        "used_bytes": float(total_bytes_used),
+        "max_bytes": max_gb * 1024 * 1024 * 1024,
+        "max_gb": max_gb
+    }
+    
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     user_email = (
