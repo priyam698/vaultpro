@@ -1238,10 +1238,10 @@ async def support_chat(req: SupportChatRequest):
             "reply": (
                 "**Daily E-Sign Creation Quotas (Resets Daily at 00:00 UTC):**\n\n"
                 "• **Free Starter:** 7 documents / day\n"
-                "• **Zephyr Micro ($1.80/mo):** 15 documents / day\n"
-                "• **Zephyr Lite ($2.50/mo):** 30 documents / day\n"
-                "• **Zephyr Plus ($4.50/mo):** 50 documents / day\n"
-                "• **Zephyr Pro ($7.00/mo):** **Unlimited** daily document signing\n\n"
+                "• **Zephyr Micro ($1.00/mo):** 15 documents / day\n"
+                "• **Zephyr Lite ($2.00/mo):** 30 documents / day\n"
+                "• **Zephyr Plus ($3.00/mo):** 50 documents / day\n"
+                "• **Zephyr Pro ($5.00/mo):** **Unlimited** daily document signing\n\n"
                 "• **Security Standards:** All envelopes feature drag-and-drop signatures, realistic vector ink, cryptographic SHA-256 audit trails, and zero-knowledge storage."
             )
         }
@@ -1253,9 +1253,9 @@ async def support_chat(req: SupportChatRequest):
                 "**4K Ultra HD AI Super-Resolution (Real-ESRGAN):**\n\n"
                 "• **Capabilities:** Reconstructs degraded textures, removes JPEG artifacts, and scales images up to 4× native resolution (up to 3840×2160 UHD).\n"
                 "• **Plan Allowances:**\n"
-                "  - **Zephyr Lite ($2.50/mo):** 15 AI runs / month\n"
-                "  - **Zephyr Plus ($4.50/mo):** 60 AI runs / month\n"
-                "  - **Zephyr Pro ($7.00/mo):** **Unlimited** AI runs\n"
+                "  - **Zephyr Lite ($2.00/mo):** 15 AI runs / month\n"
+                "  - **Zephyr Plus ($3.00/mo):** 60 AI runs / month\n"
+                "  - **Zephyr Pro ($5.00/mo):** **Unlimited** AI runs\n"
                 "  - *Free Starter & Micro do not include 4K upscaling.*\n"
                 "• **How to use:** Open any image from your Vault by clicking **Open** to launch Drive Studio, then click **4K Ultra HD Converter** in the studio toolbar. Save your lossless PNG directly back to your vault."
             )
@@ -1267,10 +1267,10 @@ async def support_chat(req: SupportChatRequest):
             "reply": (
                 "**Zephyr Transfer & Storage Plans:**\n\n"
                 "• **Free Starter ($0 / forever):** 5 GB Vault • 2 GB single transfer • 7 E-Signs/day\n"
-                "• **Zephyr Micro ($1.80/mo):** 15 GB Vault • 5 GB transfer • 15 E-Signs/day • 20-Day Grace\n"
-                "• **Zephyr Lite ($2.50/mo):** 30 GB Vault • 10 GB transfer • 30 E-Signs/day • 15 4K AI runs • Client Drop & QR\n"
-                "• **Zephyr Plus ($4.50/mo):** 80 GB Vault • 25 GB transfer • 50 E-Signs/day • 60 4K AI runs • Studio Branding\n"
-                "• **Zephyr Pro ($7.00/mo):** 200 GB Vault • 50 GB transfer • Unlimited E-Signs • Unlimited 4K AI runs • Pay-to-Unlock Escrow\n\n"
+                "• **Zephyr Micro ($1.00/mo):** 15 GB Vault • 5 GB transfer • 15 E-Signs/day • 20-Day Grace\n"
+                "• **Zephyr Lite ($2.00/mo):** 30 GB Vault • 10 GB transfer • 30 E-Signs/day • 15 4K AI runs • Client Drop & QR\n"
+                "• **Zephyr Plus ($3.00/mo):** 80 GB Vault • 25 GB transfer • 50 E-Signs/day • 60 4K AI runs • Studio Branding\n"
+                "• **Zephyr Pro ($5.00/mo):** 200 GB Vault • 50 GB transfer • Unlimited E-Signs • Unlimited 4K AI runs • Pay-to-Unlock Escrow\n\n"
                 "*Upgrades between tiers mid-cycle are seamlessly prorated (+ $0.50 processing fee).*"
             )
         }
@@ -1295,7 +1295,7 @@ async def support_chat(req: SupportChatRequest):
                 "**Client Deposit Portals & QR Codes:**\n\n"
                 "• **No-Account Client Uploads:** Generate a deposit portal where clients and collaborators can upload large project assets directly into your vault without creating a Zephyr account.\n"
                 "• **Mobile QR Scanner:** Scan the generated QR code directly with any smartphone camera to deposit photos, videos, or documents on the go.\n"
-                "• **Availability:** Included with Zephyr Lite ($2.50/mo), Plus ($4.50/mo), and Pro ($7.00/mo)."
+                "• **Availability:** Included with Zephyr Lite ($2.00/mo), Plus ($3.00/mo), and Pro ($5.00/mo)."
             )
         }
 
