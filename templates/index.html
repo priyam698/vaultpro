@@ -7463,5 +7463,37 @@ window.addEventListener('appinstalled', () => {
     });
   });
 </script>
+<script>
+// Global File Size Interceptor
+document.addEventListener('change', function(event) {
+    // Check if the user just interacted with a file input
+    if (event.target && event.target.type === 'file') {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        // 1. Determine user's single transfer limit (Checks your existing plan cookies)
+        let maxGb = 2; // Default Free tier
+        const cookies = document.cookie.toLowerCase();
+        
+        if (cookies.includes("plan=pro")) maxGb = 200;
+        else if (cookies.includes("plan=plus")) maxGb = 80;
+        else if (cookies.includes("plan=lite")) maxGb = 50;
+        else if (cookies.includes("plan=micro")) maxGb = 25;
+
+        const maxLimitBytes = maxGb * 1024 * 1024 * 1024;
+        const file = files[0]; // Gets the primary file being uploaded
+
+        // 2. Reject and flash message if exceeded
+        if (file.size > maxLimitBytes) {
+            const fileSizeGb = (file.size / (1024 * 1024 * 1024)).toFixed(2);
+            
+            alert(`⚠️ Transfer Limit Exceeded!\n\nYour file is ${fileSizeGb} GB.\nYour current plan allows a maximum of ${maxGb} GB per single transfer.\n\nPlease select a file within your limit or upgrade your plan.`);
+            
+            // 3. Immediately clear the file input to block your system from uploading
+            event.target.value = ''; 
+        }
+    }
+});
+</script>
 </body>
 </html>
