@@ -1326,7 +1326,40 @@ async def support_chat(req: SupportChatRequest):
             )
         }
 
-    # 10. Out-of-Range Fallback
+# 10. System Identity & Ownership
+    if any(k in q for k in ["owner", "creator", "who made", "who created", "who built", "who is behind", "developer", "who are you"]):
+        return {
+            "reply": (
+                "System Identity & Ownership:\n"
+                "• Zephyr was developed and is owned by Priyam Rana.\n"
+                "• It is an advanced zero-knowledge cloud storage and pay-to-unlock escrow platform built to securely transfer massive deliverables."
+            )
+        }
+
+    # 11. Physical Storage Infrastructure
+    if any(k in q for k in ["where are", "physically stored", "server location", "where is my data", "host", "where do files go", "database"]):
+        return {
+            "reply": (
+                "Physical Storage & Infrastructure:\n"
+                "• Edge Storage: Your encrypted files are physically distributed across Cloudflare R2's global edge nodes for maximum retrieval speed.\n"
+                "• Isolation: We do not store raw files on our application servers or standard databases. Files route directly to the edge pipeline.\n"
+                "• Privacy: Because encryption happens locally on your device, the physical servers only hold unreadable ciphertext."
+            )
+        }
+
+    # 12. Tech Stack & Advanced Operations
+    if any(k in q for k in ["what is zephyr", "how does zephyr work", "framework", "tech stack", "backend", "frontend", "architecture", "under the hood"]):
+        return {
+            "reply": (
+                "Zephyr Advanced Architecture:\n"
+                "• Core: Python-based backend architecture operating on a zero-knowledge pipeline.\n"
+                "• Network: Integrated with Cloudflare R2 for zero-egress data transfer.\n"
+                "• Payments: Powered by Dodo Payments for multi-currency processing and global escrow payouts.\n"
+                "• Security: Client-side AES-256 encryption ensuring cryptographic isolation."
+            )
+        }
+        
+    # 13. Out-of-Range Fallback
     return {
         "reply": "Sorry, this answer is out of range for Zephyr Copilot. Please contact priyamrana069@gmail.com for direct support."
     }
