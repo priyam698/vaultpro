@@ -1370,29 +1370,29 @@ async def site_favicon():
 
 @app.get("/", response_class=HTMLResponse)
 async def index_page(request: Request):
-    return render_template("index.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
-
-def get_highest_active_plan(user_email: str, conn):
-    cursor = conn.cursor()
-    # CRITICAL FIX: Strictly check for "status = 'active'"
-    cursor.execute(
-        "SELECT plan_name FROM subscriptions WHERE user_email = %s AND status = 'active'", 
-        (user_email,)
+    user_email = (
+        request.cookies.get("user_email")
+        or request.cookies.get("email")
+        or request.cookies.get("zephyr_email")
+        or request.cookies.get("auth_email")
+        or ""
     )
-    active_subs = cursor.fetchall()
-    
-    highest_plan = "free"
-    tier_weights = {"pro": 4, "plus": 3, "lite": 2, "micro": 1, "free": 0}
-    current_weight = 0
-    
-    for row in active_subs:
-        plan_str = row[0].lower()
-        for tier, weight in tier_weights.items():
-            if tier in plan_str and weight > current_weight:
-                highest_plan = tier
-                current_weight = weight
-                
-    return highest_plan
+    if not user_email and hasattr(request, "session"):
+        user_email = request.session.get("user_email", "")
+
+    response = render_template("index.html", request, {"supabase_url": SUPABASE_URL, "supabase_anon": SUPABASE_ANON_KEY})
+
+    # CRITICAL FIX: Overwrite stale browser cookie with true active plan
+    if user_email:
+        try:
+            conn = get_db()
+            true_active_plan = get_highest_active_plan(user_email, conn)
+            conn.close()
+            response.set_cookie(key="plan", value=true_active_plan, max_age=2592000)
+        except Exception:
+            pass
+
+    return response
 
 
 @app.get("/api/user/stats")
@@ -1763,6 +1763,36 @@ async def upload_file_direct(
     target_s3_key = f"transfers/{share_id}/{target_name}"
 
     file_bytes = await request.body()
+    # --- SECURITY LOCK: Strictly enforce active single-transfer limits ---
+    user_email = (
+        request.cookies.get("user_email")
+        or request.cookies.get("email")
+        or request.cookies.get("zephyr_email")
+        or request.cookies.get("auth_email")
+        or ""
+    )
+    if not user_email and hasattr(request, "session"):
+        user_email = request.session.get("user_email", "")
+    
+    # 1. Fetch true active plan (Ignoring expired)
+    try:
+        true_active_plan = get_highest_active_plan(user_email, conn)
+    except Exception:
+        true_active_plan = "free"
+
+    # 2. Map true plan to exact transfer limits
+    transfer_limits_gb = {"pro": 200, "plus": 80, "lite": 50, "micro": 25, "free": 2}
+    max_transfer_gb = transfer_limits_gb.get(true_active_plan, 2)
+    max_transfer_bytes = max_transfer_gb * 1024 * 1024 * 1024
+
+    # 3. Reject if the incoming file exceeds the strict limit
+    if len(file_bytes) > max_transfer_bytes:
+        conn.close()
+        raise HTTPException(
+            status_code=413, 
+            detail=f"Transfer limit exceeded. Your {true_active_plan.title()} plan allows a maximum of {max_transfer_gb} GB per file."
+        )
+    # --- END SECURITY LOCK ---
     content_type = request.headers.get("content-type")
     if not content_type or content_type == "application/octet-stream":
         guessed, _ = mimetypes.guess_type(target_name)
