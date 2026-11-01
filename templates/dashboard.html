@@ -5242,6 +5242,123 @@ async function checkAccountStorageStatus() {
     setTimeout(updateDashboardBankUI, 150);
   });
 </script>
+<script>
+function syncActivePlanFromYourPlans() {
+    const tierWeights = { pro: 4, plus: 3, lite: 2, micro: 1, free: 0 };
+    const defaultGb = { pro: 200, plus: 80, lite: 30, micro: 15, free: 5 };
+    let highestPlan = "free";
+    let highestWeight = 0;
+    let stackedActiveGb = 0;
+    let foundModalData = false;
+
+    // 1. Read active vs expired plans directly from the "Your Plans" section in the DOM
+    const allElements = document.querySelectorAll('div, li');
+    allElements.forEach(el => {
+        const text = (el.innerText || "").trim();
+        // Match individual subscription cards that contain "Ends 20..."
+        if (/Zephyr\s+(Pro|Plus|Lite|Micro)/i.test(text) && /Ends\s+20\d\d/i.test(text) && el.children.length >= 1 && text.length < 250) {
+            foundModalData = true;
+            const isActive = /\bActive\b/i.test(text) && !/\bExpired\b/i.test(text);
+            if (isActive) {
+                const planMatch = text.match(/Zephyr\s+(Pro|Plus|Lite|Micro)/i);
+                const gbMatch = text.match(/\((\d+)\s*GB\)/i);
+                if (planMatch) {
+                    const tier = planMatch[1].toLowerCase();
+                    if (tierWeights[tier] > highestWeight) {
+                        highestWeight = tierWeights[tier];
+                        highestPlan = tier;
+                    }
+                    if (gbMatch) {
+                        stackedActiveGb += parseInt(gbMatch[1], 10);
+                    }
+                }
+            }
+        }
+    });
+
+    // Also check if the "Total: XX GB" badge is present in the Your Plans modal
+    const totalBadgeMatch = document.body.innerText.match(/Total:\s*(\d+)\s*GB/i);
+    if (totalBadgeMatch && parseInt(totalBadgeMatch[1], 10) > 0) {
+        stackedActiveGb = parseInt(totalBadgeMatch[1], 10);
+    }
+
+    // 2. Fallback: Check localStorage subscription arrays if modal hasn't rendered yet
+    if (!foundModalData) {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const val = localStorage.getItem(key);
+            if (val && (val.startsWith('[') || val.startsWith('{'))) {
+                try {
+                    const parsed = JSON.parse(val);
+                    const list = Array.isArray(parsed) ? parsed : (parsed.subscriptions || []);
+                    if (Array.isArray(list) && list.length > 0) {
+                        list.forEach(sub => {
+                            const status = String(sub.status || "").toLowerCase();
+                            const endStr = sub.ends_at || sub.expires_at || sub.endDate || sub.end;
+                            const isExpired = status === "expired" || (endStr && new Date(endStr) < new Date());
+                            if (!isExpired) {
+                                const name = String(sub.plan || sub.name || sub.tier || sub.plan_name || "").toLowerCase();
+                                ["pro", "plus", "lite", "micro"].forEach(t => {
+                                    if (name.includes(t) && tierWeights[t] > highestWeight) {
+                                        highestWeight = tierWeights[t];
+                                        highestPlan = t;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+
+    const finalMaxGb = stackedActiveGb > 0 ? stackedActiveGb : defaultGb[highestPlan];
+    const planUpper = highestPlan.toUpperCase();
+
+    // 3. Overwrite stale "pro" values in localStorage & cookies so all pages stay in sync
+    localStorage.setItem("zephyr_true_active_plan", highestPlan);
+    localStorage.setItem("zephyr_true_vault_gb", String(finalMaxGb));
+    document.cookie = `plan=${highestPlan}; path=/; max-age=2592000`;
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        const v = localStorage.getItem(k);
+        if (v && ["pro", "Pro", "PRO", "zephyr_pro", "Zephyr Pro"].includes(v.trim()) && highestPlan !== "pro") {
+            localStorage.setItem(k, highestPlan);
+        }
+    }
+
+    // 4. Update Top Navbar Badge ("★ PRO" -> "★ MICRO") and Card Badge ("PRO Plan" -> "MICRO Plan")
+    document.querySelectorAll('span, div, button').forEach(el => {
+        if (el.children.length === 0) {
+            const txt = (el.innerText || "").trim();
+            if (/^★\s*(PRO|PLUS|LITE|MICRO|FREE)$/i.test(txt)) {
+                el.innerText = highestPlan === "free" ? "FREE" : `★ ${planUpper}`;
+            } else if (/^(PRO|PLUS|LITE|MICRO|FREE)\s+Plan$/i.test(txt)) {
+                el.innerText = `${planUpper} Plan`;
+            }
+        }
+    });
+
+    // 5. Update Vault Capacity Limit ("0 B / 200 GB" -> "0 B / 45 GB")
+    document.querySelectorAll('h1, h2, h3, h4, div, span').forEach(el => {
+        if (el.children.length <= 1) {
+            const txt = (el.innerText || "").trim();
+            if (/^[0-9.]+\s*(B|KB|MB|GB)\s*\/\s*\d+\s*GB$/i.test(txt)) {
+                const usedPart = txt.split('/')[0].trim();
+                el.innerText = `${usedPart} / ${finalMaxGb} GB`;
+            }
+        }
+    });
+}
+
+// Run immediately and re-verify after dashboard scripts finish rendering
+document.addEventListener("DOMContentLoaded", () => {
+    syncActivePlanFromYourPlans();
+    setTimeout(syncActivePlanFromYourPlans, 300);
+    setTimeout(syncActivePlanFromYourPlans, 1000);
+});
+</script>
 
 </body>
 </html>

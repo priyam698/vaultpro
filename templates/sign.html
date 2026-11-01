@@ -1623,5 +1623,42 @@
       dateY = y;
     });
   </script>
+  <script>
+function enforceActiveESignPlan() {
+    // Read the synced active plan (defaults to checking localStorage)
+    let activePlan = (localStorage.getItem("zephyr_true_active_plan") || "").toLowerCase();
+    
+    if (!activePlan) {
+        const match = document.cookie.match(/(?:^|;\s*)plan=([^;]*)/);
+        activePlan = match ? match[1].toLowerCase() : "free";
+    }
+
+    const esignBadgeLabels = {
+        pro: "E-Sign: Unlimited (Pro)",
+        plus: "E-Sign: 50 / day (Plus)",
+        lite: "E-Sign: 30 / day (Lite)",
+        micro: "E-Sign: 15 / day (Micro)",
+        free: "E-Sign: 7 / day (Free)"
+    };
+
+    const targetLabel = esignBadgeLabels[activePlan] || esignBadgeLabels.free;
+
+    // Update the top E-Sign badge in the navbar
+    document.querySelectorAll('span, div, button').forEach(el => {
+        if (el.children.length === 0) {
+            const txt = (el.innerText || "").trim();
+            if (/^E-Sign:\s*/i.test(txt)) {
+                el.innerText = targetLabel;
+            }
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    enforceActiveESignPlan();
+    setTimeout(enforceActiveESignPlan, 300);
+    setTimeout(enforceActiveESignPlan, 1000);
+});
+</script>
 </body>
 </html>
