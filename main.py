@@ -1194,41 +1194,30 @@ Pay-to-Unlock Escrow Payouts & Fees:
 
 @app.post("/api/support/chat")
 async def support_chat(req: SupportChatRequest):
-    user_msg = req.message.strip()
+    user_msg = (req.message or "").strip()
     if not user_msg:
         raise HTTPException(status_code=400, detail="Empty query.")
-
-   
-
+    
     q = user_msg.lower()
 
     # 1. Human Support / Live Agent Escalation
-    if any(k in q for k in ["human", "agent", "person", "representative", "contact", "support email", "talk to someone", "real person", "customer service", "helpdesk", "reach out"]):
+    if any(k in q for k in ["human", "agent", "person", "representative", "contact", "support email", "talk to someone", "real person"]):
         return {
             "reply": (
-                "**Contact Zephyr Human Support:**\n\n"
-                "• **Direct Email:** Reach our core engineering & billing desk at **`priyamrana069@gmail.com`**.\n"
-                "• **Response Times:**\n"
-                "  - **Zephyr Pro & Plus:** Priority queue (average response < 2 hours).\n"
-                "  - **Lite & Micro:** Under 12 hours.\n"
-                "  - **Free Starter:** Under 24 hours.\n"
-                "• **In-App Assistance:** If your issue relates to an active transfer, please provide your **Share ID** or **Transaction Reference ID** in your email for rapid resolution."
+                "Contact Zephyr Human Support:\n"
+                "• Direct Email: priyamrana069@gmail.com\n"
+                "• Response Times: Pro & Plus (under 2 hrs) | Lite & Micro (under 12 hrs) | Free (under 24 hrs)\n"
+                "• Tip: Include your Share ID or Transaction ID for faster resolution."
             )
         }
 
     # 2. Payment Failures, Missing Receipts & Billing Troubleshooting
-    if any(k in q for k in ["receipt", "invoice", "fail", "failed", "declined", "didn't get", "did not receive", "billing issue", "charge", "refund", "card error", "checkout error"]):
+    if any(k in q for k in ["receipt", "invoice", "fail", "failed", "declined", "didn't get", "did not receive", "billing issue", "charge", "payment issue"]):
         return {
             "reply": (
-                "**Payment & Receipt Resolution:**\n\n"
-                "• **If your card was declined or payment failed:**\n"
-                "  1. Ensure international & online e-commerce transactions are activated on your card.\n"
-                "  2. Confirm 3D Secure verification was completed before closing the checkout window.\n"
-                "  3. Any failed authorization holds are automatically voided by your bank within 24–48 hours.\n\n"
-                "• **If your payment succeeded but you didn't receive a receipt:**\n"
-                "  1. Check your email spam/promotions folder for a confirmation receipt sent from our payment processors (**Dodo Payments** or **Stripe**).\n"
-                "  2. Allow 60–90 seconds for automated webhook provisioning to update your account status.\n"
-                "  3. If your tier has not updated after 5 minutes, email **`priyamrana069@gmail.com`** with your registered account email and bank transaction time. Our team will verify and activate your tier manually."
+                "Payment & Receipt Resolution:\n"
+                "• Card Declined: Enable international/online transactions and complete 3D Secure before closing checkout. Failed holds auto-void in 24-48 hrs.\n"
+                "• Missing Receipt / Plan Not Updated: Check your spam folder for the Dodo Payments receipt and wait 60-90 seconds for webhook sync. If not updated after 5 minutes, email priyamrana069@gmail.com."
             )
         }
 
@@ -1236,55 +1225,46 @@ async def support_chat(req: SupportChatRequest):
     if any(k in q for k in ["e-sign", "esign", "sign", "signature", "envelope", "contract", "daily limit", "how many sign"]):
         return {
             "reply": (
-                "**Daily E-Sign Creation Quotas (Resets Daily at 00:00 UTC):**\n\n"
-                "• **Free Starter:** 7 documents / day\n"
-                "• **Zephyr Micro ($1.00/mo):** 15 documents / day\n"
-                "• **Zephyr Lite ($2.00/mo):** 30 documents / day\n"
-                "• **Zephyr Plus ($3.00/mo):** 50 documents / day\n"
-                "• **Zephyr Pro ($5.00/mo):** **Unlimited** daily document signing\n\n"
-                "• **Security Standards:** All envelopes feature drag-and-drop signatures, realistic vector ink, cryptographic SHA-256 audit trails, and zero-knowledge storage."
+                "Daily E-Sign Quotas (Resets 00:00 UTC):\n"
+                "• Free: 7/day | Micro ($1): 15/day | Lite ($2): 30/day | Plus ($3): 50/day | Pro ($5): Unlimited\n"
+                "• Features: Drag-and-drop signatures, vector ink, and SHA-256 cryptographic audit trails."
             )
         }
 
     # 4. 4K Ultra HD AI Super-Resolution (Real-ESRGAN)
-    if any(k in q for k in ["4k", "upscal", "esrgan", "enhance", "super-resolution", "resolution", "pixel", "hd", "clarity", "sharpen", "ai tool"]):
+    if any(k in q for k in ["4k", "upscal", "esrgan", "enhance", "super-resolution", "resolution", "pixel", "hd", "clarity", "sharpen"]):
         return {
             "reply": (
-                "**4K Ultra HD AI Super-Resolution (Real-ESRGAN):**\n\n"
-                "• **Capabilities:** Reconstructs degraded textures, removes JPEG artifacts, and scales images up to 4× native resolution (up to 3840×2160 UHD).\n"
-                "• **Plan Allowances:**\n"
-                "  - **Zephyr Lite ($2.00/mo):** 15 AI runs / month\n"
-                "  - **Zephyr Plus ($3.00/mo):** 60 AI runs / month\n"
-                "  - **Zephyr Pro ($5.00/mo):** **Unlimited** AI runs\n"
-                "  - *Free Starter & Micro do not include 4K upscaling.*\n"
-                "• **How to use:** Open any image from your Vault by clicking **Open** to launch Drive Studio, then click **4K Ultra HD Converter** in the studio toolbar. Save your lossless PNG directly back to your vault."
+                "4K Ultra HD AI Upscaler (Real-ESRGAN):\n"
+                "• Capabilities: Reconstructs textures, removes JPEG artifacts, and scales images up to 4x native resolution.\n"
+                "• Quotas: Lite ($2): 15 runs/mo | Plus ($3): 60 runs/mo | Pro ($5): Unlimited (Not in Free/Micro).\n"
+                "• How to use: Click 'Open' on any image in your Vault to launch Drive Studio, then click '4K Ultra HD'."
             )
         }
 
     # 5. Storage Plans, Vault Limits & Prorated Upgrades
-    if any(k in q for k in ["plan", "pricing", "price", "cost", "tier", "subscription", "upgrade", "vault size", "storage", "micro", "lite", "plus", "pro"]):
+    if any(k in q for k in ["plan", "pricing", "price", "cost", "tier", "subscription", "upgrade", "vault size", "storage", "micro", "lite", "plus", "pro", "limit", "transfer"]):
         return {
             "reply": (
-                "**Zephyr Transfer & Storage Plans:**\n\n"
-                "• **Free Starter ($0 / forever):** 5 GB Vault • 2 GB single transfer • 7 E-Signs/day\n"
-                "• **Zephyr Micro ($1.00/mo):** 15 GB Vault • 5 GB transfer • 15 E-Signs/day • 20-Day Grace\n"
-                "• **Zephyr Lite ($2.00/mo):** 30 GB Vault • 10 GB transfer • 30 E-Signs/day • 15 4K AI runs • Client Drop & QR\n"
-                "• **Zephyr Plus ($3.00/mo):** 80 GB Vault • 25 GB transfer • 50 E-Signs/day • 60 4K AI runs • Studio Branding\n"
-                "• **Zephyr Pro ($5.00/mo):** 200 GB Vault • 50 GB transfer • Unlimited E-Signs • Unlimited 4K AI runs • Pay-to-Unlock Escrow\n\n"
-                "*Upgrades between tiers mid-cycle are seamlessly prorated (+ $0.50 processing fee).*"
+                "Zephyr Plans & Single Transfer Limits:\n"
+                "• Free ($0): 5 GB Vault | 2 GB transfer | 7 E-Signs/day\n"
+                "• Micro ($1/mo): 15 GB Vault | 25 GB transfer | 15 E-Signs/day | 20-Day Grace | Escrow\n"
+                "• Lite ($2/mo): 30 GB Vault | 50 GB transfer | 30 E-Signs/day | 15 4K AI runs | Client Drop & QR | Escrow\n"
+                "• Plus ($3/mo): 80 GB Vault | 80 GB transfer | 50 E-Signs/day | 60 4K AI runs | Studio Branding | Escrow\n"
+                "• Pro ($5/mo): 200 GB Vault | 200 GB transfer | Unlimited E-Signs & 4K AI | Branding & Paywalls | Escrow\n"
+                "Mid-cycle upgrades are prorated (+ $0.50 processing fee)."
             )
         }
 
     # 6. Pay-to-Unlock Escrow, Bank Payouts & Anti-Screenshot Shield
-    payout_keywords = ["payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "escrow", "paywall", "unlock price", "bank account", "stripe connect"]
-    if any(k in q for k in payout_keywords) or (any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money"]) and any(h in q for h in ["how", "what", "where"])):
+    payout_keywords = ["payout", "cut", "commission", "percent", "percentage", "split", "fee", "earn", "earnings", "take home", "escrow", "paywall", "unlock"]
+    if any(k in q for k in payout_keywords) or (any(w in q for w in ["pay", "escrow", "paywall", "unlock", "money"]) and any(h in q for h in ["how", "work", "bank", "upi", "qr", "wise", "paypal"])):
         return {
             "reply": (
-                "**Pay-to-Unlock Escrow Protocol:**\n\n"
-                "• **88% Direct Payout:** Creators receive 88% of every unlock directly wired to their connected bank account via Stripe with 0% escrow chargeback risk.\n"
-                "• **12% Protocol Fee:** Zephyr retains 12% to cover edge bandwidth, hosting, and encryption pipelines.\n"
-                "• **Anti-Screenshot Protection:** Media streams inside a forensic viewer featuring dynamic moving watermarks and window-blur curtains.\n"
-                "• **Lifetime Unlock:** Upon purchase, buyers receive an access passcode sent to their Gmail for lifetime viewing without paying twice."
+                "Pay-to-Unlock Escrow Protocol:\n"
+                "• Direct Payouts: Creators receive 88% wired directly to their linked Bank, UPI, QR, Wise, or PayPal (12% covers edge bandwidth & encryption).\n"
+                "• Anti-Screenshot Shield: Media streams inside a forensic viewer with dynamic watermarks.\n"
+                "• Lifetime Unlock: Buyers receive an access passcode via Gmail upon purchase."
             )
         }
 
@@ -1292,25 +1272,21 @@ async def support_chat(req: SupportChatRequest):
     if any(k in q for k in ["client drop", "drop zone", "qr", "deposit", "receive files", "request file", "file request"]):
         return {
             "reply": (
-                "**Client Deposit Portals & QR Codes:**\n\n"
-                "• **No-Account Client Uploads:** Generate a deposit portal where clients and collaborators can upload large project assets directly into your vault without creating a Zephyr account.\n"
-                "• **Mobile QR Scanner:** Scan the generated QR code directly with any smartphone camera to deposit photos, videos, or documents on the go.\n"
-                "• **Availability:** Included with Zephyr Lite ($2.00/mo), Plus ($3.00/mo), and Pro ($5.00/mo)."
+                "Client Deposit Portals & QR Codes:\n"
+                "• No-Account Uploads: Share a deposit link so clients can upload large deliverables directly to your vault.\n"
+                "• Mobile QR Scanner: Clients can scan your QR code with any phone camera to send files instantly.\n"
+                "• Availability: Included in Lite ($2/mo), Plus ($3/mo), and Pro ($5/mo)."
             )
         }
 
-# 7.5 Password, Reset & Transfer Passcode Guidance
+    # 7.5 Password, Reset & Transfer Passcode Guidance
     if any(k in q for k in ["password", "change password", "reset password", "forgot password", "update password"]):
         return {
             "reply": (
-                "**🔐 Zephyr Password & Authentication Architecture:**\n\n"
-                "• **Account Logins (Passwordless OTP):** Zephyr does not use permanent static passwords. "
-                "Your account is secured via one-time cryptographically generated OTP verification codes sent directly to your email, "
-                "eliminating the risk of credential stuffing and forgotten passwords.\n\n"
-                "• **Transfer Passcodes:** If you set a passcode on a shared file, it is derived locally using AES-256 in your browser. "
-                "Because Zephyr operates on Zero-Knowledge principles, a transfer passcode **cannot be modified** once the link has been created. "
-                "To change a file's passcode, simply shred the active link and create a new transfer with your desired passcode.\n\n"
-                "• **Need Assistance?** Contact our core engineering desk at **priyamrana069@gmail.com** or submit a query at **/contact**."
+                "Password & Authentication Guide:\n"
+                "• Account Logins (Passwordless OTP): Zephyr uses one-time OTP verification codes sent to your email—no static passwords to reset.\n"
+                "• Transfer Passcodes: Encrypted locally via AES-256 and cannot be edited once created. To change a passcode, shred the active link and create a new transfer.\n"
+                "• Need Help? Email priyamrana069@gmail.com."
             )
         }
 
@@ -1318,10 +1294,10 @@ async def support_chat(req: SupportChatRequest):
     if any(k in q for k in ["security", "encryption", "zero-knowledge", "burn", "shred", "aes", "r2", "privacy", "passcode"]):
         return {
             "reply": (
-                "**Zero-Knowledge Architecture & Self-Shredding:**\n\n"
-                "• **Client-Side AES-256:** Key derivation and file hashing execute entirely inside your browser. No unencrypted passcodes or raw master keys are ever written to server logs or databases.\n"
-                "• **Cloudflare R2 Direct Pipe:** Files stream straight through edge nodes with zero intermediary inspection.\n"
-                "• **Burn-on-Read (🔥):** Setting max downloads to 1 triggers instant edge purging the millisecond a recipient finishes downloading.\n"
+                "Zero-Knowledge Security & Burn-on-Read:\n"
+                "• Client-Side AES-256: Key derivation and hashing happen entirely in your browser; zero unencrypted data leaves your device.\n"
+                "• Cloudflare R2 Direct Pipe: Files stream through edge nodes with zero server inspection.\n"
+                "• Burn-on-Read: Setting max downloads to 1 instantly purges the file from edge storage after the first download."
             )
         }
 
@@ -1329,27 +1305,30 @@ async def support_chat(req: SupportChatRequest):
     if any(k in q for k in ["grace", "lapse", "cancel", "expire", "expiration", "retention", "prun", "buffer", "delete files"]):
         return {
             "reply": (
-                "**20-Day Retention Grace Period:**\n\n"
-                "• If your paid plan lapses, your vault enters an industry-standard **20-day read-only grace period**.\n"
-                "• Your data remains fully protected and downloadable during these 20 days.\n"
-                "• If the plan is not renewed after 20 days, the vault is automatically pruned down to your active tier limit by permanently shredding the oldest files."
+                "20-Day Retention Grace Period:\n"
+                "• If your paid plan lapses, your vault enters a 20-day read-only grace period.\n"
+                "• Your data stays protected and downloadable during these 20 days.\n"
+                "• After 20 days without renewal, the vault auto-prunes down to your active tier limit."
             )
         }
 
-    # 10. Default / Fallback Navigation Menu
+    # Greeting Check (Only when user says hi/help)
+    if q in ["hi", "hello", "hey", "help", "start", "menu"]:
+        return {
+            "reply": (
+                "Hi! I'm Zephyr Copilot. Ask me about:\n"
+                "• Storage Plans & Transfer Limits\n"
+                "• Pay-to-Unlock Escrow & Payouts\n"
+                "• 4K Ultra HD AI Upscaler\n"
+                "• E-Sign Quotas & Client Drop QR\n"
+                "• Zero-Knowledge Security & 20-Day Grace\n"
+                "• Payment & Password Troubleshooting"
+            )
+        }
+
+    # 10. Out-of-Range Fallback
     return {
-        "reply": (
-            "I'm Zephyr Copilot! How can I help you today? You can ask me about:\n\n"
-            "• **4K Ultra HD AI Upscaler** (Quotas, Real-ESRGAN, Studio tools)\n"
-            "• **Storage Plans & Pricing** (Free Starter, Micro, Lite, Plus, Pro)\n"
-            "• **E-Sign Studio Quotas** (Daily document creation limits)\n"
-            "• **Payment or Receipt Issues** (Failed checkouts, missing receipts)\n"
-            "• **Pay-to-Unlock Escrow** (88% payouts, Stripe Connect, forensic viewers)\n"
-            "• **Client Drop & QR Portals** (Direct client deposit links)\n"
-            "• **Zero-Knowledge Security & 20-Day Grace Retention**\n"
-            "• **Contacting Human Support** (`priyamrana069@gmail.com`)\n\n"
-            "What would you like to explore?"
-        )
+        "reply": "Sorry, this answer is out of range for Zephyr Copilot. Please contact priyamrana069@gmail.com for direct support."
     }
 # ----------------- Main Static Routes -----------------
 @app.get("/favicon.ico", include_in_schema=False)
