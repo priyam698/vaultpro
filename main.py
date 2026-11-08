@@ -4307,8 +4307,8 @@ async def ai_upscale_endpoint(
                 "image": image_file,
                 "upscale": 4,
                 "face_upsample": True,
-                "background_enhance": True,
-                "codeformer_fidelity": 0.95
+                "background_enhance": False,  # CRITICAL: Disables the "plastic" AI smoothing on text & charts!
+                "codeformer_fidelity": 1.0    # CRITICAL: 1.0 absolutely locks the original facial expression (0% hallucination).
             }
         )
 
