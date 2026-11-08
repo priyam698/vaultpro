@@ -4302,13 +4302,15 @@ async def ai_upscale_endpoint(
         # Send to Replicate Real-ESRGAN
         with open(tmp_path, "rb") as image_file:
             output = replicate.run(
-                "nightmareai/real-esrgan:42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
-                input={
-                    "image": image_file,
-                    "scale": 4,
-                    "face_enhance": True
-                }
-            )
+            "sczhou/codeformer:7de2ea26c616d5bf2245ad0d5e24f0ff9a6204578a5c876db53142edd9d2cd56",
+            input={
+                "image": image_file,
+                "upscale": 4,
+                "face_upsample": True,
+                "background_enhance": True,
+                "codeformer_fidelity": 0.95
+            }
+        )
 
         # Replicate can return a URL string, FileOutput, or list of URLs
         upscaled_url = str(output[0]) if isinstance(output, list) else str(output)
