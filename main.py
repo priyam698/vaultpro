@@ -872,7 +872,7 @@ async def get_user_subscriptions(user_id: str):
             "name": tier_names.get(t, t.capitalize()),
             "gb": gb_val,
             "price": float(s["price"]),
-            "auto_renew": s["auto_renew"] if s.get("auto_renew") is not None else True,
+            "auto_renew": (s["auto_renew"] if s.get("auto_renew") is not None else True) if active else False,
             "is_active": active,
             "subscription_end_at": str(end_dt)[:19] if end_dt else "Active"
         })
@@ -1394,7 +1394,45 @@ async def index_page(request: Request):
 
     return response
 
+def get_highest_active_plan(user_identifier: str, conn) -> str:
+    if not user_identifier:
+        return "free"
+    cursor = conn.cursor()
+    target_ids = [user_identifier]
 
+    # Resolve user_id if an email cookie was passed
+    try:
+        cursor.execute(
+            "SELECT user_id FROM users WHERE email = %s OR user_id = %s",
+            (user_identifier, user_identifier)
+        )
+        u_row = cursor.fetchone()
+        if u_row:
+            uid = u_row["user_id"] if isinstance(u_row, dict) else u_row[0]
+            if uid and uid not in target_ids:
+                target_ids.append(uid)
+    except Exception:
+        pass
+
+    placeholders = ", ".join(["%s"] * len(target_ids))
+    cursor.execute(
+        f"SELECT tier, subscription_end_at FROM user_subscriptions WHERE user_id IN ({placeholders})",
+        tuple(target_ids)
+    )
+    rows = cursor.fetchall()
+    tier_weights = {"pro": 4, "plus": 3, "lite": 2, "micro": 1, "free": 0}
+    highest_plan = "free"
+    current_weight = 0
+
+    for row in rows:
+        end_dt = row["subscription_end_at"] if isinstance(row, dict) else row[1]
+        if is_sub_active(end_dt):
+            t = (row["tier"] if isinstance(row, dict) else row[0] or "free").lower()
+            if tier_weights.get(t, 0) > current_weight:
+                highest_plan = t
+                current_weight = tier_weights[t]
+
+    return highest_plan
 @app.get("/api/user/stats")
 async def get_user_stats(request: Request):
     # 1. Match your exact dashboard authentication logic
@@ -4126,21 +4164,45 @@ async def dodo_webhook(request: Request):
             dodo_id = d_data.get("subscription_id") or d_data.get("payment_id") or d_data.get("id")
 
         if user_id:
-            # 1. PREVENT DUPLICATES: If this exact payment was already recorded, skip it
+            event_type = str(payload.get("type") or payload.get("event") or "").lower()
+
+            # 1. HANDLE DODO AUTO-RENEWALS VS INITIAL CHECKOUT DUPLICATES
             already_added = False
             if dodo_id:
-                cursor.execute("SELECT id FROM user_subscriptions WHERE dodo_subscription_id = %s", (str(dodo_id),))
-                if cursor.fetchone():
+                cursor.execute(
+                    "SELECT id, subscription_end_at FROM user_subscriptions WHERE dodo_subscription_id = %s",
+                    (str(dodo_id),)
+                )
+                existing_sub = cursor.fetchone()
+                if existing_sub:
                     already_added = True
+                    existing_end = existing_sub.get("subscription_end_at")
+                    now_utc = datetime.utcnow()
+                    is_renewal_window = (
+                        "renew" in event_type
+                        or not existing_end
+                        or existing_end <= (now_utc + timedelta(days=5))
+                    )
+                    if is_renewal_window and not any(x in event_type for x in ["fail", "cancel", "expire"]):
+                        base_dt = existing_end if (existing_end and existing_end > now_utc) else now_utc
+                        renewed_end = base_dt + timedelta(days=30)
+                        cursor.execute(
+                            """
+                            UPDATE user_subscriptions
+                            SET subscription_end_at = %s, auto_renew = TRUE
+                            WHERE id = %s
+                            """,
+                            (renewed_end, existing_sub["id"])
+                        )
+                        conn.commit()
 
-            # 2. STACK STORAGE: If it's a new purchase (or bought 2nd time), insert new plan
+            # 2. STACK STORAGE: If it's a new purchase, insert new plan
             if not already_added:
                 cursor.execute("""
                     INSERT INTO user_subscriptions (user_id, tier, quota_bytes, price, auto_renew, subscription_end_at, dodo_subscription_id)
                     VALUES (%s, %s, %s, %s, TRUE, %s, %s)
                 """, (user_id, requested_tier, target_quota, target_price, sub_end, str(dodo_id) if dodo_id else None))
                 conn.commit()
-
             # 3. SUM TOTAL QUOTA: Stacks active plans (15 GB + 15 GB = 30 GB)
             cursor.execute("""
                 SELECT COALESCE(SUM(quota_bytes), 0) as net_q
