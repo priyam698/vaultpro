@@ -1,13 +1,19 @@
 (function () {
     const ORT_CDN = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
-    const DIRECT_HF_URL = "https://huggingface.co/darktable-org/upscale-realplksr-onnx/resolve/main/onnx/model_x4.onnx";
-    const PROXY_MODEL_URL = "/api/ai-model/realplksr-x4.onnx";
-    const CACHE_NAME = "zephyr-realplksr-cache-v1";
+    const DIRECT_URLS = [
+        "https://huggingface.co/relax123666/clearpic-models/resolve/main/RealESRGAN_x4plus.onnx",
+        "https://huggingface.co/othytenk/realesrgan-x4plus/resolve/main/realesrgan_x4plus.onnx",
+        "https://huggingface.co/fernandotonon/QtMeshEditor-realesrgan-onnx/resolve/main/RealESRGAN_x4plus.onnx",
+    ];
+    const PROXY_MODEL_URL = "/api/ai-model/realesrgan-x4plus.onnx";
+    const CACHE_NAME = "zephyr-realesrgan-x4plus-cache-v1";
+    const OLD_CACHE_NAME = "zephyr-realplksr-cache-v1";
 
-    const TILE_SIZE = 256;   // Required static input size for RealPLKSR x4
-    const OVERLAP = 16;      // Overlap border trimmed per side to eliminate tile seams
-    const STEP = TILE_SIZE - 2 * OVERLAP; // 224 px core per tile
-    const SCALE = 4;         // 256x256 -> 1024x1024
+    // Fixed 128x128 tiles keep VRAM low (~90 MB) and let WebGPU compile shaders only once
+    const TILE_SIZE = 128;
+    const OVERLAP = 16;
+    const STEP = TILE_SIZE - 2 * OVERLAP; // 96 px seamless core per tile
+    const SCALE = 4;                      // 128x128 -> 512x512
 
     let ortLoadPromise = null;
     let sessionPromise = null;
@@ -29,24 +35,25 @@
     async function fetchModelBuffer(onStatus) {
         if ("caches" in window) {
             try {
+                await caches.delete(OLD_CACHE_NAME);
                 const cache = await caches.open(CACHE_NAME);
                 const cached = await cache.match(PROXY_MODEL_URL);
                 if (cached) {
-                    if (onStatus) onStatus("Loading cached RealPLKSR neural weights...");
+                    if (onStatus) onStatus("Loading cached Real-ESRGAN x4plus GAN weights...");
                     return await cached.arrayBuffer();
                 }
             } catch (_) {}
         }
 
-        const urls = [DIRECT_HF_URL, PROXY_MODEL_URL];
+        const urls = [...DIRECT_URLS, PROXY_MODEL_URL];
         let lastErr = null;
         for (const url of urls) {
             try {
-                if (onStatus) onStatus("Downloading RealPLKSR 4x model (29.7 MB, cached once)...");
+                if (onStatus) onStatus("Downloading Real-ESRGAN x4plus GAN (67 MB, cached once)...");
                 const resp = await fetch(url);
                 if (!resp.ok) throw new Error("HTTP " + resp.status);
                 const buf = await resp.arrayBuffer();
-                if (buf.byteLength < 25_000_000) throw new Error("Incomplete model file");
+                if (buf.byteLength < 60_000_000) throw new Error("Incomplete model file");
 
                 if ("caches" in window) {
                     try {
@@ -64,13 +71,13 @@
                 lastErr = err;
             }
         }
-        throw lastErr || new Error("Failed to download RealPLKSR model");
+        throw lastErr || new Error("Failed to download Real-ESRGAN x4plus model");
     }
 
     async function getSession(onStatus) {
         if (sessionPromise) return sessionPromise;
         sessionPromise = (async () => {
-            if (onStatus) onStatus("Initializing Zephyr RealPLKSR Engine...");
+            if (onStatus) onStatus("Initializing Real-ESRGAN x4plus GAN Engine...");
             const ort = await loadOrtScript();
             ort.env.wasm.wasmPaths = ORT_CDN;
             ort.env.wasm.numThreads = self.crossOriginIsolated
@@ -81,7 +88,7 @@
 
             if (navigator.gpu) {
                 try {
-                    if (onStatus) onStatus("Compiling RealPLKSR for your GPU (WebGPU)...");
+                    if (onStatus) onStatus("Compiling Real-ESRGAN x4plus GAN for your GPU (WebGPU)...");
                     activeProvider = "WebGPU GPU";
                     return await ort.InferenceSession.create(modelBuffer, {
                         executionProviders: ["webgpu"],
@@ -92,7 +99,7 @@
                 }
             }
 
-            if (onStatus) onStatus("Loading RealPLKSR on Neural CPU (WASM)...");
+            if (onStatus) onStatus("Loading Real-ESRGAN x4plus on Neural CPU (WASM)...");
             activeProvider = "WASM Neural CPU";
             return await ort.InferenceSession.create(modelBuffer, {
                 executionProviders: ["wasm"],
@@ -131,37 +138,13 @@
         return i;
     }
 
-    function applyLuminanceClarity(imageData, amount) {
-        const { data, width, height } = imageData;
-        const lum = new Float32Array(width * height);
-        for (let i = 0, p = 0; i < data.length; i += 4, p++) {
-            lum[p] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        }
-        for (let y = 1; y < height - 1; y++) {
-            const row = y * width;
-            for (let x = 1; x < width - 1; x++) {
-                const idx = row + x;
-                const avg = (
-                    lum[idx - width - 1] + lum[idx - width] + lum[idx - width + 1] +
-                    lum[idx - 1]         + lum[idx]         + lum[idx + 1] +
-                    lum[idx + width - 1] + lum[idx + width] + lum[idx + width + 1]
-                ) / 9;
-                const delta = (lum[idx] - avg) * amount;
-                const p = idx * 4;
-                data[p]     = Math.max(0, Math.min(255, data[p]     + delta));
-                data[p + 1] = Math.max(0, Math.min(255, data[p + 1] + delta));
-                data[p + 2] = Math.max(0, Math.min(255, data[p + 2] + delta));
-            }
-        }
-    }
-
     window.zephyrNeuralUpscale = async function (fileOrImg, onStatus) {
         const session = await getSession(onStatus);
         const ort = window.ort;
         const { img, revokeUrl } = await fileToImage(fileOrImg);
 
         try {
-            const maxSide = activeProvider === "WebGPU GPU" ? 1024 : 672;
+            const maxSide = activeProvider === "WebGPU GPU" ? 960 : 576;
             let inW = img.naturalWidth || img.width;
             let inH = img.naturalHeight || img.height;
             if (Math.max(inW, inH) > maxSide) {
@@ -196,9 +179,9 @@
             const inputName = session.inputNames[0];
             const outputName = session.outputNames[0];
             const tileArea = TILE_SIZE * TILE_SIZE;
-            const outTileDim = TILE_SIZE * SCALE;
+            const outTileDim = TILE_SIZE * SCALE; // 512
             const outTileArea = outTileDim * outTileDim;
-            const ovOut = OVERLAP * SCALE;
+            const ovOut = OVERLAP * SCALE; // 64
 
             for (let tyIdx = 0; tyIdx < tilesY; tyIdx++) {
                 const coreY = tyIdx * STEP;
@@ -252,18 +235,18 @@
                     doneTiles++;
                     if (onStatus) {
                         const pct = Math.round((doneTiles / totalTiles) * 100);
-                        onStatus(`RealPLKSR ${activeProvider}: ${pct}%`);
+                        onStatus(`Real-ESRGAN x4plus GAN (${activeProvider}): ${pct}%`);
                     }
                     await new Promise((r) => setTimeout(r, 0));
                 }
             }
 
-            applyLuminanceClarity(outImgData, 0.22);
+            // Lossless PNG handoff so Studio CAS sharpens pure GAN pixels with zero JPEG artifacts
             outCtx.putImageData(outImgData, 0, 0);
 
             return {
-                upscaled_url: outCanvas.toDataURL("image/jpeg", 0.96),
-                engine: `Zephyr RealPLKSR 4x (${activeProvider})`,
+                upscaled_url: outCanvas.toDataURL("image/png"),
+                engine: `Real-ESRGAN x4plus GAN (${activeProvider})`,
                 width: outW,
                 height: outH,
             };
