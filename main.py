@@ -4344,46 +4344,7 @@ async def lemon_webhook(request: Request):
 # AI 4K SUPER-RESOLUTION ENDPOINT (REAL-ESRGAN VIA REPLICATE)
 # -------------------------------------------------------------
 import tempfile
-from fastapi.responses import FileResponse
 
-@app.get("/api/ai-model/realesrgan-x4plus.onnx")
-async def serve_realesrgan_x4plus_model():
-    import urllib.request
-    model_path = "/tmp/realesrgan_x4plus.onnx"
-    tmp_path = "/tmp/realesrgan_x4plus.onnx.part"
-
-    if not os.path.exists(model_path) or os.path.getsize(model_path) < 60_000_000:
-        urls = [
-            "https://huggingface.co/relax123666/clearpic-models/resolve/main/RealESRGAN_x4plus.onnx",
-            "https://huggingface.co/othytenk/realesrgan-x4plus/resolve/main/realesrgan_x4plus.onnx",
-            "https://huggingface.co/fernandotonon/QtMeshEditor-realesrgan-onnx/resolve/main/RealESRGAN_x4plus.onnx",
-        ]
-        last_err = None
-        for url in urls:
-            try:
-                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req, timeout=180) as resp, open(tmp_path, "wb") as f:
-                    while True:
-                        chunk = resp.read(262144)
-                        if not chunk:
-                            break
-                        f.write(chunk)
-                if os.path.getsize(tmp_path) >= 60_000_000:
-                    os.replace(tmp_path, model_path)
-                    last_err = None
-                    break
-            except Exception as e:
-                last_err = e
-                if os.path.exists(tmp_path):
-                    os.remove(tmp_path)
-        if last_err:
-            raise HTTPException(status_code=502, detail=f"RealESRGAN x4plus download failed: {last_err}")
-
-    return FileResponse(
-        model_path,
-        media_type="application/octet-stream",
-        headers={"Cache-Control": "public, max-age=31536000, immutable"},
-    )
 @app.post("/api/drive/ai-upscale")
 async def ai_upscale_endpoint(
     file: UploadFile = File(...),

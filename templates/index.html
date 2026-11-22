@@ -5301,7 +5301,6 @@ window.addEventListener('appinstalled', () => {
     runBtn.innerHTML = `<span>Convert & Fix Pixels to 4K</span>`;
   }
 </script>
-<script src="/static/zephyr_realplksr.js"></script>
 <script>
   // ============================================================================
   // 1. GLOBAL STUDIO STATE, RESOLUTION TIER MATRIX & DYNAMIC GRADIO LOADER
@@ -5924,48 +5923,139 @@ window.addEventListener('appinstalled', () => {
     });
   }
 
- async function runVerifiedCloudGpuPipeline(sourceImg, stageEl, barEl, pctEl) {
-  try {
-    if (typeof window.zephyrNeuralUpscale !== "function") {
-      throw new Error("RealPLKSR engine not loaded. Please hard-refresh the page.");
-    }
+  async function runVerifiedCloudGpuPipeline(sourceImg, stageEl, barEl, pctEl) {
+    const presetMode = document.getElementById('epPresetSelect')?.value || 'ultra';
+    const cfg = EP_TIER_CONFIG[epSelectedTier] || EP_TIER_CONFIG['4K'];
 
-    stageEl.innerText = "Initializing RealPLKSR 4x Neural Engine...";
-    barEl.style.width = "10%";
-    pctEl.innerText = "10%";
+    const optimalMaxEdge = (presetMode === 'anime') ? 480 : 1024;
+    const upscaleFactor  = (presetMode === 'anime') ? 4 : 2;
+    const fidelityWeight = (presetMode === 'anime') ? 0.80 : cfg.fidelity;
 
-    const inputSource = epCurrentFile || sourceImg;
-    const result = await window.zephyrNeuralUpscale(inputSource, (statusText) => {
-      stageEl.innerText = statusText;
-      const match = statusText.match(/(\d+)%/);
-      if (match) {
-        const tilePct = parseInt(match[1], 10);
-        const uiPct = Math.min(92, Math.max(20, Math.round(20 + tilePct * 0.72)));
-        barEl.style.width = uiPct + "%";
-        pctEl.innerText = uiPct + "%";
-      } else if (statusText.includes("Downloading")) {
-        barEl.style.width = "14%";
-        pctEl.innerText = "14%";
-      } else if (statusText.includes("Compiling") || statusText.includes("Loading")) {
-        barEl.style.width = "18%";
-        pctEl.innerText = "18%";
+    stageEl.innerText = "Preparing optimal RGB tensor for Cloud GPU cluster...";
+    barEl.style.width = "16%";
+    pctEl.innerText = "16%";
+
+    // Pass raw inputBlob directly (Required by sczhou/CodeFormer Gradio 3 endpoint!)
+    const inputBlob = await prepareInputBlobForGpu(sourceImg, optimalMaxEdge);
+    const Client = await getGradioClient();
+
+    // -------------------------------------------------------------------------
+    // GPU NODE 1: sczhou/CodeFormer (RetinaFace + CodeFormer + Real-ESRGAN GPU)
+    // -------------------------------------------------------------------------
+    try {
+      stageEl.innerText = "Connecting to Cloud GPU Node #1 (CodeFormer + Real-ESRGAN)...";
+      barEl.style.width = "34%";
+      pctEl.innerText = "34%";
+
+      const cfClient = await Client.connect("sczhou/CodeFormer");
+
+      stageEl.innerText = "Running RetinaFace + CodeFormer + Real-ESRGAN on Cloud GPU...";
+      barEl.style.width = "60%";
+      pctEl.innerText = "60%";
+
+      let cfResult = null;
+      try {
+        cfResult = await cfClient.predict(0, [
+          inputBlob,
+          true,
+          true,
+          true,
+          upscaleFactor,
+          fidelityWeight
+        ]);
+      } catch (sig6Err) {
+        cfResult = await cfClient.predict(0, [
+          inputBlob,
+          true,
+          true,
+          upscaleFactor,
+          fidelityWeight
+        ]);
       }
-    });
 
-    if (result && result.upscaled_url) {
-      stageEl.innerText = `Finalizing Neural Master from ${result.engine}...`;
-      barEl.style.width = "94%";
-      pctEl.innerText = "94%";
-      epActiveEngineName = result.engine || "Zephyr RealPLKSR 4x (WebGPU)";
-      return await loadUrlIntoImage(result.upscaled_url);
+      const cfUrl = extractGradioOutputUrl(cfResult?.data);
+      if (cfUrl) {
+        stageEl.innerText = "Downloading Neural Master from CodeFormer + Real-ESRGAN GPU...";
+        barEl.style.width = "88%";
+        pctEl.innerText = "88%";
+        epActiveEngineName = "CodeFormer + Real-ESRGAN GPU";
+        return await loadUrlIntoImage(cfUrl);
+      }
+    } catch (node1Err) {
+      console.warn("Cloud GPU Node #1 busy, failing over to Node #2 (Finegrain Diffusion):", node1Err);
     }
-  } catch (err) {
-    console.warn("RealPLKSR WebGPU engine failed, falling back to local Studio CAS Engine:", err);
-  }
 
-  epActiveEngineName = "Studio FidelityFX CAS Engine";
-  return sourceImg;
-}
+    // -------------------------------------------------------------------------
+    // GPU NODE 2: finegrain/finegrain-image-enhancer (ControlNet-Tile Diffusion)
+    // -------------------------------------------------------------------------
+    try {
+      stageEl.innerText = "Connecting to Cloud GPU Node #2 (Finegrain Latent Diffusion)...";
+      barEl.style.width = "52%";
+      pctEl.innerText = "52%";
+
+      const fgClient = await Client.connect("finegrain/finegrain-image-enhancer");
+
+      stageEl.innerText = "Running ControlNet-Tile Diffusion Super-Resolution on GPU...";
+      barEl.style.width = "74%";
+      pctEl.innerText = "74%";
+
+      const fgResult = await fgClient.predict("/process", [
+        inputBlob,
+        "masterpiece, best quality, highres, ultra sharp details, photorealistic",
+        "worst quality, low quality, blurry, noisy, halos, oversaturated",
+        42,
+        2,
+        0.6,
+        1.0,
+        6,
+        112,
+        144,
+        0.32,
+        18,
+        "DDIM"
+      ]);
+
+      const fgUrl = extractGradioOutputUrl(fgResult?.data);
+      if (fgUrl) {
+        stageEl.innerText = "Downloading Diffusion Master from Finegrain GPU...";
+        barEl.style.width = "88%";
+        pctEl.innerText = "88%";
+        epActiveEngineName = "Finegrain Diffusion + ESRGAN GPU";
+        return await loadUrlIntoImage(fgUrl);
+      }
+    } catch (node2Err) {
+      console.warn("Cloud GPU Node #2 busy, failing over to Node #3 (Real-ESRGAN 4x):", node2Err);
+    }
+
+    // -------------------------------------------------------------------------
+    // GPU NODE 3: doevent/Face-Real-ESRGAN (Dedicated Real-ESRGAN Tensor GPU)
+    // -------------------------------------------------------------------------
+    try {
+      stageEl.innerText = "Connecting to Cloud GPU Node #3 (Real-ESRGAN 4x Tensor Core)...";
+      barEl.style.width = "68%";
+      pctEl.innerText = "68%";
+
+      const esrClient = await Client.connect("doevent/Face-Real-ESRGAN");
+      const esrResult = await esrClient.predict("/predict", [
+        inputBlob,
+        "4x"
+      ]);
+
+      const esrUrl = extractGradioOutputUrl(esrResult?.data);
+      if (esrUrl) {
+        stageEl.innerText = "Downloading 4x Super-Resolution Master from Real-ESRGAN GPU...";
+        barEl.style.width = "88%";
+        pctEl.innerText = "88%";
+        epActiveEngineName = "Real-ESRGAN 4x Cloud GPU";
+        return await loadUrlIntoImage(esrUrl);
+      }
+    } catch (node3Err) {
+      console.warn("All 3 Cloud GPU nodes currently queued, using local Studio CAS Engine:", node3Err);
+    }
+
+    epActiveEngineName = "Studio FidelityFX CAS Engine";
+    return sourceImg;
+  }
 
   // ============================================================================
   // 6. MAIN ORCHESTRATION WORKFLOW & INSTANT-FLOW UI HANDLERS
