@@ -1102,7 +1102,7 @@ body {
   <footer class="relative z-20 border-t border-white/[0.08] bg-[#03050c]/80 backdrop-blur-md py-6 text-center text-xs opacity-75">
     © 2026 Zephyr Systems. Zero-knowledge Cloud Storage & Automated Grace Period Retention.
   </footer>
-
+<script src="/static/zephyr_realplksr.js"></script>
   <script>
     function initTheme() {
       const savedTheme = localStorage.getItem("zephyr_theme") || "dark";
@@ -1642,24 +1642,16 @@ studioModal.style.cssText = "display: flex !important; z-index: 99999 !important
     }
 
     const dataUrl = studioCanvas.toDataURL("image/png");
-    const blobRes = await fetch(dataUrl);
-    const blob = await blobRes.blob();
 
-    const formData = new FormData();
-    formData.append("file", blob, "canvas_source.png");
-    formData.append("user_id", currentUserId);
+      if (typeof window.zephyrNeuralUpscale !== "function") {
+        throw new Error("RealPLKSR engine did not load. Please hard-refresh the page.");
+      }
 
-    const res = await fetch("/api/drive/ai-upscale", {
-      method: "POST",
-      body: formData
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "Server failed to upscale image");
-    }
-
-    const data = await res.json();
+      const data = await window.zephyrNeuralUpscale(dataUrl, (statusText) => {
+        if (upscaleBtn) {
+          upscaleBtn.innerHTML = `<span>⏳</span><span>${statusText}</span>`;
+        }
+      });
     const aiImg = new Image();
     aiImg.crossOrigin = "anonymous";
     aiImg.onload = () => {
